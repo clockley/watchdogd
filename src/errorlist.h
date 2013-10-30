@@ -12,6 +12,7 @@
 #define WESYSCALL	249
 #define WECUSTOM	246
 #define WESCRIPT	251
+#define WEPIDFILE	250
 #define WEOTHER		WEZERO
 
 #endif

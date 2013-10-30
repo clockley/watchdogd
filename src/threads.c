@@ -425,7 +425,7 @@ void *ManagerThread(void *arg)
 		if (s->error & PIDFILERROR || s->error & UNKNOWNPIDFILERROR) {
 			Logmsg(LOG_ERR, "pid file test failed");
 			if (Shutdown
-			    (WESCRIPT, s->options & KEXEC ? 1 : 0, arg) < 0) {
+			    (WEPIDFILE, s->options & KEXEC ? 1 : 0, arg) < 0) {
 				Logmsg(LOG_ERR,
 				       "watchdogd: Unable to shutdown system");
 				exit(EXIT_FAILURE);
