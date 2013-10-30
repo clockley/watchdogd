@@ -72,7 +72,7 @@ void *MarkTime(void *arg)
 		nanosleep(&rqtp, NULL);
 
 		if (shutdown == 1) {
-			break;
+			pthread_exit(NULL);
 		}
 	}
 
@@ -132,7 +132,7 @@ void *TestDirThread(void *arg)
 		nanosleep(&rqtp, NULL);
 
 		if (shutdown == 1) {
-			break;
+			pthread_exit(NULL);
 		}
 	}
 
@@ -164,7 +164,7 @@ void *TestBinThread(void *arg)
 		nanosleep(&rqtp, NULL);
 
 		if (shutdown == 1) {
-			break;
+			pthread_exit(NULL);
 		}
 	}
 
@@ -446,7 +446,7 @@ void *ManagerThread(void *arg)
 		nanosleep(&rqtp, NULL);
 
 		if (shutdown == 1) {
-			break;
+			pthread_exit(NULL);
 		}
 	}
 
