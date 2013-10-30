@@ -1,0 +1,255 @@
+/*
+ * Copyright 2013 Christian Lockley
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may 
+ * not use this file except in compliance with the License. You may obtain 
+ * a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+ * implied. See the License for the specific language governing
+ * permissions and limitations under the License. 
+ */
+
+/*
+ * This file contains functions that are used be more than one module.
+ */
+
+#define _ _STDC_WANT_LIB_EXT1_ _ 1
+#define STDC_WANT_LIB_EXT1 1
+
+#ifndef __STDC_LIMIT_MACROS
+#define __STDC_LIMIT_MACROS 1
+#endif
+
+#include <inttypes.h>
+#include <stdint.h>
+#include "watchdogd.h"
+#include "sub.h"
+#include "testdir.h"
+
+#include <errno.h>
+#include <stdarg.h>
+#include <pthread.h>
+#include <fcntl.h>
+#include <libconfig.h>
+#include <sys/stat.h>
+#include <sched.h>
+#include <signal.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/ioctl.h>
+#include <syslog.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <time.h>
+#include <unistd.h>
+
+int CloseWraper(const int *pfd)
+{
+	int ret = 0;
+	int count = 0;
+
+	if (pfd == NULL)
+		return -1;
+
+	do {
+		ret = close(*pfd);
+		count = count +1;
+
+	}
+	while (ret != 0 && errno == EINTR && count <= 8);
+
+	if (ret != 0) {
+		return -1;
+	}
+
+	return 0;
+}
+
+int IsDaemon(void *arg)
+{
+	struct cfgoptions *s = arg;
+
+	if (s->options & FOREGROUNDSETFROMCOMMANDLINE)
+		return 0;
+
+	if (s->options & DAEMONIZE)
+		return 1;
+
+	return 0;
+}
+
+int DeletePidFile(void *arg)
+{
+	struct cfgoptions *s = arg;
+
+	extern struct flock fl;
+
+	if (s == NULL) {
+		return -1;
+	}
+
+	if (IsDaemon(arg) == 0)
+		return 0;
+
+	if (!(s->options & USEPIDFILE)) {
+		return 0;
+	}
+
+	fl.l_type = F_UNLCK;
+
+	if (fcntl(s->lockfd, F_SETLK, &fl) != 0) {
+		Logmsg(LOG_ERR, "fcntl failed: %s", strerror(errno));
+		return -1;
+	}
+
+	CloseWraper(&s->lockfd);
+
+	if (remove(s->pidpathname) < 0) {
+		Logmsg(LOG_ERR, "remove failed: %s", strerror(errno));
+		return -2;
+	}
+
+	return 0;
+}
+
+int Wasprintf(char **ret, const char *format, ...)
+{
+//http://stackoverflow.com/questions/4899221/substitute-or-workaround-for-asprintf-on-aix
+
+	va_list ap;
+
+	*ret = NULL;
+
+	va_start(ap, format);
+	int count = vsnprintf(NULL, 0, format, ap);
+	va_end(ap);
+
+	if (count >= 0) {
+		char *buffer = malloc((size_t) count + 1);
+
+		if (buffer == NULL)
+			return -1;
+
+		va_start(ap, format);
+		count = vsnprintf(buffer, (size_t) count + 1, format, ap);
+		va_end(ap);
+
+		if (count < 0) {
+			free(buffer);
+			return count;
+		}
+		*ret = buffer;
+	}
+
+	return count;
+}
+
+int EndDaemon(int exitv, void *arg, int keepalive)
+{
+	if (arg == NULL)
+		return -1;
+
+	struct cfgoptions *s = arg;
+
+	extern volatile sig_atomic_t shutdown;
+
+	shutdown = 1;
+
+	if (IsDaemon(arg) == 1) {
+		struct sigaction dummy = {.sa_handler = SIG_IGN,.sa_flags = 0 };
+
+		sigemptyset(&dummy.sa_mask);
+
+		sigaddset(&dummy.sa_mask, SIGUSR2);
+
+		sigaction(SIGUSR2, &dummy, NULL);
+
+		if (killpg(getpgrp(), SIGUSR2) == -1) {
+			Logmsg(LOG_ERR, "killpg failed %s", strerror(errno));
+		}
+	}
+
+	if (keepalive == 0) {
+		FreeExeList(&parent);
+
+		config_destroy(&s->cfg);
+
+		Logmsg(LOG_INFO, "stopping watchdog daemon");
+		closelog();
+		munlockall();
+
+		if (exitv == 0) {
+			return 0;
+		}
+
+		return -1;
+	}
+
+	DeletePidFile(arg);
+	FreeExeList(&parent);
+	Logmsg(LOG_INFO, "restarting system");
+	closelog();
+	munlockall();
+
+	return 0;
+}
+
+void ResetSignalHandlers(int maxsigno)
+{
+	if (maxsigno < 1)
+		return;
+
+	struct sigaction sa = {.sa_handler = SIG_DFL,.sa_flags = 0 };
+	sigfillset(&sa.sa_mask);
+
+	for (int i = 1; i < maxsigno; sigaction(i, &sa, NULL), i++) ;
+}
+
+int IsExe(const char *pathname, int returnfildes)
+{
+	struct stat buffer;
+
+	if (pathname == NULL)
+		return -1;
+
+	int fildes = open(pathname, O_RDONLY | O_CLOEXEC);
+
+	if (fildes == -1)
+		return -1;
+
+	if (fstat(fildes, &buffer) != 0) {
+		close(fildes);
+		return -1;
+	}
+
+	if (S_ISREG(buffer.st_mode) == 0) {
+		close(fildes);
+		return -1;
+	}
+
+	if (!(buffer.st_mode & S_IXUSR)) {
+		close(fildes);
+		return -1;
+	}
+
+	if (!(buffer.st_mode & S_IRUSR)) {
+		close(fildes);
+		return -1;
+	}
+
+	if (returnfildes == 1)	//For use with fexecve
+		return fildes;
+
+	close(fildes);
+	return 0;
+}

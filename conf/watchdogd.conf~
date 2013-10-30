@@ -1,0 +1,26 @@
+//use-pid-file = true /*default true. ignored if daemonize = false*/
+
+//lock-memory = true /*default true*/
+
+//daemonize = true /*default true. command line option overrides config file*/
+
+//max-load-1 = 0 /*default zero*/
+
+//max-load-5 = //default max-load-one * .75
+
+//max-load-15 =  //default max-load-one * .5
+
+//logtick = false //don't enable this option. false by default/
+
+test-directory = "/etc/watchdog.d" //default /etc/watchdogd.d
+
+/*pid-files = ["/var/run/sendsnail.pid", "/var/run/pumpdaudio.pid",
+"/var/run/fond.pid", "/var/run/nat.pid"]*/
+
+//repair-binary = "/bin/true"
+//test-binary = "/bin/true"
+
+//repair-timeout = 20
+//test-timeout = 20
+//min-memory = 0
+//watchdog-device = "/dev/watchdog"

@@ -1,0 +1,106 @@
+NAME
+	watchdogd — watchdog daemon
+SYNOPSIS
+	watchdogd [-F] [-c <config_file>]
+
+DESCRIPTION
+	A watchdog timer(WDT) is a hardware or software device that can reset a computer.
+	Normally a daemon via a kernel interface resets the watchdog to prevent it
+	from resetting the system. If the daemon(watchdogd) is unable to reset the
+	system the WDT will reset the system. The following graphic illustrates
+	the process.
+
+	[watchdog daemon pings kernel watchdog driver]
+			||
+			\/
+	[kernel watchdog daemon resets watchdog device]
+			||
+			\/
+	[watchdog does not time out system is not reset]
+
+
+OPTIONS
+	The following options are supported:
+
+       -F Skip SysV daemon startup sequence. Note the option enables logging with
+	fprintf to STDERR instead of syslog, it also automatically enables the Linux
+	kernel's printk() priority system for all log messages to STDERR for easy
+	integration with systemd.
+
+	-c pathname of configuration file.
+
+FILES
+	/var/run/watchdogd.pid
+
+AUTHORS
+	Christian Lockley. clockley1@gmail.com
+
+PORTING
+
+
+CONFIG FILE
+
+	The configuration file uses a simple format where x is the variable name
+	and the value that is assigned comes after the the equal sign ex. x = 1
+
+	C++ and unix shell comments are supported.
+
+OPTIONS
+	test-directory = <string>
+	All executables in this folder will be automatically executed.
+	See REPAIR SCRIPT section.
+
+	interval = <int>
+	Set the time in seconds between two pings the watchdog device.
+	Default value is 1 second.
+
+	max-load-1 = <float>
+	If the one minute system load average exceeds this value watchdogd
+	will reboot the system.
+
+	max-load-5 = <float>
+	If the five minute system load average exceeds this value watchdogd
+	will reboot the system.
+
+	max-load-15 = <float>
+	If the fifteen minute system load average exceeds this value watchdogd
+	will reboot the system.
+
+	enable-load-monitor = <bool>
+	If this option is undefined or set to false the max-load-* options are
+	ignored.
+
+	min-memory = <int>
+	The amount of virtual memory ram+pagefile in pages that must stay free.
+	If free memory is less than value given the watchdog daemon will reboot
+	the system.
+	The page size for Linux running on a x86 system is usually 4096KB.
+	The only way to change (the default of 4096KB) is to recompile your kernel
+	with huge page support.
+
+	watchdog-device = <string>
+	The pathname to the watchdog device.
+
+	use-pid-file = <bool>
+	This option is ignored if watchdogd is not running in daemon mode.
+
+	watchdog-timeout = <int>
+	Set the watchdog device timeout. If the daemon can't set the timeout it
+	will exit with an error message.
+
+	pid-files = <array>
+	pid-files is an array that contians the list of pid files that watchdogd in
+	to parse. If the pid specified in the pidfile is not valid the repair-binary
+	will run. Is the repair-binary return an error code greater than zero or is
+	not sepecified in the configuration watchdogd will reboot the system.
+	Example:
+		pid-files= ["/var/run/sendsnail.pid", "/var/run/pumpdaudio.pid",
+		"/var/run/lightdm.pid", "/var/run/nat.pid"]
+
+	softboot = <bool>
+	Reboot the system if watchdogd is unable to open a pidfile.
+
+...
+
+REPAIR SCRIPTS
+

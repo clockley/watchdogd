@@ -1,0 +1,11 @@
+watchdogd is a simple watchdog daemon I wrote as a learning project.
+
+This is the first version.
+
+TODO:
+
+1.) Add ping support.
+
+2.) Write better documentation.
+
+3.) Organize source tree.

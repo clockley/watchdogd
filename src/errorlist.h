@@ -1,0 +1,17 @@
+#ifndef ERRORLIST_H
+#define ERRORLIST_H
+
+#define WECMDREBOOT	255
+#define WECMDRESET	254
+
+#define WESYSOVERLOAD	253
+#define WETEMP		252
+#define WEZERO		0
+#define WECHTIME	247
+#define	WECHKILL	248
+#define WESYSCALL	249
+#define WECUSTOM	246
+#define WESCRIPT	251
+#define WEOTHER		WEZERO
+
+#endif
