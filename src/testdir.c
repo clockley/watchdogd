@@ -20,6 +20,8 @@
 #include <config.h>
 #include "watchdogd.h"
 #include "testdir.h"
+#include "exe.h"
+
 
 //The dirent_buf_size function was written by Ben Hutchings and released under the following license.
 
