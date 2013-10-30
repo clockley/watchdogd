@@ -42,7 +42,7 @@ int CloseWatchdog(const int *pfd)
 		       strerror(errno));
 	}
 
-	if (write(*pfd, "V", 1) < 0) {
+	if (write(*pfd, "V", strlen("V")) < 0) {
 		Logmsg(LOG_CRIT, "write to watchdog device failed: %s",
 		       strerror(errno));
 		CloseWraper(pfd);

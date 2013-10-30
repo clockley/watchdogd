@@ -26,6 +26,7 @@
 #include "errorlist.h"
 #include "threads.h"
 #include "testdir.h"
+#include "exe.h"
 
 extern volatile sig_atomic_t shutdown;
 static pthread_mutex_t managerlock = PTHREAD_MUTEX_INITIALIZER;

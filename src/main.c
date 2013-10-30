@@ -44,6 +44,7 @@
 #include "watchdogd.h"
 #include "sub.h"
 #include "main.h"
+#include "init.h"
 #include "threads.h"
 
 #ifdef __linux__

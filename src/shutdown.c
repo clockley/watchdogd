@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <stddef.h>
 #include "sub.h"
+#include "exe.h"
 #include "errorlist.h"
 #include "watchdogd.h"
 

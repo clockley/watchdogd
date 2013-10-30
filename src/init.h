@@ -8,4 +8,6 @@ int CheckPriority(int priority);
 int InitializePosixMemlock(void);
 int Usage(void);
 int PrintVersionString(void);
+int LoadConfigurationFile(void *arg);
+int ParseCommandLine(int *argc, char **argv, void *arg);
 #endif
