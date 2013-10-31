@@ -1,7 +1,7 @@
 NAME
 	watchdogd — watchdog daemon
 SYNOPSIS
-	watchdogd [-F] [-c <config_file>]
+	watchdogd [-F] [-q] [-s] [-c <config_file>]
 
 DESCRIPTION
 	A watchdog timer(WDT) is a hardware or software device that can reset a computer.
@@ -28,6 +28,10 @@ OPTIONS
 	integration with systemd.
 
 	-c pathname of configuration file.
+
+	-q Do not start the WDT or restart the system if test fail.
+
+	-s Sync the system every chance we get.
 
 FILES
 	/var/run/watchdogd.pid
