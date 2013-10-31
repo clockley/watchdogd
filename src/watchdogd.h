@@ -73,6 +73,7 @@ struct cfgoptions {
 #define FOREGROUNDSETFROMCOMMANDLINE 0x40
 #define ENABLEPIDCHECKER 0x80
 #define FORCE 0x100
+#define NOACTION 0x200
 
 	int priority;
 	int lockfd;

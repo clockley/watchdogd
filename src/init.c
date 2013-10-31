@@ -144,9 +144,12 @@ int LoadConfigurationFile(void *arg)
 		s->options |= DAEMONIZE;
 	}
 
-	if (config_lookup_bool(&s->cfg, "sync", &tmp) == CONFIG_TRUE) {
-		if (tmp) {
-			s->options |= SYNC;
+
+	if (!s->options & SYNC) {
+		if (config_lookup_bool(&s->cfg, "sync", &tmp) == CONFIG_TRUE) {
+			if (tmp) {
+				s->options |= SYNC;
+			}
 		}
 	}
 
