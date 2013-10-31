@@ -15,4 +15,5 @@ int SetupTestFork(void *arg);
 int SetupSyncThread(void *arg);
 int SetupThread(void *(*startFunction) (void *), void *arg);
 int StartPidFileTestThread(void *arg);
+static void PrintConfiguration(void *arg);
 #endif

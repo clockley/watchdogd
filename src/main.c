@@ -60,35 +60,6 @@ volatile sig_atomic_t shutdown = 0;
 
 bool logToSyslog = false;
 
-static void PrintConfiguration(struct cfgoptions *s)
-{
-	Logmsg(LOG_INFO,
-	       "int=%is realtime=%s sync=%s softboot=%s force=%s mla=%.2f mem=%li",
-	       s->sleeptime, s->options & REALTIME ? "yes" : "no",
-	       s->options & SYNC ? "yes" : "no",
-	       s->options & SOFTBOOT ? "yes" : "no", "true", s->maxLoadOne,
-	       s->minfreepages);
-
-	if (s->options & ENABLEPIDCHECKER) {
-		for (int cnt = 0; cnt < config_setting_length(s->pidFiles);
-		     cnt++) {
-			const char *pidFilePathName = NULL;
-			pidFilePathName =
-			    config_setting_get_string_elem(s->pidFiles, cnt);
-
-			Logmsg(LOG_DEBUG, "pidfile: %s", pidFilePathName);
-		}
-	} else {
-		Logmsg(LOG_INFO, "pidfile: no server process to check");
-	}
-
-	Logmsg(LOG_INFO, "test=%s(%i) repair=%s(%i) no_act=%s",
-	       s->testexepathname == NULL ? "no" : s->testexepathname,
-	       s->testBinTimeout,
-	       s->exepathname == NULL ? "no" : s->exepathname,
-	       s->repairBinTimeout, s->options & NOACTION ? "yes" : "no");
-}
-
 int main(int argc, char **argv)
 {
 	static struct cfgoptions options = {.confile =
@@ -449,4 +420,35 @@ int StartPidFileTestThread(void *arg)
 		return -1;
 
 	return 0;
+}
+
+static void PrintConfiguration(void *arg)
+{
+	struct cfgoptions *s = arg;
+
+	Logmsg(LOG_INFO,
+	       "int=%is realtime=%s sync=%s softboot=%s force=%s mla=%.2f mem=%li",
+	       s->sleeptime, s->options & REALTIME ? "yes" : "no",
+	       s->options & SYNC ? "yes" : "no",
+	       s->options & SOFTBOOT ? "yes" : "no", "true", s->maxLoadOne,
+	       s->minfreepages);
+
+	if (s->options & ENABLEPIDCHECKER) {
+		for (int cnt = 0; cnt < config_setting_length(s->pidFiles);
+		     cnt++) {
+			const char *pidFilePathName = NULL;
+			pidFilePathName =
+			    config_setting_get_string_elem(s->pidFiles, cnt);
+
+			Logmsg(LOG_DEBUG, "pidfile: %s", pidFilePathName);
+		}
+	} else {
+		Logmsg(LOG_INFO, "pidfile: no server process to check");
+	}
+
+	Logmsg(LOG_INFO, "test=%s(%i) repair=%s(%i) no_act=%s",
+	       s->testexepathname == NULL ? "no" : s->testexepathname,
+	       s->testBinTimeout,
+	       s->exepathname == NULL ? "no" : s->exepathname,
+	       s->repairBinTimeout, s->options & NOACTION ? "yes" : "no");
 }
