@@ -41,9 +41,9 @@
 
 //Copied into this program Sun September 8, 2013 by Christian Lockley
 
-size_t DirentBufSize(DIR *dirp);
+size_t DirentBufSize(DIR * dirp);
 
-size_t DirentBufSize(DIR *dirp)
+size_t DirentBufSize(DIR * dirp)
 {
 	long name_max;
 	size_t name_end;
@@ -191,16 +191,20 @@ int ExecuteRepairScripts(void *arg1, void *arg)
 	struct child *next = NULL;
 
 	list_for_each_entry(c, next, &p->children, entry) {
-		int ret = Spawn(s->repairBinTimeout, arg, c->name, c->name, "test", NULL);
+		int ret =
+		    Spawn(s->repairBinTimeout, arg, c->name, c->name, "test",
+			  NULL);
 
 		if (ret == 0)
 			continue;
 
-		char buf[8] = {0x00};
+		char buf[8] = { 0x00 };
 
 		snprintf(buf, sizeof(buf), "%i", ret);
 
-		if (Spawn(s->repairBinTimeout, arg, c->name, c->name, "repair", buf, NULL) != EXIT_SUCCESS) {
+		if (Spawn
+		    (s->repairBinTimeout, arg, c->name, c->name, "repair", buf,
+		     NULL) != EXIT_SUCCESS) {
 			return -1;
 		}
 	}

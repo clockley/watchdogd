@@ -144,12 +144,11 @@ int LoadConfigurationFile(void *arg)
 		s->options |= DAEMONIZE;
 	}
 
-
 	if (!s->options & SYNC) {
 		if (config_lookup_bool(&s->cfg, "sync", &tmp) == CONFIG_TRUE) {
 			if (tmp) {
 				s->options |= SYNC;
-			} /*no need to unset if false because all options are false by default*/
+			}	/*no need to unset if false because all options are false by default */
 		}
 	}
 
@@ -265,7 +264,13 @@ int LoadConfigurationFile(void *arg)
 			if (SetSchedulerPolicy(s->priority) < 0) {
 				return -1;
 			}
+			s->options |= REALTIME;
 		}
+	} else {
+		if (SetSchedulerPolicy(s->priority) < 0) {
+			return -1;
+		}
+		s->options |= REALTIME;
 	}
 
 	if (config_lookup_int(&s->cfg, "watchdog-timeout", &tmp) == CONFIG_TRUE) {
@@ -321,8 +326,8 @@ int LoadConfigurationFile(void *arg)
 			fprintf(stderr,
 				"watchdogd: %s:%i: illegal type for configuration file entry"
 				" \"pid-files\" expected array\n",
-				LibconfigWraperConfigSettingSourceFile(s->
-								       pidFiles),
+				LibconfigWraperConfigSettingSourceFile
+				(s->pidFiles),
 				config_setting_source_line(s->pidFiles));
 			return -1;
 		}
@@ -335,8 +340,8 @@ int LoadConfigurationFile(void *arg)
 	return 0;
 }
 
-const char
-*LibconfigWraperConfigSettingSourceFile(const config_setting_t * setting)
+const char *LibconfigWraperConfigSettingSourceFile(const config_setting_t *
+						   setting)
 {
 	const char *fileName = config_setting_source_file(setting);
 

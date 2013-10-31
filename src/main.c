@@ -21,6 +21,7 @@
 
 #include <inttypes.h>
 #include <stdint.h>
+#include <config.h>
 
 #include <errno.h>
 #include <pthread.h>
@@ -59,6 +60,35 @@ volatile sig_atomic_t shutdown = 0;
 
 bool logToSyslog = false;
 
+static void PrintConfiguration(struct cfgoptions *s)
+{
+	Logmsg(LOG_INFO,
+	       "int=%is realtime=%s sync=%s softboot=%s force=%s mla=%.2f mem=%li",
+	       s->sleeptime, s->options & REALTIME ? "yes" : "no",
+	       s->options & SYNC ? "yes" : "no",
+	       s->options & SOFTBOOT ? "yes" : "no", "true", s->maxLoadOne,
+	       s->minfreepages);
+
+	if (s->options & ENABLEPIDCHECKER) {
+		for (int cnt = 0; cnt < config_setting_length(s->pidFiles);
+		     cnt++) {
+			const char *pidFilePathName = NULL;
+			pidFilePathName =
+			    config_setting_get_string_elem(s->pidFiles, cnt);
+
+			Logmsg(LOG_DEBUG, "pidfile: %s", pidFilePathName);
+		}
+	} else {
+		Logmsg(LOG_INFO, "pidfile: no server process to check");
+	}
+
+	Logmsg(LOG_INFO, "test=%s(%i) repair=%s(%i) no_act=%s",
+	       s->testexepathname == NULL ? "no" : s->testexepathname,
+	       s->testBinTimeout,
+	       s->exepathname == NULL ? "no" : s->exepathname,
+	       s->repairBinTimeout, s->options & NOACTION ? "yes" : "no");
+}
+
 int main(int argc, char **argv)
 {
 	static struct cfgoptions options = {.confile =
@@ -95,7 +125,9 @@ int main(int argc, char **argv)
 	rqtp.tv_sec = options.sleeptime;
 	rqtp.tv_nsec = options.sleeptime * 1000;
 
-	Logmsg(LOG_INFO, "starting daemon");
+	Logmsg(LOG_INFO, "starting daemon (%s)", PACKAGE_VERSION);
+
+	PrintConfiguration(&options);
 
 	if (ConfigureKernelOutOfMemoryKiller() < 0) {
 		Logmsg(LOG_ERR, "unable to configure out of memory killer");
@@ -143,31 +175,36 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if (OpenWatchdog(&fd, options.devicepath) < 0) {
-		Abend(&options);
-	}
+	if (options.options & NOACTION == 0) {
+		if (OpenWatchdog(&fd, options.devicepath) < 0) {
+			Abend(&options);
+		}
 
-	if (ConfigureWatchdogTimeout(&fd, &options) < 0
-	    && options.watchdogTimeout != -1 && IsDaemon(&options) == 0) {
-		fprintf(stderr, "unable to set watchdog device timeout\n");
-		fprintf(stderr, "program exiting\n");
-		/*Can't use Abend() because we need to shut down watchdog device after we open it */
-		EndDaemon(CloseWatchdog(&fd), &options, false);
-		exit(EXIT_FAILURE);
-	} else if (ConfigureWatchdogTimeout(&fd, &options) < 0
-		   && options.watchdogTimeout != -1) {
-		Logmsg(LOG_ERR, "unable to set watchdog device timeout");
-		Logmsg(LOG_ERR, "program exiting");
-		EndDaemon(CloseWatchdog(&fd), &options, false);
-		exit(EXIT_FAILURE);
-	}
+		if (ConfigureWatchdogTimeout(&fd, &options) < 0
+		    && options.watchdogTimeout != -1 && IsDaemon(&options) == 0)
+		{
+			fprintf(stderr,
+				"unable to set watchdog device timeout\n");
+			fprintf(stderr, "program exiting\n");
+			/*Can't use Abend() because we need to shut down watchdog device after we open it */
+			EndDaemon(CloseWatchdog(&fd), &options, false);
+			exit(EXIT_FAILURE);
+		} else if (ConfigureWatchdogTimeout(&fd, &options) < 0
+			   && options.watchdogTimeout != -1) {
+			Logmsg(LOG_ERR,
+			       "unable to set watchdog device timeout");
+			Logmsg(LOG_ERR, "program exiting");
+			EndDaemon(CloseWatchdog(&fd), &options, false);
+			exit(EXIT_FAILURE);
+		}
 
-	if (options.watchdogTimeout != -1 && CheckDeviceAndDaemonTimeout
-	    (NULL, options.watchdogTimeout, options.sleeptime) < 0) {
-		Logmsg(LOG_ERR,
-		       "WDT timeout is less than watchdog daemon ping interval");
-		Logmsg(LOG_ERR,
-		       "Using this interval may result in spurious reboots");
+		if (options.watchdogTimeout != -1 && CheckDeviceAndDaemonTimeout
+		    (NULL, options.watchdogTimeout, options.sleeptime) < 0) {
+			Logmsg(LOG_ERR,
+			       "WDT timeout is less than watchdog daemon ping interval");
+			Logmsg(LOG_ERR,
+			       "Using this interval may result in spurious reboots");
+		}
 	}
 
 	if (SetupAuxManagerThread(&options) < 0) {
@@ -175,13 +212,18 @@ int main(int argc, char **argv)
 	}
 
 	while (quit == 0) {
-		PingWatchdog(&fd);
+		if (options.options & NOACTION == 0) {
+			PingWatchdog(&fd);
+		}
+
 		if (nanosleep(&rqtp, NULL) == -1) {
 			Logmsg(LOG_ERR, "nanosleep failed %s", strerror(errno));
 		}
 	}
 
-	if (EndDaemon(CloseWatchdog(&fd), &options, false) < 0) {
+	if (EndDaemon
+	    (options.options & NOACTION == 0 ? CloseWatchdog(&fd) : 0, &options,
+	     false) < 0) {
 		DeletePidFile(&options);
 		exit(EXIT_FAILURE);
 	}

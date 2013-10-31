@@ -34,13 +34,13 @@
 #if 0
 #ifndef NSIG
 #if defined(_NSIG)
-#define NSIG _NSIG /* For BSD/SysV */
+#define NSIG _NSIG		/* For BSD/SysV */
 #elif defined(_SIGMAX)
-#define NSIG (_SIGMAX + 1) /* For QNX */
+#define NSIG (_SIGMAX + 1)	/* For QNX */
 #elif defined(SIGMAX)
-#define NSIG (SIGMAX + 1) /* For djgpp */
+#define NSIG (SIGMAX + 1)	/* For djgpp */
 #else
-#define NSIG 64 /* Use a reasonable default value */
+#define NSIG 64			/* Use a reasonable default value */
 #endif
 #endif
 #endif
@@ -74,6 +74,7 @@ struct cfgoptions {
 #define ENABLEPIDCHECKER 0x80
 #define FORCE 0x100
 #define NOACTION 0x200
+#define REALTIME 0x400
 
 	int priority;
 	int lockfd;

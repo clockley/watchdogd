@@ -63,7 +63,7 @@ int CloseWraper(const int *pfd)
 
 	do {
 		ret = close(*pfd);
-		count = count +1;
+		count = count + 1;
 
 	}
 	while (ret != 0 && errno == EINTR && count <= 8);
@@ -165,18 +165,16 @@ int EndDaemon(int exitv, void *arg, int keepalive)
 
 	shutdown = 1;
 
-	if (IsDaemon(arg) == 1) {
-		struct sigaction dummy = {.sa_handler = SIG_IGN,.sa_flags = 0 };
+	struct sigaction dummy = {.sa_handler = SIG_IGN,.sa_flags = 0 };
 
-		sigemptyset(&dummy.sa_mask);
+	sigemptyset(&dummy.sa_mask);
 
-		sigaddset(&dummy.sa_mask, SIGUSR2);
+	sigaddset(&dummy.sa_mask, SIGUSR2);
 
-		sigaction(SIGUSR2, &dummy, NULL);
+	sigaction(SIGUSR2, &dummy, NULL);
 
-		if (killpg(getpgrp(), SIGUSR2) == -1) {
-			Logmsg(LOG_ERR, "killpg failed %s", strerror(errno));
-		}
+	if (killpg(getpgrp(), SIGUSR2) == -1) {
+		Logmsg(LOG_ERR, "killpg failed %s", strerror(errno));
 	}
 
 	if (keepalive == 0) {

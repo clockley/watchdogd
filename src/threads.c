@@ -269,7 +269,7 @@ void *TestPidfileThread(void *arg)
 				break;
 			}
 
-			int fd = open(pidFilePathName, O_RDONLY|O_CLOEXEC);
+			int fd = open(pidFilePathName, O_RDONLY | O_CLOEXEC);
 
 			if (fd < 0) {
 				Logmsg(LOG_ERR, "cannot open %s: %s",
@@ -327,7 +327,8 @@ void *TestPidfileThread(void *arg)
 			pid_t pid = (pid_t) strtol(buf, (char **)NULL, 10);
 
 			if (pid == 0) {
-				Logmsg(LOG_ERR,"strtol failed: %s", strerror(errno));
+				Logmsg(LOG_ERR, "strtol failed: %s",
+				       strerror(errno));
 				s->error |= UNKNOWNPIDFILERROR;
 				break;
 			}
@@ -382,8 +383,8 @@ void *ManagerThread(void *arg)
 			Logmsg(LOG_ERR,
 			       "polled load average exceed configured load average limit");
 			if (Shutdown
-			    (WESYSOVERLOAD,
-			     s->options & KEXEC ? 1 : 0, arg) < 0) {
+			    (WESYSOVERLOAD, s->options & KEXEC ? 1 : 0,
+			     arg) < 0) {
 				Logmsg(LOG_ERR,
 				       "watchdogd: Unable to shutdown system");
 				exit(EXIT_FAILURE);
@@ -393,8 +394,8 @@ void *ManagerThread(void *arg)
 		if (s->error & OUTOFMEMORY) {
 			Logmsg(LOG_ERR,
 			       "less than configured free pages available");
-			if (Shutdown
-			    (WEOTHER, s->options & KEXEC ? 1 : 0, arg) < 0) {
+			if (Shutdown(WEOTHER, s->options & KEXEC ? 1 : 0, arg) <
+			    0) {
 				Logmsg(LOG_ERR,
 				       "watchdogd: Unable to shutdown system");
 				exit(EXIT_FAILURE);
@@ -404,8 +405,8 @@ void *ManagerThread(void *arg)
 		if (s->error & FORKFAILED) {
 			Logmsg(LOG_ERR,
 			       "process table test failed because fork failed");
-			if (Shutdown
-			    (WEOTHER, s->options & KEXEC ? 1 : 0, arg) < 0) {
+			if (Shutdown(WEOTHER, s->options & KEXEC ? 1 : 0, arg) <
+			    0) {
 				Logmsg(LOG_ERR,
 				       "watchdogd: Unable to shutdown system");
 				exit(EXIT_FAILURE);
@@ -414,8 +415,8 @@ void *ManagerThread(void *arg)
 
 		if (s->error & SCRIPTFAILED) {
 			Logmsg(LOG_ERR, "repair script failed");
-			if (Shutdown
-			    (WESCRIPT, s->options & KEXEC ? 1 : 0, arg) < 0) {
+			if (Shutdown(WESCRIPT, s->options & KEXEC ? 1 : 0, arg)
+			    < 0) {
 				Logmsg(LOG_ERR,
 				       "watchdogd: Unable to shutdown system");
 				exit(EXIT_FAILURE);
@@ -424,8 +425,8 @@ void *ManagerThread(void *arg)
 
 		if (s->error & PIDFILERROR || s->error & UNKNOWNPIDFILERROR) {
 			Logmsg(LOG_ERR, "pid file test failed");
-			if (Shutdown
-			    (WEPIDFILE, s->options & KEXEC ? 1 : 0, arg) < 0) {
+			if (Shutdown(WEPIDFILE, s->options & KEXEC ? 1 : 0, arg)
+			    < 0) {
 				Logmsg(LOG_ERR,
 				       "watchdogd: Unable to shutdown system");
 				exit(EXIT_FAILURE);
@@ -435,8 +436,8 @@ void *ManagerThread(void *arg)
 		if (s->testExeReturnValue > 0 || s->testExeReturnValue < 0) {
 			Logmsg(LOG_ERR, "check executable failed");
 			if (Shutdown
-			    (s->testExeReturnValue,
-			     s->options & KEXEC ? 1 : 0, arg) < 0) {
+			    (s->testExeReturnValue, s->options & KEXEC ? 1 : 0,
+			     arg) < 0) {
 				Logmsg(LOG_ERR,
 				       "watchdogd: Unable to shutdown system");
 				exit(EXIT_FAILURE);

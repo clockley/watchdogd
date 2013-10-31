@@ -2,7 +2,7 @@
 #define INIT_H
 int MakeLogDir(void *arg);
 const char
-*LibconfigWraperConfigSettingSourceFile(const config_setting_t *setting);
+*LibconfigWraperConfigSettingSourceFile(const config_setting_t * setting);
 int SetSchedulerPolicy(int priority);
 int CheckPriority(int priority);
 int InitializePosixMemlock(void);
