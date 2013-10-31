@@ -392,13 +392,16 @@ int ParseCommandLine(int *argc, char **argv, void *arg)
 	struct cfgoptions *s = arg;
 	int opt = 0;
 
-	while ((opt = getopt(*argc, argv, "Fc:")) != -1) {
+	while ((opt = getopt(*argc, argv, "sFc:")) != -1) {
 		switch (opt) {
 		case 'F':
 			s->options |= FOREGROUNDSETFROMCOMMANDLINE;
 			break;
 		case 'c':
 			s->confile = optarg;
+			break;
+		case 's':
+			s->options |= SYNC;
 			break;
 		default:
 			Usage();

@@ -72,6 +72,7 @@ struct cfgoptions {
 #define DAEMONIZE 0x20
 #define FOREGROUNDSETFROMCOMMANDLINE 0x40
 #define ENABLEPIDCHECKER 0x80
+#define FORCE 0x100
 
 	int priority;
 	int lockfd;
