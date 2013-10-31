@@ -149,7 +149,7 @@ int LoadConfigurationFile(void *arg)
 		if (config_lookup_bool(&s->cfg, "sync", &tmp) == CONFIG_TRUE) {
 			if (tmp) {
 				s->options |= SYNC;
-			}
+			} /*no need to unset if false because all options are false by default*/
 		}
 	}
 
@@ -395,7 +395,7 @@ int ParseCommandLine(int *argc, char **argv, void *arg)
 	struct cfgoptions *s = arg;
 	int opt = 0;
 
-	while ((opt = getopt(*argc, argv, "sFc:")) != -1) {
+	while ((opt = getopt(*argc, argv, "qsFc:")) != -1) {
 		switch (opt) {
 		case 'F':
 			s->options |= FOREGROUNDSETFROMCOMMANDLINE;
@@ -405,6 +405,9 @@ int ParseCommandLine(int *argc, char **argv, void *arg)
 			break;
 		case 's':
 			s->options |= SYNC;
+			break;
+		case 'q':
+			s->options |= NOACTION;
 			break;
 		default:
 			Usage();
