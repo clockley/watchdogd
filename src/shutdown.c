@@ -36,8 +36,10 @@ int Shutdown(int errorcode, int kexec, void *arg)
 	struct cfgoptions *s = arg;
 	int i = 0;
 
-	if (s->options & NOACTION)
+	if (s->options & NOACTION) {
+		Logmsg(LOG_DEBUG, "shutdown() errorcode=%i, kexec=%i", errorcode, kexec);
 		return 0;
+	}
 
 /*	if (errorcode == WECMDRESET) {
 		kill(getpid(), SIGUSR1);
