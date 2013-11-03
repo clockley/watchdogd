@@ -257,6 +257,19 @@ int LoadConfigurationFile(void *arg)
 		s->maxLoadFifteen = s->maxLoadOne * 0.5;
 	}
 
+
+	if (config_lookup_float(&s->cfg, "retry-timeout", &s->retryLimit) ==
+	    CONFIG_TRUE) {
+		if (s->retryLimit > 86400L) {
+			fprintf(stderr,
+				"watchdogd: illegal value for configuration file entry named \"retry-timeout\"\n");
+			fprintf(stderr, "watchdogd: disableing retry timeout\n");
+			s->retryLimit = 0L;
+		}
+	} else {
+		s->retryLimit = 0L;
+	}
+
 	config_set_auto_convert(&s->cfg, false);
 
 	if (config_lookup_bool(&s->cfg, "realtime-scheduling", &tmp)) {

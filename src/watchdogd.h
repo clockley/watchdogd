@@ -52,6 +52,7 @@ struct cfgoptions {
 	double maxLoadFifteen;
 	double maxLoadOne;
 	double maxLoadFive;
+	double retryLimit;
 	const config_setting_t *pidFiles;
 	const char *devicepath;
 	const char *testexepath;

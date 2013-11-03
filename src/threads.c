@@ -271,6 +271,36 @@ void *TestPidfileThread(void *arg)
 
 			int fd = open(pidFilePathName, O_RDONLY | O_CLOEXEC);
 
+			time_t startTime = 0;
+
+			if (time(&startTime) == (time_t)(-1)) {
+				s->error |= UNKNOWNPIDFILERROR;
+				break;
+			}
+
+			int i = 0;
+			time_t currentTime = 0;
+
+			struct timespec rqtp;
+			rqtp.tv_sec = 1;
+			rqtp.tv_nsec = 1 * 1000;
+
+			do {
+				if (time(&currentTime) == (time_t)(-1)) {
+					currentTime = 0;
+					break;
+				}
+				
+				fd = open(pidFilePathName, O_RDONLY | O_CLOEXEC);
+				i = i + 1;
+				if (fd > 0) {
+					break;
+				}
+				nanosleep(&rqtp, NULL);
+			} while (difftime(currentTime, startTime) <= s->retryLimit);
+
+			Logmsg(LOG_INFO,"%i", i);
+
 			if (fd < 0) {
 				Logmsg(LOG_ERR, "cannot open %s: %s",
 				       pidFilePathName, strerror(errno));
@@ -278,7 +308,12 @@ void *TestPidfileThread(void *arg)
 					s->error |= PIDFILERROR;
 					break;
 				} else {
-					continue;
+					if (s->retryLimit < 1) {
+						continue;
+					} else {
+						s->error |= PIDFILERROR;
+						break;
+					}
 				}
 			}
 
