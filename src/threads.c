@@ -278,7 +278,6 @@ void *TestPidfileThread(void *arg)
 				break;
 			}
 
-			int i = 0;
 			time_t currentTime = 0;
 
 			struct timespec rqtp;
@@ -292,14 +291,11 @@ void *TestPidfileThread(void *arg)
 				}
 				
 				fd = open(pidFilePathName, O_RDONLY | O_CLOEXEC);
-				i = i + 1;
 				if (fd > 0) {
 					break;
 				}
 				nanosleep(&rqtp, NULL);
 			} while (difftime(currentTime, startTime) <= s->retryLimit);
-
-			Logmsg(LOG_INFO,"%i", i);
 
 			if (fd < 0) {
 				Logmsg(LOG_ERR, "cannot open %s: %s",
