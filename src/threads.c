@@ -280,11 +280,8 @@ void *TestPidfileThread(void *arg)
 
 			time_t currentTime = 0;
 
-			struct timespec rqtp;
-			rqtp.tv_sec = 1;
-			rqtp.tv_nsec = 1 * 1000;
-
 			do {
+				useconds_t sleepTime = 1000;
 				if (time(&currentTime) == (time_t)(-1)) {
 					currentTime = 0;
 					break;
@@ -294,7 +291,7 @@ void *TestPidfileThread(void *arg)
 				if (fd > 0) {
 					break;
 				}
-				nanosleep(&rqtp, NULL);
+				usleep(sleepTime);
 			} while (difftime(currentTime, startTime) <= s->retryLimit);
 
 			if (fd < 0) {

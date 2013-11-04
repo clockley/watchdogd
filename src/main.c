@@ -146,7 +146,7 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if (options.options & NOACTION == 0) {
+	if ((options.options & NOACTION) == 0) {
 		if (OpenWatchdog(&fd, options.devicepath) < 0) {
 			Abend(&options);
 		}
@@ -183,7 +183,7 @@ int main(int argc, char **argv)
 	}
 
 	while (quit == 0) {
-		if (options.options & NOACTION == 0) {
+		if ((options.options & NOACTION) == 0) {
 			PingWatchdog(&fd);
 		}
 
@@ -193,7 +193,7 @@ int main(int argc, char **argv)
 	}
 
 	if (EndDaemon
-	    (options.options & NOACTION == 0 ? CloseWatchdog(&fd) : 0, &options,
+	    ((options.options & NOACTION) == 0 ? CloseWatchdog(&fd) : 0, &options,
 	     false) < 0) {
 		DeletePidFile(&options);
 		exit(EXIT_FAILURE);

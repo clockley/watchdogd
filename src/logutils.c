@@ -58,7 +58,7 @@ void Logmsg(int priority, const char *fmt, ...)
 
 	extern bool logToSyslog;
 
-	char buf[128] = { 0 };
+	char buf[2048] = { 0 };
 
 	va_list args;
 
