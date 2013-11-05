@@ -36,7 +36,7 @@ void *WaitThread(void *arg)
 	return NULL;
 }
 
-int Spawn(int timeout, void *aarg, const char *file, const char *args, ...)
+int Spawn(pid_t *async, int timeout, void *aarg, const char *file, const char *args, ...)
 {
 	struct cfgoptions *s = aarg;
 	int status = 0;
@@ -152,6 +152,10 @@ int Spawn(int timeout, void *aarg, const char *file, const char *args, ...)
 			}
 		}
 	default:
+		if (async != NULL) {
+			*async == pid;
+			return 0;
+		}
 		errno = 0;
 		if (waitpid(pid, &status, 0) != pid && errno == EINTR) {
 			kill(pid, SIGKILL);
