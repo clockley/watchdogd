@@ -263,7 +263,7 @@ int LoadConfigurationFile(void *arg)
 			fprintf(stderr,
 				"watchdogd: illegal value for configuration file entry named \"retry-timeout\"\n");
 			fprintf(stderr,
-				"watchdogd: disableing retry timeout\n");
+				"watchdogd: disabling retry timeout\n");
 			s->retryLimit = 0L;
 		}
 	} else {
