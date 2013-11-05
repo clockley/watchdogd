@@ -103,10 +103,6 @@ struct child {
 	struct list entry;
 	const char *name;
 	int ret;
-	unsigned int flags;
-#define TIMEDOUT 0x1
-#define SIGNAL 0x2
-#define ASYNC 0x4
 };
 
 struct parent parent;
