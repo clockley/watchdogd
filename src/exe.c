@@ -118,8 +118,10 @@ int Spawn(int timeout, void *aarg, const char *file, const char *args, ...)
 				int ret = 0;
 
 				pthread_attr_init(&attr);
-				pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-				pthread_create(&thread, &attr, WaitThread, &ret);
+				pthread_attr_setdetachstate(&attr,
+							    PTHREAD_CREATE_DETACHED);
+				pthread_create(&thread, &attr, WaitThread,
+					       &ret);
 				pthread_attr_destroy(&attr);
 				pthread_mutex_lock(&lock);
 
@@ -127,9 +129,10 @@ int Spawn(int timeout, void *aarg, const char *file, const char *args, ...)
 
 				clock_gettime(CLOCK_REALTIME, &rqtp);
 
-				rqtp.tv_sec += (time_t)timeout;
+				rqtp.tv_sec += (time_t) timeout;
 
-				int returnValue = pthread_cond_timedwait(&cond, &lock, &rqtp);
+				int returnValue =
+				    pthread_cond_timedwait(&cond, &lock, &rqtp);
 				pthread_mutex_unlock(&lock);
 
 				if (returnValue == ETIMEDOUT) {

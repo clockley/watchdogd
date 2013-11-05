@@ -193,8 +193,8 @@ int main(int argc, char **argv)
 	}
 
 	if (EndDaemon
-	    ((options.options & NOACTION) == 0 ? CloseWatchdog(&fd) : 0, &options,
-	     false) < 0) {
+	    ((options.options & NOACTION) == 0 ? CloseWatchdog(&fd) : 0,
+	     &options, false) < 0) {
 		DeletePidFile(&options);
 		exit(EXIT_FAILURE);
 	}

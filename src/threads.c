@@ -285,7 +285,7 @@ void *TestPidfileThread(void *arg)
 
 			time_t startTime = 0;
 
-			if (time(&startTime) == (time_t)(-1)) {
+			if (time(&startTime) == (time_t) (-1)) {
 				s->error |= UNKNOWNPIDFILERROR;
 				break;
 			}
@@ -294,17 +294,19 @@ void *TestPidfileThread(void *arg)
 
 			do {
 				useconds_t sleepTime = 1000;
-				if (time(&currentTime) == (time_t)(-1)) {
+				if (time(&currentTime) == (time_t) (-1)) {
 					currentTime = 0;
 					break;
 				}
-				
-				fd = open(pidFilePathName, O_RDONLY | O_CLOEXEC);
+
+				fd = open(pidFilePathName,
+					  O_RDONLY | O_CLOEXEC);
 				if (fd > 0) {
 					break;
 				}
 				usleep(sleepTime);
-			} while (difftime(currentTime, startTime) <= s->retryLimit);
+			} while (difftime(currentTime, startTime) <=
+				 s->retryLimit);
 
 			if (fd < 0) {
 				Logmsg(LOG_ERR, "cannot open %s: %s",
