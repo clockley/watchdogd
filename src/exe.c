@@ -19,6 +19,22 @@
 #include "watchdogd.h"
 #include "sub.h"
 
+static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+static pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
+
+void *WaitThread(void *arg)
+{
+	int *ret = arg;
+
+	wait(ret);
+
+	pthread_mutex_lock(&lock);
+	pthread_cond_signal(&cond);
+	pthread_mutex_unlock(&lock);
+
+	return NULL;
+}
+
 int Spawn(int timeout, void *aarg, const char *file, const char *args, ...)
 {
 	struct cfgoptions *s = aarg;
@@ -96,41 +112,37 @@ int Spawn(int timeout, void *aarg, const char *file, const char *args, ...)
 				return -1;
 			}
 
-			int ret = 0;
-
 			if (timeout > 0) {
-				pid_t timer = fork();
+				pthread_t thread;
+				pthread_attr_t attr;
+				int ret = 0;
 
-				if (timer == 0) {
-					struct timespec rqtp;
+				pthread_attr_init(&attr);
+				pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+				pthread_create(&thread, &attr, WaitThread, &ret);
+				pthread_attr_destroy(&attr);
+				pthread_mutex_lock(&lock);
 
-					rqtp.tv_sec = timeout;
-					rqtp.tv_nsec = timeout * 1000;
+				struct timespec rqtp;
 
-					nanosleep(&rqtp, &rqtp);
+				clock_gettime(CLOCK_REALTIME, &rqtp);
 
-					_Exit(0);
-				}
+				rqtp.tv_sec += (time_t)timeout;
 
-				if (timer == -1) {
-					return -1;
-				}
+				int returnValue = pthread_cond_timedwait(&cond, &lock, &rqtp);
+				pthread_mutex_unlock(&lock);
 
-				pid_t firstoexit = wait(&ret);
-
-				if (firstoexit == timer) {
+				if (returnValue == ETIMEDOUT) {
 					kill(worker, SIGKILL);
 					Logmsg(LOG_ERR,
 					       "binary %s exceeded time limit %ld",
 					       file, timeout);
 					_Exit(0);
-				} else if (firstoexit == worker) {
-					kill(timer, SIGKILL);
-					_Exit(WEXITSTATUS(ret));
-				} else {
-					_Exit(0);
 				}
+
+				_Exit(WEXITSTATUS(ret));
 			} else {
+				int ret = 0;
 				wait(&ret);
 				_Exit(WEXITSTATUS(ret));
 			}
@@ -139,10 +151,6 @@ int Spawn(int timeout, void *aarg, const char *file, const char *args, ...)
 		errno = 0;
 		if (waitpid(pid, &status, 0) != pid && errno == EINTR) {
 			kill(pid, SIGKILL);
-			return 0;
-		}
-
-		if (WIFEXITED(status) == 1 && WEXITSTATUS(status) == 0) {
 			return 0;
 		}
 

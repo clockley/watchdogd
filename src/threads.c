@@ -34,6 +34,18 @@ static pthread_cond_t workerupdate = PTHREAD_COND_INITIALIZER;
 static pthread_once_t getPageSize = PTHREAD_ONCE_INIT;
 static long pageSize = 0;
 
+/*static time_t Time(time_t *tloc)
+{
+	struct timespec tp;
+	int ret = clock_gettime(CLOCK_MONOTONIC, &tp);
+	if (tloc == NULL)
+		return tp.tv_sec;
+	else
+		*tloc = tp.tv_sec;
+
+	return ret;
+}*/
+
 void GetPageSize(void)
 {
 	pageSize = sysconf(_SC_PAGESIZE);
@@ -476,7 +488,7 @@ void *ManagerThread(void *arg)
 		nanosleep(&rqtp, NULL);
 
 		if (shutdown == 1) {
-			pthread_exit(NULL);
+			break;
 		}
 	}
 

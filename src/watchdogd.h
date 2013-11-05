@@ -15,6 +15,7 @@
 #include <string.h>
 #include <stddef.h>
 #include <stdbool.h>
+#include <time.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -101,6 +102,7 @@ struct parent {
 struct child {
 	struct list entry;
 	const char *name;
+	int ret;
 };
 
 struct parent parent;

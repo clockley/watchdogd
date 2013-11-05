@@ -150,6 +150,8 @@ int CreateLinkedListOfExes(const char *path, void *arg)
 			goto error;
 		}
 
+		child->ret = 0;
+
 		list_add(&child->entry, &p->children);
 	}
 
@@ -195,19 +197,29 @@ int ExecuteRepairScripts(void *arg1, void *arg)
 		    Spawn(s->repairBinTimeout, arg, c->name, c->name, "test",
 			  NULL);
 
-		if (ret == 0)
+		if (ret != 0) {
+			c->ret = ret;
+		}
+	}
+
+	int ret = 0;
+
+	list_for_each_entry(c, next, &p->children, entry) {
+		if (c->ret == 0)
 			continue;
+
+		Logmsg(LOG_CRIT, "test binary %s returned %i", c->name, c->ret);
 
 		char buf[8] = { 0x00 };
 
-		snprintf(buf, sizeof(buf), "%i", ret);
+		snprintf(buf, sizeof(buf), "%i", c->ret);
 
 		if (Spawn
 		    (s->repairBinTimeout, arg, c->name, c->name, "repair", buf,
 		     NULL) != EXIT_SUCCESS) {
-			return -1;
+			ret = -1;
 		}
 	}
 
-	return 0;
+	return ret;
 }
