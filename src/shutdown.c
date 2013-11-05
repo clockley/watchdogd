@@ -63,7 +63,7 @@ int Shutdown(int errorcode, int kexec, void *arg)
 		snprintf(buf, sizeof(buf), "%d\n", errorcode);
 
 		if (Spawn
-		    (s->repairBinTimeout, arg, s->exepathname, s->exepathname,
+		    (0, s->repairBinTimeout, arg, s->exepathname, s->exepathname,
 		     buf, NULL) == 0)
 			return 0;
 	}

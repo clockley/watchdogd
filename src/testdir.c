@@ -194,7 +194,7 @@ int ExecuteRepairScripts(void *arg1, void *arg)
 
 	list_for_each_entry(c, next, &p->children, entry) {
 		int ret =
-		    Spawn(s->repairBinTimeout, arg, c->name, c->name, "test",
+		    Spawn(0, s->repairBinTimeout, arg, c->name, c->name, "test",
 			  NULL);
 
 		if (ret != 0) {
@@ -215,7 +215,7 @@ int ExecuteRepairScripts(void *arg1, void *arg)
 		snprintf(buf, sizeof(buf), "%i", c->ret);
 
 		if (Spawn
-		    (s->repairBinTimeout, arg, c->name, c->name, "repair", buf,
+		    (0, s->repairBinTimeout, arg, c->name, c->name, "repair", buf,
 		     NULL) != EXIT_SUCCESS) {
 			ret = -1;
 		}

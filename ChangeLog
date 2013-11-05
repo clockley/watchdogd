@@ -1,3 +1,10 @@
-2013 - 10 - 29 Christian Lockley  <clockley1@gmail.com>
+2013-10-29 Christian Lockley  <clockley1@gmail.com>
 
 * First version
+
+2013-11-05 Christian Lockley <clockley1@gmail.com>
+
+* Use a timer thread instead of forking.
+* Other random mutations.
+* 0.0.1b
+* 0.0.2
