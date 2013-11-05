@@ -36,7 +36,7 @@ void *WaitThread(void *arg)
 	return NULL;
 }
 
-int Spawn(int async, int timeout, void *aarg, const char *file, const char *args, ...)
+int Spawn(int timeout, void *aarg, const char *file, const char *args, ...)
 {
 	struct cfgoptions *s = aarg;
 	int status = 0;
@@ -118,15 +118,11 @@ int Spawn(int async, int timeout, void *aarg, const char *file, const char *args
 				pthread_attr_t attr;
 				int ret = 0;
 
-				if (pthread_attr_init(&attr) != 0)
-					goto error;
-
+				pthread_attr_init(&attr);
 				pthread_attr_setdetachstate(&attr,
 							    PTHREAD_CREATE_DETACHED);
-				if (pthread_create(&thread, &attr, WaitThread,
-						   &ret) != 0)
-					goto error;
-
+				pthread_create(&thread, &attr, WaitThread,
+					       &ret);
 				pthread_attr_destroy(&attr);
 				pthread_mutex_lock(&lock);
 
@@ -154,10 +150,6 @@ int Spawn(int async, int timeout, void *aarg, const char *file, const char *args
 				wait(&ret);
 				_Exit(WEXITSTATUS(ret));
 			}
- error:
-			Logmsg(LOG_CRIT, "fatal internal error: %s",
-			       strerror(errno));
-			_Exit(1);
 		}
 	default:
 		errno = 0;

@@ -166,7 +166,7 @@ void *TestBinThread(void *arg)
 	rqtp.tv_nsec = 5 * 1000;
 
 	for (;;) {
-		int ret = Spawn(0, s->testBinTimeout, arg, s->testexepathname,
+		int ret = Spawn(s->testBinTimeout, arg, s->testexepathname,
 				s->testexepathname, "test", NULL);
 		if (ret == 0) {
 			s->testExeReturnValue = 0;

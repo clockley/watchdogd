@@ -103,9 +103,6 @@ struct child {
 	struct list entry;
 	const char *name;
 	int ret;
-	int flags;
-	pid_t pid;
-	pid_t sid;
 };
 
 struct parent parent;
