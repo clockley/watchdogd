@@ -133,11 +133,20 @@ int Spawn(int timeout, void *aarg, const char *file, const char *args, ...)
 				rqtp.tv_sec += (time_t) timeout;
 
 				int returnValue = 0;
+				bool once = false;
 
 				do {
 					returnValue =
 					    pthread_cond_timedwait(&cond, &lock, &rqtp);
-					pthread_mutex_unlock(&lock);
+
+					if (returnValue == 0) {
+						break;
+					}
+
+					if (once == false) {
+						pthread_mutex_unlock(&lock);
+						once = true;
+					}
 				} while(returnValue != ETIMEDOUT);
 
 				if (returnValue == ETIMEDOUT) {
