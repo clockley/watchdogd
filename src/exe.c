@@ -132,9 +132,13 @@ int Spawn(int timeout, void *aarg, const char *file, const char *args, ...)
 
 				rqtp.tv_sec += (time_t) timeout;
 
-				int returnValue =
-				    pthread_cond_timedwait(&cond, &lock, &rqtp);
-				pthread_mutex_unlock(&lock);
+				int returnValue = 0;
+
+				do {
+					returnValue =
+					    pthread_cond_timedwait(&cond, &lock, &rqtp);
+					pthread_mutex_unlock(&lock);
+				} while(returnValue != ETIMEDOUT);
 
 				if (returnValue == ETIMEDOUT) {
 					kill(worker, SIGKILL);
