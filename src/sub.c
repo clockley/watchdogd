@@ -213,6 +213,16 @@ void ResetSignalHandlers(int maxsigno)
 	for (int i = 1; i < maxsigno; sigaction(i, &sa, NULL), i++) ;
 }
 
+void NormalizeTimespec(void *arg)
+{
+	struct timespec *tp = arg;
+
+	while (tp->tv_nsec >= 1000000000) {
+		tp->tv_nsec -= 1000000000;
+		tp->tv_sec++;
+	}
+}
+
 int IsExe(const char *pathname, int returnfildes)
 {
 	struct stat buffer;

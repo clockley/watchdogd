@@ -75,8 +75,6 @@ int main(int argc, char **argv)
 
 	int fd = 0;
 
-	struct timespec rqtp;
-
 	if (ParseCommandLine(&argc, argv, &options) != 0) {
 		return EXIT_FAILURE;
 	}
@@ -92,9 +90,6 @@ int main(int argc, char **argv)
 	if (SetupSignalHandlers(IsDaemon(&options)) < 0) {
 		Abend(&options);
 	}
-
-	rqtp.tv_sec = options.sleeptime;
-	rqtp.tv_nsec = options.sleeptime * 1000;
 
 	Logmsg(LOG_INFO, "starting daemon (%s)", PACKAGE_VERSION);
 
@@ -182,14 +177,22 @@ int main(int argc, char **argv)
 		Abend(&options);
 	}
 
+
+	struct timespec rqtp;
+
+	clock_gettime(CLOCK_MONOTONIC, &rqtp);
+
 	while (quit == 0) {
 		if ((options.options & NOACTION) == 0) {
 			PingWatchdog(&fd);
 		}
 
-		if (nanosleep(&rqtp, NULL) == -1) {
-			Logmsg(LOG_ERR, "nanosleep failed %s", strerror(errno));
+		if (clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &rqtp, NULL) != 0) {
+			Logmsg(LOG_ERR, "clock_nanosleep failed %s", strerror(errno));
 		}
+
+		rqtp.tv_sec += options.sleeptime;
+		NormalizeTimespec(&rqtp);
 	}
 
 	if (EndDaemon
