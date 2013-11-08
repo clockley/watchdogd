@@ -284,7 +284,7 @@ int SetupSyncThread(void *arg)
 	if (arg == NULL)
 		return -1;
 
-	if (SetupThread(Sync, arg) < 0)
+	if (CreateDetachedThread(Sync, arg) < 0)
 		return -1;
 
 	return 0;
@@ -292,7 +292,7 @@ int SetupSyncThread(void *arg)
 
 int SetupTestFork(void *arg)
 {
-	if (SetupThread(TestFork, arg) < 0)
+	if (CreateDetachedThread(TestFork, arg) < 0)
 		return -1;
 
 	return 0;
@@ -300,7 +300,7 @@ int SetupTestFork(void *arg)
 
 int SetupExeDir(void *arg)
 {
-	if (SetupThread(TestDirThread, arg) < 0)
+	if (CreateDetachedThread(TestDirThread, arg) < 0)
 		return -1;
 
 	return 0;
@@ -316,7 +316,7 @@ int SetupMinPagesThread(void *arg)
 	if (s->minfreepages == 0)
 		return 0;
 
-	if (SetupThread(MinPagesThread, arg) < 0)
+	if (CreateDetachedThread(MinPagesThread, arg) < 0)
 		return -1;
 
 	return 0;
@@ -327,7 +327,7 @@ int SetupLoadAvgThread(void *arg)
 	if (arg == NULL)
 		return -1;
 
-	if (SetupThread(LoadAvgThread, arg) < 0)
+	if (CreateDetachedThread(LoadAvgThread, arg) < 0)
 		return -1;
 
 	return 0;
@@ -338,7 +338,7 @@ int SetupTestBinThread(void *arg)
 	if (arg == NULL)
 		return -1;
 
-	if (SetupThread(TestBinThread, arg) < 0)
+	if (CreateDetachedThread(TestBinThread, arg) < 0)
 		return -1;
 
 	return 0;
@@ -349,7 +349,7 @@ int SetupAuxManagerThread(void *arg)
 	if (arg == NULL)
 		return -1;
 
-	if (SetupThread(ManagerThread, arg) < 0)
+	if (CreateDetachedThread(ManagerThread, arg) < 0)
 		return -1;
 
 	return 0;
@@ -357,7 +357,7 @@ int SetupAuxManagerThread(void *arg)
 
 int SetupLogTick(void *arg)
 {
-	if (SetupThread(MarkTime, arg) < 0)
+	if (CreateDetachedThread(MarkTime, arg) < 0)
 		return -1;
 
 	return 0;
@@ -368,7 +368,7 @@ int StartPidFileTestThread(void *arg)
 	if (arg == NULL)
 		return -1;
 
-	if (SetupThread(TestPidfileThread, arg) < 0)
+	if (CreateDetachedThread(TestPidfileThread, arg) < 0)
 		return -1;
 
 	return 0;

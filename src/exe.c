@@ -120,18 +120,11 @@ int Spawn(int timeout, void *aarg, const char *file, const char *args, ...)
 			}
 
 			if (timeout > 0) {
-				pthread_t thread;
-				pthread_attr_t attr;
 				int ret = 0;
 
-				pthread_attr_init(&attr);
-				pthread_attr_setguardsize(&attr, 0);
-				pthread_attr_setdetachstate(&attr,
-							    PTHREAD_CREATE_DETACHED);
-				pthread_create(&thread, &attr, WaitThread,
-					       &ret);
-				pthread_attr_destroy(&attr);
 				pthread_mutex_lock(&lock);
+
+				CreateDetachedThread(WaitThread, &ret);
 
 				struct timespec rqtp;
 
@@ -167,6 +160,8 @@ int Spawn(int timeout, void *aarg, const char *file, const char *args, ...)
 					       "binary %s exceeded time limit %ld",
 					       file, timeout);
 					_Exit(0);
+				} else if (returnValue != 0){
+					Logmsg(LOG_ERR, "unknown error in timeout code");
 				}
 
 				_Exit(WEXITSTATUS(ret));
