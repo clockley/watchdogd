@@ -282,6 +282,7 @@ CheckDeviceAndDaemonTimeout(const int *fd, int deviceTimeout,
 int SetupThread(void *(*startFunction) (void *), void *arg)
 {
 	pthread_t thread;
+	pthread_attr_t attr;
 
 	if (arg == NULL)
 		return -1;
@@ -289,21 +290,21 @@ int SetupThread(void *(*startFunction) (void *), void *arg)
 	if (*startFunction == NULL)
 		return -1;
 
+	if (pthread_attr_init(&attr) != 0)
+		return -1;
+
+	pthread_attr_setguardsize(&attr, 0);
+	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+
 	errno = 0;
 
-	if (pthread_create(&thread, NULL, startFunction, arg) != 0) {
+	if (pthread_create(&thread, &attr, startFunction, arg) != 0) {
 		fprintf(stderr, "watchdogd: pthread_create failed: %s\n",
 			strerror(errno));
 		return -1;
 	}
 
-	errno = 0;
-
-	if (pthread_detach(thread) != 0) {
-		fprintf(stderr, "watchdogd: %s\n", strerror(errno));
-		pthread_cancel(thread);
-		return -1;
-	}
+	pthread_attr_destroy(&attr);
 
 	return 0;
 }
@@ -321,31 +322,10 @@ int SetupSyncThread(void *arg)
 
 int SetupTestFork(void *arg)
 {
-	int id = 0;
-	pthread_t tick;
-
-	if (arg == NULL)
+	if (SetupThread(TestFork, arg) < 0)
 		return -1;
-
-	errno = 0;
-
-	id = pthread_create(&tick, NULL, TestFork, arg);
-	if (id != 0) {
-		fprintf(stderr, "watchdogd: %s\n", strerror(errno));
-		fprintf(stderr, "watchdogd: pthread_create failed\n");
-		fprintf(stderr, "watchdogd: TestFork disabled\n");
-		return -1;
-	}
-
-	errno = 0;
-
-	if (pthread_detach(tick) != 0) {
-		fprintf(stderr, "watchdogd: %s\n", strerror(errno));
-		return -1;
-	}
 
 	return 0;
-
 }
 
 int SetupExeDir(void *arg)
