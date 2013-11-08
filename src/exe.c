@@ -134,6 +134,7 @@ int Spawn(int timeout, void *aarg, const char *file, const char *args, ...)
 				clock_gettime(CLOCK_REALTIME, &rqtp);
 
 				rqtp.tv_sec += (time_t) timeout;
+				NormalizeTimespec(&rqtp);
 
 				bool once = false;
 				int returnValue = 0;
