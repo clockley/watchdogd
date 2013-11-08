@@ -124,7 +124,10 @@ int Spawn(int timeout, void *aarg, const char *file, const char *args, ...)
 
 				pthread_mutex_lock(&lock);
 
-				CreateDetachedThread(WaitThread, &ret);
+				if (CreateDetachedThread(WaitThread, &ret) < 0) {
+					Logmsg(LOG_ERR,"%s", strerror(errno));
+					return -1;
+				}
 
 				struct timespec rqtp;
 
