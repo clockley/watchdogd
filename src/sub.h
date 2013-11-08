@@ -19,4 +19,5 @@ void WriteUserAccountingDatabaseRecord(int reboot);
 void ResetSignalHandlers(int maxsigno);
 int IsExe(const char *pathname, int returnfildes);
 void NormalizeTimespec(void *arg);
+int SetupThread(void *(*startFunction) (void *), void *arg);
 #endif

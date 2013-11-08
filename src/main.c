@@ -279,36 +279,6 @@ CheckDeviceAndDaemonTimeout(const int *fd, int deviceTimeout,
 	return 0;
 }
 
-int SetupThread(void *(*startFunction) (void *), void *arg)
-{
-	pthread_t thread;
-	pthread_attr_t attr;
-
-	if (arg == NULL)
-		return -1;
-
-	if (*startFunction == NULL)
-		return -1;
-
-	if (pthread_attr_init(&attr) != 0)
-		return -1;
-
-	pthread_attr_setguardsize(&attr, 0);
-	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-
-	errno = 0;
-
-	if (pthread_create(&thread, &attr, startFunction, arg) != 0) {
-		fprintf(stderr, "watchdogd: pthread_create failed: %s\n",
-			strerror(errno));
-		return -1;
-	}
-
-	pthread_attr_destroy(&attr);
-
-	return 0;
-}
-
 int SetupSyncThread(void *arg)
 {
 	if (arg == NULL)
