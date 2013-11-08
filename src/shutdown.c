@@ -50,7 +50,7 @@ int Shutdown(int errorcode, int kexec, void *arg)
 
 		rqtp.tv_sec = 960;
 		rqtp.tv_nsec = 960 * 1000;
-\
+
 		nanosleep(&rqtp, &rqtp);
 
 		_Shutdown(errorcode, false);

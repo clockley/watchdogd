@@ -8,4 +8,5 @@ void *TestFork(void *arg);
 void *Sync(void *arg);
 void *MinPagesThread(void *arg);
 void *TestPidfileThread(void *arg);
+void *CheckIfAbleToOpenFile(void *arg);
 #endif

@@ -23,7 +23,7 @@ static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
 
 static void *WaitThread(void *arg);
-void *WaitThread(void *arg)
+static void *WaitThread(void *arg)
 {
 	int *ret = arg;
 
@@ -55,6 +55,12 @@ int Spawn(int timeout, void *aarg, const char *file, const char *args, ...)
 			pid_t worker = fork();
 
 			if (worker == 0) {
+				struct sched_param param;
+				param.sched_priority = 0;
+
+				sched_setscheduler(getpid(), SCHED_OTHER, &param);
+				nice(0);
+
 				int dfd =
 				    open(s->logdir, O_DIRECTORY | O_RDONLY);
 
@@ -132,22 +138,27 @@ int Spawn(int timeout, void *aarg, const char *file, const char *args, ...)
 
 				rqtp.tv_sec += (time_t) timeout;
 
-				int returnValue = 0;
 				bool once = false;
+				int returnValue = 0;
 
+				errno = 0;
 				do {
 					returnValue =
-					    pthread_cond_timedwait(&cond, &lock, &rqtp);
-
-					if (returnValue == 0) {
-						break;
-					}
-
+					    pthread_cond_timedwait(&cond, &lock,
+								   &rqtp);
 					if (once == false) {
-						pthread_mutex_unlock(&lock);
-						once = true;
+						if (pthread_mutex_unlock(&lock)
+						    != 0) {
+							Logmsg
+							    (LOG_ERR,
+							     "pthread_mutex_unlock failed aborting %s, %i",
+							     __FILE__,
+							     __LINE__);
+							abort();
+						}
 					}
-				} while(returnValue != ETIMEDOUT);
+				} while (returnValue != ETIMEDOUT
+					 && kill(worker, 0) == 0 && errno == 0);
 
 				if (returnValue == ETIMEDOUT) {
 					kill(worker, SIGKILL);

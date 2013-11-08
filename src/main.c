@@ -177,7 +177,6 @@ int main(int argc, char **argv)
 		Abend(&options);
 	}
 
-
 	struct timespec rqtp;
 
 	clock_gettime(CLOCK_MONOTONIC, &rqtp);
@@ -220,7 +219,7 @@ int SetupSignalHandlers(int isDaemon)
 
 	sigemptyset(&act.sa_mask);
 
-	sigaddset(&act.sa_mask, SIGINT);
+//	sigaddset(&act.sa_mask, SIGINT);
 	sigaddset(&act.sa_mask, SIGTERM);
 	sigaddset(&act.sa_mask, SIGCHLD);
 
