@@ -54,49 +54,51 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 void Logmsg(int priority, const char *fmt, ...)
 {
-	static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-
 	extern bool logToSyslog;
 
 	char buf[2048] = { 0 };
 
+	assert(fmt != NULL);
+
 	va_list args;
 
 	if (logToSyslog == false) {
+		static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 		va_start(args, fmt);
 
-		pthread_mutex_lock(&mutex);
-
 		switch (priority) {
 		case LOG_EMERG:
-			fprintf(stderr, "<0>");
+			snprintf(buf, sizeof(buf),"<0>");
 			break;
 		case LOG_ALERT:
-			fprintf(stderr, "<1>");
+			snprintf(buf, sizeof(buf),"<1>");
 			break;
 		case LOG_CRIT:
-			fprintf(stderr, "<2>");
+			snprintf(buf, sizeof(buf),"<2>");
 			break;
 		case LOG_ERR:
-			fprintf(stderr, "<3>");
+			snprintf(buf, sizeof(buf),"<3>");
 			break;
 		case LOG_WARNING:
-			fprintf(stderr, "<4>");
+			snprintf(buf, sizeof(buf),"<4>");
 			break;
 		case LOG_NOTICE:
-			fprintf(stderr, "<5>");
+			snprintf(buf, sizeof(buf),"<5>");
 			break;
 		case LOG_INFO:
-			fprintf(stderr, "<6>");
+			snprintf(buf, sizeof(buf),"<6>");
 			break;
 		case LOG_DEBUG:
-			fprintf(stderr, "<7>");
+			snprintf(buf, sizeof(buf),"<7>");
 			break;
 		}
 
-		vfprintf(stderr, fmt, args);
-		fprintf(stderr, "\n");
+		vsnprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), fmt, args);
+
+		pthread_mutex_lock(&mutex);
+
+		fprintf(stderr, "%s\n", buf);
 
 		pthread_mutex_unlock(&mutex);
 
@@ -108,7 +110,7 @@ void Logmsg(int priority, const char *fmt, ...)
 
 	vsnprintf(buf, sizeof(buf) - 1, fmt, args);
 
-	syslog(priority, "%s", buf);
-
 	va_end(args);
+
+	syslog(priority, "%s", buf);
 }
