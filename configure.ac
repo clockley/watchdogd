@@ -16,9 +16,9 @@ AC_PROG_CC_STDC
 
 # Checks for libraries.
 
-PKG_CHECK_MODULES([MOUNT], [mount])
+PKG_CHECK_MODULES([MOUNT], [mount >= 2.22.0])
 
-PKG_CHECK_MODULES([DEPS], [libconfig])
+PKG_CHECK_MODULES([DEPS], [libconfig >= 1.4.8])
 
 AX_PTHREAD
 

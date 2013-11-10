@@ -154,6 +154,7 @@ int Spawn(int timeout, void *aarg, const char *file, const char *args, ...)
 							     __LINE__);
 							abort();
 						}
+						once = true;
 					}
 				} while (returnValue != ETIMEDOUT
 					 && kill(worker, 0) == 0 && errno == 0);
