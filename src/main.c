@@ -22,26 +22,6 @@
 #include <inttypes.h>
 #include <stdint.h>
 #include <config.h>
-
-#include <errno.h>
-#include <pthread.h>
-#include <fcntl.h>
-#include <getopt.h>
-#include <sched.h>
-#include <signal.h>
-#include <stdbool.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/ioctl.h>
-#include <syslog.h>
-#include <sys/mman.h>
-#include <sys/stat.h>
-#include <sys/time.h>
-#include <sys/types.h>
-#include <time.h>
-#include <unistd.h>
 #include "watchdogd.h"
 #include "sub.h"
 #include "main.h"
