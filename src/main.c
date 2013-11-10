@@ -382,7 +382,7 @@ static void PrintConfiguration(void *arg)
 	       "int=%is realtime=%s sync=%s softboot=%s force=%s mla=%.2f mem=%li",
 	       s->sleeptime, s->options & REALTIME ? "yes" : "no",
 	       s->options & SYNC ? "yes" : "no",
-	       s->options & SOFTBOOT ? "yes" : "no", "true", s->maxLoadOne,
+	       s->options & SOFTBOOT ? "yes" : "no", "yes", s->maxLoadOne,
 	       s->minfreepages);
 
 	if (s->options & ENABLEPIDCHECKER) {

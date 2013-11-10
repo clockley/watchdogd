@@ -31,7 +31,7 @@
 extern volatile sig_atomic_t shutdown;
 static pthread_mutex_t managerlock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_cond_t workerupdate = PTHREAD_COND_INITIALIZER;
-static pthread_once_t getPageSize = PTHREAD_ONCE_INIT;
+
 static long pageSize = 0;
 
 /*static time_t Time(time_t *tloc)
@@ -190,6 +190,7 @@ void *MinPagesThread(void *arg)
 {
 	struct cfgoptions *s = arg;
 	struct sysinfo infostruct;
+	static pthread_once_t getPageSize = PTHREAD_ONCE_INIT;
 
 	pthread_once(&getPageSize, GetPageSize);
 
