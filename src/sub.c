@@ -17,23 +17,11 @@
 /*
  * This file contains functions that are used be more than one module.
  */
-
-#define _ _STDC_WANT_LIB_EXT1_ _ 1
-#define STDC_WANT_LIB_EXT1 1
-
-#ifndef __STDC_LIMIT_MACROS
-#define __STDC_LIMIT_MACROS 1
-#endif
-
-#include <inttypes.h>
-#include <stdint.h>
 #include "watchdogd.h"
 #include "sub.h"
 #include "testdir.h"
-
 #include <errno.h>
 #include <stdarg.h>
-#include <pthread.h>
 #include <fcntl.h>
 #include <libconfig.h>
 #include <sys/stat.h>
@@ -44,7 +32,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/ioctl.h>
 #include <syslog.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
@@ -146,6 +133,7 @@ int Wasprintf(char **ret, const char *format, ...)
 
 		if (count < 0) {
 			free(buffer);
+			*ret = NULL;
 			return count;
 		}
 		*ret = buffer;

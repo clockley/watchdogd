@@ -33,24 +33,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  * implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
-
-#ifndef __STDC_LIMIT_MACROS
-#define __STDC_LIMIT_MACROS 1
-#endif
-
-#include <inttypes.h>
-#include <stdint.h>
-
-#include <string.h>
-#include <errno.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdarg.h>
-#include <stdlib.h>
-#include <syslog.h>
 #include "watchdogd.h"
-#include "sub.h"
 
 void Logmsg(int priority, const char *fmt, ...)
 {

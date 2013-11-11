@@ -15,7 +15,6 @@
  */
 
 #include <sys/wait.h>
-#include <stdarg.h>
 #include "watchdogd.h"
 #include "sub.h"
 
