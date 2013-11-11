@@ -63,8 +63,6 @@ void Logmsg(int priority, const char *fmt, ...)
 	va_list args;
 
 	if (logToSyslog == false) {
-		static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-
 		va_start(args, fmt);
 
 		switch (priority) {
@@ -96,11 +94,7 @@ void Logmsg(int priority, const char *fmt, ...)
 
 		vsnprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), fmt, args);
 
-		pthread_mutex_lock(&mutex);
-
 		fprintf(stderr, "%s\n", buf);
-
-		pthread_mutex_unlock(&mutex);
 
 		va_end(args);
 		return;
