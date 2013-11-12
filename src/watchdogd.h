@@ -4,32 +4,28 @@
 #define _ISOC11_SOURCE
 
 #include <assert.h>
-#include <inttypes.h>
-#include <stdbool.h>
-#include <stdarg.h>
-#include <stdint.h>
 #include <errno.h>
-#include <pthread.h>
 #include <fcntl.h>
+#include <inttypes.h>
 #include <iso646.h>
-#include <string.h>
-#include <stddef.h>
-#include <stdbool.h>
-#include <time.h>
-#include <sys/time.h>
-#include <stdint.h>
+#include <libconfig.h>
+#include <pthread.h>
 #include <sched.h>
+#include <signal.h>
+#include <stdarg.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <syslog.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
+#include <sys/time.h>
 #include <sys/types.h>
-#include <libconfig.h>
+#include <time.h>
 #include <unistd.h>
-#include <signal.h>
-#include <stdbool.h>
 
 #if !defined(_NSIG)
 #define _NSIG 0
