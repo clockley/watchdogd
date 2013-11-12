@@ -407,7 +407,7 @@ int OpenPidFile(const char *path)
 	mode_t oumask = umask(0027);
 	int ret = open(path, O_WRONLY | O_CREAT | O_EXCL | O_CLOEXEC, 0644);
 	if (ret < 0) {
-		fprintf(stderr, "watchdogd: open failed: %s", strerror(errno));
+		fprintf(stderr, "watchdogd: open failed: %s\n", strerror(errno));
 		if (errno == EEXIST) {
 			ret = open(path, O_RDONLY|O_CLOEXEC);
 
@@ -432,11 +432,12 @@ int OpenPidFile(const char *path)
 			}
 
 			if (kill(pid, 0) != 0 && errno == ESRCH) {
+				close(ret);
 				if (remove(path) < 0) {
 					umask(oumask);
 					return -1;
 				} else {
-					ret = open(path, O_RDONLY|O_CLOEXEC);
+					ret = open(path, O_WRONLY | O_CREAT | O_EXCL | O_CLOEXEC, 0644);
 					fprintf(stderr, "watchdogd: open failed: %s", strerror(errno));
 
 					if (ret < 0) {
