@@ -79,8 +79,6 @@ int DeletePidFile(void *arg)
 {
 	struct cfgoptions *s = arg;
 
-	extern struct flock fl;
-
 	if (s == NULL) {
 		return -1;
 	}
@@ -92,12 +90,7 @@ int DeletePidFile(void *arg)
 		return 0;
 	}
 
-	fl.l_type = F_UNLCK;
-
-	if (fcntl(s->lockfd, F_SETLK, &fl) != 0) {
-		Logmsg(LOG_ERR, "fcntl failed: %s", strerror(errno));
-		return -1;
-	}
+	UnlockFile(s->lockfd, getpid());
 
 	CloseWraper(&s->lockfd);
 

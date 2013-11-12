@@ -59,14 +59,12 @@ void CloseFileDescriptors(long maxfd)
 
 int Daemon(void *arg)
 {
-// see the daemon(7) man page
 	struct cfgoptions *s = arg;
 
 	pid_t pid = 0;
 	long maxfd = 0;
 
 	extern bool logToSyslog;
-	extern struct flock fl;
 	logToSyslog = true;
 
 	if (s == NULL) {
@@ -153,13 +151,18 @@ int Daemon(void *arg)
 	}
 
 	if (s->options & USEPIDFILE) {
-		fl.l_type = F_WRLCK;
-		fl.l_whence = SEEK_SET;
-		fl.l_start = 0;
-		fl.l_len = 0;
-		fl.l_pid = getpid();
+		s->lockfd = OpenPidFile(s->pidpathname);
 
-		if (OpenAndWriteToPidFile(s) < 0) {
+		if (s->lockfd < 0) {
+			return -1;
+		}
+
+		if (LockFile(s->lockfd, getpid()) < 0) {
+			fprintf(stderr, "watchdogd: LockFile failed: %s\n", strerror(errno));
+			return -1;
+		}
+
+		if (WritePidFile(s->lockfd, getpid(), s->pidpathname) < 0) {
 			return -1;
 		}
 	}

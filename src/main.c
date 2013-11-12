@@ -34,8 +34,6 @@
 
 static volatile sig_atomic_t quit = 0;
 
-struct flock fl;
-
 volatile sig_atomic_t shutdown = 0;
 
 bool logToSyslog = false;

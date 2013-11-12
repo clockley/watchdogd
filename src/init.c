@@ -364,48 +364,92 @@ const char *LibconfigWraperConfigSettingSourceFile(const config_setting_t *
 	return fileName;
 }
 
-int OpenAndWriteToPidFile(void *arg)
+int LockFile(int fd, pid_t pid)
 {
-	struct cfgoptions *s = arg;
-	extern struct flock fl;
-	mode_t oumask = 0;
+	struct flock fl;
+	fl.l_type = F_WRLCK;
+	fl.l_whence = SEEK_SET;
+	fl.l_start = 0;
+	fl.l_len = 0;
+	fl.l_pid = pid;
+	return fcntl(fd, F_SETLKW, &fl);
+}
 
-	if (s == NULL) {
+int UnlockFile(int fd, pid_t pid)
+{
+	struct flock fl;
+	fl.l_type = F_UNLCK;
+	fl.l_whence = SEEK_SET;
+	fl.l_start = 0;
+	fl.l_len = 0;
+	fl.l_pid = pid;
+	return fcntl(fd, F_SETLKW, &fl);
+}
+
+int WritePidFile(int fd, pid_t pid, const char *name)
+{
+	if (dprintf(fd, "%d", pid) < 0) {
+		if (name != NULL) {
+			fprintf(stderr, "watchdogd: unable to write pid to %s: %s\n",
+				name, strerror(errno));
+		} else {
+			fprintf(stderr, "watchdogd: unable to write pid to %i: %s\n",
+				fd, strerror(errno));
+		}
 		return -1;
 	}
 
-	oumask = umask(0027);
+	return 0;
+}
 
-	errno = 0;
+int OpenPidFile(const char *path)
+{
+	mode_t oumask = umask(0027);
+	int ret = open(path, O_WRONLY | O_CREAT | O_EXCL | O_CLOEXEC, 0644);
+	if (ret < 0) {
+		fprintf(stderr, "watchdogd: open failed: %s", strerror(errno));
+		if (errno == EEXIST) {
+			ret = open(path, O_RDONLY|O_CLOEXEC);
 
-	s->lockfd =
-	    open(s->pidpathname, O_WRONLY | O_CREAT | O_EXCL | O_CLOEXEC, 0644);
+			if (ret < 0) {
+				umask(oumask);
+				return ret;
+			}
 
-	if (s->lockfd < 0) {
-		fprintf(stderr, "watchdogd: unable to open pid file.\n");
-		fprintf(stderr, "watchdogd: %s\n", strerror(errno));
-		umask(oumask);
-		return -1;
-	}
+			char buf[64] = { 0x00 };
+			if (pread(ret, buf, sizeof(buf), 0) == -1) {
+				close(ret);
+				umask(oumask);
+				return -1;
+			}
 
-	errno = 0;
+			errno = 0;
+			pid_t pid = (pid_t) strtol(buf, (char **)NULL, 10);
 
-	if (fcntl(s->lockfd, F_SETLKW, &fl) != 0) {
-		fprintf(stderr, "watchdogd: %s\n", strerror(errno));
-		umask(oumask);
-		return -1;
-	}
+			if (errno != 0) {
+				umask(oumask);
+				return -1;
+			}
 
-	errno = 0;
+			if (kill(pid, 0) != 0 && errno == ESRCH) {
+				if (remove(path) < 0) {
+					umask(oumask);
+					return -1;
+				} else {
+					ret = open(path, O_RDONLY|O_CLOEXEC);
+					fprintf(stderr, "watchdogd: open failed: %s", strerror(errno));
 
-	if (dprintf(s->lockfd, "%d\n", getpid()) < 0) {
-		fprintf(stderr, "watchdogd: unable to write pid to %s: %s\n",
-			s->pidpathname, strerror(errno));
+					if (ret < 0) {
+						umask(oumask);
+						return ret;
+					}
+				}
+			}
+		}
 	}
 
 	umask(oumask);
-
-	return 0;
+	return ret;
 }
 
 int ParseCommandLine(int *argc, char **argv, void *arg)
