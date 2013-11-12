@@ -431,6 +431,7 @@ int OpenPidFile(const char *path)
 				return -1;
 			}
 
+			fprintf(stderr, "watchdogd: checking if the pid is valid\n");
 			if (kill(pid, 0) != 0 && errno == ESRCH) {
 				close(ret);
 				if (remove(path) < 0) {
@@ -438,7 +439,13 @@ int OpenPidFile(const char *path)
 					return -1;
 				} else {
 					ret = open(path, O_WRONLY | O_CREAT | O_EXCL | O_CLOEXEC, 0644);
-					fprintf(stderr, "watchdogd: open failed: %s", strerror(errno));
+					if (ret < 0) {
+						fprintf(stderr, "watchdogd: open failed: %s\n", strerror(errno));
+						umask(oumask);
+						return ret;
+					} else {
+						fprintf(stdout, "successfully opened pid file\n");
+					}
 
 					if (ret < 0) {
 						umask(oumask);
