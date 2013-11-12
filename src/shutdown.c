@@ -31,15 +31,15 @@ int TermAll(void);
 int StartInit(void);
 int StopInit(void);
 
-int Shutdown(int errorcode, int kexec, void *arg)
+int Shutdown(int errorcode, void *arg)
 {
 	struct cfgoptions *s = arg;
 	assert(arg != NULL);
 	int i = 0;
 
 	if (s->options & NOACTION) {
-		Logmsg(LOG_DEBUG, "shutdown() errorcode=%i, kexec=%i",
-		       errorcode, kexec);
+		Logmsg(LOG_DEBUG, "shutdown() errorcode=%i, kexec=%s",
+		       errorcode, s->options & KEXEC ? "true" : "false");
 		return 0;
 	}
 
@@ -97,7 +97,7 @@ int Shutdown(int errorcode, int kexec, void *arg)
 
 	RemountRootReadOnly();
 
-	return _Shutdown(errorcode, kexec);
+	return _Shutdown(errorcode, s->options & KEXEC ? 1 : 0);
 }
 
 int KillAll(void)

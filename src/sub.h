@@ -5,7 +5,7 @@ int CloseStandardFileDescriptors(void);
 int CloseWraper(const int *pfd);
 void CloseFileDescriptors(long maxfd);
 int ConfigureKernelOutOfMemoryKiller(void);
-int Shutdown(int errorcode, int kexec, void *arg);
+int Shutdown(int errorcode, void *arg);
 void Logmsg(int priority, const char *fmt, ...);
 int Daemon(void *arg);
 int OpenAndWriteToPidFile(void *arg);

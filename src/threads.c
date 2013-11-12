@@ -429,9 +429,7 @@ void *ManagerThread(void *arg)
 		if (s->error & LOADAVGTOOHIGH) {
 			Logmsg(LOG_ERR,
 			       "polled load average exceed configured load average limit");
-			if (Shutdown
-			    (WESYSOVERLOAD, s->options & KEXEC ? 1 : 0,
-			     arg) < 0) {
+			if (Shutdown(WESYSOVERLOAD, arg) < 0) {
 				Logmsg(LOG_ERR,
 				       "watchdogd: Unable to shutdown system");
 				exit(EXIT_FAILURE);
@@ -441,8 +439,7 @@ void *ManagerThread(void *arg)
 		if (s->error & OUTOFMEMORY) {
 			Logmsg(LOG_ERR,
 			       "less than configured free pages available");
-			if (Shutdown(WEOTHER, s->options & KEXEC ? 1 : 0, arg) <
-			    0) {
+			if (Shutdown(WEOTHER, arg) < 0) {
 				Logmsg(LOG_ERR,
 				       "watchdogd: Unable to shutdown system");
 				exit(EXIT_FAILURE);
@@ -452,8 +449,7 @@ void *ManagerThread(void *arg)
 		if (s->error & FORKFAILED) {
 			Logmsg(LOG_ERR,
 			       "process table test failed because fork failed");
-			if (Shutdown(WEOTHER, s->options & KEXEC ? 1 : 0, arg) <
-			    0) {
+			if (Shutdown(WEOTHER, arg) < 0) {
 				Logmsg(LOG_ERR,
 				       "watchdogd: Unable to shutdown system");
 				exit(EXIT_FAILURE);
@@ -462,7 +458,7 @@ void *ManagerThread(void *arg)
 
 		if (s->error & SCRIPTFAILED) {
 			Logmsg(LOG_ERR, "repair script failed");
-			if (Shutdown(WESCRIPT, s->options & KEXEC ? 1 : 0, arg)
+			if (Shutdown(WESCRIPT, arg)
 			    < 0) {
 				Logmsg(LOG_ERR,
 				       "watchdogd: Unable to shutdown system");
@@ -472,7 +468,7 @@ void *ManagerThread(void *arg)
 
 		if (s->error & PIDFILERROR || s->error & UNKNOWNPIDFILERROR) {
 			Logmsg(LOG_ERR, "pid file test failed");
-			if (Shutdown(WEPIDFILE, s->options & KEXEC ? 1 : 0, arg)
+			if (Shutdown(WEPIDFILE, arg)
 			    < 0) {
 				Logmsg(LOG_ERR,
 				       "watchdogd: Unable to shutdown system");
@@ -482,9 +478,7 @@ void *ManagerThread(void *arg)
 
 		if (s->testExeReturnValue > 0 || s->testExeReturnValue < 0) {
 			Logmsg(LOG_ERR, "check executable failed");
-			if (Shutdown
-			    (s->testExeReturnValue, s->options & KEXEC ? 1 : 0,
-			     arg) < 0) {
+			if (Shutdown(s->testExeReturnValue, arg) < 0) {
 				Logmsg(LOG_ERR,
 				       "watchdogd: Unable to shutdown system");
 				exit(EXIT_FAILURE);
