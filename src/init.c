@@ -388,7 +388,7 @@ int UnlockFile(int fd, pid_t pid)
 
 int WritePidFile(int fd, pid_t pid, const char *name)
 {
-	if (dprintf(fd, "%d", pid) < 0) {
+	if (dprintf(fd, "%d\n", pid) < 0) {
 		if (name != NULL) {
 			fprintf(stderr, "watchdogd: unable to write pid to %s: %s\n",
 				name, strerror(errno));
@@ -399,6 +399,7 @@ int WritePidFile(int fd, pid_t pid, const char *name)
 		return -1;
 	}
 
+	fsync(fd);
 	return 0;
 }
 
