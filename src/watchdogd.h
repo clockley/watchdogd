@@ -105,6 +105,21 @@ struct child {
 
 struct parent parent;
 
+struct listOfRunningProcess {
+	struct list children;
+};
+
+struct listOfRunningProcess listOfRunningProcess;
+
+struct process {
+	struct list entry;
+	const char *name;
+	time_t starttime;
+	time_t timeout;
+	pid_t pid;
+	int ret;
+};
+
 #ifdef __linux__
 #include "linux.h"
 #endif
