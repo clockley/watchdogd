@@ -76,10 +76,10 @@ void Logmsg(int priority, const char *fmt, ...)
 		}
 
 		vsnprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), fmt, args);
+		va_end(args);
 
 		fprintf(stderr, "%s\n", buf);
 
-		va_end(args);
 		return;
 	}
 

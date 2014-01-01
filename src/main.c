@@ -77,46 +77,8 @@ int main(int argc, char **argv)
 		Logmsg(LOG_ERR, "unable to configure out of memory killer");
 	}
 
-	if (SetupTestFork(&options) < 0) {
+	if (StartHelperThreads(&options) != 0) {
 		Abend(&options);
-	}
-
-	if (SetupExeDir(&options) < 0) {
-		Abend(&options);
-	}
-
-	if (options.testexepathname != NULL) {
-		if (SetupTestBinThread(&options) < 0) {
-			Abend(&options);
-		}
-	}
-
-	if (options.options & LOGTICK)
-		if (SetupLogTick(&options) < 0)
-			Abend(&options);
-
-	if (options.maxLoadOne > 0) {
-		if (SetupLoadAvgThread(&options) < 0) {
-			Abend(&options);
-		}
-	}
-
-	if (options.options & SYNC) {
-		if (SetupSyncThread(&options) < 0) {
-			Abend(&options);
-		}
-	}
-
-	if (options.minfreepages != 0) {
-		if (SetupMinPagesThread(&options) < 0) {
-			Abend(&options);
-		}
-	}
-
-	if (options.options & ENABLEPIDCHECKER) {
-		if (StartPidFileTestThread(&options) < 0) {
-			Abend(&options);
-		}
 	}
 
 	if ((options.options & NOACTION) == 0) {
@@ -381,4 +343,51 @@ static void PrintConfiguration(void *arg)
 	       s->testBinTimeout,
 	       s->exepathname == NULL ? "no" : s->exepathname,
 	       s->repairBinTimeout, s->options & NOACTION ? "yes" : "no");
+}
+
+static int StartHelperThreads(struct cfgoptions *options)
+{
+	if (SetupTestFork(options) < 0) {
+		return -1;
+	}
+
+	if (SetupExeDir(options) < 0) {
+		return -1;
+	}
+
+	if (options->testexepathname != NULL) {
+		if (SetupTestBinThread(options) < 0) {
+			return -1;
+		}
+	}
+
+	if (options->options & LOGTICK)
+		if (SetupLogTick(options) < 0)
+			return -1;
+
+	if (options->maxLoadOne > 0) {
+		if (SetupLoadAvgThread(options) < 0) {
+			return -1;
+		}
+	}
+
+	if (options->options & SYNC) {
+		if (SetupSyncThread(options) < 0) {
+			return -1;
+		}
+	}
+
+	if (options->minfreepages != 0) {
+		if (SetupMinPagesThread(options) < 0) {
+			return -1;
+		}
+	}
+
+	if (options->options & ENABLEPIDCHECKER) {
+		if (StartPidFileTestThread(options) < 0) {
+			return -1;
+		}
+	}
+
+	return 0;
 }
