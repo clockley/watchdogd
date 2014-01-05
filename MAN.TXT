@@ -47,6 +47,12 @@ CONFIG FILE
 	The configuration file uses a simple format where x is the variable name
 	and the value that is assigned comes after the the equal sign ex. x = 1
 
+	Examples:
+
+	float_option = 2.2
+	char_option = "string"
+	bool_option = true
+
 	C++ and unix shell comments are supported.
 
 OPTIONS
@@ -78,10 +84,6 @@ OPTIONS
 	The amount of virtual memory ram+pagefile in pages that must stay free.
 	If free memory is less than value given the watchdog daemon will reboot
 	the system.
-	The page size for Linux running on a x86 system is usually 4096KB.
-	The only way to change (the default of 4096KB) is to recompile your kernel
-	with huge page support.
-
 	watchdog-device = <string>
 	The pathname to the watchdog device.
 
@@ -103,6 +105,12 @@ OPTIONS
 
 	softboot = <bool>
 	Reboot the system if watchdogd is unable to open a pidfile.
+
+	lock-memory = <bool>
+	Lock memory if set to true. Default true.
+
+	sync = <bool>
+	Sync file systems with the sync() call every time watchdogd is awake.
 
 ...
 
