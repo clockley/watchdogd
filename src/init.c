@@ -480,6 +480,9 @@ int ParseCommandLine(int *argc, char **argv, void *arg)
 		case 'q':
 			s->options |= NOACTION;
 			break;
+		case 'f':
+			s->options |= FORCE; //no-op
+			break;
 		default:
 			Usage();
 			return -1;
