@@ -73,6 +73,9 @@ void Logmsg(int priority, const char *fmt, ...)
 		case LOG_DEBUG:
 			snprintf(buf, sizeof(buf),"<7>");
 			break;
+		default:
+			snprintf(buf, sizeof(buf),"<4>");
+			break;
 		}
 
 		vsnprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), fmt, args);
