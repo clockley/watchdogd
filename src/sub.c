@@ -64,12 +64,13 @@ int CloseWraper(const int *pfd)
 
 int IsDaemon(void *arg)
 {
-	struct cfgoptions *s = arg;
+	//struct cfgoptions *s = arg;
+	const struct cfgoptions s = *(struct cfgoptions*)arg;
 
-	if (s->options & FOREGROUNDSETFROMCOMMANDLINE)
+	if (s.options & FOREGROUNDSETFROMCOMMANDLINE)
 		return 0;
 
-	if (s->options & DAEMONIZE)
+	if (s.options & DAEMONIZE)
 		return 1;
 
 	return 0;
