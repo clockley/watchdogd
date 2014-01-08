@@ -1,6 +1,6 @@
+#include "watchdogd.h"
 #include "linux.h"
 #include "sub.h"
-#include "watchdogd.h"
 
 #ifdef __linux__
 

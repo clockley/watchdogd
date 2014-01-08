@@ -1,6 +1,6 @@
+#include "watchdogd.h"
 #include <sys/wait.h>
 #include "sub.h"
-#include "watchdogd.h"
 
 int CloseStandardFileDescriptors(void)
 {

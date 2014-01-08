@@ -14,6 +14,8 @@
  * permissions and limitations under the License.
  */
 
+#define _BSD_SOURCE
+#include "watchdogd.h"
 #include <unistd.h>
 #include <stdlib.h>
 #include <signal.h>
@@ -24,7 +26,6 @@
 #include "sub.h"
 #include "exe.h"
 #include "errorlist.h"
-#include "watchdogd.h"
 
 int KillAll(void);
 int TermAll(void);

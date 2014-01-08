@@ -19,10 +19,10 @@
 #define __STDC_LIMIT_MACROS 1
 #endif
 
+#include "watchdogd.h"
 #include <inttypes.h>
 #include <stdint.h>
 #include <config.h>
-#include "watchdogd.h"
 #include "sub.h"
 #include "main.h"
 #include "init.h"

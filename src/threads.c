@@ -15,6 +15,8 @@
  * 
  */
 
+#define _BSD_SOURCE
+#include "watchdogd.h"
 #include <pthread.h>
 #include <stdio.h>
 #include <syslog.h>
@@ -22,7 +24,6 @@
 #include <sys/sysinfo.h>
 #include <errno.h>
 #include "sub.h"
-#include "watchdogd.h"
 #include "errorlist.h"
 #include "threads.h"
 #include "testdir.h"

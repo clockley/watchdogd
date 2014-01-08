@@ -14,8 +14,8 @@
  * permissions and limitations under the License. 
  */
 
-#include <sys/wait.h>
 #include "watchdogd.h"
+#include <sys/wait.h>
 #include "sub.h"
 
 static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
