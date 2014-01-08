@@ -3,7 +3,7 @@
 
 AC_PREREQ([2.69])
 AC_INIT([watchdogd],[0.0.2b],[clockley1@gmail.com])
-AM_INIT_AUTOMAKE([1.7] [foreign dist-bzip2 dist-xz])
+AM_INIT_AUTOMAKE([1.7] [foreign dist-bzip2 dist-xz dist-zip])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR([Makefile.am])
 AC_CONFIG_HEADERS([config.h])
