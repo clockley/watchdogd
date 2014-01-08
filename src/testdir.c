@@ -14,11 +14,10 @@
  * permissions and limitations under the License. 
  */
 
+#include "watchdogd.h"
 #include "sub.h"
-#include <limits.h>
 #include <dirent.h>
 #include <config.h>
-#include "watchdogd.h"
 #include "testdir.h"
 #include "exe.h"
 

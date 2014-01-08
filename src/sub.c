@@ -20,25 +20,8 @@
 #include "watchdogd.h"
 #include "sub.h"
 #include "testdir.h"
-#include <errno.h>
-#include <stdarg.h>
-#include <fcntl.h>
 #include <libconfig.h>
-#include <sys/stat.h>
-#include <sched.h>
-#include <signal.h>
-#include <stdbool.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <syslog.h>
-#include <sys/mman.h>
-#include <sys/stat.h>
-#include <sys/time.h>
-#include <sys/types.h>
-#include <time.h>
-#include <unistd.h>
 
 int CloseWraper(const int *pfd)
 {

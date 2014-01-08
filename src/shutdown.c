@@ -16,13 +16,6 @@
 
 #define _BSD_SOURCE
 #include "watchdogd.h"
-#include <unistd.h>
-#include <stdlib.h>
-#include <signal.h>
-#include <errno.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stddef.h>
 #include "sub.h"
 #include "exe.h"
 #include "errorlist.h"

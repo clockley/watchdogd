@@ -9,6 +9,7 @@
 #include <inttypes.h>
 #include <iso646.h>
 #include <libconfig.h>
+#include <limits.h>
 #include <pthread.h>
 #include <sched.h>
 #include <signal.h>
