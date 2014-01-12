@@ -39,7 +39,7 @@ void Logmsg(int priority, const char *fmt, ...)
 {
 	extern bool logToSyslog;
 
-	char buf[2048] = { 0 };
+	char buf[2048] = { '\0' };
 
 	assert(fmt != NULL);
 
