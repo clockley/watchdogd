@@ -18,9 +18,11 @@ int CloseStandardFileDescriptors(void)
 
 	if (fstat(fd, &statBuf) != 0) {
 		Logmsg(LOG_CRIT, "Stat failed %s", strerror(errno));
+		CloseWraper(&fd);
 		return -1;
 	} else if (S_ISCHR(statBuf.st_mode) == 0 && S_ISBLK(statBuf.st_mode) == 0) {
 		Logmsg(LOG_CRIT, "/dev/null is not a unix device file");
+		CloseWraper(&fd);
 		return -1;
 	}
 

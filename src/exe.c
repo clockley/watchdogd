@@ -76,6 +76,7 @@ int Spawn(int timeout, void *aarg, const char *file, const char *args, ...)
 				if (fd < 0) {
 					Logmsg(LOG_CRIT, "open failed: %s",
 					       strerror(errno));
+					close(dfd);
 					return -1;
 				} else {
 					close(dfd);

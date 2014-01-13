@@ -91,12 +91,15 @@ int ConfigureKernelOutOfMemoryKiller(void)
 
 	if (fd == -1) {
 		Logmsg(LOG_ERR, "open failed: %s", strerror(errno));
+		CloseWraper(&fd); //CloseWraper is totally wacko, I really should remove it.
+		CloseWraper(&dfd);
 		return -1;
 	}
 
 	if (write(fd, "-1000", strlen("-1000")) < 0) {
 		Logmsg(LOG_ERR, "write failed: %s", strerror(errno));
 		CloseWraper(&fd);
+		CloseWraper(&dfd);
 		return -1;
 	}
 

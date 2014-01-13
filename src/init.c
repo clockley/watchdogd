@@ -539,6 +539,30 @@ int CheckPriority(int priority)
 	return 0;
 }
 
+bool SetDefaultConfig(struct cfgoptions *options)
+{
+	if (options == NULL)
+		return false;
+
+	options->confile = "/etc/watchdogd.conf";
+	options->priority = 16;
+	options->pidpathname = "/var/run/watchdogd.pid";
+	options->sleeptime = 1;
+	options->watchdogTimeout = -1;
+	options->logtickinterval = 1800;
+	options->maxLoadOne = 0;
+	options->maxLoadFive = 0;
+	options->maxLoadFifteen = 0;
+	options->minfreepages = 0;
+	options->testExeReturnValue = 0;
+	options->repairBinTimeout = 0;
+	options->testBinTimeout = 0;
+	options->options = 0;
+	options->error = 0;
+
+	return true;
+}
+
 int PrintVersionString(void)
 {
 	printf("%s %s\n", PACKAGE_NAME, PACKAGE_VERSION);

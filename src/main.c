@@ -40,16 +40,11 @@ bool logToSyslog = false;
 
 int main(int argc, char **argv)
 {
-	static struct cfgoptions options = {.confile =
-		    "/etc/watchdogd.conf",.priority = 16,
-		.pidpathname = "/var/run/watchdogd.pid",.sleeptime =
-		    1,.watchdogTimeout = -1,
-		.logtickinterval = 1800,.maxLoadOne = 0,.maxLoadFive =
-		    0,.maxLoadFifteen = 0,
-		.minfreepages = 0,.testExeReturnValue = 0,
-		.repairBinTimeout = 0,
-		.testBinTimeout = 0,.options = 0,.error = 0
-	};
+	static struct cfgoptions options;
+
+	if (SetDefaultConfig(&options) == false) {
+		return EXIT_FAILURE;
+	}
 
 	int fd = 0;
 
