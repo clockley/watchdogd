@@ -496,3 +496,145 @@ void *ManagerThread(void *arg)
 
 	return NULL;
 }
+
+int StartHelperThreads(struct cfgoptions *options)
+{
+	if (SetupTestFork(options) < 0) {
+		return -1;
+	}
+
+	if (SetupExeDir(options) < 0) {
+		return -1;
+	}
+
+	if (options->testexepathname != NULL) {
+		if (SetupTestBinThread(options) < 0) {
+			return -1;
+		}
+	}
+
+	if (options->options & LOGTICK)
+		if (SetupLogTick(options) < 0)
+			return -1;
+
+	if (options->maxLoadOne > 0) {
+		if (SetupLoadAvgThread(options) < 0) {
+			return -1;
+		}
+	}
+
+	if (options->options & SYNC) {
+		if (SetupSyncThread(options) < 0) {
+			return -1;
+		}
+	}
+
+	if (options->minfreepages != 0) {
+		if (SetupMinPagesThread(options) < 0) {
+			return -1;
+		}
+	}
+
+	if (options->options & ENABLEPIDCHECKER) {
+		if (StartPidFileTestThread(options) < 0) {
+			return -1;
+		}
+	}
+
+	return 0;
+}
+
+int SetupTestFork(void *arg)
+{
+	if (CreateDetachedThread(TestFork, arg) < 0)
+		return -1;
+
+	return 0;
+}
+
+int SetupExeDir(void *arg)
+{
+	if (CreateDetachedThread(TestDirThread, arg) < 0)
+		return -1;
+
+	return 0;
+}
+
+int SetupMinPagesThread(void *arg)
+{
+	struct cfgoptions *s = arg;
+
+	if (arg == NULL)
+		return -1;
+
+	if (s->minfreepages == 0)
+		return 0;
+
+	if (CreateDetachedThread(MinPagesThread, arg) < 0)
+		return -1;
+
+	return 0;
+}
+
+int SetupLoadAvgThread(void *arg)
+{
+	if (arg == NULL)
+		return -1;
+
+	if (CreateDetachedThread(LoadAvgThread, arg) < 0)
+		return -1;
+
+	return 0;
+}
+
+int SetupTestBinThread(void *arg)
+{
+	if (arg == NULL)
+		return -1;
+
+	if (CreateDetachedThread(TestBinThread, arg) < 0)
+		return -1;
+
+	return 0;
+}
+
+int SetupAuxManagerThread(void *arg)
+{
+	if (arg == NULL)
+		return -1;
+
+	if (CreateDetachedThread(ManagerThread, arg) < 0)
+		return -1;
+
+	return 0;
+}
+
+int SetupSyncThread(void *arg)
+{
+	if (arg == NULL)
+		return -1;
+
+	if (CreateDetachedThread(Sync, arg) < 0)
+		return -1;
+
+	return 0;
+}
+
+int SetupLogTick(void *arg)
+{
+	if (CreateDetachedThread(MarkTime, arg) < 0)
+		return -1;
+
+	return 0;
+}
+
+int StartPidFileTestThread(void *arg)
+{
+	if (arg == NULL)
+		return -1;
+
+	if (CreateDetachedThread(TestPidfileThread, arg) < 0)
+		return -1;
+
+	return 0;
+}
