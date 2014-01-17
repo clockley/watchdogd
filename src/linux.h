@@ -33,6 +33,6 @@ int RemountRootReadOnly(void);
 int CloseWatchdog(const int *pfd);
 int PingWatchdog(const int *pfd);
 int OpenWatchdog(int *pfd, const char *devicepath);
-int ConfigureWatchdogTimeout(int *fd, void *arg);
+int ConfigureWatchdogTimeout(int *fd, struct cfgoptions *s);
 int _Shutdown(int errorcode, bool kexec);
 #endif

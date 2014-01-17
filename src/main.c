@@ -193,9 +193,9 @@ void SignalHandler(int signum)
 	(void)signum;
 }
 
-void Abend(void *arg)
+void Abend(struct cfgoptions *s)
 {
-	struct cfgoptions *s = arg;
+	assert(s != NULL);
 
 	Logmsg(LOG_INFO, "stopping watchdog daemon");
 
@@ -221,10 +221,8 @@ CheckDeviceAndDaemonTimeout(const int *fd, int deviceTimeout,
 	return 0;
 }
 
-static void PrintConfiguration(void *arg)
+static void PrintConfiguration(struct cfgoptions *s)
 {
-	struct cfgoptions *s = arg;
-
 	Logmsg(LOG_INFO,
 	       "int=%is realtime=%s sync=%s softboot=%s force=%s mla=%.2f mem=%li",
 	       s->sleeptime, s->options & REALTIME ? "yes" : "no",

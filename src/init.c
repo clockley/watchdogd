@@ -46,11 +46,10 @@ int InitializePosixMemlock(void)
 	return 0;
 }
 
-int LoadConfigurationFile(void *arg)
+int LoadConfigurationFile(struct cfgoptions *s)
 {
-	assert(arg != NULL);
+	assert(s != NULL);
 
-	struct cfgoptions *s = arg;
 	int tmp = 0;
 
 	config_init(&s->cfg);
@@ -132,7 +131,7 @@ int LoadConfigurationFile(void *arg)
 		s->logdir = "/var/log/watchdogd";
 	}
 
-	if (MakeLogDir(arg) < 0)
+	if (MakeLogDir(s) < 0)
 		return -1;
 
 	if (config_lookup_bool(&s->cfg, "daemonize", &tmp) == CONFIG_TRUE
@@ -461,9 +460,8 @@ int OpenPidFile(const char *path)
 	return ret;
 }
 
-int ParseCommandLine(int *argc, char **argv, void *arg)
+int ParseCommandLine(int *argc, char **argv, struct cfgoptions *s)
 {
-	struct cfgoptions *s = arg;
 	int opt = 0;
 
 	while ((opt = getopt(*argc, argv, "qsFc:")) != -1) {
@@ -492,9 +490,9 @@ int ParseCommandLine(int *argc, char **argv, void *arg)
 	return 0;
 }
 
-int MakeLogDir(void *arg)
+int MakeLogDir(struct cfgoptions *s)
 {
-	struct cfgoptions *s = arg;
+	assert(s != NULL);
 
 	errno = 0;
 	if (mkdir(s->logdir, 0750) != 0) {

@@ -68,9 +68,9 @@ void CloseFileDescriptors(long maxfd)
 	}
 }
 
-int Daemon(void *arg)
+int Daemon(struct cfgoptions *s)
 {
-	struct cfgoptions *s = arg;
+	assert(s != NULL);
 
 	pid_t pid = 0;
 	long maxfd = 0;

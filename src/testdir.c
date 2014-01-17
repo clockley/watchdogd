@@ -40,9 +40,9 @@
 
 //Copied into this program Sun September 8, 2013 by Christian Lockley
 
-size_t DirentBufSize(DIR * dirp);
+size_t DirentBufSize(DIR *dirp);
 
-size_t DirentBufSize(DIR * dirp)
+size_t DirentBufSize(DIR *dirp)
 {
 	long name_max;
 	size_t name_end;
@@ -182,18 +182,19 @@ void FreeExeList(void *arg)
 	}
 }
 
-int ExecuteRepairScripts(void *arg1, void *arg)
+int ExecuteRepairScripts(void *arg1, struct cfgoptions *s)
 {
-	assert(arg != NULL);
+	assert(s != NULL);
+	assert(arg1 != NULL);
+
 	struct parent *p = arg1;
-	struct cfgoptions *s = arg;
 
 	struct child *c = NULL;
 	struct child *next = NULL;
 
 	list_for_each_entry(c, next, &p->children, entry) {
 		int ret =
-		    Spawn(s->repairBinTimeout, arg, c->name, c->name, "test",
+		    Spawn(s->repairBinTimeout, s, c->name, c->name, "test",
 			  NULL);
 
 		if (ret != 0) {
@@ -214,7 +215,7 @@ int ExecuteRepairScripts(void *arg1, void *arg)
 		snprintf(buf, sizeof(buf), "%i", c->ret);
 
 		if (Spawn
-		    (s->repairBinTimeout, arg, c->name, c->name, "repair", buf,
+		    (s->repairBinTimeout, s, c->name, c->name, "repair", buf,
 		     NULL) != EXIT_SUCCESS) {
 			ret = -1;
 		}

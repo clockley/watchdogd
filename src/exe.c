@@ -35,9 +35,8 @@ static void *WaitThread(void *arg)
 	return NULL;
 }
 
-int Spawn(int timeout, void *aarg, const char *file, const char *args, ...)
+int Spawn(int timeout, struct cfgoptions *s, const char *file, const char *args, ...)
 {
-	struct cfgoptions *s = aarg;
 	int status = 0;
 
 	pid_t pid = fork();

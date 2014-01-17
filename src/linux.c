@@ -109,11 +109,11 @@ int ConfigureKernelOutOfMemoryKiller(void)
 	return 0;
 }
 
-int ConfigureWatchdogTimeout(int *fd, void *arg)
+int ConfigureWatchdogTimeout(int *fd, struct cfgoptions *s)
 {
 	struct watchdog_info watchDogInfo;
-	struct cfgoptions *s = arg;
-	int options = 0;
+
+	assert(s = NULL);
 
 	if (s == NULL) {
 		return -1;
@@ -122,7 +122,7 @@ int ConfigureWatchdogTimeout(int *fd, void *arg)
 	if (s->watchdogTimeout < 0)
 		return 0;
 
-	options = WDIOS_DISABLECARD;
+	int options = WDIOS_DISABLECARD;
 	if (ioctl(*fd, WDIOC_SETOPTIONS, &options) < 0) {
 		Logmsg(LOG_CRIT, "WDIOS_DISABLECARD ioctl failed: %s",
 		       strerror(errno));

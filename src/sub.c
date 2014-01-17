@@ -45,29 +45,24 @@ int CloseWraper(const int *pfd)
 	return 0;
 }
 
-int IsDaemon(void *arg)
+int IsDaemon(const struct cfgoptions *s)
 {
-	//struct cfgoptions *s = arg;
-	const struct cfgoptions s = *(struct cfgoptions*)arg;
-
-	if (s.options & FOREGROUNDSETFROMCOMMANDLINE)
+	if (s->options & FOREGROUNDSETFROMCOMMANDLINE)
 		return 0;
 
-	if (s.options & DAEMONIZE)
+	if (s->options & DAEMONIZE)
 		return 1;
 
 	return 0;
 }
 
-int DeletePidFile(void *arg)
+int DeletePidFile(struct cfgoptions *s)
 {
-	struct cfgoptions *s = arg;
-
 	if (s == NULL) {
 		return -1;
 	}
 
-	if (IsDaemon(arg) == 0)
+	if (IsDaemon(s) == 0)
 		return 0;
 
 	if (!(s->options & USEPIDFILE)) {
@@ -119,12 +114,10 @@ int Wasprintf(char **ret, const char *format, ...)
 	return count;
 }
 
-int EndDaemon(int exitv, void *arg, int keepalive)
+int EndDaemon(int exitv, struct cfgoptions *s, int keepalive)
 {
-	if (arg == NULL)
+	if (s == NULL)
 		return -1;
-
-	struct cfgoptions *s = arg;
 
 	extern volatile sig_atomic_t shutdown;
 
@@ -158,7 +151,7 @@ int EndDaemon(int exitv, void *arg, int keepalive)
 		return -1;
 	}
 
-	DeletePidFile(arg);
+	DeletePidFile(s);
 	FreeExeList(&parent);
 	Logmsg(LOG_INFO, "restarting system");
 	closelog();
@@ -178,10 +171,8 @@ void ResetSignalHandlers(int maxsigno)
 	for (int i = 1; i < maxsigno; sigaction(i, &sa, NULL), i++) ;
 }
 
-void NormalizeTimespec(void *arg)
+void NormalizeTimespec(struct timespec *tp)
 {
-	struct timespec *tp = arg;
-
 	while (tp->tv_nsec >= 1000000000) {
 		tp->tv_nsec -= 1000000000;
 		tp->tv_sec++;
