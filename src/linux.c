@@ -113,7 +113,7 @@ int ConfigureWatchdogTimeout(int *fd, struct cfgoptions *s)
 {
 	struct watchdog_info watchDogInfo;
 
-	assert(s = NULL);
+	assert(s =! NULL);
 
 	if (s == NULL) {
 		return -1;
