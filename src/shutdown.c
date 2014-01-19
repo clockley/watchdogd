@@ -64,8 +64,9 @@ int Shutdown(int errorcode, struct cfgoptions *arg)
 
 	StopInit();
 
-	for (int i = 0; i < _NSIG; i += 1)
-		signal(i ,SIG_IGN);
+	for (int i = 0; i < _NSIG; i += 1) {
+		signal(i, SIG_IGN);
+	}
 
 	while (TermAll() == -1 && i < 2)
 		i = i + 1;
@@ -84,7 +85,7 @@ int Shutdown(int errorcode, struct cfgoptions *arg)
 	WriteUserAccountingDatabaseRecord(errorcode ==
 					  WECMDREBOOT ? true : false);
 
-	//acct(NULL);		//acct not in POSIX
+	acct(NULL);		//acct not in POSIX
 
 	DisablePageFiles();
 
