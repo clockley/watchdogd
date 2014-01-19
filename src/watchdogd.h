@@ -47,6 +47,7 @@
 
 #include "list.h"
 
+//TODO: Split this struct into an options struct(values read in from config file) and a runtime struct.
 struct cfgoptions {
 	config_t cfg;
 	double maxLoadFifteen;
