@@ -264,8 +264,8 @@ int DisablePageFiles(void)
 			continue;
 	}
 
-	//mnt_free_iter(iterator);
-	//mnt_free_table(tableOfPageFiles);
+	mnt_free_iter(iterator);
+	mnt_free_table(tableOfPageFiles);
 
 	if (ret < 0)
 		return -1;
