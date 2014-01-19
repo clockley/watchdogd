@@ -6,7 +6,7 @@ int CloseStandardFileDescriptors(void);
 int CloseWraper(const int *pfd);
 void CloseFileDescriptors(long maxfd);
 int ConfigureKernelOutOfMemoryKiller(void);
-int Shutdown(int errorcode, void *arg);
+int Shutdown(int errorcode, struct cfgoptions *arg);
 void Logmsg(int priority, const char *fmt, ...);
 int Daemon(struct cfgoptions *s);
 void *TestDirThread(void *arg);

@@ -25,15 +25,13 @@ int TermAll(void);
 int StartInit(void);
 int StopInit(void);
 
-int Shutdown(int errorcode, void *arg)
+int Shutdown(int errorcode, struct cfgoptions *arg)
 {
-	struct cfgoptions *s = arg;
-	assert(arg != NULL);
 	int i = 0;
 
-	if (s->options & NOACTION) {
+	if (arg->options & NOACTION) {
 		Logmsg(LOG_DEBUG, "shutdown() errorcode=%i, kexec=%s",
-		       errorcode, s->options & KEXEC ? "true" : "false");
+		       errorcode, arg->options & KEXEC ? "true" : "false");
 		return 0;
 	}
 
@@ -57,7 +55,7 @@ int Shutdown(int errorcode, void *arg)
 		snprintf(buf, sizeof(buf), "%d\n", errorcode);
 
 		if (Spawn
-		    (s->repairBinTimeout, arg, s->exepathname, s->exepathname,
+		    (arg->repairBinTimeout, arg, arg->exepathname, arg->exepathname,
 		     buf, NULL) == 0)
 			return 0;
 	}
@@ -65,6 +63,9 @@ int Shutdown(int errorcode, void *arg)
 	EndDaemon(0, arg, true);	//point of no return
 
 	StopInit();
+
+	for (int i = 0; i < _NSIG; i += 1)
+		signal(i ,SIG_IGN);
 
 	while (TermAll() == -1 && i < 2)
 		i = i + 1;
@@ -83,7 +84,7 @@ int Shutdown(int errorcode, void *arg)
 	WriteUserAccountingDatabaseRecord(errorcode ==
 					  WECMDREBOOT ? true : false);
 
-	acct(NULL);		//acct not in POSIX
+	//acct(NULL);		//acct not in POSIX
 
 	DisablePageFiles();
 
@@ -91,7 +92,7 @@ int Shutdown(int errorcode, void *arg)
 
 	RemountRootReadOnly();
 
-	return _Shutdown(errorcode, s->options & KEXEC ? 1 : 0);
+	return _Shutdown(errorcode, arg->options & KEXEC ? 1 : 0);
 }
 
 int KillAll(void)
