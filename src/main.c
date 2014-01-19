@@ -105,14 +105,13 @@ int main(int argc, char **argv)
 			       "WDT timeout is less than watchdog daemon ping interval");
 			Logmsg(LOG_ERR,
 			       "Using this interval may result in spurious reboots");
-		}
 
-		if (!(options.options & FORCE)) {
-			CloseWatchdog(&fd);
-			Logmsg(LOG_WARNING, "use the -f option to force this configuration");
-			Abend(&options);
+			if (!(options.options & FORCE)) {
+				CloseWatchdog(&fd);
+				Logmsg(LOG_WARNING, "use the -f option to force this configuration");
+				Abend(&options);
+			}
 		}
-
 	}
 
 	if (SetupAuxManagerThread(&options) < 0) {
