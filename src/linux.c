@@ -275,6 +275,10 @@ int DisablePageFiles(void)
 
 int _Shutdown(int errorcode, bool kexec)
 {
+	if (reboot(LINUX_REBOOT_CMD_CAD_ON) != 0 && errno == EPERM) {
+		return -1;
+	}
+
 	if (errorcode == WETEMP) {
 		sync();
 		errno = 0;
