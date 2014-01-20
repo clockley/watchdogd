@@ -173,6 +173,16 @@ void ResetSignalHandlers(int maxsigno)
 
 void NormalizeTimespec(struct timespec *tp)
 {
+	while (tp->tv_nsec < 0) {
+		if (tp->tv_sec == 0) {
+			tp->tv_nsec = 0;
+			return;
+		}
+
+		tp->tv_sec -= 1;
+		tp->tv_nsec += 1000000000;
+	}
+
 	while (tp->tv_nsec >= 1000000000) {
 		tp->tv_nsec -= 1000000000;
 		tp->tv_sec++;

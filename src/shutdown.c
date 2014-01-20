@@ -27,8 +27,6 @@ int StopInit(void);
 
 int Shutdown(int errorcode, struct cfgoptions *arg)
 {
-	int i = 0;
-
 	if (arg->options & NOACTION) {
 		Logmsg(LOG_DEBUG, "shutdown() errorcode=%i, kexec=%s",
 		       errorcode, arg->options & KEXEC ? "true" : "false");
@@ -68,17 +66,16 @@ int Shutdown(int errorcode, struct cfgoptions *arg)
 		signal(i, SIG_IGN);
 	}
 
+	int i = 0;
 	while (TermAll() == -1 && i < 2)
-		i = i + 1;
+		i += 1;
 
 	sleep(2);
 	sync();
 	sleep(3);
 
-	i = 0;
 
-	while (i > 5) {
-		i = i + 1;
+	for (int j = 0; j < 5; j += 1) {
 		KillAll();
 	}
 
