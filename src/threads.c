@@ -21,73 +21,33 @@
 #include <syslog.h>
 #include <sys/wait.h>
 #include <sys/sysinfo.h>
-#include <netdb.h>
 #include "sub.h"
 #include "errorlist.h"
 #include "threads.h"
 #include "testdir.h"
 #include "exe.h"
 
-extern volatile sig_atomic_t stopThreads;
+extern volatile sig_atomic_t shutdown;
 static pthread_mutex_t managerlock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_cond_t workerupdate = PTHREAD_COND_INITIALIZER;
 
 static long pageSize = 0;
 
+/*static time_t Time(time_t *tloc)
+{
+	struct timespec tp;
+	int ret = clock_gettime(CLOCK_MONOTONIC, &tp);
+	if (tloc == NULL)
+		return tp.tv_sec;
+	else
+		*tloc = tp.tv_sec;
+
+	return ret;
+}*/
+
 void GetPageSize(void)
 {
 	pageSize = sysconf(_SC_PAGESIZE);
-}
-
-void *Ping(void *arg)
-{
-	struct cfgoptions *s = arg;
-	for (;;) {
-		pthread_mutex_lock(&managerlock);
-
-		if (ping_send(s->pingObj) > 0) {
-			for (pingobj_iter_t *iter = ping_iterator_get(s->pingObj); iter != NULL; iter = ping_iterator_next(iter)) {
-				double latency = -1.0;
-				size_t len = sizeof (latency);
-				ping_iterator_get_info(iter, PING_INFO_LATENCY, &latency, &len);
-				char buf[NI_MAXHOST] = {'\0'};
-				len = sizeof(buf);
-				ping_iterator_get_info (iter, PING_INFO_ADDRESS, &buf, &len);
-
-				if (latency > 0.0) {
-					Logmsg(LOG_DEBUG, "got answer from target %s", buf);
-					void *cxt = ping_iterator_get_context(iter);
-					if (cxt != NULL) {
-						free(cxt);
-						ping_iterator_set_context(iter, NULL);
-					}
-					continue;
-				} else {
-					Logmsg(LOG_ERR, "no response from ping (target: %s)", buf);
-				}
-
-				void *cxt = ping_iterator_get_context(iter);
-				if (cxt == NULL) {
-					int *retries = malloc(sizeof(int*));
-					*retries += 1;
-					ping_iterator_set_context(iter, retries);
-				} else {
-					int *retries = cxt;
-					if (*retries > 3) { //FIXME: This should really be a config value.
-						s->error |= PINGFAILED;
-					} else {
-						*retries += 1;
-					}
-				}
-			}
-		} else {
-			Logmsg(LOG_ERR, "%s", ping_get_error(s->pingObj));
-			s->error |= PINGFAILED;
-		}
-
-		pthread_cond_wait(&workerupdate, &managerlock);
-		pthread_mutex_unlock(&managerlock);
-	}
 }
 
 void *Sync(void *arg)
@@ -123,7 +83,7 @@ void *MarkTime(void *arg)
 		Logmsg(LOG_INFO, "still alive");
 		nanosleep(&rqtp, NULL);
 
-		if (stopThreads == 1) {
+		if (shutdown == 1) {
 			pthread_exit(NULL);
 		}
 	}
@@ -183,7 +143,7 @@ void *TestDirThread(void *arg)
 
 		nanosleep(&rqtp, NULL);
 
-		if (stopThreads == 1) {
+		if (shutdown == 1) {
 			pthread_exit(NULL);
 		}
 	}
@@ -215,7 +175,7 @@ void *TestBinThread(void *arg)
 
 		nanosleep(&rqtp, NULL);
 
-		if (stopThreads == 1) {
+		if (shutdown == 1) {
 			pthread_exit(NULL);
 		}
 	}
@@ -524,19 +484,10 @@ void *ManagerThread(void *arg)
 			}
 		}
 
-		if (s->error & PINGFAILED) {
-			Logmsg(LOG_ERR, "ping test failed... rebooting system");
-			if (Shutdown(PINGFAILED, arg) < 0) {
-				Logmsg(LOG_ERR,
-				       "watchdogd: Unable to shutdown system");
-				exit(EXIT_FAILURE);
-			}
-		}
-
 		pthread_mutex_unlock(&managerlock);
 		nanosleep(&rqtp, NULL);
 
-		if (stopThreads == 1) {
+		if (shutdown == 1) {
 			break;
 		}
 	}

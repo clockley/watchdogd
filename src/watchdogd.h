@@ -10,7 +10,6 @@
 #include <iso646.h>
 #include <libconfig.h>
 #include <limits.h>
-#include <oping.h>
 #include <pthread.h>
 #include <sched.h>
 #include <signal.h>
@@ -55,9 +54,7 @@ struct cfgoptions {
 	double maxLoadOne;
 	double maxLoadFive;
 	double retryLimit;
-	pingobj_t *pingObj;
 	const config_setting_t *pidFiles;
-	const config_setting_t *ipAddresses;
 	const char *devicepath;
 	const char *testexepath;
 	const char *exepathname;
@@ -80,8 +77,6 @@ struct cfgoptions {
 #define FORCE 0x100
 #define NOACTION 0x200
 #define REALTIME 0x400
-#define ENABLEPING 0x800
-#define VERBOSE 0x1000
 
 	int priority;
 	int lockfd;
@@ -98,7 +93,6 @@ struct cfgoptions {
 #define LOADAVGTOOHIGH 0x8
 #define UNKNOWNPIDFILERROR 0x10
 #define PIDFILERROR 0x20
-#define PINGFAILED 0x40
 };
 
 struct parent {

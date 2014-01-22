@@ -34,7 +34,7 @@
 
 static volatile sig_atomic_t quit = 0;
 
-volatile sig_atomic_t stopThreads = 0;
+volatile sig_atomic_t shutdown = 0;
 
 bool logToSyslog = false;
 
