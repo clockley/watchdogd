@@ -119,9 +119,9 @@ int EndDaemon(int exitv, struct cfgoptions *s, int keepalive)
 	if (s == NULL)
 		return -1;
 
-	extern volatile sig_atomic_t shutdown;
+	extern volatile sig_atomic_t stopThreads;
 
-	shutdown = 1;
+	stopThreads = 1;
 
 	struct sigaction dummy = {.sa_handler = SIG_IGN,.sa_flags = 0 };
 
