@@ -69,10 +69,9 @@ size_t DirentBufSize(DIR *dirp)
 		? name_end : sizeof(struct dirent));
 }
 
-int CreateLinkedListOfExes(const char *path, void *arg)
+int CreateLinkedListOfExes(const char *path, struct parent *p)
 {
-	assert(arg != NULL);
-	struct parent *p = arg;
+	assert(p != NULL);
 
 	struct stat buffer;
 	struct dirent *ent = NULL;
@@ -167,10 +166,9 @@ int CreateLinkedListOfExes(const char *path, void *arg)
 	return -1;
 }
 
-void FreeExeList(void *arg)
+void FreeExeList(struct parent *p)
 {
-	assert(arg != NULL);
-	struct parent *p = arg;
+	assert(p != NULL);
 
 	struct child *c = NULL;
 	struct child *next = NULL;

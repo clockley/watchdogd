@@ -1,6 +1,6 @@
 #ifndef TESTDIR_H
 #define TESTDIR
-int CreateLinkedListOfExes(const char *path, void *arg);
+int CreateLinkedListOfExes(const char *path, struct parent *p);
 int ExecuteRepairScripts(void *arg1, struct cfgoptions *s);
-void FreeExeList(void *arg);
+void FreeExeList(struct parent *p);
 #endif
