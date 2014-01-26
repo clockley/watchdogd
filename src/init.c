@@ -464,7 +464,7 @@ int ParseCommandLine(int *argc, char **argv, struct cfgoptions *s)
 {
 	int opt = 0;
 
-	while ((opt = getopt(*argc, argv, "qsFc:")) != -1) {
+	while ((opt = getopt(*argc, argv, "qsfFc:")) != -1) {
 		switch (opt) {
 		case 'F':
 			s->options |= FOREGROUNDSETFROMCOMMANDLINE;
