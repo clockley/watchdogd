@@ -553,8 +553,8 @@ bool SetDefaultConfig(struct cfgoptions *options)
 	options->maxLoadFifteen = 0;
 	options->minfreepages = 0;
 	options->testExeReturnValue = 0;
-	options->repairBinTimeout = 0;
-	options->testBinTimeout = 0;
+	options->repairBinTimeout = 60;
+	options->testBinTimeout = 60;
 	options->options = 0;
 	options->error = 0;
 
