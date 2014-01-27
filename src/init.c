@@ -479,7 +479,7 @@ int ParseCommandLine(int *argc, char **argv, struct cfgoptions *s)
 			s->options |= NOACTION;
 			break;
 		case 'f':
-			s->options |= FORCE; //no-op
+			s->options |= FORCE;
 			break;
 		default:
 			Usage();
