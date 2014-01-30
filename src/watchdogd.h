@@ -107,8 +107,8 @@ struct child {
 
 struct watchdogDevice {
 	const char *path;
-	const char *name;
 	int fd;
+	int timeout;
 	void *tem;
 };
 

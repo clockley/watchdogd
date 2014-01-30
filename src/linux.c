@@ -119,6 +119,8 @@ int ConfigureWatchdogTimeout(watchdog_t * watchdog, int timeout)
 		return -1;
 	}
 
+	watchdog->timeout = timeout;
+
 	return PingWatchdog(watchdog);
 }
 

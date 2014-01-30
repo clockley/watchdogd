@@ -90,19 +90,22 @@ int main(int argc, char **argv)
 			/*Can't use Abend() because we need to shut down watchdog device after we open it */
 			EndDaemon(CloseWatchdog(watchdog), &options, false);
 			exit(EXIT_FAILURE);
-		} else
-		    if (ConfigureWatchdogTimeout
-			(watchdog, options.watchdogTimeout) < 0
-			&& options.watchdogTimeout != -1) {
-			Logmsg(LOG_ERR,
-			       "unable to set watchdog device timeout");
-			Logmsg(LOG_ERR, "program exiting");
-			EndDaemon(CloseWatchdog(watchdog), &options, false);
-			exit(EXIT_FAILURE);
+		} else {
+			if (ConfigureWatchdogTimeout
+			    (watchdog, options.watchdogTimeout) < 0
+			    && options.watchdogTimeout != -1) {
+				Logmsg(LOG_ERR,
+				       "unable to set watchdog device timeout");
+				Logmsg(LOG_ERR, "program exiting");
+				EndDaemon(CloseWatchdog(watchdog), &options,
+					  false);
+				exit(EXIT_FAILURE);
+			}
 		}
 
-		if (options.watchdogTimeout != -1 && CheckDeviceAndDaemonTimeout
-		    (NULL, options.watchdogTimeout, options.sleeptime) < 0) {
+		if (options.watchdogTimeout != -1
+		    && CheckWatchdogTimeout(watchdog,
+					    options.sleeptime) == true) {
 			Logmsg(LOG_ERR,
 			       "WDT timeout is less than watchdog daemon ping interval");
 			Logmsg(LOG_ERR,
@@ -212,15 +215,12 @@ void Abend(struct cfgoptions *s)
 	exit(EXIT_FAILURE);
 }
 
-int
-CheckDeviceAndDaemonTimeout(const int *fd, int deviceTimeout,
-			    int daemonSleepTime)
+bool CheckWatchdogTimeout(watchdog_t * wdt, int timeout)
 {
-	(void)fd;
-	if (daemonSleepTime >= deviceTimeout)
-		return -1;
-
-	return 0;
+	if (timeout >= wdt->timeout) {
+		return false;
+	}
+	return true;
 }
 
 static void PrintConfiguration(struct cfgoptions *s)
