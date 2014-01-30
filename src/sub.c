@@ -249,7 +249,7 @@ int CreateDetachedThread(void *(*startFunction) (void *), void *arg)
 
 	if (pthread_create(&thread, &attr, startFunction, arg) != 0) {
 		Logmsg(LOG_CRIT, "watchdogd: pthread_create failed: %s\n",
-			strerror(errno));
+		       strerror(errno));
 		return -1;
 	}
 
@@ -260,11 +260,11 @@ int CreateDetachedThread(void *(*startFunction) (void *), void *arg)
 
 watchdog_t *WatchdogConstruct(void)
 {
-	watchdog_t *dog = (watchdog_t *)calloc(1, sizeof(*dog));
+	watchdog_t *dog = (watchdog_t *) calloc(1, sizeof(*dog));
 	return dog;
 }
 
-void WatchdogDestroy(watchdog_t *dog)
+void WatchdogDestroy(watchdog_t * dog)
 {
 	free(dog);
 	dog = NULL;

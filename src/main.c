@@ -81,17 +81,19 @@ int main(int argc, char **argv)
 			Abend(&options);
 		}
 
-		if (ConfigureWatchdogTimeout(watchdog, options.watchdogTimeout) < 0
-		    && options.watchdogTimeout != -1 && IsDaemon(&options) == 0)
-		{
+		if (ConfigureWatchdogTimeout(watchdog, options.watchdogTimeout)
+		    < 0 && options.watchdogTimeout != -1
+		    && IsDaemon(&options) == 0) {
 			fprintf(stderr,
 				"unable to set watchdog device timeout\n");
 			fprintf(stderr, "program exiting\n");
 			/*Can't use Abend() because we need to shut down watchdog device after we open it */
 			EndDaemon(CloseWatchdog(watchdog), &options, false);
 			exit(EXIT_FAILURE);
-		} else if (ConfigureWatchdogTimeout(watchdog, options.watchdogTimeout) < 0
-			   && options.watchdogTimeout != -1) {
+		} else
+		    if (ConfigureWatchdogTimeout
+			(watchdog, options.watchdogTimeout) < 0
+			&& options.watchdogTimeout != -1) {
 			Logmsg(LOG_ERR,
 			       "unable to set watchdog device timeout");
 			Logmsg(LOG_ERR, "program exiting");
@@ -108,7 +110,8 @@ int main(int argc, char **argv)
 
 			if (!(options.options & FORCE)) {
 				CloseWatchdog(watchdog);
-				Logmsg(LOG_WARNING, "use the -f option to force this configuration");
+				Logmsg(LOG_WARNING,
+				       "use the -f option to force this configuration");
 				Abend(&options);
 			}
 		}
@@ -127,8 +130,10 @@ int main(int argc, char **argv)
 			PingWatchdog(watchdog);
 		}
 
-		if (clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &rqtp, NULL) != 0) {
-			Logmsg(LOG_ERR, "clock_nanosleep failed %s", strerror(errno));
+		if (clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &rqtp, NULL)
+		    != 0) {
+			Logmsg(LOG_ERR, "clock_nanosleep failed %s",
+			       strerror(errno));
 		}
 
 		rqtp.tv_sec += options.sleeptime;

@@ -35,7 +35,8 @@ static void *WaitThread(void *arg)
 	return NULL;
 }
 
-int Spawn(int timeout, struct cfgoptions *s, const char *file, const char *args, ...)
+int Spawn(int timeout, struct cfgoptions *s, const char *file, const char *args,
+	  ...)
 {
 	int status = 0;
 
@@ -56,7 +57,8 @@ int Spawn(int timeout, struct cfgoptions *s, const char *file, const char *args,
 				struct sched_param param;
 				param.sched_priority = 0;
 
-				sched_setscheduler(getpid(), SCHED_OTHER, &param);
+				sched_setscheduler(getpid(), SCHED_OTHER,
+						   &param);
 				nice(0);
 
 				int dfd =
@@ -124,7 +126,7 @@ int Spawn(int timeout, struct cfgoptions *s, const char *file, const char *args,
 				pthread_mutex_lock(&lock);
 
 				if (CreateDetachedThread(WaitThread, &ret) < 0) {
-					Logmsg(LOG_ERR,"%s", strerror(errno));
+					Logmsg(LOG_ERR, "%s", strerror(errno));
 					return -1;
 				}
 
@@ -164,8 +166,9 @@ int Spawn(int timeout, struct cfgoptions *s, const char *file, const char *args,
 					       "binary %s exceeded time limit %ld",
 					       file, timeout);
 					_Exit(0);
-				} else if (returnValue != 0){
-					Logmsg(LOG_ERR, "unknown error in timeout code");
+				} else if (returnValue != 0) {
+					Logmsg(LOG_ERR,
+					       "unknown error in timeout code");
 				}
 
 				_Exit(WEXITSTATUS(ret));

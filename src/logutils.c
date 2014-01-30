@@ -50,35 +50,36 @@ void Logmsg(int priority, const char *fmt, ...)
 
 		switch (priority) {
 		case LOG_EMERG:
-			snprintf(buf, sizeof(buf),"<0>");
+			snprintf(buf, sizeof(buf), "<0>");
 			break;
 		case LOG_ALERT:
-			snprintf(buf, sizeof(buf),"<1>");
+			snprintf(buf, sizeof(buf), "<1>");
 			break;
 		case LOG_CRIT:
-			snprintf(buf, sizeof(buf),"<2>");
+			snprintf(buf, sizeof(buf), "<2>");
 			break;
 		case LOG_ERR:
-			snprintf(buf, sizeof(buf),"<3>");
+			snprintf(buf, sizeof(buf), "<3>");
 			break;
 		case LOG_WARNING:
-			snprintf(buf, sizeof(buf),"<4>");
+			snprintf(buf, sizeof(buf), "<4>");
 			break;
 		case LOG_NOTICE:
-			snprintf(buf, sizeof(buf),"<5>");
+			snprintf(buf, sizeof(buf), "<5>");
 			break;
 		case LOG_INFO:
-			snprintf(buf, sizeof(buf),"<6>");
+			snprintf(buf, sizeof(buf), "<6>");
 			break;
 		case LOG_DEBUG:
-			snprintf(buf, sizeof(buf),"<7>");
+			snprintf(buf, sizeof(buf), "<7>");
 			break;
 		default:
-			snprintf(buf, sizeof(buf),"<4>");
+			snprintf(buf, sizeof(buf), "<4>");
 			break;
 		}
 
-		vsnprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), fmt, args);
+		vsnprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), fmt,
+			  args);
 		va_end(args);
 
 		fprintf(stderr, "%s\n", buf);

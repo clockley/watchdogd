@@ -261,8 +261,7 @@ int LoadConfigurationFile(struct cfgoptions *s)
 		if (s->retryLimit > 86400L) {
 			fprintf(stderr,
 				"watchdogd: illegal value for configuration file entry named \"retry-timeout\"\n");
-			fprintf(stderr,
-				"watchdogd: disabling retry timeout\n");
+			fprintf(stderr, "watchdogd: disabling retry timeout\n");
 			s->retryLimit = 0L;
 		}
 	} else {
@@ -389,10 +388,12 @@ int WritePidFile(int fd, pid_t pid, const char *name)
 {
 	if (dprintf(fd, "%d\n", pid) < 0) {
 		if (name != NULL) {
-			fprintf(stderr, "watchdogd: unable to write pid to %s: %s\n",
+			fprintf(stderr,
+				"watchdogd: unable to write pid to %s: %s\n",
 				name, strerror(errno));
 		} else {
-			fprintf(stderr, "watchdogd: unable to write pid to %i: %s\n",
+			fprintf(stderr,
+				"watchdogd: unable to write pid to %i: %s\n",
 				fd, strerror(errno));
 		}
 		return -1;
@@ -407,9 +408,10 @@ int OpenPidFile(const char *path)
 	mode_t oumask = umask(0027);
 	int ret = open(path, O_WRONLY | O_CREAT | O_EXCL | O_CLOEXEC, 0644);
 	if (ret < 0) {
-		fprintf(stderr, "watchdogd: open failed: %s\n", strerror(errno));
+		fprintf(stderr, "watchdogd: open failed: %s\n",
+			strerror(errno));
 		if (errno == EEXIST) {
-			ret = open(path, O_RDONLY|O_CLOEXEC);
+			ret = open(path, O_RDONLY | O_CLOEXEC);
 
 			if (ret < 0) {
 				umask(oumask);
@@ -431,20 +433,27 @@ int OpenPidFile(const char *path)
 				return -1;
 			}
 
-			fprintf(stderr, "watchdogd: checking if the pid is valid\n");
+			fprintf(stderr,
+				"watchdogd: checking if the pid is valid\n");
 			if (kill(pid, 0) != 0 && errno == ESRCH) {
 				close(ret);
 				if (remove(path) < 0) {
 					umask(oumask);
 					return -1;
 				} else {
-					ret = open(path, O_WRONLY | O_CREAT | O_EXCL | O_CLOEXEC, 0644);
+					ret =
+					    open(path,
+						 O_WRONLY | O_CREAT | O_EXCL |
+						 O_CLOEXEC, 0644);
 					if (ret < 0) {
-						fprintf(stderr, "watchdogd: open failed: %s\n", strerror(errno));
+						fprintf(stderr,
+							"watchdogd: open failed: %s\n",
+							strerror(errno));
 						umask(oumask);
 						return ret;
 					} else {
-						fprintf(stdout, "successfully opened pid file\n");
+						fprintf(stdout,
+							"successfully opened pid file\n");
 					}
 
 					if (ret < 0) {
@@ -537,7 +546,7 @@ int CheckPriority(int priority)
 	return 0;
 }
 
-bool SetDefaultConfig(struct cfgoptions *options)
+bool SetDefaultConfig(struct cfgoptions * options)
 {
 	if (options == NULL)
 		return false;

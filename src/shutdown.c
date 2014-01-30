@@ -53,8 +53,8 @@ int Shutdown(int errorcode, struct cfgoptions *arg)
 		snprintf(buf, sizeof(buf), "%d\n", errorcode);
 
 		if (Spawn
-		    (arg->repairBinTimeout, arg, arg->exepathname, arg->exepathname,
-		     buf, NULL) == 0)
+		    (arg->repairBinTimeout, arg, arg->exepathname,
+		     arg->exepathname, buf, NULL) == 0)
 			return 0;
 	}
 
@@ -73,7 +73,6 @@ int Shutdown(int errorcode, struct cfgoptions *arg)
 	sleep(2);
 	sync();
 	sleep(3);
-
 
 	for (int j = 0; j < 5; j += 1) {
 		KillAll();

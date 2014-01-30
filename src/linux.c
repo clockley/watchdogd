@@ -6,7 +6,7 @@
 
 int IsSwaparea(struct libmnt_fs *fs, void *unused);
 
-int PingWatchdog(watchdog_t *watchdog)
+int PingWatchdog(watchdog_t * watchdog)
 {
 	if (watchdog == NULL) {
 		return -1;
@@ -27,7 +27,7 @@ int PingWatchdog(watchdog_t *watchdog)
 	return -1;
 }
 
-int CloseWatchdog(watchdog_t *watchdog)
+int CloseWatchdog(watchdog_t * watchdog)
 {
 	if (watchdog == NULL) {
 		return -1;
@@ -92,7 +92,7 @@ int ConfigureKernelOutOfMemoryKiller(void)
 
 	if (fd == -1) {
 		Logmsg(LOG_ERR, "open failed: %s", strerror(errno));
-		CloseWraper(&fd); //CloseWraper is totally wacko, I really should remove it.
+		CloseWraper(&fd);	//CloseWraper is totally wacko, I really should remove it.
 		CloseWraper(&dfd);
 		return -1;
 	}
@@ -110,7 +110,7 @@ int ConfigureKernelOutOfMemoryKiller(void)
 	return 0;
 }
 
-int ConfigureWatchdogTimeout(watchdog_t *watchdog, int timeout)
+int ConfigureWatchdogTimeout(watchdog_t * watchdog, int timeout)
 {
 	struct watchdog_info watchDogInfo;
 
