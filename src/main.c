@@ -103,7 +103,7 @@ int main(int argc, char **argv)
 		    && CheckWatchdogTimeout(watchdog,
 					    options.sleeptime) == true) {
 			Logmsg(LOG_ERR,
-			       "WDT timeout is less than watchdog daemon ping interval");
+			       "WDT timeout is less than or equal watchdog daemon ping interval");
 			Logmsg(LOG_ERR,
 			       "Using this interval may result in spurious reboots");
 
@@ -217,7 +217,8 @@ static void PrintConfiguration(struct cfgoptions *s)
 	       "int=%is realtime=%s sync=%s softboot=%s force=%s mla=%.2f mem=%li",
 	       s->sleeptime, s->options & REALTIME ? "yes" : "no",
 	       s->options & SYNC ? "yes" : "no",
-	       s->options & SOFTBOOT ? "yes" : "no", "yes", s->maxLoadOne,
+	       s->options & SOFTBOOT ? "yes" : "no",
+	       s->options & FORCE ? "yes" : "no", s->maxLoadOne,
 	       s->minfreepages);
 
 	if (s->options & ENABLEPIDCHECKER) {
