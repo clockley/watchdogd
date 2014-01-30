@@ -106,10 +106,17 @@ int ConfigureWatchdogTimeout(watchdog_t * watchdog, int timeout)
 		return -1;
 	}
 
+	int oldTimeout = timeout;
+
 	if (ioctl(watchdog->fd, WDIOC_SETTIMEOUT, &timeout) < 0) {
 		fprintf(stderr,
-			"watchdogd: unable to set user supplied WDT timeout \n");
+			"watchdogd: unable to set WDT timeout \n");
 		return -1;
+	}
+
+	if (timeout != oldTimeout) {
+		fprintf(stderr, "watchdogd: Actual WDT timeout: %i seconds\n", timeout);
+		fprintf(stderr, "watchdogd: Timeout specified in the configuration file: %i\n", oldTimeout);
 	}
 
 	options = WDIOS_ENABLECARD;

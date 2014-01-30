@@ -26,4 +26,5 @@ int UnlockFile(int fd, pid_t pid);
 int WritePidFile(int fd, pid_t pid, const char *name);
 watchdog_t *WatchdogConstruct(void);
 void WatchdogDestroy(watchdog_t * dog);
+bool CheckWatchdogTimeout(watchdog_t * wdt, int timeout);
 #endif

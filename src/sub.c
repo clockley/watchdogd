@@ -269,3 +269,11 @@ void WatchdogDestroy(watchdog_t * dog)
 	free(dog);
 	dog = NULL;
 }
+
+bool CheckWatchdogTimeout(watchdog_t * wdt, int timeout)
+{
+	if (timeout >= wdt->timeout) {
+		return false;
+	}
+	return true;
+}

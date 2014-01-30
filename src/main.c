@@ -211,14 +211,6 @@ void Abend(struct cfgoptions *s)
 	exit(EXIT_FAILURE);
 }
 
-bool CheckWatchdogTimeout(watchdog_t * wdt, int timeout)
-{
-	if (timeout >= wdt->timeout) {
-		return false;
-	}
-	return true;
-}
-
 static void PrintConfiguration(struct cfgoptions *s)
 {
 	Logmsg(LOG_INFO,
