@@ -28,10 +28,6 @@
 #include "init.h"
 #include "threads.h"
 
-#ifdef __linux__
-#include "linux.h"
-#endif
-
 static volatile sig_atomic_t quit = 0;
 
 volatile sig_atomic_t shutdown = 0;
