@@ -109,6 +109,7 @@ struct watchdogDevice {
 	const char *path;
 	const char *name;
 	int fd;
+	void *tem;
 };
 
 typedef struct watchdogDevice watchdog_t;
