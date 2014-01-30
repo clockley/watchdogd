@@ -105,6 +105,14 @@ struct child {
 	int ret;
 };
 
+struct watchdogDevice {
+	const char *path;
+	const char *name;
+	int fd;
+};
+
+typedef struct watchdogDevice watchdog_t;
+
 struct parent parent;
 
 struct listOfRunningProcess {

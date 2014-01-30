@@ -6,21 +6,19 @@
 
 int IsSwaparea(struct libmnt_fs *fs, void *unused);
 
-int PingWatchdog(const int *pfd)
+int PingWatchdog(watchdog_t *watchdog)
 {
-	int i = 0;
-
-	if (pfd == NULL) {
+	if (watchdog == NULL) {
 		return -1;
 	}
 
-	if (ioctl(*pfd, WDIOC_KEEPALIVE, &i) == 0) {
+	if (ioctl(watchdog->fd, WDIOC_KEEPALIVE, &watchdog->fd) == 0) {
 		return 0;
 	}
 
 	errno = 0;
 
-	if (ioctl(*pfd, WDIOC_KEEPALIVE, &i) == 0) {
+	if (ioctl(watchdog->fd, WDIOC_KEEPALIVE, &watchdog->fd) == 0) {
 		return 0;
 	}
 
@@ -29,50 +27,53 @@ int PingWatchdog(const int *pfd)
 	return -1;
 }
 
-int CloseWatchdog(const int *pfd)
+int CloseWatchdog(watchdog_t *watchdog)
 {
-	if (pfd == NULL) {
+	if (watchdog == NULL) {
 		return -1;
 	}
 
 	int options = WDIOS_DISABLECARD;
 
-	if (ioctl(*pfd, WDIOC_SETOPTIONS, &options) < 0) {
+	if (ioctl(watchdog->fd, WDIOC_SETOPTIONS, &options) < 0) {
 		Logmsg(LOG_CRIT, "WDIOS_DISABLECARD ioctl failed: %s",
 		       strerror(errno));
 	}
 
-	if (write(*pfd, "V", strlen("V")) < 0) {
+	if (write(watchdog->fd, "V", strlen("V")) < 0) {
 		Logmsg(LOG_CRIT, "write to watchdog device failed: %s",
 		       strerror(errno));
-		CloseWraper(pfd);
+		CloseWraper(&watchdog->fd);
+		WatchdogDestroy(watchdog);
 		return -1;
 	} else {
-		CloseWraper(pfd);
+		CloseWraper(&watchdog->fd);
+		WatchdogDestroy(watchdog);
 	}
 
 	return 0;
 }
 
-int OpenWatchdog(int *pfd, const char *devicepath)
+watchdog_t *OpenWatchdog(const char *path)
 {
 
-	if (pfd == NULL) {
-		return -1;
+	if (path == NULL) {
+		return NULL;
 	}
 
-	if (devicepath == NULL) {
-		return -1;
-	}
+	watchdog_t *watchdog = WatchdogConstruct();
+	if (watchdog == NULL)
+		return NULL;
 
-	*pfd = open(devicepath, O_WRONLY | O_CLOEXEC);
-	if (*pfd == -1) {
+	watchdog->fd = open(path, O_WRONLY | O_CLOEXEC);
+	if (watchdog->fd == -1) {
 		Logmsg(LOG_ERR,
 		       "unable to open watchdog device: %s", strerror(errno));
-		return -1;
+		WatchdogDestroy(watchdog);
+		return NULL;
 	}
 
-	return 0;
+	return watchdog;
 }
 
 int ConfigureKernelOutOfMemoryKiller(void)
@@ -109,27 +110,27 @@ int ConfigureKernelOutOfMemoryKiller(void)
 	return 0;
 }
 
-int ConfigureWatchdogTimeout(int *fd, struct cfgoptions *s)
+int ConfigureWatchdogTimeout(watchdog_t *watchdog, int timeout)
 {
 	struct watchdog_info watchDogInfo;
 
-	assert(s != NULL);
+	assert(watchdog != NULL);
 
-	if (s == NULL) {
+	if (watchdog == NULL) {
 		return -1;
 	}
 
-	if (s->watchdogTimeout < 0)
+	if (timeout < 0)
 		return 0;
 
 	int options = WDIOS_DISABLECARD;
-	if (ioctl(*fd, WDIOC_SETOPTIONS, &options) < 0) {
+	if (ioctl(watchdog->fd, WDIOC_SETOPTIONS, &options) < 0) {
 		Logmsg(LOG_CRIT, "WDIOS_DISABLECARD ioctl failed: %s",
 		       strerror(errno));
 		return -1;
 	}
 
-	if (ioctl(*fd, WDIOC_GETSUPPORT, &watchDogInfo) < 0) {
+	if (ioctl(watchdog->fd, WDIOC_GETSUPPORT, &watchDogInfo) < 0) {
 		Logmsg(LOG_CRIT, "WDIOC_GETSUPPORT ioctl failed: %s",
 		       strerror(errno));
 		return -1;
@@ -139,20 +140,20 @@ int ConfigureWatchdogTimeout(int *fd, struct cfgoptions *s)
 		return -1;
 	}
 
-	if (ioctl(*fd, WDIOC_SETTIMEOUT, &s->watchdogTimeout) < 0) {
+	if (ioctl(watchdog->fd, WDIOC_SETTIMEOUT, &timeout) < 0) {
 		fprintf(stderr,
 			"watchdogd: unable to set user supplied WDT timeout \n");
 		return -1;
 	}
 
 	options = WDIOS_ENABLECARD;
-	if (ioctl(*fd, WDIOC_SETOPTIONS, &options) < 0) {
+	if (ioctl(watchdog->fd, WDIOC_SETOPTIONS, &options) < 0) {
 		Logmsg(LOG_CRIT, "WDIOS_ENABLECARD ioctl failed: %s",
 		       strerror(errno));
 		return -1;
 	}
 
-	return PingWatchdog(fd);
+	return PingWatchdog(watchdog);
 }
 
 int RemountRootReadOnly(void)

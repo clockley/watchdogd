@@ -41,12 +41,11 @@ bool logToSyslog = false;
 int main(int argc, char **argv)
 {
 	static struct cfgoptions options;
+	watchdog_t *watchdog;
 
 	if (SetDefaultConfig(&options) == false) {
 		return EXIT_FAILURE;
 	}
-
-	int fd = 0;
 
 	if (ParseCommandLine(&argc, argv, &options) != 0) {
 		return EXIT_FAILURE;
@@ -77,25 +76,26 @@ int main(int argc, char **argv)
 	}
 
 	if ((options.options & NOACTION) == 0) {
-		if (OpenWatchdog(&fd, options.devicepath) < 0) {
+		watchdog = OpenWatchdog(options.devicepath);
+		if (watchdog == NULL) {
 			Abend(&options);
 		}
 
-		if (ConfigureWatchdogTimeout(&fd, &options) < 0
+		if (ConfigureWatchdogTimeout(watchdog, options.watchdogTimeout) < 0
 		    && options.watchdogTimeout != -1 && IsDaemon(&options) == 0)
 		{
 			fprintf(stderr,
 				"unable to set watchdog device timeout\n");
 			fprintf(stderr, "program exiting\n");
 			/*Can't use Abend() because we need to shut down watchdog device after we open it */
-			EndDaemon(CloseWatchdog(&fd), &options, false);
+			EndDaemon(CloseWatchdog(watchdog), &options, false);
 			exit(EXIT_FAILURE);
-		} else if (ConfigureWatchdogTimeout(&fd, &options) < 0
+		} else if (ConfigureWatchdogTimeout(watchdog, options.watchdogTimeout) < 0
 			   && options.watchdogTimeout != -1) {
 			Logmsg(LOG_ERR,
 			       "unable to set watchdog device timeout");
 			Logmsg(LOG_ERR, "program exiting");
-			EndDaemon(CloseWatchdog(&fd), &options, false);
+			EndDaemon(CloseWatchdog(watchdog), &options, false);
 			exit(EXIT_FAILURE);
 		}
 
@@ -107,7 +107,7 @@ int main(int argc, char **argv)
 			       "Using this interval may result in spurious reboots");
 
 			if (!(options.options & FORCE)) {
-				CloseWatchdog(&fd);
+				CloseWatchdog(watchdog);
 				Logmsg(LOG_WARNING, "use the -f option to force this configuration");
 				Abend(&options);
 			}
@@ -124,7 +124,7 @@ int main(int argc, char **argv)
 
 	while (quit == 0) {
 		if ((options.options & NOACTION) == 0) {
-			PingWatchdog(&fd);
+			PingWatchdog(watchdog);
 		}
 
 		if (clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &rqtp, NULL) != 0) {
@@ -136,7 +136,7 @@ int main(int argc, char **argv)
 	}
 
 	if (EndDaemon
-	    ((options.options & NOACTION) == 0 ? CloseWatchdog(&fd) : 0,
+	    ((options.options & NOACTION) == 0 ? CloseWatchdog(watchdog) : 0,
 	     &options, false) < 0) {
 		DeletePidFile(&options);
 		exit(EXIT_FAILURE);

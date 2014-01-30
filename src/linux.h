@@ -30,9 +30,9 @@
 
 int DisablePageFiles(void);
 int RemountRootReadOnly(void);
-int CloseWatchdog(const int *pfd);
-int PingWatchdog(const int *pfd);
-int OpenWatchdog(int *pfd, const char *devicepath);
-int ConfigureWatchdogTimeout(int *fd, struct cfgoptions *s);
+int CloseWatchdog(watchdog_t *watchdog);
+int PingWatchdog(watchdog_t *watchdog);
+watchdog_t *OpenWatchdog(const char *path);
+int ConfigureWatchdogTimeout(watchdog_t *watchdog, int timeout);
 int _Shutdown(int errorcode, bool kexec);
 #endif

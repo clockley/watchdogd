@@ -257,3 +257,15 @@ int CreateDetachedThread(void *(*startFunction) (void *), void *arg)
 
 	return 0;
 }
+
+watchdog_t *WatchdogConstruct(void)
+{
+	watchdog_t *dog = (watchdog_t *)calloc(1, sizeof(*dog));
+	return dog;
+}
+
+void WatchdogDestroy(watchdog_t *dog)
+{
+	free(dog);
+	dog = NULL;
+}
