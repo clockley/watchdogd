@@ -76,40 +76,6 @@ watchdog_t *OpenWatchdog(const char *path)
 	return watchdog;
 }
 
-int ConfigureKernelOutOfMemoryKiller(void)
-{
-	int fd = 0;
-	int dfd = 0;
-
-	dfd = open("/proc/self", O_DIRECTORY | O_RDONLY);
-
-	if (dfd == -1) {
-		Logmsg(LOG_ERR, "open failed: %s", strerror(errno));
-		return -1;
-	}
-
-	fd = openat(dfd, "oom_score_adj", O_WRONLY);
-
-	if (fd == -1) {
-		Logmsg(LOG_ERR, "open failed: %s", strerror(errno));
-		CloseWraper(&fd);	//CloseWraper is totally wacko, I really should remove it.
-		CloseWraper(&dfd);
-		return -1;
-	}
-
-	if (write(fd, "-1000", strlen("-1000")) < 0) {
-		Logmsg(LOG_ERR, "write failed: %s", strerror(errno));
-		CloseWraper(&fd);
-		CloseWraper(&dfd);
-		return -1;
-	}
-
-	CloseWraper(&fd);
-	CloseWraper(&dfd);
-
-	return 0;
-}
-
 int ConfigureWatchdogTimeout(watchdog_t * watchdog, int timeout)
 {
 	struct watchdog_info watchDogInfo;
@@ -120,7 +86,7 @@ int ConfigureWatchdogTimeout(watchdog_t * watchdog, int timeout)
 		return -1;
 	}
 
-	if (timeout < 0)
+	if (timeout <= 0)
 		return 0;
 
 	int options = WDIOS_DISABLECARD;
@@ -154,6 +120,40 @@ int ConfigureWatchdogTimeout(watchdog_t * watchdog, int timeout)
 	}
 
 	return PingWatchdog(watchdog);
+}
+
+int ConfigureKernelOutOfMemoryKiller(void)
+{
+	int fd = 0;
+	int dfd = 0;
+
+	dfd = open("/proc/self", O_DIRECTORY | O_RDONLY);
+
+	if (dfd == -1) {
+		Logmsg(LOG_ERR, "open failed: %s", strerror(errno));
+		return -1;
+	}
+
+	fd = openat(dfd, "oom_score_adj", O_WRONLY);
+
+	if (fd == -1) {
+		Logmsg(LOG_ERR, "open failed: %s", strerror(errno));
+		CloseWraper(&fd);	//CloseWraper is totally wacko, I really should remove it.
+		CloseWraper(&dfd);
+		return -1;
+	}
+
+	if (write(fd, "-1000", strlen("-1000")) < 0) {
+		Logmsg(LOG_ERR, "write failed: %s", strerror(errno));
+		CloseWraper(&fd);
+		CloseWraper(&dfd);
+		return -1;
+	}
+
+	CloseWraper(&fd);
+	CloseWraper(&dfd);
+
+	return 0;
 }
 
 int RemountRootReadOnly(void)
