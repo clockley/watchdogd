@@ -272,7 +272,7 @@ void WatchdogDestroy(watchdog_t * dog)
 
 bool CheckWatchdogTimeout(watchdog_t * wdt, int timeout)
 {
-	if (timeout >= wdt->timeout) {
+	if (timeout <= wdt->timeout) {
 		return false;
 	}
 	return true;
