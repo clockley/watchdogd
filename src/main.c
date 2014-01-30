@@ -149,8 +149,6 @@ int main(int argc, char **argv)
 
 	DeletePidFile(&options);
 
-	exit(EXIT_SUCCESS);
-
 	return EXIT_SUCCESS;
 }
 
