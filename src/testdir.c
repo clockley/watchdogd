@@ -173,24 +173,23 @@ void FreeExeList(struct parent *p)
 	struct child *c = NULL;
 	struct child *next = NULL;
 
-	list_for_each_entry(c, next, &p->children, entry) {
+	for (c = (struct child *)p->children.next, next =
+	     (struct child *)c->entry.next; &c->entry != &p->children;
+	     c = next, next = (struct child *)c->entry.next) {
 		list_del(&c->entry);
 		free((void *)c->name);
 		free(c);
 	}
 }
 
-int ExecuteRepairScripts(void *arg1, struct cfgoptions *s)
+int ExecuteRepairScripts(struct parent *p, struct cfgoptions *s)
 {
 	assert(s != NULL);
-	assert(arg1 != NULL);
-
-	struct parent *p = arg1;
 
 	struct child *c = NULL;
-	struct child *next = NULL;
 
-	list_for_each_entry(c, next, &p->children, entry) {
+	for (c = (struct child *)p->children.next; &c->entry != &p->children;
+	     c = (struct child *)c->entry.next) {
 		int ret =
 		    Spawn(s->repairBinTimeout, s, c->name, c->name, "test",
 			  NULL);
@@ -202,7 +201,8 @@ int ExecuteRepairScripts(void *arg1, struct cfgoptions *s)
 
 	int ret = 0;
 
-	list_for_each_entry(c, next, &p->children, entry) {
+	for (c = (struct child *)p->children.next; &c->entry != &p->children;
+	     c = (struct child *)c->entry.next) {
 		if (c->ret == 0)
 			continue;
 
