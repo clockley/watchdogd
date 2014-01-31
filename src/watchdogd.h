@@ -28,10 +28,6 @@
 #include <time.h>
 #include <unistd.h>
 
-#if !defined(_NSIG)
-#define _NSIG 0
-#endif
-#if 0
 #ifndef NSIG
 #if defined(_NSIG)
 #define NSIG _NSIG		/* For BSD/SysV */
@@ -41,7 +37,6 @@
 #define NSIG (SIGMAX + 1)	/* For djgpp */
 #else
 #define NSIG 64			/* Use a reasonable default value */
-#endif
 #endif
 #endif
 
@@ -119,8 +114,6 @@ struct parent parent;
 struct listOfRunningProcess {
 	struct list children;
 };
-
-struct listOfRunningProcess listOfRunningProcess;
 
 struct process {
 	struct list entry;
