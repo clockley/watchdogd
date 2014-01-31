@@ -102,7 +102,7 @@ int Daemon(struct cfgoptions *s)
 		CloseFileDescriptors(maxfd);
 	}
 
-	ResetSignalHandlers(NSIG);
+	ResetSignalHandlers(_NSIG);
 
 	sigset_t sa;
 

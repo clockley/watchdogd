@@ -47,8 +47,8 @@ int Spawn(int timeout, struct cfgoptions *s, const char *file, const char *args,
 		return -1;
 	case 0:
 		{
-#if defined(NSIG)
-			ResetSignalHandlers(NSIG);
+#if defined(_NSIG)
+			ResetSignalHandlers(_NSIG);
 #endif
 
 			pid_t worker = fork();
@@ -241,8 +241,8 @@ int SpawnAsync(void *aarg, void *arg, const char *file, const char *args, ...)
 		return -1;
 	case 0:
 		{
-#if defined(NSIG)
-			ResetSignalHandlers(NSIG);
+#if defined(_NSIG)
+			ResetSignalHandlers(_NSIG);
 #endif
 			struct sched_param param;
 			param.sched_priority = 0;
