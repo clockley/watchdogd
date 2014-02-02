@@ -27,11 +27,6 @@
 
 #ifndef LIST_H_
 #define LIST_H_
-
-struct list {
-	struct list *next, *prev;
-};
-
 bool list_is_empty(void *arg_one);
 void list_move_tail(void *arg_one, void *arg_two);
 void list_move(void *arg_one, void *arg_two);
@@ -121,7 +116,9 @@ void list_add(void *arg_one, void *arg_two);
  * There are no requirements for a list head, any struct list can be a list
  * head.
  */
-
+struct list {
+	struct list *next, *prev;
+};
 
 /**
  * Alias of container_of
