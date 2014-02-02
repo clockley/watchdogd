@@ -156,8 +156,8 @@ struct list {
 #define list_last_entry(ptr, type, member) \
     list_entry((ptr)->prev, type, member)
 
-#define __container_of(ptr, sample, member)				\
-    (void *)((char *)(ptr)						\
+#define __container_of(ptr, sample, member, type)				\
+    (type)((char *)(ptr)						\
 	     - ((char *)&(sample)->member - (char *)(sample)))
 /**
  * Loop through the list given by head and set pos to struct in the list.
@@ -181,11 +181,11 @@ struct list {
  *
  * See list_for_each_entry for more details.
  */
-#define list_for_each_entry(pos, tmp, head, member)		\
-    for (pos = __container_of((head)->next, pos, member),		\
-	 tmp = __container_of(pos->member.next, pos, member);		\
+#define list_for_each_entry(pos, tmp, head, member, type)		\
+    for (pos = __container_of((head)->next, pos, member, type),		\
+	 tmp = __container_of(pos->member.next, pos, member, type);		\
 	 &pos->member != (head);					\
-	 pos = tmp, tmp = __container_of(pos->member.next, tmp, member))
+	 pos = tmp, tmp = __container_of(pos->member.next, tmp, member, type))
 
 #undef container_of
 #define container_of(ptr, type, member) \

@@ -101,7 +101,7 @@ int CreateLinkedListOfExes(const char *path, struct parent *p)
 		return -1;
 	}
 
-	direntbuf = malloc(size);
+	direntbuf = (struct dirent*)malloc(size);
 
 	if (direntbuf == NULL) {
 		closedir(dir);
@@ -136,7 +136,7 @@ int CreateLinkedListOfExes(const char *path, struct parent *p)
 		if (!(buffer.st_mode & S_IRUSR))
 			continue;
 
-		struct child *child = malloc(sizeof(*child));
+		struct child *child = (struct child*)malloc(sizeof(*child));
 
 		if (child == NULL) {
 			goto error;
@@ -173,24 +173,23 @@ void FreeExeList(struct parent *p)
 	struct child *c = NULL;
 	struct child *next = NULL;
 
-	list_for_each_entry(c, next, &p->children, entry) {
+	list_for_each_entry(c, next, &p->children, entry, struct child*) {
 		list_del(&c->entry);
 		free((void *)c->name);
 		free(c);
 	}
 }
 
-int ExecuteRepairScripts(void *arg1, struct cfgoptions *s)
+int ExecuteRepairScripts(struct parent *p, struct cfgoptions *s)
 {
 	assert(s != NULL);
-	assert(arg1 != NULL);
+	assert(p != NULL);
 
-	struct parent *p = arg1;
 
 	struct child *c = NULL;
 	struct child *next = NULL;
 
-	list_for_each_entry(c, next, &p->children, entry) {
+	list_for_each_entry(c, next, &p->children, entry, struct child*) {
 		int ret =
 		    Spawn(s->repairBinTimeout, s, c->name, c->name, "test",
 			  NULL);
@@ -202,7 +201,7 @@ int ExecuteRepairScripts(void *arg1, struct cfgoptions *s)
 
 	int ret = 0;
 
-	list_for_each_entry(c, next, &p->children, entry) {
+	list_for_each_entry(c, next, &p->children, entry, struct child *) {
 		if (c->ret == 0)
 			continue;
 
