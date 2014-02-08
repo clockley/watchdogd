@@ -23,12 +23,11 @@
  *
  */
 
-void _list_del(void *arg_one);
-void __list_del(void *arg_one, void *arg_two);
-void __list_add(void *arg_one, void *arg_two, void *arg_three);
-
 #include "watchdogd.h"
 
+void _list_del(struct list *entry);
+void __list_del(struct list *prev, struct list *next);
+void __list_add(struct list *entry, struct list *prev, struct list *next);
 /**
  * Initialize the list as an empty list.
  *
@@ -37,18 +36,13 @@ void __list_add(void *arg_one, void *arg_two, void *arg_three);
  *
  * @param The list to initialized.
  */
-void list_init(void *arg)
+void list_init(struct list *list)
 {
-	struct list *list = arg;
 	list->next = list->prev = list;
 }
 
-void __list_add(void *arg_one, void *arg_two, void *arg_three)
+void __list_add(struct list *entry, struct list *prev, struct list *next)
 {
-	struct list *entry = arg_one;
-	struct list *prev = arg_two;
-	struct list *next = arg_three;
-
 	next->prev = entry;
 	entry->next = next;
 	entry->prev = prev;
@@ -70,31 +64,22 @@ void __list_add(void *arg_one, void *arg_two, void *arg_three)
  * @param entry The new element to prepend to the list.
  * @param head The existing list.
  */
-void list_add(void *arg_one, void *arg_two)
+void list_add(struct list *entry, struct list *head)
 {
-	struct list *entry = arg_one;
-	struct list *head = arg_two;
-
 	__list_add(entry, head, head->next);
 }
 
-void list_add_tail(void *arg_one, void *arg_two)
+void list_add_tail(struct list *entry, struct list *head)
 {
-	struct list *entry = arg_one;
-	struct list *head = arg_two;
-
 	__list_add(entry, head->prev, head);
 }
 
-void list_replace(void *arg_one, void *arg_two)
+void list_replace(struct list *old, struct list *_new)
 {
-	struct list *old = arg_one;
-	struct list *new = arg_two;
-
-	new->next = old->next;
-	new->next->prev = new;
-	new->prev = old->prev;
-	new->prev->next = new;
+	_new->next = old->next;
+	_new->next->prev = _new;
+	_new->prev = old->prev;
+	_new->prev->next = _new;
 }
 
 #define list_last_entry(ptr, type, member) \
@@ -118,27 +103,20 @@ void list_replace(void *arg_one, void *arg_two)
  * @param entry The new element to prepend to the list.
  * @param head The existing list.
  */
-void list_append(void *arg_one, void *arg_two)
+void list_append(struct list *entry, struct list *head)
 {
-	struct list *entry = arg_one;
-	struct list *head = arg_two;
 	__list_add(entry, head->prev, head);
 }
 
-void __list_del(void *arg_one, void *arg_two)
+void __list_del(struct list *prev, struct list *next)
 {
-	struct list *prev = arg_one;
-	struct list *next = arg_two;
-
 	assert(next->prev == prev->next);
 	next->prev = prev;
 	prev->next = next;
 }
 
-void _list_del(void *arg_one)
+void _list_del(struct list *entry)
 {
-	struct list *entry = arg_one;
-
 	assert(entry->prev->next == entry);
 	assert(entry->next->prev == entry);
 	__list_del(entry->prev, entry->next);
@@ -158,29 +136,22 @@ void _list_del(void *arg_one)
  *
  * @param entry The element to remove.
  */
-void list_del(void *arg_one)
+void list_del(struct list *entry)
 {
-	struct list *entry = arg_one;
 	_list_del(entry);
 	list_init(entry);
 }
 
-void list_move(void *arg_one, void *arg_two)
+void list_move(struct list *list, struct list *head)
 {
-	struct list *list = arg_one;
-	struct list *head = arg_two;
-
 	if (list->prev != head) {
 		_list_del(list);
 		list_add(list, head);
 	}
 }
 
-void list_move_tail(void *arg_one, void *arg_two)
+void list_move_tail(struct list *list, struct list *head)
 {
-	struct list *list = arg_one;
-	struct list *head = arg_two;
-
 	_list_del(list);
 	list_add_tail(list, head);
 }
@@ -193,9 +164,7 @@ void list_move_tail(void *arg_one, void *arg_two)
  *
  * @return True if the list contains one or more elements or False otherwise.
  */
-bool list_is_empty(void *arg_one)
+bool list_is_empty(const struct list *head)
 {
-	const struct list *head = arg_one;
-
 	return head->next == head;
 }

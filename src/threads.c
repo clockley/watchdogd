@@ -72,7 +72,7 @@ void *MarkTime(void *arg)
 {
 	/*The thread sends mark mesages to the system log daemon */
 
-	struct cfgoptions *s = arg;
+	struct cfgoptions *s = (struct cfgoptions *)arg;
 	struct timespec rqtp;
 
 	rqtp.tv_sec = (time_t) s->logtickinterval;
@@ -95,7 +95,7 @@ void *MarkTime(void *arg)
 
 void *LoadAvgThread(void *arg)
 {
-	struct cfgoptions *s = arg;
+	struct cfgoptions *s = (struct cfgoptions *)arg;
 
 	double load[3] = { 0 };
 
@@ -130,14 +130,14 @@ void *TestDirThread(void *arg)
 	//This thread is a bit different as we don't want to prevent the other
 	//tests from running.
 
-	struct cfgoptions *s = arg;
+	struct cfgoptions *s = (struct cfgoptions *)arg;
 	struct timespec rqtp;
 
 	rqtp.tv_sec = 5;
 	rqtp.tv_nsec = 5 * 1000;
 
 	for (;;) {
-		if (ExecuteRepairScripts(&parent, arg) < 0) {
+		if (ExecuteRepairScripts(&parent, s) < 0) {
 			s->error |= SCRIPTFAILED;
 		}
 
@@ -158,14 +158,14 @@ void *TestBinThread(void *arg)
 	//This thread is a bit different as we don't want to prevent the other
 	//tests from running.
 
-	struct cfgoptions *s = arg;
+	struct cfgoptions *s = (struct cfgoptions *)arg;
 	struct timespec rqtp;
 
 	rqtp.tv_sec = 5;
 	rqtp.tv_nsec = 5 * 1000;
 
 	for (;;) {
-		int ret = Spawn(s->testBinTimeout, arg, s->testexepathname,
+		int ret = Spawn(s->testBinTimeout, s, s->testexepathname,
 				s->testexepathname, "test", NULL);
 		if (ret == 0) {
 			s->testExeReturnValue = 0;
@@ -187,7 +187,7 @@ void *TestBinThread(void *arg)
 
 void *MinPagesThread(void *arg)
 {
-	struct cfgoptions *s = arg;
+	struct cfgoptions *s = (struct cfgoptions *)arg;
 	struct sysinfo infostruct;
 	static pthread_once_t getPageSize = PTHREAD_ONCE_INIT;
 
@@ -230,7 +230,7 @@ void *TestFork(void *arg)
 {
 	assert(arg != NULL);
 
-	struct cfgoptions *s = arg;
+	struct cfgoptions *s = (struct cfgoptions *)arg;
 	pid_t pid = 0;
 
 	for (;;) {
@@ -265,7 +265,7 @@ void *TestPidfileThread(void *arg)
 {
 	assert(arg != NULL);
 
-	struct cfgoptions *s = arg;
+	struct cfgoptions *s = (struct cfgoptions *)arg;
 
 	for (;;) {
 		pthread_mutex_lock(&managerlock);
@@ -407,7 +407,7 @@ void *ManagerThread(void *arg)
 	/*This thread gets data from the non main threads and
 	   calls a function to take care of the problem */
 
-	struct cfgoptions *s = arg;
+	struct cfgoptions *s = (struct cfgoptions *)arg;
 	struct timespec rqtp;
 
 	rqtp.tv_sec = 5;
@@ -428,7 +428,7 @@ void *ManagerThread(void *arg)
 		if (s->error & LOADAVGTOOHIGH) {
 			Logmsg(LOG_ERR,
 			       "polled load average exceed configured load average limit");
-			if (Shutdown(WESYSOVERLOAD, arg) < 0) {
+			if (Shutdown(WESYSOVERLOAD, s) < 0) {
 				Logmsg(LOG_ERR,
 				       "watchdogd: Unable to shutdown system");
 				exit(EXIT_FAILURE);
@@ -438,7 +438,7 @@ void *ManagerThread(void *arg)
 		if (s->error & OUTOFMEMORY) {
 			Logmsg(LOG_ERR,
 			       "less than configured free pages available");
-			if (Shutdown(WEOTHER, arg) < 0) {
+			if (Shutdown(WEOTHER, s) < 0) {
 				Logmsg(LOG_ERR,
 				       "watchdogd: Unable to shutdown system");
 				exit(EXIT_FAILURE);
@@ -448,7 +448,7 @@ void *ManagerThread(void *arg)
 		if (s->error & FORKFAILED) {
 			Logmsg(LOG_ERR,
 			       "process table test failed because fork failed");
-			if (Shutdown(WEOTHER, arg) < 0) {
+			if (Shutdown(WEOTHER, s) < 0) {
 				Logmsg(LOG_ERR,
 				       "watchdogd: Unable to shutdown system");
 				exit(EXIT_FAILURE);
@@ -457,7 +457,7 @@ void *ManagerThread(void *arg)
 
 		if (s->error & SCRIPTFAILED) {
 			Logmsg(LOG_ERR, "repair script failed");
-			if (Shutdown(WESCRIPT, arg)
+			if (Shutdown(WESCRIPT, s)
 			    < 0) {
 				Logmsg(LOG_ERR,
 				       "watchdogd: Unable to shutdown system");
@@ -467,7 +467,7 @@ void *ManagerThread(void *arg)
 
 		if (s->error & PIDFILERROR || s->error & UNKNOWNPIDFILERROR) {
 			Logmsg(LOG_ERR, "pid file test failed");
-			if (Shutdown(WEPIDFILE, arg)
+			if (Shutdown(WEPIDFILE, s)
 			    < 0) {
 				Logmsg(LOG_ERR,
 				       "watchdogd: Unable to shutdown system");
@@ -477,7 +477,7 @@ void *ManagerThread(void *arg)
 
 		if (s->testExeReturnValue > 0 || s->testExeReturnValue < 0) {
 			Logmsg(LOG_ERR, "check executable failed");
-			if (Shutdown(s->testExeReturnValue, arg) < 0) {
+			if (Shutdown(s->testExeReturnValue, s) < 0) {
 				Logmsg(LOG_ERR,
 				       "watchdogd: Unable to shutdown system");
 				exit(EXIT_FAILURE);
@@ -562,7 +562,7 @@ int SetupExeDir(void *arg)
 
 int SetupMinPagesThread(void *arg)
 {
-	struct cfgoptions *s = arg;
+	struct cfgoptions *s = (struct cfgoptions *)arg;
 
 	if (arg == NULL)
 		return -1;

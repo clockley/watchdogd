@@ -15,10 +15,6 @@
  * 
  */
 
-#ifndef __STDC_LIMIT_MACROS
-#define __STDC_LIMIT_MACROS 1
-#endif
-
 #include "watchdogd.h"
 #include <inttypes.h>
 #include <stdint.h>
@@ -153,8 +149,9 @@ int main(int argc, char **argv)
 
 int SetupSignalHandlers(int isDaemon)
 {
-	struct sigaction IgnoredSignals = {.sa_handler = SIG_IGN,.sa_flags = 0
-	};
+	struct sigaction IgnoredSignals;
+	IgnoredSignals.sa_handler = SIG_IGN;
+	IgnoredSignals.sa_flags = 0;
 
 	sigemptyset(&IgnoredSignals.sa_mask);
 

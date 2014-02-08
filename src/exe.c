@@ -24,7 +24,7 @@ static pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
 static void *WaitThread(void *arg);
 static void *WaitThread(void *arg)
 {
-	int *ret = arg;
+	int *ret = (int *)arg;
 
 	wait(ret);
 

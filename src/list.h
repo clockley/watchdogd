@@ -27,15 +27,30 @@
 
 #ifndef LIST_H_
 #define LIST_H_
-bool list_is_empty(void *arg_one);
-void list_move_tail(void *arg_one, void *arg_two);
-void list_move(void *arg_one, void *arg_two);
-void list_del(void *arg_one);
-void list_append(void *arg_one, void *arg_two);
-void list_replace(void *arg_one, void *arg_two);
-void list_add_tail(void *arg_one, void *arg_two);
-void list_init(void *arg);
-void list_add(void *arg_one, void *arg_two);
+
+/**
+ * The linkage struct for list nodes. This struct must be part of your
+ * to-be-linked struct. struct list is required for both the head of the
+ * list and for each list node.
+ *
+ * Position and name of the struct list field is irrelevant.
+ * There are no requirements that elements of a list are of the same type.
+ * There are no requirements for a list head, any struct list can be a list
+ * head.
+ */
+struct list {
+	struct list *next, *prev;
+};
+
+bool list_is_empty(const struct list *head);
+void list_move_tail(struct list *list, struct list *head);
+void list_move(struct list *list, struct list *head);
+void list_del(struct list *entry);
+void list_append(struct list *entry, struct list *head);
+void list_replace(struct list *old, struct list *_new);
+void list_add_tail(struct list *entry, struct list *head);
+void list_init(struct list *list);
+void list_add(struct list *entry, struct list *head);
 
 /**
  * @file Classic doubly-link circular list implementation.
@@ -105,20 +120,6 @@ void list_add(void *arg_one, void *arg_two);
  * }
  *
  */
-
-/**
- * The linkage struct for list nodes. This struct must be part of your
- * to-be-linked struct. struct list is required for both the head of the
- * list and for each list node.
- *
- * Position and name of the struct list field is irrelevant.
- * There are no requirements that elements of a list are of the same type.
- * There are no requirements for a list head, any struct list can be a list
- * head.
- */
-struct list {
-	struct list *next, *prev;
-};
 
 /**
  * Alias of container_of
