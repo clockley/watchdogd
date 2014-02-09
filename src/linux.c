@@ -325,7 +325,7 @@ void WriteUserAccountingDatabaseRecord(int reboot)
 	strncpy(utmpxStruct.ut_user, reboot == 1 ? "reboot" : "shutdown",
 		sizeof(utmpxStruct.ut_user));
 	strncpy(utmpxStruct.ut_line, "~", sizeof(utmpxStruct.ut_user));
-	strncpy(utmpxStruct.ut_id, "~~", sizeof(utmpxStruct.ut_user));
+	strncpy(utmpxStruct.ut_id, "~~", sizeof(utmpxStruct.ut_id));
 	utmpxStruct.ut_pid = 0;
 	utmpxStruct.ut_type = RUN_LVL;
 	gettimeofday(&utmpxStruct.ut_tv, NULL);

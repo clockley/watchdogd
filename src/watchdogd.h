@@ -4,6 +4,7 @@
 #define _ISOC11_SOURCE
 
 #include <assert.h>
+#include <config.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <inttypes.h>
@@ -109,7 +110,7 @@ struct watchdogDevice {
 
 typedef struct watchdogDevice watchdog_t;
 
-struct parent parent;
+extern struct parent parent;
 
 struct listOfRunningProcess {
 	struct list children;

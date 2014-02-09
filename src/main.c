@@ -16,9 +16,7 @@
  */
 
 #include "watchdogd.h"
-#include <inttypes.h>
-#include <stdint.h>
-#include <config.h>
+
 #include "sub.h"
 #include "main.h"
 #include "init.h"
@@ -27,8 +25,8 @@
 static volatile sig_atomic_t quit = 0;
 
 volatile sig_atomic_t shutdown = 0;
-
 bool logToSyslog = false;
+struct parent parent;
 
 int main(int argc, char **argv)
 {
