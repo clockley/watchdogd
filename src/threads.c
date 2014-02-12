@@ -33,18 +33,6 @@ static pthread_cond_t workerupdate = PTHREAD_COND_INITIALIZER;
 
 static long pageSize = 0;
 
-/*static time_t Time(time_t *tloc)
-{
-	struct timespec tp;
-	int ret = clock_gettime(CLOCK_MONOTONIC, &tp);
-	if (tloc == NULL)
-		return tp.tv_sec;
-	else
-		*tloc = tp.tv_sec;
-
-	return ret;
-}*/
-
 void GetPageSize(void)
 {
 	pageSize = sysconf(_SC_PAGESIZE);
@@ -61,31 +49,6 @@ void *Sync(void *arg)
 		pthread_cond_wait(&workerupdate, &managerlock);
 
 		pthread_mutex_unlock(&managerlock);
-	}
-
-	pthread_exit(NULL);
-
-	return NULL;
-}
-
-void *MarkTime(void *arg)
-{
-	/*The thread sends mark mesages to the system log daemon */
-
-	struct cfgoptions *s = (struct cfgoptions *)arg;
-	struct timespec rqtp;
-
-	rqtp.tv_sec = (time_t) s->logtickinterval;
-	rqtp.tv_nsec = (time_t) s->logtickinterval * 1000;
-
-	for (;;) {
-		//Logmsg(LOG_INFO, "still alive after %llu interval(s)", intervals);
-		Logmsg(LOG_INFO, "still alive");
-		nanosleep(&rqtp, NULL);
-
-		if (shutdown == 1) {
-			pthread_exit(NULL);
-		}
 	}
 
 	pthread_exit(NULL);
@@ -513,10 +476,6 @@ int StartHelperThreads(struct cfgoptions *options)
 		}
 	}
 
-	if (options->options & LOGTICK)
-		if (SetupLogTick(options) < 0)
-			return -1;
-
 	if (options->maxLoadOne > 0) {
 		if (SetupLoadAvgThread(options) < 0) {
 			return -1;
@@ -615,14 +574,6 @@ int SetupSyncThread(void *arg)
 		return -1;
 
 	if (CreateDetachedThread(Sync, arg) < 0)
-		return -1;
-
-	return 0;
-}
-
-int SetupLogTick(void *arg)
-{
-	if (CreateDetachedThread(MarkTime, arg) < 0)
 		return -1;
 
 	return 0;

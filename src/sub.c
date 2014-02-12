@@ -58,12 +58,7 @@ int IsDaemon(const struct cfgoptions *s)
 
 int DeletePidFile(struct cfgoptions *s)
 {
-	if (s == NULL) {
-		return -1;
-	}
-
-	if (IsDaemon(s) == 0)
-		return 0;
+	assert(s != NULL);
 
 	if (!(s->options & USEPIDFILE)) {
 		return 0;
@@ -94,7 +89,7 @@ int Wasprintf(char **ret, const char *format, ...)
 	va_end(ap);
 
 	if (count >= 0) {
-		char *buffer = malloc((size_t) count + 1);
+		char *buffer = (char *)malloc((size_t) count + 1);
 
 		if (buffer == NULL)
 			return -1;
@@ -123,7 +118,9 @@ int EndDaemon(int exitv, struct cfgoptions *s, int keepalive)
 
 	shutdown = 1;
 
-	struct sigaction dummy = {.sa_handler = SIG_IGN,.sa_flags = 0 };
+	struct sigaction dummy;
+	dummy.sa_handler = SIG_IGN;
+	dummy.sa_flags = 0;
 
 	sigemptyset(&dummy.sa_mask);
 
@@ -165,14 +162,19 @@ void ResetSignalHandlers(int maxsigno)
 	if (maxsigno < 1)
 		return;
 
-	struct sigaction sa = {.sa_handler = SIG_DFL,.sa_flags = 0 };
+	struct sigaction sa;
+	sa.sa_handler = SIG_DFL;
+	sa.sa_flags = 0;
 	sigfillset(&sa.sa_mask);
 
-	for (int i = 1; i < maxsigno; sigaction(i, &sa, NULL), i++) ;
+	int i = 0;
+	for (; ({i < maxsigno; sigaction(i, &sa, NULL), 1;}); i++) ;
 }
 
 void NormalizeTimespec(struct timespec *tp)
 {
+	assert(tp != NULL);
+
 	while (tp->tv_nsec < 0) {
 		if (tp->tv_sec == 0) {
 			tp->tv_nsec = 0;
@@ -189,7 +191,7 @@ void NormalizeTimespec(struct timespec *tp)
 	}
 }
 
-int IsExe(const char *pathname, int returnfildes)
+int IsExe(const char *pathname, bool returnfildes)
 {
 	struct stat buffer;
 
@@ -221,7 +223,7 @@ int IsExe(const char *pathname, int returnfildes)
 		return -1;
 	}
 
-	if (returnfildes == 1)	//For use with fexecve
+	if (returnfildes == true)	//For use with fexecve
 		return fildes;
 
 	close(fildes);

@@ -16,8 +16,6 @@ int PingWatchdog(watchdog_t * watchdog)
 		return 0;
 	}
 
-	errno = 0;
-
 	if (ioctl(watchdog->fd, WDIOC_KEEPALIVE, &watchdog->fd) == 0) {
 		return 0;
 	}

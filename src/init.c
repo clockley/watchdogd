@@ -157,27 +157,6 @@ int LoadConfigurationFile(struct cfgoptions *s)
 		}
 	}
 
-	if (config_lookup_bool(&s->cfg, "logtick", &tmp) == CONFIG_TRUE) {
-		if (tmp) {
-			if (config_lookup_int(&s->cfg, "logtick-interval",
-					      &s->logtickinterval) ==
-			    CONFIG_TRUE) {
-				if (s->logtickinterval < 0
-				    || s->logtickinterval > 7200
-				    || s->logtickinterval == 0) {
-					fprintf(stderr,
-						"illegal value for configuration file entry named \"logtick-interval\"\n");
-					fprintf(stderr,
-						"watchdogd: using default value\n");
-					s->options |= LOGTICK;
-					s->logtickinterval = 1800;
-				} else {
-					s->options |= LOGTICK;
-				}
-			}
-		}
-	}
-
 	if (config_lookup_bool(&s->cfg, "lock-memory", &tmp) == CONFIG_TRUE) {
 		if (tmp) {
 			if (InitializePosixMemlock() < 0) {
@@ -556,7 +535,6 @@ bool SetDefaultConfig(struct cfgoptions * options)
 	options->pidpathname = "/var/run/watchdogd.pid";
 	options->sleeptime = 1;
 	options->watchdogTimeout = -1;
-	options->logtickinterval = 1800;
 	options->maxLoadOne = 0;
 	options->maxLoadFive = 0;
 	options->maxLoadFifteen = 0;

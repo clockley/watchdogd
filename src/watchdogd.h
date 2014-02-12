@@ -65,7 +65,7 @@ struct cfgoptions {
 #define SOFTBOOT 0x1
 #define SYNC 0x2
 #define USEPIDFILE 0x4
-#define LOGTICK 0x8
+#define UNUSED 0x8
 #define KEXEC 0x10
 #define DAEMONIZE 0x20
 #define FOREGROUNDSETFROMCOMMANDLINE 0x40
@@ -77,7 +77,6 @@ struct cfgoptions {
 	int priority;
 	int lockfd;
 	int watchdogTimeout;
-	int logtickinterval;
 	int testExeReturnValue;
 	int testBinTimeout;
 	int repairBinTimeout;
