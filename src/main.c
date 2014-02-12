@@ -186,7 +186,6 @@ void SignalHandler(int signum)
 {
 	quit = 1;
 	return;
-	(void)signum;
 }
 
 void Abend(struct cfgoptions *s)
