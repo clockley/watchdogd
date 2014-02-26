@@ -172,9 +172,9 @@ static int InstallSignalAction(struct sigaction *act, ...)
 
 	return 0;
 error:
+	va_end(ap);
 	assert(sig != 0);
 	Logmsg(LOG_ERR, "sigaction failed: %s:", strerror(errno));
-	va_end(ap);
 	return sig;
 }
 
