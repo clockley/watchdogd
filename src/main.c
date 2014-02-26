@@ -145,38 +145,80 @@ int main(int argc, char **argv)
 	return EXIT_SUCCESS;
 }
 
+
+static bool AddSignalsToSet(sigset_t *set, ...)
+{
+	va_list ap;
+	va_start(ap, set);
+
+	assert(set != NULL);
+
+	int sig = 0;
+
+	while ((sig = va_arg(ap, int)) != 0) {
+		sigaddset(set, sig);
+	}
+
+	va_end(ap);
+
+	return true;
+}
+
+static int InstallSignalAction(struct sigaction *act, ...)
+{
+	va_list ap;
+	struct sigaction oact;
+	va_start(ap, act);
+
+	assert(act != NULL);
+
+	int sig = 0;
+
+	while ((sig = va_arg(ap, int)) != 0) {
+		if (sigaction(sig, NULL, &oact) < 0) {
+			goto error;
+		}
+
+		if (oact.sa_handler != SIG_IGN) {
+			if (sigaction(sig, act, NULL) < 0) {
+				goto error;
+			}
+		}
+	}
+
+	va_end(ap);
+
+	return 0;
+error:
+	Logmsg(LOG_ERR, "sigaction failed: %s:", strerror(errno));
+	va_end(ap);
+	return sig;
+}
+
 int SetupSignalHandlers(int isDaemon)
 {
-	struct sigaction IgnoredSignals;
-	IgnoredSignals.sa_handler = SIG_IGN;
-	IgnoredSignals.sa_flags = 0;
-
-	sigemptyset(&IgnoredSignals.sa_mask);
-
 	struct sigaction act;
 
 	sigemptyset(&act.sa_mask);
-
-	sigaddset(&act.sa_mask, SIGINT);
-	sigaddset(&act.sa_mask, SIGTERM);
-	sigaddset(&act.sa_mask, SIGCHLD);
-
 	act.sa_handler = SignalHandler;
 	act.sa_flags = SA_SIGINFO;
 
-	if (sigaction(SIGTERM, &act, NULL) < 0) {
-		Logmsg(LOG_ERR, "sigaction failed: %s", strerror(errno));
-		return -1;
-	}
+	int ret = InstallSignalAction(&act, SIGTERM, SIGINT, 0);
 
-	if (sigaction(SIGINT, &act, NULL)) {
-		Logmsg(LOG_ERR, "sigaction failed: %s", strerror(errno));
+	if (ret !=  0) {
 		return -1;
 	}
 
 	if (isDaemon) {
-		sigaddset(&IgnoredSignals.sa_mask, SIGHUP);
-		sigaction(SIGHUP, &IgnoredSignals, NULL);
+		struct sigaction IgnoredSignals;
+		IgnoredSignals.sa_handler = SIG_IGN;
+		IgnoredSignals.sa_flags = 0;
+		sigemptyset(&IgnoredSignals.sa_mask);
+
+		ret = InstallSignalAction(&IgnoredSignals, SIGHUP, 0);
+		if (ret != 0) {
+			return -1;
+		}
 	}
 
 	return 0;

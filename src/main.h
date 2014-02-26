@@ -4,4 +4,5 @@ int SetupSignalHandlers(int isDaemon);
 void Abend(struct cfgoptions *s);
 void SignalHandler(int signum);
 static void PrintConfiguration(struct cfgoptions *s);
+static int InstallSignalAction(struct sigaction *act, ...);
 #endif
