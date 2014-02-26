@@ -40,7 +40,6 @@ void GetPageSize(void)
 
 void *Sync(void *arg)
 {
-	(void)arg;
 	for (;;) {
 		pthread_mutex_lock(&managerlock);
 
@@ -50,8 +49,6 @@ void *Sync(void *arg)
 
 		pthread_mutex_unlock(&managerlock);
 	}
-
-	pthread_exit(NULL);
 
 	return NULL;
 }
@@ -83,8 +80,6 @@ void *LoadAvgThread(void *arg)
 		pthread_mutex_unlock(&managerlock);
 	}
 
-	pthread_exit(NULL);
-
 	return NULL;
 }
 
@@ -110,8 +105,6 @@ void *TestDirThread(void *arg)
 			pthread_exit(NULL);
 		}
 	}
-
-	pthread_exit(NULL);
 
 	return NULL;
 }
@@ -142,8 +135,6 @@ void *TestBinThread(void *arg)
 			pthread_exit(NULL);
 		}
 	}
-
-	pthread_exit(NULL);
 
 	return NULL;
 }
@@ -184,8 +175,6 @@ void *MinPagesThread(void *arg)
 		pthread_mutex_unlock(&managerlock);
 	}
 
-	pthread_exit(NULL);
-
 	return NULL;
 }
 
@@ -218,8 +207,6 @@ void *TestFork(void *arg)
 		pthread_cond_wait(&workerupdate, &managerlock);
 		pthread_mutex_unlock(&managerlock);
 	}
-
-	pthread_exit(NULL);
 
 	return NULL;
 }
@@ -455,8 +442,6 @@ void *ManagerThread(void *arg)
 		}
 	}
 
-	pthread_exit(NULL);
-
 	return NULL;
 }
 
@@ -523,8 +508,7 @@ int SetupMinPagesThread(void *arg)
 {
 	struct cfgoptions *s = (struct cfgoptions *)arg;
 
-	if (arg == NULL)
-		return -1;
+	assert(arg != NULL);
 
 	if (s->minfreepages == 0)
 		return 0;
@@ -537,8 +521,7 @@ int SetupMinPagesThread(void *arg)
 
 int SetupLoadAvgThread(void *arg)
 {
-	if (arg == NULL)
-		return -1;
+	assert(arg != NULL);
 
 	if (CreateDetachedThread(LoadAvgThread, arg) < 0)
 		return -1;
@@ -548,8 +531,7 @@ int SetupLoadAvgThread(void *arg)
 
 int SetupTestBinThread(void *arg)
 {
-	if (arg == NULL)
-		return -1;
+	assert(arg != NULL);
 
 	if (CreateDetachedThread(TestBinThread, arg) < 0)
 		return -1;
@@ -559,8 +541,7 @@ int SetupTestBinThread(void *arg)
 
 int SetupAuxManagerThread(void *arg)
 {
-	if (arg == NULL)
-		return -1;
+	assert(arg != NULL);
 
 	if (CreateDetachedThread(ManagerThread, arg) < 0)
 		return -1;
@@ -570,8 +551,7 @@ int SetupAuxManagerThread(void *arg)
 
 int SetupSyncThread(void *arg)
 {
-	if (arg == NULL)
-		return -1;
+	assert(arg != NULL);
 
 	if (CreateDetachedThread(Sync, arg) < 0)
 		return -1;
@@ -581,8 +561,7 @@ int SetupSyncThread(void *arg)
 
 int StartPidFileTestThread(void *arg)
 {
-	if (arg == NULL)
-		return -1;
+	assert(arg != NULL);
 
 	if (CreateDetachedThread(TestPidfileThread, arg) < 0)
 		return -1;
