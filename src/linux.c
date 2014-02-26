@@ -52,6 +52,21 @@ int CloseWatchdog(watchdog_t * watchdog)
 	return 0;
 }
 
+static bool PrintWdtInfo(watchdog_t * wdt)
+{
+	struct watchdog_info watchDogInfo;
+
+	if (ioctl(wdt->fd, WDIOC_GETSUPPORT, &watchDogInfo) < 0) {
+		Logmsg(LOG_ERR, "%s", strerror(errno));
+	} else {
+		Logmsg(LOG_DEBUG, "Hardware watchdog '%s', version %lu",
+		       watchDogInfo.identity, watchDogInfo.firmware_version);
+		return true;
+	}
+
+	return false;
+}
+
 watchdog_t *OpenWatchdog(const char *path)
 {
 
@@ -71,6 +86,12 @@ watchdog_t *OpenWatchdog(const char *path)
 		return NULL;
 	}
 
+	if (PingWatchdog(watchdog) != 0) {
+		free(watchdog);
+		return NULL;
+	}
+
+	PrintWdtInfo(watchdog);
 	return watchdog;
 }
 
@@ -107,14 +128,16 @@ int ConfigureWatchdogTimeout(watchdog_t * watchdog, int timeout)
 	int oldTimeout = timeout;
 
 	if (ioctl(watchdog->fd, WDIOC_SETTIMEOUT, &timeout) < 0) {
-		fprintf(stderr,
-			"watchdogd: unable to set WDT timeout \n");
+		fprintf(stderr, "watchdogd: unable to set WDT timeout \n");
 		return -1;
 	}
 
 	if (timeout != oldTimeout) {
-		fprintf(stderr, "watchdogd: Actual WDT timeout: %i seconds\n", timeout);
-		fprintf(stderr, "watchdogd: Timeout specified in the configuration file: %i\n", oldTimeout);
+		fprintf(stderr, "watchdogd: Actual WDT timeout: %i seconds\n",
+			timeout);
+		fprintf(stderr,
+			"watchdogd: Timeout specified in the configuration file: %i\n",
+			oldTimeout);
 	}
 
 	options = WDIOS_ENABLECARD;

@@ -30,7 +30,7 @@ struct parent parent;
 
 int main(int argc, char **argv)
 {
-	static struct cfgoptions options;
+	struct cfgoptions options;
 	watchdog_t *watchdog;
 
 	if (SetDefaultConfig(&options) == false) {
