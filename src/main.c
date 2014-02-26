@@ -149,6 +149,7 @@ static int InstallSignalAction(struct sigaction *act, ...)
 {
 	va_list ap;
 	struct sigaction oact;
+	sigemptyset(&oact.sa_mask);
 	va_start(ap, act);
 
 	assert(act != NULL);
