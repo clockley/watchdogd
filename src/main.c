@@ -145,25 +145,6 @@ int main(int argc, char **argv)
 	return EXIT_SUCCESS;
 }
 
-
-static bool AddSignalsToSet(sigset_t *set, ...)
-{
-	va_list ap;
-	va_start(ap, set);
-
-	assert(set != NULL);
-
-	int sig = 0;
-
-	while ((sig = va_arg(ap, int)) != 0) {
-		sigaddset(set, sig);
-	}
-
-	va_end(ap);
-
-	return true;
-}
-
 static int InstallSignalAction(struct sigaction *act, ...)
 {
 	va_list ap;
