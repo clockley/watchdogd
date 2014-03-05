@@ -219,8 +219,6 @@ void Abend(struct cfgoptions *s)
 
 	Logmsg(LOG_INFO, "stopping watchdog daemon");
 
-	assert(s != NULL);
-
 	config_destroy(&s->cfg);
 
 	DeletePidFile(s);
