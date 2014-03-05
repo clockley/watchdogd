@@ -1,7 +1,7 @@
 #ifndef SUB_H
 #define SUB_H
 #include "watchdogd.h"
-int EndDaemon(int exitv, struct cfgoptions *s, int keepalive);
+int EndDaemon(struct cfgoptions *s, int keepalive);
 int CloseStandardFileDescriptors(void);
 int CloseWraper(const int *pfd);
 void CloseFileDescriptors(long maxfd);

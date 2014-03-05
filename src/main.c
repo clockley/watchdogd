@@ -78,7 +78,8 @@ int main(int argc, char **argv)
 				"unable to set watchdog device timeout\n");
 			fprintf(stderr, "program exiting\n");
 			/*Can't use Abend() because we need to shut down watchdog device after we open it */
-			EndDaemon(CloseWatchdog(watchdog), &options, false);
+			EndDaemon(&options, false);
+			CloseWatchdog(watchdog);
 			exit(EXIT_FAILURE);
 		} else {
 			if (ConfigureWatchdogTimeout
@@ -87,8 +88,8 @@ int main(int argc, char **argv)
 				Logmsg(LOG_ERR,
 				       "unable to set watchdog device timeout");
 				Logmsg(LOG_ERR, "program exiting");
-				EndDaemon(CloseWatchdog(watchdog), &options,
-					  false);
+				EndDaemon(&options, false);
+				CloseWatchdog(watchdog);
 				exit(EXIT_FAILURE);
 			}
 		}
@@ -133,9 +134,9 @@ int main(int argc, char **argv)
 		NormalizeTimespec(&rqtp);
 	}
 
-	if (EndDaemon
-	    ((options.options & NOACTION) == 0 ? CloseWatchdog(watchdog) : 0,
-	     &options, false) < 0) {
+	CloseWatchdog(watchdog);
+
+	if (EndDaemon(&options, false) < 0) {
 		DeletePidFile(&options);
 		exit(EXIT_FAILURE);
 	}

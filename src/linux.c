@@ -43,6 +43,7 @@ int CloseWatchdog(watchdog_t * watchdog)
 		       strerror(errno));
 		CloseWraper(&watchdog->fd);
 		WatchdogDestroy(watchdog);
+		Logmsg(LOG_CRIT, "unable to close watchdog device");
 		return -1;
 	} else {
 		CloseWraper(&watchdog->fd);

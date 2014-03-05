@@ -109,7 +109,7 @@ int Wasprintf(char **ret, const char *format, ...)
 	return count;
 }
 
-int EndDaemon(int exitv, struct cfgoptions *s, int keepalive)
+int EndDaemon(struct cfgoptions *s, int keepalive)
 {
 	if (s == NULL)
 		return -1;
@@ -141,11 +141,7 @@ int EndDaemon(int exitv, struct cfgoptions *s, int keepalive)
 		closelog();
 		munlockall();
 
-		if (exitv == 0) {
-			return 0;
-		}
-
-		return -1;
+		return 0;
 	}
 
 	DeletePidFile(s);

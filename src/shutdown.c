@@ -58,7 +58,7 @@ int Shutdown(int errorcode, struct cfgoptions *arg)
 			return 0;
 	}
 
-	EndDaemon(0, arg, true);	//point of no return
+	EndDaemon(arg, true);	//point of no return
 
 	StopInit();
 
