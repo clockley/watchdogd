@@ -106,7 +106,7 @@ int main(int argc, char **argv)
 				CloseWatchdog(watchdog);
 				Logmsg(LOG_WARNING,
 				       "use the -f option to force this configuration");
-				FatalError(&options);
+				return EXIT_FAILURE;
 			}
 		}
 	}
