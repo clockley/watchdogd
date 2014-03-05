@@ -42,7 +42,7 @@ int main(int argc, char **argv)
 	}
 
 	if (LoadConfigurationFile(&options) < 0) {
-		FatalError(&options);
+		return EXIT_FAILURE;
 	}
 
 	if (IsDaemon(&options) && Daemon(&options) < 0) {
