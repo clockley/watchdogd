@@ -42,15 +42,15 @@ int main(int argc, char **argv)
 	}
 
 	if (LoadConfigurationFile(&options) < 0) {
-		Abend(&options);
+		FatalError(&options);
 	}
 
 	if (IsDaemon(&options) && Daemon(&options) < 0) {
-		Abend(&options);
+		FatalError(&options);
 	}
 
 	if (SetupSignalHandlers(IsDaemon(&options)) < 0) {
-		Abend(&options);
+		FatalError(&options);
 	}
 
 	Logmsg(LOG_INFO, "starting daemon (%s)", PACKAGE_VERSION);
@@ -62,13 +62,13 @@ int main(int argc, char **argv)
 	}
 
 	if (StartHelperThreads(&options) != 0) {
-		Abend(&options);
+		FatalError(&options);
 	}
 
 	if ((options.options & NOACTION) == 0) {
 		watchdog = OpenWatchdog(options.devicepath);
 		if (watchdog == NULL) {
-			Abend(&options);
+			FatalError(&options);
 		}
 
 		if (ConfigureWatchdogTimeout(watchdog, options.watchdogTimeout)
@@ -77,7 +77,7 @@ int main(int argc, char **argv)
 			fprintf(stderr,
 				"unable to set watchdog device timeout\n");
 			fprintf(stderr, "program exiting\n");
-			/*Can't use Abend() because we need to shut down watchdog device after we open it */
+			/*Can't use FatalError() because we need to shut down watchdog device after we open it */
 			EndDaemon(&options, false);
 			CloseWatchdog(watchdog);
 			exit(EXIT_FAILURE);
@@ -106,13 +106,13 @@ int main(int argc, char **argv)
 				CloseWatchdog(watchdog);
 				Logmsg(LOG_WARNING,
 				       "use the -f option to force this configuration");
-				Abend(&options);
+				FatalError(&options);
 			}
 		}
 	}
 
 	if (SetupAuxManagerThread(&options) < 0) {
-		Abend(&options);
+		FatalError(&options);
 	}
 
 	struct timespec rqtp;
@@ -214,17 +214,17 @@ void SignalHandler(int signum)
 	return;
 }
 
-void Abend(struct cfgoptions *s)
+void FatalError(struct cfgoptions *s)
 {
 	assert(s != NULL);
 
-	Logmsg(LOG_INFO, "stopping watchdog daemon");
+	Logmsg(LOG_CRIT, "fatal error");
 
 	config_destroy(&s->cfg);
 
 	DeletePidFile(s);
 
-	exit(EXIT_FAILURE);
+	abort();
 }
 
 static void PrintConfiguration(struct cfgoptions *s)
