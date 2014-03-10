@@ -80,7 +80,7 @@ int main(int argc, char **argv)
 			/*Can't use FatalError() because we need to shut down watchdog device after we open it */
 			EndDaemon(&options, false);
 			CloseWatchdog(watchdog);
-			exit(EXIT_FAILURE);
+			return EXIT_FAILURE;
 		} else {
 			if (ConfigureWatchdogTimeout
 			    (watchdog, options.watchdogTimeout) < 0
@@ -90,7 +90,7 @@ int main(int argc, char **argv)
 				Logmsg(LOG_ERR, "program exiting");
 				EndDaemon(&options, false);
 				CloseWatchdog(watchdog);
-				exit(EXIT_FAILURE);
+				return EXIT_FAILURE;
 			}
 		}
 
