@@ -136,12 +136,11 @@ int main(int argc, char **argv)
 
 	CloseWatchdog(watchdog);
 
+	DeletePidFile(&options);
+
 	if (EndDaemon(&options, false) < 0) {
-		DeletePidFile(&options);
 		exit(EXIT_FAILURE);
 	}
-
-	DeletePidFile(&options);
 
 	return EXIT_SUCCESS;
 }
