@@ -31,7 +31,7 @@ struct parent parent;
 int main(int argc, char **argv)
 {
 	struct cfgoptions options;
-	watchdog_t *watchdog;
+	watchdog_t *watchdog = NULL;
 
 	if (SetDefaultConfig(&options) == false) {
 		return EXIT_FAILURE;
