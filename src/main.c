@@ -139,7 +139,7 @@ int main(int argc, char **argv)
 	DeletePidFile(&options);
 
 	if (EndDaemon(&options, false) < 0) {
-		exit(EXIT_FAILURE);
+		return EXIT_FAILURE;
 	}
 
 	return EXIT_SUCCESS;
