@@ -74,6 +74,8 @@ int Spawn(int timeout, struct cfgoptions *s, const char *file, const char *args,
 						O_RDWR | O_APPEND | O_CREAT,
 						S_IWUSR | S_IRUSR);
 
+				fsync(fd);
+
 				if (fd < 0) {
 					Logmsg(LOG_CRIT, "open failed: %s",
 					       strerror(errno));
