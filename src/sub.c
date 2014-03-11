@@ -144,7 +144,10 @@ int EndDaemon(struct cfgoptions *s, int keepalive)
 		return 0;
 	}
 
-	ping_destroy(s->pingObj);
+	if (s->options & ENABLEPING) {
+		ping_destroy(s->pingObj);
+	}
+
 	DeletePidFile(s);
 	FreeExeList(&parent);
 	Logmsg(LOG_INFO, "restarting system");
@@ -274,4 +277,17 @@ bool CheckWatchdogTimeout(watchdog_t * wdt, int timeout)
 		return false;
 	}
 	return true;
+}
+
+void FatalError(struct cfgoptions *s)
+{
+	assert(s != NULL);
+
+	Logmsg(LOG_CRIT, "fatal error");
+
+	DeletePidFile(s);
+
+	config_destroy(&s->cfg);
+
+	abort();
 }

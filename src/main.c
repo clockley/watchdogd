@@ -212,19 +212,6 @@ void SignalHandler(int signum)
 	return;
 }
 
-void FatalError(struct cfgoptions *s)
-{
-	assert(s != NULL);
-
-	Logmsg(LOG_CRIT, "fatal error");
-
-	config_destroy(&s->cfg);
-
-	DeletePidFile(s);
-
-	abort();
-}
-
 static void PrintConfiguration(struct cfgoptions *s)
 {
 	Logmsg(LOG_INFO,

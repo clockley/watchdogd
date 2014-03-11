@@ -345,6 +345,11 @@ int LoadConfigurationFile(struct cfgoptions *s)
 		}
 
 		s->pingObj = ping_construct();
+		if (s->pingObj == NULL) {
+			Logmsg(LOG_CRIT, "unable to allocate memory for ping object");
+			FatalError(s);
+		}
+
 		for (int cnt = 0; cnt < config_setting_length(s->ipAddresses);
 		     cnt++) {
 			const char *ipAddress =
@@ -576,6 +581,7 @@ bool SetDefaultConfig(struct cfgoptions * options)
 	options->testBinTimeout = 60;
 	options->options = 0;
 	options->error = 0;
+	options->pingObj = NULL;
 
 	return true;
 }
