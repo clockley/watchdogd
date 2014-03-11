@@ -24,7 +24,7 @@
 
 static volatile sig_atomic_t quit = 0;
 
-volatile sig_atomic_t shutdown = 0;
+volatile sig_atomic_t stop = 0;
 bool logToSyslog = false;
 struct parent parent;
 

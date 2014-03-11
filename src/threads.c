@@ -27,7 +27,7 @@
 #include "testdir.h"
 #include "exe.h"
 
-extern volatile sig_atomic_t shutdown;
+extern volatile sig_atomic_t stop;
 static pthread_mutex_t managerlock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_cond_t workerupdate = PTHREAD_COND_INITIALIZER;
 
@@ -101,7 +101,7 @@ void *TestDirThread(void *arg)
 
 		nanosleep(&rqtp, NULL);
 
-		if (shutdown == 1) {
+		if (stop == 1) {
 			pthread_exit(NULL);
 		}
 	}
@@ -131,7 +131,7 @@ void *TestBinThread(void *arg)
 
 		nanosleep(&rqtp, NULL);
 
-		if (shutdown == 1) {
+		if (stop == 1) {
 			pthread_exit(NULL);
 		}
 	}
@@ -437,7 +437,7 @@ void *ManagerThread(void *arg)
 		pthread_mutex_unlock(&managerlock);
 		nanosleep(&rqtp, NULL);
 
-		if (shutdown == 1) {
+		if (stop == 1) {
 			break;
 		}
 	}
