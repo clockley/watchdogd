@@ -114,9 +114,9 @@ int EndDaemon(struct cfgoptions *s, int keepalive)
 	if (s == NULL)
 		return -1;
 
-	extern volatile sig_atomic_t shutdown;
+	extern volatile sig_atomic_t stop;
 
-	shutdown = 1;
+	stop = 1;
 
 	struct sigaction dummy;
 	dummy.sa_handler = SIG_IGN;
@@ -144,6 +144,7 @@ int EndDaemon(struct cfgoptions *s, int keepalive)
 		return 0;
 	}
 
+	ping_destroy(s->pingObj);
 	DeletePidFile(s);
 	FreeExeList(&parent);
 	Logmsg(LOG_INFO, "restarting system");

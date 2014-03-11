@@ -35,5 +35,5 @@ int PingWatchdog(watchdog_t * watchdog);
 watchdog_t *OpenWatchdog(const char *path);
 int ConfigureWatchdogTimeout(watchdog_t * watchdog, int timeout);
 int _Shutdown(int errorcode, bool kexec);
-static bool PrintWdtInfo(watchdog_t *wdt);
+static bool PrintWdtInfo(watchdog_t * wdt);
 #endif

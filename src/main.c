@@ -171,7 +171,7 @@ static int InstallSignalAction(struct sigaction *act, ...)
 	va_end(ap);
 
 	return 0;
-error:
+ error:
 	va_end(ap);
 	assert(sig != 0);
 	Logmsg(LOG_ERR, "sigaction failed: %s:", strerror(errno));
@@ -188,7 +188,7 @@ int SetupSignalHandlers(int isDaemon)
 
 	int ret = InstallSignalAction(&act, SIGTERM, SIGINT, 0);
 
-	if (ret !=  0) {
+	if (ret != 0) {
 		return -1;
 	}
 

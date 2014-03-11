@@ -327,6 +327,39 @@ int LoadConfigurationFile(struct cfgoptions *s)
 		}
 	}
 
+	s->ipAddresses = config_lookup(&s->cfg, "ping");
+	if (s->ipAddresses != NULL) {
+		if (config_setting_is_array(s->ipAddresses) == CONFIG_FALSE) {
+			fprintf(stderr,
+				"watchdogd: %s:%i: illegal type for configuration file entry"
+				" \"ip-address\" expected array\n",
+				LibconfigWraperConfigSettingSourceFile
+				(s->ipAddresses),
+				config_setting_source_line(s->ipAddresses));
+			return -1;
+		}
+
+		if (config_setting_length(s->ipAddresses) > 0) {
+			s->options |= ENABLEPING;
+		} else {
+			return 0;
+		}
+
+		s->pingObj = ping_construct();
+		for (int cnt = 0; cnt < config_setting_length(s->ipAddresses);
+		     cnt++) {
+			const char *ipAddress =
+			    config_setting_get_string_elem(s->ipAddresses, cnt);
+
+			if (ping_host_add(s->pingObj, ipAddress) != 0) {
+				fprintf(stderr, "watchdogd: %s\n",
+					ping_get_error(s->pingObj));
+				ping_destroy(s->pingObj);
+				return -1;
+			}
+		}
+	}
+
 	return 0;
 }
 

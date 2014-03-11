@@ -19,6 +19,7 @@
 #include "watchdogd.h"
 #include <pthread.h>
 #include <syslog.h>
+#include <netdb.h>
 #include <sys/wait.h>
 #include <sys/sysinfo.h>
 #include "sub.h"
@@ -51,6 +52,67 @@ void *Sync(void *arg)
 	}
 
 	return NULL;
+}
+
+void *Ping(void *arg)
+{
+	struct cfgoptions *s = arg;
+	for (;;) {
+		pthread_mutex_lock(&managerlock);
+		if (ping_send(s->pingObj) > 0) {
+			for (pingobj_iter_t * iter =
+			     ping_iterator_get(s->pingObj); iter != NULL;
+			     iter = ping_iterator_next(iter)) {
+				double latency = -1.0;
+				size_t len = sizeof(latency);
+				ping_iterator_get_info(iter, PING_INFO_LATENCY,
+						       &latency, &len);
+				char buf[NI_MAXHOST] = { '\0' };
+				len = sizeof(buf);
+				ping_iterator_get_info(iter, PING_INFO_ADDRESS,
+						       &buf, &len);
+
+				if (latency > 0.0) {
+					Logmsg(LOG_DEBUG,
+					       "got answer from target %s",
+					       buf);
+					void *cxt =
+					    ping_iterator_get_context(iter);
+					if (cxt != NULL) {
+						free(cxt);
+						ping_iterator_set_context(iter,
+									  NULL);
+					}
+					continue;
+				} else {
+					Logmsg(LOG_ERR,
+					       "no response from ping (target: %s)",
+					       buf);
+				}
+
+				void *cxt = ping_iterator_get_context(iter);
+				if (cxt == NULL) {
+					int *retries = malloc(sizeof(int *));
+					*retries += 1;
+					ping_iterator_set_context(iter,
+								  retries);
+				} else {
+					int *retries = cxt;
+					if (*retries > 3) {	//FIXME: This should really be a config value.
+						s->error |= PINGFAILED;
+					} else {
+						*retries += 1;
+					}
+				}
+			}
+		} else {
+			Logmsg(LOG_ERR, "%s", ping_get_error(s->pingObj));
+			s->error |= PINGFAILED;
+		}
+
+		pthread_cond_wait(&workerupdate, &managerlock);
+		pthread_mutex_unlock(&managerlock);
+	}
 }
 
 void *LoadAvgThread(void *arg)
@@ -434,6 +496,15 @@ void *ManagerThread(void *arg)
 			}
 		}
 
+		if (s->error & PINGFAILED) {
+			Logmsg(LOG_ERR, "ping test failed... rebooting system");
+			if (Shutdown(PINGFAILED, arg) < 0) {
+				Logmsg(LOG_ERR,
+				       "watchdogd: Unable to shutdown system");
+				exit(EXIT_FAILURE);
+			}
+		}
+
 		pthread_mutex_unlock(&managerlock);
 		nanosleep(&rqtp, NULL);
 
@@ -483,6 +554,10 @@ int StartHelperThreads(struct cfgoptions *options)
 		if (StartPidFileTestThread(options) < 0) {
 			return -1;
 		}
+	}
+
+	if (options->options & ENABLEPING && StartPingThread(options) < 0) {
+		return -1;
 	}
 
 	return 0;
@@ -564,6 +639,16 @@ int StartPidFileTestThread(void *arg)
 	assert(arg != NULL);
 
 	if (CreateDetachedThread(TestPidfileThread, arg) < 0)
+		return -1;
+
+	return 0;
+}
+
+int StartPingThread(void *arg)
+{
+	assert(arg != NULL);
+
+	if (CreateDetachedThread(Ping, arg) < 0)
 		return -1;
 
 	return 0;
