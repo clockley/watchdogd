@@ -57,6 +57,8 @@ static bool PrintWdtInfo(watchdog_t * wdt)
 {
 	struct watchdog_info watchDogInfo;
 
+	assert(wdt != NULL);
+
 	if (ioctl(wdt->fd, WDIOC_GETSUPPORT, &watchDogInfo) < 0) {
 		Logmsg(LOG_ERR, "%s", strerror(errno));
 	} else {
