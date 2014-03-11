@@ -19,6 +19,8 @@ AC_PROG_CC_STDC
 PKG_CHECK_MODULES([MOUNT], [mount >= 2.22.0])
 
 PKG_CHECK_MODULES([DEPS], [libconfig >= 1.4.8])
+AC_CHECK_LIB([oping],[ping_construct])
+AC_CHECK_HEADERS([oping.h])
 
 AX_PTHREAD
 
