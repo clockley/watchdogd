@@ -55,7 +55,7 @@ void *Sync(void *arg)
 
 void *Ping(void *arg)
 {
-	struct cfgoptions *s = arg;
+	struct cfgoptions *s = (struct cfgoptions *)arg;
 	for (;;) {
 		pthread_mutex_lock(&managerlock);
 		if (ping_send(s->pingObj) > 0) {
@@ -91,12 +91,12 @@ void *Ping(void *arg)
 
 				void *cxt = ping_iterator_get_context(iter);
 				if (cxt == NULL) {
-					int *retries = malloc(sizeof(int *));
+					int *retries = (int *)malloc(sizeof(int *));
 					*retries += 1;
 					ping_iterator_set_context(iter,
 								  retries);
 				} else {
-					int *retries = cxt;
+					int *retries = (int *)cxt;
 					if (*retries > 3) {	//FIXME: This should really be a config value.
 						s->error |= PINGFAILED;
 					} else {
@@ -112,6 +112,8 @@ void *Ping(void *arg)
 		pthread_cond_wait(&workerupdate, &managerlock);
 		pthread_mutex_unlock(&managerlock);
 	}
+
+	return NULL;
 }
 
 void *LoadAvgThread(void *arg)
@@ -493,7 +495,7 @@ void *ManagerThread(void *arg)
 
 		if (s->error & PINGFAILED) {
 			Logmsg(LOG_ERR, "ping test failed... rebooting system");
-			if (Shutdown(PINGFAILED, arg) < 0) {
+			if (Shutdown(PINGFAILED, s) < 0) {
 				Logmsg(LOG_ERR,
 				       "watchdogd: Unable to shutdown system");
 				exit(EXIT_FAILURE);
