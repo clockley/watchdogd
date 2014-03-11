@@ -431,10 +431,6 @@ void *ManagerThread(void *arg)
 		if (s->temptoohigh == 1) {
 			/*Shutdown(true) */ ;
 		}
-
-		if (s->pingfailed == 1) {	//Need to find out how to use Linux network API.
-			/*Shutdown(false) */ ;
-		}
 #endif
 		if (s->error & LOADAVGTOOHIGH) {
 			Logmsg(LOG_ERR,
