@@ -114,6 +114,8 @@ int Spawn(int timeout, struct cfgoptions *s, const char *file, const char *args,
 
 				execv(file, (char *const *)array);
 
+				Logmsg(LOG_CRIT, "execv failed %s", strerror(errno));
+
 				close(fd);
 				return -1;
 			}
