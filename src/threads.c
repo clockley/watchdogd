@@ -79,7 +79,6 @@ void *Ping(void *arg)
 					    ping_iterator_get_context(iter);
 					if (cxt != NULL) {
 						free(cxt);
-						cxt = NULL;
 						ping_iterator_set_context(iter,
 									  NULL);
 					}
@@ -90,17 +89,17 @@ void *Ping(void *arg)
 					       buf);
 				}
 
-				void *cxt = ping_iterator_get_context(iter);
-				if (cxt == NULL) {
-					int *retries = (int *)calloc(1, sizeof(int *));
-					*retries += 1;
+				if (ping_iterator_get_context(iter) == NULL) {
 					ping_iterator_set_context(iter,
-								  retries);
-				} else {
+								  calloc(1, sizeof(int *)));
+					void *cxt = ping_iterator_get_context(iter);
 					int *retries = (int *)cxt;
+					*retries = *retries + 1;
+				} else {
+					int *retries = ping_iterator_get_context(iter);
 					if (*retries > 3) {	//FIXME: This should really be a config value.
-						free(cxt);
-						cxt = NULL;
+						free(ping_iterator_get_context(iter));
+						ping_iterator_set_context(iter, NULL);
 						s->error |= PINGFAILED;
 					} else {
 						*retries += 1;

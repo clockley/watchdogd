@@ -132,6 +132,20 @@ int EndDaemon(struct cfgoptions *s, int keepalive)
 		Logmsg(LOG_ERR, "killpg failed %s", strerror(errno));
 	}
 
+
+	for (int cnt = 0; cnt < config_setting_length(s->ipAddresses);
+	     cnt++) {
+		const char *ipAddress =
+		    config_setting_get_string_elem(s->ipAddresses, cnt);
+
+		if (ping_host_remove(s->pingObj, ipAddress) != 0) {
+			fprintf(stderr, "watchdogd: %s\n",
+				ping_get_error(s->pingObj));
+			ping_destroy(s->pingObj);
+			return -1;
+		}
+	}
+
 	if (keepalive == 0) {
 		FreeExeList(&parent);
 
