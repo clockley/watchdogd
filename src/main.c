@@ -222,6 +222,20 @@ static void PrintConfiguration(struct cfgoptions *s)
 	       s->options & FORCE ? "yes" : "no", s->maxLoadOne,
 	       s->minfreepages);
 
+	if (s->options & ENABLEPING) {
+		for (int cnt = 0; cnt < config_setting_length(s->ipAddresses);
+		     cnt++) {
+			const char *ipAddress =
+			    config_setting_get_string_elem(s->ipAddresses, cnt);
+
+			assert(ipAddress != NULL);
+
+			Logmsg(LOG_INFO, "ping: %s", ipAddress);
+		}
+	} else {
+		Logmsg(LOG_INFO, "ping: no ip adresses to ping");
+	}
+
 	if (s->options & ENABLEPIDCHECKER) {
 		for (int cnt = 0; cnt < config_setting_length(s->pidFiles);
 		     cnt++) {
