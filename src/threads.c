@@ -99,6 +99,7 @@ void *Ping(void *arg)
 					int *retries = (int *)cxt;
 					if (*retries > 3) {	//FIXME: This should really be a config value.
 						free(cxt);
+						cxt = NULL;
 						s->error |= PINGFAILED;
 					} else {
 						*retries += 1;
