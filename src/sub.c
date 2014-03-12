@@ -132,9 +132,13 @@ int EndDaemon(struct cfgoptions *s, int keepalive)
 		Logmsg(LOG_ERR, "killpg failed %s", strerror(errno));
 	}
 
+	for (pingobj_iter_t * iter = ping_iterator_get(s->pingObj);
+	     iter != NULL; iter = ping_iterator_next(iter)) {
+		free(ping_iterator_get_context(iter));
+		ping_iterator_set_context(iter, NULL);
+	}
 
-	for (int cnt = 0; cnt < config_setting_length(s->ipAddresses);
-	     cnt++) {
+	for (int cnt = 0; cnt < config_setting_length(s->ipAddresses); cnt++) {
 		const char *ipAddress =
 		    config_setting_get_string_elem(s->ipAddresses, cnt);
 
