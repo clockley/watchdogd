@@ -72,9 +72,6 @@ void *Ping(void *arg)
 						       &buf, &len);
 
 				if (latency > 0.0) {
-					Logmsg(LOG_DEBUG,
-					       "got answer from target %s",
-					       buf);
 					void *cxt =
 					    ping_iterator_get_context(iter);
 					if (cxt != NULL) {
