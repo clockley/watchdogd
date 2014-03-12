@@ -346,7 +346,8 @@ int LoadConfigurationFile(struct cfgoptions *s)
 
 		s->pingObj = ping_construct();
 		if (s->pingObj == NULL) {
-			Logmsg(LOG_CRIT, "unable to allocate memory for ping object");
+			Logmsg(LOG_CRIT,
+			       "unable to allocate memory for ping object");
 			FatalError(s);
 		}
 
@@ -361,6 +362,10 @@ int LoadConfigurationFile(struct cfgoptions *s)
 				ping_destroy(s->pingObj);
 				return -1;
 			}
+		}
+		for (pingobj_iter_t * iter = ping_iterator_get(s->pingObj);
+		     iter != NULL; iter = ping_iterator_next(iter)) {
+			ping_iterator_set_context(iter, NULL);
 		}
 	}
 

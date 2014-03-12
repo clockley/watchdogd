@@ -79,6 +79,7 @@ void *Ping(void *arg)
 					    ping_iterator_get_context(iter);
 					if (cxt != NULL) {
 						free(cxt);
+						cxt = NULL;
 						ping_iterator_set_context(iter,
 									  NULL);
 					}
@@ -91,7 +92,7 @@ void *Ping(void *arg)
 
 				void *cxt = ping_iterator_get_context(iter);
 				if (cxt == NULL) {
-					int *retries = (int *)malloc(sizeof(int *));
+					int *retries = (int *)calloc(1, sizeof(int *));
 					*retries += 1;
 					ping_iterator_set_context(iter,
 								  retries);
