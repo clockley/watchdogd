@@ -209,7 +209,6 @@ int SetupSignalHandlers(int isDaemon)
 void SignalHandler(int signum)
 {
 	quit = 1;
-	return;
 }
 
 static void PrintConfiguration(struct cfgoptions *s)
