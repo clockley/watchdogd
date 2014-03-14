@@ -189,34 +189,23 @@ int ExecuteRepairScripts(struct parent *p, struct cfgoptions *s)
 	struct child *next = NULL;
 
 	list_for_each_entry(c, next, &p->children, entry, struct child *) {
-		int ret =
+		c->ret =
 		    Spawn(s->repairBinTimeout, s, c->name, c->name, "test",
 			  NULL);
 
-		if (ret != 0) {
-			c->ret = ret;
-		}
-	}
-
-	int ret = 0;
-
-	list_for_each_entry(c, next, &p->children, entry, struct child *) {
 		if (c->ret == 0)
 			continue;
 
-		Logmsg(LOG_CRIT, "test binary %s returned %i", c->name, c->ret);
-
 		char buf[8] = { 0x00 };
-
 		snprintf(buf, sizeof(buf), "%i", c->ret);
 
-		if (Spawn
-		    (s->repairBinTimeout, s, c->name, c->name, "repair", buf,
-		     NULL) != EXIT_SUCCESS) {
-			ret = -1;
+		c->ret = Spawn(s->repairBinTimeout, s, c->name, c->name, "repair", buf, NULL);
+
+		if (c->ret != 0) {
+			c->ret = 0; //reset to zero
+			return -1; //exit
 		}
 	}
 
-	return ret;
-
+	return 0;
 }
