@@ -72,6 +72,7 @@ size_t DirentBufSize(DIR * dirp)
 int CreateLinkedListOfExes(const char *path, struct parent *p)
 {
 	assert(p != NULL);
+	assert(path != NULL);
 
 	struct stat buffer;
 	struct dirent *ent = NULL;
@@ -101,7 +102,7 @@ int CreateLinkedListOfExes(const char *path, struct parent *p)
 		return -1;
 	}
 
-	direntbuf = (struct dirent *)malloc(size);
+	direntbuf = (struct dirent *)calloc(1, size);
 
 	if (direntbuf == NULL) {
 		closedir(dir);
@@ -136,7 +137,7 @@ int CreateLinkedListOfExes(const char *path, struct parent *p)
 		if (!(buffer.st_mode & S_IRUSR))
 			continue;
 
-		struct child *child = (struct child *)malloc(sizeof(*child));
+		struct child *child = (struct child *)calloc(1, sizeof(*child));
 
 		if (child == NULL) {
 			goto error;
