@@ -75,6 +75,9 @@ void *Ping(void *arg)
 					void *cxt =
 					    ping_iterator_get_context(iter);
 					if (cxt != NULL) {
+						if (s->error & PINGFAILED) {
+							s->error &= !PINGFAILED;
+						}
 						free(cxt);
 						ping_iterator_set_context(iter,
 									  NULL);
