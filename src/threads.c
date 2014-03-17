@@ -96,7 +96,7 @@ void *Ping(void *arg)
 					int *retries = (int *)cxt;
 					*retries = *retries + 1;
 				} else {
-					int *retries = ping_iterator_get_context(iter);
+					int *retries = (int *)ping_iterator_get_context(iter);
 					if (*retries > 3) {	//FIXME: This should really be a config value.
 						free(ping_iterator_get_context(iter));
 						ping_iterator_set_context(iter, NULL);
