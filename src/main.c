@@ -121,6 +121,8 @@ int main(int argc, char **argv)
 	while (quit == 0) {
 		if ((options.options & NOACTION) == 0) {
 			PingWatchdog(watchdog);
+		} else {
+			assert(watchdog == NULL);
 		}
 
 		if (clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &rqtp, NULL)
