@@ -150,7 +150,10 @@ int EndDaemon(struct cfgoptions *s, int keepalive)
 		}
 	}
 
-	ping_destroy(s->pingObj);
+
+	if (s->options & ENABLEPING) {
+		ping_destroy(s->pingObj);
+	}
 
 	if (keepalive == 0) {
 		FreeExeList(&parent);
@@ -162,10 +165,6 @@ int EndDaemon(struct cfgoptions *s, int keepalive)
 		munlockall();
 
 		return 0;
-	}
-
-	if (s->options & ENABLEPING) {
-		ping_destroy(s->pingObj);
 	}
 
 	DeletePidFile(s);
