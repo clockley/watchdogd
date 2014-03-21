@@ -82,6 +82,8 @@ void Logmsg(int priority, const char *fmt, ...)
 			  args);
 		va_end(args);
 
+		assert(buf[sizeof(buf) - 1] == '\0');
+
 		fprintf(stderr, "%s\n", buf);
 
 		return;
@@ -92,6 +94,8 @@ void Logmsg(int priority, const char *fmt, ...)
 	vsnprintf(buf, sizeof(buf) - 1, fmt, args);
 
 	va_end(args);
+
+	assert(buf[sizeof(buf) - 1] == '\0');
 
 	syslog(priority, "%s", buf);
 }
