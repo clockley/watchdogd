@@ -150,6 +150,8 @@ int EndDaemon(struct cfgoptions *s, int keepalive)
 		}
 	}
 
+	ping_destroy(s->pingObj);
+
 	if (keepalive == 0) {
 		FreeExeList(&parent);
 
