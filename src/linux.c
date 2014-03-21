@@ -19,6 +19,7 @@
 
 #ifdef __linux__
 
+static bool PrintWdtInfo(watchdog_t * wdt);
 int IsSwaparea(struct libmnt_fs *fs, void *unused);
 
 int PingWatchdog(watchdog_t * watchdog)
