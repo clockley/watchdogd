@@ -74,8 +74,7 @@ void Logmsg(int priority, const char *fmt, ...)
 			snprintf(buf, sizeof(buf), "<7>");
 			break;
 		default:
-			snprintf(buf, sizeof(buf), "<4>");
-			break;
+			assert(false);
 		}
 
 		vsnprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), fmt,
