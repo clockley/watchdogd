@@ -111,6 +111,7 @@ void list_append(struct list *entry, struct list *head)
 void __list_del(struct list *prev, struct list *next)
 {
 	assert(next->prev == prev->next);
+
 	next->prev = prev;
 	prev->next = next;
 }
