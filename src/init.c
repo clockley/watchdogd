@@ -601,6 +601,6 @@ int PrintVersionString(void)
 int Usage(void)
 {
 	PrintVersionString();
-	printf("%s [-F] [-c <config_file>]\n", PACKAGE_NAME);
+	printf("%s [-F] [-q] [-c <config_file>]\n", PACKAGE_NAME);
 	return 0;
 }
