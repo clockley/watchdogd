@@ -28,11 +28,13 @@ int PingWatchdog(watchdog_t * watchdog)
 		return -1;
 	}
 
-	if (ioctl(watchdog->fd, WDIOC_KEEPALIVE, &watchdog->fd) == 0) {
+	int tmp = 0;
+
+	if (ioctl(GetFd(watchdog), WDIOC_KEEPALIVE, &tmp) == 0) {
 		return 0;
 	}
 
-	if (ioctl(watchdog->fd, WDIOC_KEEPALIVE, &watchdog->fd) == 0) {
+	if (ioctl(GetFd(watchdog), WDIOC_KEEPALIVE, &tmp) == 0) {
 		return 0;
 	}
 
@@ -49,20 +51,20 @@ int CloseWatchdog(watchdog_t * watchdog)
 
 	int options = WDIOS_DISABLECARD;
 
-	if (ioctl(watchdog->fd, WDIOC_SETOPTIONS, &options) < 0) {
+	if (ioctl(GetFd(watchdog), WDIOC_SETOPTIONS, &options) < 0) {
 		Logmsg(LOG_CRIT, "WDIOS_DISABLECARD ioctl failed: %s",
 		       strerror(errno));
 	}
 
-	if (write(watchdog->fd, "V", strlen("V")) < 0) {
+	if (write(GetFd(watchdog), "V", strlen("V")) < 0) {
 		Logmsg(LOG_CRIT, "write to watchdog device failed: %s",
 		       strerror(errno));
-		CloseWraper(&watchdog->fd);
+		close(GetFd(watchdog));
 		WatchdogDestroy(watchdog);
 		Logmsg(LOG_CRIT, "unable to close watchdog device");
 		return -1;
 	} else {
-		CloseWraper(&watchdog->fd);
+		close(GetFd(watchdog));
 		WatchdogDestroy(watchdog);
 	}
 
@@ -75,7 +77,7 @@ static bool PrintWdtInfo(watchdog_t * wdt)
 
 	assert(wdt != NULL);
 
-	if (ioctl(wdt->fd, WDIOC_GETSUPPORT, &watchDogInfo) < 0) {
+	if (ioctl(GetFd(wdt), WDIOC_GETSUPPORT, &watchDogInfo) < 0) {
 		Logmsg(LOG_ERR, "%s", strerror(errno));
 	} else {
 		Logmsg(LOG_DEBUG, "Hardware watchdog '%s', version %lu",
@@ -88,7 +90,6 @@ static bool PrintWdtInfo(watchdog_t * wdt)
 
 watchdog_t *OpenWatchdog(const char *path)
 {
-
 	if (path == NULL) {
 		return NULL;
 	}
@@ -97,8 +98,8 @@ watchdog_t *OpenWatchdog(const char *path)
 	if (watchdog == NULL)
 		return NULL;
 
-	watchdog->fd = open(path, O_WRONLY | O_CLOEXEC);
-	if (watchdog->fd == -1) {
+	SetFd(watchdog, open(path, O_WRONLY | O_CLOEXEC));
+	if (GetFd(watchdog) == -1) {
 		Logmsg(LOG_ERR,
 		       "unable to open watchdog device: %s", strerror(errno));
 		WatchdogDestroy(watchdog);
@@ -106,7 +107,7 @@ watchdog_t *OpenWatchdog(const char *path)
 	}
 
 	if (PingWatchdog(watchdog) != 0) {
-		free(watchdog);
+		WatchdogDestroy(watchdog);
 		return NULL;
 	}
 
@@ -128,13 +129,13 @@ int ConfigureWatchdogTimeout(watchdog_t * watchdog, int timeout)
 		return 0;
 
 	int options = WDIOS_DISABLECARD;
-	if (ioctl(watchdog->fd, WDIOC_SETOPTIONS, &options) < 0) {
+	if (ioctl(GetFd(watchdog), WDIOC_SETOPTIONS, &options) < 0) {
 		Logmsg(LOG_CRIT, "WDIOS_DISABLECARD ioctl failed: %s",
 		       strerror(errno));
 		return -1;
 	}
 
-	if (ioctl(watchdog->fd, WDIOC_GETSUPPORT, &watchDogInfo) < 0) {
+	if (ioctl(GetFd(watchdog), WDIOC_GETSUPPORT, &watchDogInfo) < 0) {
 		Logmsg(LOG_CRIT, "WDIOC_GETSUPPORT ioctl failed: %s",
 		       strerror(errno));
 		return -1;
@@ -146,7 +147,7 @@ int ConfigureWatchdogTimeout(watchdog_t * watchdog, int timeout)
 
 	int oldTimeout = timeout;
 
-	if (ioctl(watchdog->fd, WDIOC_SETTIMEOUT, &timeout) < 0) {
+	if (ioctl(GetFd(watchdog), WDIOC_SETTIMEOUT, &timeout) < 0) {
 		fprintf(stderr, "watchdogd: unable to set WDT timeout \n");
 		return -1;
 	}
@@ -160,13 +161,13 @@ int ConfigureWatchdogTimeout(watchdog_t * watchdog, int timeout)
 	}
 
 	options = WDIOS_ENABLECARD;
-	if (ioctl(watchdog->fd, WDIOC_SETOPTIONS, &options) < 0) {
+	if (ioctl(GetFd(watchdog), WDIOC_SETOPTIONS, &options) < 0) {
 		Logmsg(LOG_CRIT, "WDIOS_ENABLECARD ioctl failed: %s",
 		       strerror(errno));
 		return -1;
 	}
 
-	watchdog->timeout = timeout;
+	SetTimeout(watchdog, timeout);
 
 	return PingWatchdog(watchdog);
 }

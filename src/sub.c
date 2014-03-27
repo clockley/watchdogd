@@ -150,7 +150,6 @@ int EndDaemon(struct cfgoptions *s, int keepalive)
 		}
 	}
 
-
 	if (s->options & ENABLEPING) {
 		ping_destroy(s->pingObj);
 	}
@@ -295,6 +294,32 @@ bool CheckWatchdogTimeout(watchdog_t * wdt, int timeout)
 		return false;
 	}
 	return true;
+}
+
+
+
+void SetFd(watchdog_t * wdt, int fd)
+{
+	assert(wdt != NULL);
+	wdt->fd = fd;
+}
+
+int GetFd(watchdog_t * wdt)
+{
+	assert(wdt != NULL);
+	return wdt->fd;
+}
+
+void SetTimeout(watchdog_t * wdt, int timeout)
+{
+	assert(wdt != NULL);
+	wdt->timeout = timeout;
+}
+
+int GetTimeout(watchdog_t * wdt)
+{
+	assert(wdt != NULL);
+	return wdt->timeout;
 }
 
 void FatalError(struct cfgoptions *s)

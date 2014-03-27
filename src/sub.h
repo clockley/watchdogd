@@ -24,8 +24,17 @@ int OpenPidFile(const char *path);
 int LockFile(int fd, pid_t pid);
 int UnlockFile(int fd, pid_t pid);
 int WritePidFile(int fd, pid_t pid, const char *name);
+
+// watchdog_t obj methods
 watchdog_t *WatchdogConstruct(void);
 void WatchdogDestroy(watchdog_t * dog);
+
 bool CheckWatchdogTimeout(watchdog_t * wdt, int timeout);
+void SetFd(watchdog_t * wdt, int fd);
+int GetFd(watchdog_t * wdt);
+void SetTimeout(watchdog_t * wdt, int timeout);
+int GetTimeout(watchdog_t * wdt);
+//
+
 void FatalError(struct cfgoptions *s);
 #endif
