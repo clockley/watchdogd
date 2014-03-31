@@ -269,6 +269,7 @@ int CreateDetachedThread(void *(*startFunction) (void *), void *arg)
 	if (pthread_create(&thread, &attr, startFunction, arg) != 0) {
 		Logmsg(LOG_CRIT, "watchdogd: pthread_create failed: %s\n",
 		       strerror(errno));
+		pthread_attr_destroy(&attr);
 		return -1;
 	}
 
