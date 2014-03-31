@@ -120,9 +120,9 @@ int LoadConfigurationFile(struct cfgoptions *s)
 		}
 	}
 
-	if (config_lookup_string(&s->cfg, "pid-pathname", &s->pidpathname) ==
+	if (config_lookup_string(&s->cfg, "pid-pathname", &s->pidfile.name) ==
 	    CONFIG_FALSE) {
-		s->pidpathname = "/var/run/watchdogd.pid";
+		s->pidfile.name = "/var/run/watchdogd.pid";
 	}
 
 	if (config_lookup_string(&s->cfg, "log-dir", &s->logdir) ==
@@ -574,7 +574,7 @@ bool SetDefaultConfig(struct cfgoptions * options)
 
 	options->confile = "/etc/watchdogd.conf";
 	options->priority = 16;
-	options->pidpathname = "/var/run/watchdogd.pid";
+	options->pidfile.name = "/var/run/watchdogd.pid";
 	options->sleeptime = 1;
 	options->watchdogTimeout = -1;
 	options->maxLoadOne = 0;

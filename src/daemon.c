@@ -179,19 +179,19 @@ int Daemon(struct cfgoptions *s)
 	}
 
 	if (s->options & USEPIDFILE) {
-		s->lockfd = OpenPidFile(s->pidpathname);
+		s->pidfile.fd = OpenPidFile(s->pidfile.name);
 
-		if (s->lockfd < 0) {
+		if (s->pidfile.fd < 0) {
 			return -1;
 		}
 
-		if (LockFile(s->lockfd, getpid()) < 0) {
+		if (LockFile(s->pidfile.fd, getpid()) < 0) {
 			fprintf(stderr, "watchdogd: LockFile failed: %s\n",
 				strerror(errno));
 			return -1;
 		}
 
-		if (WritePidFile(s->lockfd, getpid(), s->pidpathname) < 0) {
+		if (WritePidFile(s->pidfile.fd, getpid(), s->pidfile.name) < 0) {
 			return -1;
 		}
 	}

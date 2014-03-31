@@ -44,6 +44,13 @@
 
 #include "list.h"
 
+struct pidfile {
+	const char *name;
+	int fd;
+};
+
+typedef struct pidfile pidfile_t;
+
 //TODO: Split this struct into an options struct(values read in from config file) and a runtime struct.
 struct cfgoptions {
 	config_t cfg;
@@ -59,8 +66,8 @@ struct cfgoptions {
 	const char *exepathname;
 	const char *testexepathname;
 	const char *confile;
-	const char *pidpathname;
 	const char *logdir;
+	pidfile_t pidfile;
 	time_t sleeptime;
 	unsigned long minfreepages;
 
@@ -78,7 +85,6 @@ struct cfgoptions {
 #define REALTIME 0x400
 
 	int priority;
-	int lockfd;
 	int watchdogTimeout;
 	int testExeReturnValue;
 	int testBinTimeout;

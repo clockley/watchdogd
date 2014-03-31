@@ -64,11 +64,11 @@ int DeletePidFile(struct cfgoptions *s)
 		return 0;
 	}
 
-	UnlockFile(s->lockfd, getpid());
+	UnlockFile(s->pidfile.fd, getpid());
 
-	CloseWraper(&s->lockfd);
+	CloseWraper(&s->pidfile.fd);
 
-	if (remove(s->pidpathname) < 0) {
+	if (remove(s->pidfile.name) < 0) {
 		Logmsg(LOG_ERR, "remove failed: %s", strerror(errno));
 		return -2;
 	}
