@@ -208,7 +208,7 @@ int SetupSignalHandlers(int isDaemon)
 	return 0;
 }
 
-void SignalHandler(int signum)
+static void SignalHandler(int signum)
 {
 	quit = 1;
 }

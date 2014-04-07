@@ -20,10 +20,10 @@
 #include "exe.h"
 #include "errorlist.h"
 
-int KillAll(void);
-int TermAll(void);
-int StartInit(void);
-int StopInit(void);
+static int KillAll(void);
+static int TermAll(void);
+static int StartInit(void);
+static int StopInit(void);
 
 int Shutdown(int errorcode, struct cfgoptions *arg)
 {
@@ -65,8 +65,8 @@ int Shutdown(int errorcode, struct cfgoptions *arg)
 	for (int i = 0; i < _NSIG; i += 1) {
 		signal(i, SIG_IGN);
 	}
-
 	int i = 0;
+
 	while (TermAll() == -1 && i < 2)
 		i += 1;
 
@@ -92,7 +92,7 @@ int Shutdown(int errorcode, struct cfgoptions *arg)
 	return _Shutdown(errorcode, arg->options & KEXEC ? 1 : 0);
 }
 
-int KillAll(void)
+static int KillAll(void)
 {
 	sync();
 	if (kill(-1, SIGKILL) != 0) {
@@ -104,7 +104,7 @@ int KillAll(void)
 	return 0;
 }
 
-int TermAll(void)
+static int TermAll(void)
 {
 	if (kill(-1, SIGTERM) != 0) {
 		if (errno != ESRCH)
@@ -114,7 +114,7 @@ int TermAll(void)
 	return 0;
 }
 
-int StartInit(void)
+static int StartInit(void)
 {
 	if (kill(1, SIGCONT) == -1)
 		return -1;
@@ -122,7 +122,7 @@ int StartInit(void)
 	return 0;
 }
 
-int StopInit(void)
+static int StopInit(void)
 {
 	if (kill(1, SIGTSTP) == -1)
 		return -1;

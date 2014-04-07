@@ -20,7 +20,7 @@
 #ifdef __linux__
 
 static bool PrintWdtInfo(watchdog_t * wdt);
-int IsSwaparea(struct libmnt_fs *fs, void *unused);
+static int IsSwaparea(struct libmnt_fs *fs, void *unused);
 
 int PingWatchdog(watchdog_t * watchdog)
 {
@@ -273,7 +273,7 @@ int UnmountAll(void)
 	return 0;
 }
 
-int IsSwaparea(struct libmnt_fs *fs, void *unused)
+static int IsSwaparea(struct libmnt_fs *fs, void *unused)
 {
 	assert(fs != NULL);
 
