@@ -40,7 +40,6 @@
 
 //Copied into this program Sun September 8, 2013 by Christian Lockley
 
-static size_t DirentBufSize(DIR * dirp);
 static size_t DirentBufSize(DIR * dirp)
 {
 	long name_max;
