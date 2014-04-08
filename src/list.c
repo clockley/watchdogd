@@ -25,9 +25,6 @@
 
 #include "watchdogd.h"
 
-void _list_del(struct list *entry);
-void __list_del(struct list *prev, struct list *next);
-void __list_add(struct list *entry, struct list *prev, struct list *next);
 /**
  * Initialize the list as an empty list.
  *
@@ -41,7 +38,7 @@ void list_init(struct list *list)
 	list->next = list->prev = list;
 }
 
-void __list_add(struct list *entry, struct list *prev, struct list *next)
+static void __list_add(struct list *entry, struct list *prev, struct list *next)
 {
 	next->prev = entry;
 	entry->next = next;
@@ -108,7 +105,7 @@ void list_append(struct list *entry, struct list *head)
 	__list_add(entry, head->prev, head);
 }
 
-void __list_del(struct list *prev, struct list *next)
+static void __list_del(struct list *prev, struct list *next)
 {
 	assert(next->prev == prev->next);
 
@@ -116,7 +113,7 @@ void __list_del(struct list *prev, struct list *next)
 	prev->next = next;
 }
 
-void _list_del(struct list *entry)
+static void _list_del(struct list *entry)
 {
 	assert(entry->prev->next == entry);
 	assert(entry->next->prev == entry);
