@@ -77,11 +77,10 @@ struct cfgoptions {
 #define ENABLEPING 0x8
 #define KEXEC 0x10
 #define DAEMONIZE 0x20
-#define UNUSED 0x40
-#define ENABLEPIDCHECKER 0x80
-#define FORCE 0x100
-#define NOACTION 0x200
-#define REALTIME 0x400
+#define ENABLEPIDCHECKER 0x40
+#define FORCE 0x80
+#define NOACTION 0x100
+#define REALTIME 0x200
 
 	int priority;
 	int watchdogTimeout;
