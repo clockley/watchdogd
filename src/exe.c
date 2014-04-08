@@ -34,8 +34,8 @@ static void *WaitThread(void *arg)
 	return NULL;
 }
 
-int Spawn(int timeout, struct cfgoptions *s, const char *file, const char *args,
-	  ...)
+int Spawn(int timeout, struct cfgoptions *config, const char *file,
+	  const char *args, ...)
 {
 	int status = 0;
 
@@ -61,12 +61,13 @@ int Spawn(int timeout, struct cfgoptions *s, const char *file, const char *args,
 				nice(0);
 
 				int dfd =
-				    open(s->logdir, O_DIRECTORY | O_RDONLY);
+				    open(config->logdir,
+					 O_DIRECTORY | O_RDONLY);
 
 				if (dfd < 0) {
 					Logmsg(LOG_CRIT,
-					       "open failed: %s: %s", s->logdir,
-					       strerror(errno));
+					       "open failed: %s: %s",
+					       config->logdir, strerror(errno));
 				}
 
 				int fd = openat(dfd, "repair.out",
