@@ -587,6 +587,7 @@ bool SetDefaultConfig(struct cfgoptions * options)
 	options->options = 0;
 	options->error = 0;
 	options->pingObj = NULL;
+	options->ipAddresses = NULL;
 
 	return true;
 }
