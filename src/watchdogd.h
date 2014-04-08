@@ -8,7 +8,6 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <inttypes.h>
-#include <iso646.h>
 #include <libconfig.h>
 #include <oping.h>
 #include <limits.h>
@@ -121,8 +120,10 @@ typedef struct watchdogDevice watchdog_t;
 
 extern struct parent parent;
 
-#ifdef __linux__
+struct listOfRunningProcess {
+	struct list children;
+};
+
 #include "linux.h"
-#endif
 
 #endif
