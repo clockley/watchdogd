@@ -585,7 +585,7 @@ bool SetDefaultConfig(struct cfgoptions * options)
 	options->repairBinTimeout = 60;
 	options->testBinTimeout = 60;
 	options->options = 0;
-	options->options =| DAEMONIZE;
+	options->options |= DAEMONIZE;
 	options->error = 0;
 	options->pingObj = NULL;
 	options->ipAddresses = NULL;
