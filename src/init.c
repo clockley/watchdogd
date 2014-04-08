@@ -133,13 +133,12 @@ int LoadConfigurationFile(struct cfgoptions *s)
 	if (MakeLogDir(s) < 0)
 		return -1;
 
-	if (config_lookup_bool(&s->cfg, "daemonize", &tmp) == CONFIG_TRUE
-	    && !(s->options & FOREGROUNDSETFROMCOMMANDLINE)) {
-		if (tmp) {
-			s->options |= DAEMONIZE;
+	if (s->options & DAEMONIZE == true) {
+		if (config_lookup_bool(&s->cfg, "daemonize", &tmp) == CONFIG_TRUE) {
+			if (!tmp) {
+				s->options &= !DAEMONIZE;
+			}
 		}
-	} else {
-		s->options |= DAEMONIZE;
 	}
 
 	if (!(s->options & SYNC)) {
@@ -497,7 +496,8 @@ int ParseCommandLine(int *argc, char **argv, struct cfgoptions *s)
 	while ((opt = getopt(*argc, argv, "qsfFc:")) != -1) {
 		switch (opt) {
 		case 'F':
-			s->options |= FOREGROUNDSETFROMCOMMANDLINE;
+			assert(s->options & DAEMONIZE);
+			s->options &= !DAEMONIZE;
 			break;
 		case 'c':
 			s->confile = optarg;
@@ -585,6 +585,7 @@ bool SetDefaultConfig(struct cfgoptions * options)
 	options->repairBinTimeout = 60;
 	options->testBinTimeout = 60;
 	options->options = 0;
+	options->options =| DAEMONIZE;
 	options->error = 0;
 	options->pingObj = NULL;
 
