@@ -91,15 +91,23 @@ void *Ping(void *arg)
 
 				if (ping_iterator_get_context(iter) == NULL) {
 					ping_iterator_set_context(iter,
-								  calloc(1, sizeof(int *)));
-					void *cxt = ping_iterator_get_context(iter);
+								  calloc(1,
+									 sizeof
+									 (int
+									  *)));
+					void *cxt =
+					    ping_iterator_get_context(iter);
 					int *retries = (int *)cxt;
 					*retries = *retries + 1;
 				} else {
-					int *retries = (int *)ping_iterator_get_context(iter);
+					int *retries =
+					    (int *)
+					    ping_iterator_get_context(iter);
 					if (*retries > 3) {	//FIXME: This should really be a config value.
-						free(ping_iterator_get_context(iter));
-						ping_iterator_set_context(iter, NULL);
+						free(ping_iterator_get_context
+						     (iter));
+						ping_iterator_set_context(iter,
+									  NULL);
 						s->error |= PINGFAILED;
 					} else {
 						*retries += 1;

@@ -297,8 +297,6 @@ bool CheckWatchdogTimeout(watchdog_t * wdt, int timeout)
 	return true;
 }
 
-
-
 void SetFd(watchdog_t * wdt, int fd)
 {
 	assert(wdt != NULL);

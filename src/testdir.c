@@ -199,11 +199,13 @@ int ExecuteRepairScripts(struct parent *p, struct cfgoptions *s)
 		char buf[8] = { 0x00 };
 		snprintf(buf, sizeof(buf), "%i", c->ret);
 
-		c->ret = Spawn(s->repairBinTimeout, s, c->name, c->name, "repair", buf, NULL);
+		c->ret =
+		    Spawn(s->repairBinTimeout, s, c->name, c->name, "repair",
+			  buf, NULL);
 
 		if (c->ret != 0) {
-			c->ret = 0; //reset to zero
-			return -1; //exit
+			c->ret = 0;	//reset to zero
+			return -1;	//exit
 		}
 	}
 
