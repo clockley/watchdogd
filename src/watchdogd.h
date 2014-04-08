@@ -121,19 +121,6 @@ typedef struct watchdogDevice watchdog_t;
 
 extern struct parent parent;
 
-struct listOfRunningProcess {
-	struct list children;
-};
-
-struct process {
-	struct list entry;
-	const char *name;
-	time_t starttime;
-	time_t timeout;
-	pid_t pid;
-	int ret;
-};
-
 #ifdef __linux__
 #include "linux.h"
 #endif
