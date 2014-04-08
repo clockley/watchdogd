@@ -18,10 +18,6 @@
 #include "sub.h"
 
 #ifdef __linux__
-
-static bool PrintWdtInfo(watchdog_t * wdt);
-static int IsSwaparea(struct libmnt_fs *fs, void *unused);
-
 int PingWatchdog(watchdog_t * watchdog)
 {
 	if (watchdog == NULL) {
