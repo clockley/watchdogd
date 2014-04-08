@@ -77,7 +77,7 @@ struct cfgoptions {
 #define ENABLEPING 0x8
 #define KEXEC 0x10
 #define DAEMONIZE 0x20
-#define FOREGROUNDSETFROMCOMMANDLINE 0x40
+#define UNUSED 0x40
 #define ENABLEPIDCHECKER 0x80
 #define FORCE 0x100
 #define NOACTION 0x200
