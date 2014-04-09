@@ -493,7 +493,7 @@ int ParseCommandLine(int *argc, char **argv, struct cfgoptions *s)
 {
 	int opt = 0;
 
-	while ((opt = getopt(*argc, argv, "qsfFc:")) != -1) {
+	while ((opt = getopt(*argc, argv, "qsfFbc:")) != -1) {
 		switch (opt) {
 		case 'F':
 			assert(s->options & DAEMONIZE);
@@ -510,6 +510,9 @@ int ParseCommandLine(int *argc, char **argv, struct cfgoptions *s)
 			break;
 		case 'f':
 			s->options |= FORCE;
+			break;
+		case 'b'
+			s->options |= SOFTBOOT;
 			break;
 		default:
 			Usage();
