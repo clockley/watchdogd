@@ -15,6 +15,6 @@
  */
 #ifndef EXE_H
 #define EXE_H
-int Spawn(int timeout, struct cfgoptions *config, const char *file,
+int Spawn(int timeout, struct cfgoptions *const config, const char *file,
 	  const char *args, ...);
 #endif

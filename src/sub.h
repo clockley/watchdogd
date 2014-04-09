@@ -17,7 +17,7 @@ int IsDaemon(const struct cfgoptions *s);
 void WriteUserAccountingDatabaseRecord(int reboot);
 void ResetSignalHandlers(int maxsigno);
 int IsExe(const char *pathname, bool returnfildes);
-void NormalizeTimespec(struct timespec *tp);
+void NormalizeTimespec(struct timespec *const tp);
 int CreateDetachedThread(void *(*startFunction) (void *), void *arg);
 int DeletePidFile(struct cfgoptions *s);
 int OpenPidFile(const char *path);

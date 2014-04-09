@@ -186,7 +186,7 @@ void ResetSignalHandlers(int maxsigno)
 	for (int i = 1; i < maxsigno; sigaction(i, &sa, NULL), i++) ;
 }
 
-void NormalizeTimespec(struct timespec *tp)
+void NormalizeTimespec(struct timespec * const tp)
 {
 	assert(tp != NULL);
 

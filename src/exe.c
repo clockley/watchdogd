@@ -34,7 +34,7 @@ static void *WaitThread(void *arg)
 	return NULL;
 }
 
-int Spawn(int timeout, struct cfgoptions *config, const char *file,
+int Spawn(int timeout, struct cfgoptions *const config, const char *file,
 	  const char *args, ...)
 {
 	int status = 0;
@@ -60,9 +60,8 @@ int Spawn(int timeout, struct cfgoptions *config, const char *file,
 						   &param);
 				nice(0);
 
-				int dfd =
-				    open(config->logdir,
-					 O_DIRECTORY | O_RDONLY);
+				int dfd = open(config->logdir,
+					       O_DIRECTORY | O_RDONLY);
 
 				if (dfd < 0) {
 					Logmsg(LOG_CRIT,
