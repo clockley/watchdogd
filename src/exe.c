@@ -169,9 +169,11 @@ int Spawn(int timeout, struct cfgoptions *const config, const char *file,
 					Logmsg(LOG_ERR,
 					       "binary %s exceeded time limit %ld",
 					       file, timeout);
+					//assert(ret != EXIT_SUCCESS); //Can't count on that.
 					if (ret == EXIT_SUCCESS) {
 						_Exit(EXIT_FAILURE);
 					} else {
+						assert(WEXITSTATUS(ret) != EXIT_SUCCESS);
 						_Exit(WEXITSTATUS(ret));
 					}
 				} else if (returnValue != 0) {
