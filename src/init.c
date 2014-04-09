@@ -133,7 +133,7 @@ int LoadConfigurationFile(struct cfgoptions *s)
 	if (MakeLogDir(s) < 0)
 		return -1;
 
-	if (s->options & DAEMONIZE == true) {
+	if ((s->options & DAEMONIZE) == true) {
 		if (config_lookup_bool(&s->cfg, "daemonize", &tmp) == CONFIG_TRUE) {
 			if (!tmp) {
 				s->options &= !DAEMONIZE;
@@ -511,7 +511,7 @@ int ParseCommandLine(int *argc, char **argv, struct cfgoptions *s)
 		case 'f':
 			s->options |= FORCE;
 			break;
-		case 'b'
+		case 'b':
 			s->options |= SOFTBOOT;
 			break;
 		default:
