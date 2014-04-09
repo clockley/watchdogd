@@ -22,6 +22,10 @@ PKG_CHECK_MODULES([DEPS], [libconfig >= 1.4.8])
 AC_CHECK_LIB([oping],[ping_construct])
 AC_CHECK_HEADERS([oping.h])
 
+LIBS=""
+AC_SEARCH_LIBS(clock_gettime, rt, [CLOCK_GETTIME_LIBS=$LIBS])
+AC_SUBST(CLOCK_GETTIME_LIBS)
+
 AX_PTHREAD
 
 # Checks for header files.
