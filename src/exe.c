@@ -169,7 +169,11 @@ int Spawn(int timeout, struct cfgoptions *const config, const char *file,
 					Logmsg(LOG_ERR,
 					       "binary %s exceeded time limit %ld",
 					       file, timeout);
-					_Exit(0);
+					if (ret == EXIT_SUCCESS) {
+						_Exit(EXIT_FAILURE);
+					} else {
+						_Exit(WEXITSTATUS(ret));
+					}
 				} else if (returnValue != 0) {
 					Logmsg(LOG_ERR,
 					       "unknown error in timeout code");

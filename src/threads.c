@@ -170,6 +170,10 @@ void *TestDirThread(void *arg)
 	for (;;) {
 		if (ExecuteRepairScripts(&parent, s) < 0) {
 			s->error |= SCRIPTFAILED;
+		} else {
+			if (s->error & SCRIPTFAILED) {
+				s->error &= !SCRIPTFAILED;
+			}
 		}
 
 		nanosleep(&rqtp, NULL);
