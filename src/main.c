@@ -118,7 +118,7 @@ int main(int argc, char **argv)
 
 	clock_gettime(CLOCK_MONOTONIC, &rqtp);
 
-	while (quit == 0) {
+	while (quit == 0 && stop == 0) {
 		if ((options.options & NOACTION) == 0) {
 			PingWatchdog(watchdog);
 		} else {
@@ -133,6 +133,15 @@ int main(int argc, char **argv)
 
 		rqtp.tv_sec += options.sleeptime;
 		NormalizeTimespec(&rqtp);
+	}
+
+	if (stop == 1) {
+		CloseWatchdog(watchdog);
+		while (true) {
+			sleep(60);
+		}
+	} else {
+		assert(quit == 1);
 	}
 
 	CloseWatchdog(watchdog);
