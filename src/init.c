@@ -575,23 +575,15 @@ bool SetDefaultConfig(struct cfgoptions * options)
 	if (options == NULL)
 		return false;
 
+	memset(options, 0, sizeof(*options));
+
 	options->confile = "/etc/watchdogd.conf";
 	options->priority = 16;
-	options->pidfile.name = "/var/run/watchdogd.pid";
 	options->sleeptime = 1;
 	options->watchdogTimeout = -1;
-	options->maxLoadOne = 0;
-	options->maxLoadFive = 0;
-	options->maxLoadFifteen = 0;
-	options->minfreepages = 0;
-	options->testExeReturnValue = 0;
 	options->repairBinTimeout = 60;
 	options->testBinTimeout = 60;
-	options->options = 0;
 	options->options |= DAEMONIZE;
-	options->error = 0;
-	options->pingObj = NULL;
-	options->ipAddresses = NULL;
 
 	return true;
 }
