@@ -21,6 +21,8 @@
 #include "init.h"
 #include "threads.h"
 
+#define DISARM_WATCHDOG_BEFORE_REBOOT true
+
 static volatile sig_atomic_t quit = 0;
 
 volatile sig_atomic_t stop = 0;
@@ -136,7 +138,12 @@ int main(int argc, char **argv)
 	}
 
 	if (stop == 1) {
-		CloseWatchdog(watchdog);
+		if (DISARM_WATCHDOG_BEFORE_REBOOT) {
+			CloseWatchdog(watchdog);
+		} else {
+			close(GetFd(watchdog));
+		}
+
 		while (true) {
 			sleep(60);
 		}
