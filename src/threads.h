@@ -11,4 +11,5 @@ int StartPingThread(void *arg);
 int SetupTestFork(void *arg);
 int SetupSyncThread(void *arg);
 int StartPidFileTestThread(void *arg);
+int StartPingThread(void *arg);
 #endif
