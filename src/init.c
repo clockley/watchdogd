@@ -52,7 +52,7 @@ int LoadConfigurationFile(struct cfgoptions *s)
 	int tmp = 0;
 
 	config_init(&s->cfg);
-
+	assert(s->confile);
 	if (!config_read_file(&s->cfg, s->confile)
 	    && config_error_file(&s->cfg) == NULL) {
 		fprintf(stderr,
