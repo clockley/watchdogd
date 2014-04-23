@@ -9,8 +9,6 @@ int ConfigureKernelOutOfMemoryKiller(void);
 int Shutdown(int errorcode, struct cfgoptions *arg);
 void Logmsg(int priority, const char *fmt, ...);
 int Daemon(struct cfgoptions *s);
-void *TestDirThread(void *arg);
-void *TestBinThread(void *arg);
 int UnmountAll(void);
 int Wasprintf(char **ret, const char *format, ...);
 int IsDaemon(const struct cfgoptions *s);

@@ -1,15 +1,5 @@
 #if !defined(THREADS_H)
 #define THREADS_H
-void GetPageSize(void);
-void *ManagerThread(void *arg);
-void *MarkTime(void *arg);
-void *LoadAvgThread(void *arg);
-void *TestFork(void *arg);
-void *Sync(void *arg);
-void *MinPagesThread(void *arg);
-void *TestPidfileThread(void *arg);
-void *CheckIfAbleToOpenFile(void *arg);
-void *Ping(void *arg);
 int StartHelperThreads(struct cfgoptions *options);
 int SetupLogTick(void *arg);
 int SetupAuxManagerThread(void *arg);

@@ -33,12 +33,12 @@ static pthread_cond_t workerupdate = PTHREAD_COND_INITIALIZER;
 
 static long pageSize = 0;
 
-void GetPageSize(void)
+static void GetPageSize(void)
 {
 	pageSize = sysconf(_SC_PAGESIZE);
 }
 
-void *Sync(void *arg)
+static void *Sync(void *arg)
 {
 	for (;;) {
 		pthread_mutex_lock(&managerlock);
@@ -53,7 +53,7 @@ void *Sync(void *arg)
 	return NULL;
 }
 
-void *Ping(void *arg)
+static void *Ping(void *arg)
 {
 	struct cfgoptions *s = (struct cfgoptions *)arg;
 	for (;;) {
@@ -126,7 +126,7 @@ void *Ping(void *arg)
 	return NULL;
 }
 
-void *LoadAvgThread(void *arg)
+static void *LoadAvgThread(void *arg)
 {
 	struct cfgoptions *s = (struct cfgoptions *)arg;
 
@@ -156,7 +156,7 @@ void *LoadAvgThread(void *arg)
 	return NULL;
 }
 
-void *TestDirThread(void *arg)
+static void *TestDirThread(void *arg)
 {
 	//This thread is a bit different as we don't want to prevent the other
 	//tests from running.
@@ -186,7 +186,7 @@ void *TestDirThread(void *arg)
 	return NULL;
 }
 
-void *TestBinThread(void *arg)
+static void *TestBinThread(void *arg)
 {
 	//This thread is a bit different as we don't want to prevent the other
 	//tests from running.
@@ -216,7 +216,7 @@ void *TestBinThread(void *arg)
 	return NULL;
 }
 
-void *MinPagesThread(void *arg)
+static void *MinPagesThread(void *arg)
 {
 	struct cfgoptions *s = (struct cfgoptions *)arg;
 	struct sysinfo infostruct;
@@ -255,7 +255,7 @@ void *MinPagesThread(void *arg)
 	return NULL;
 }
 
-void *TestFork(void *arg)
+static void *TestFork(void *arg)
 {
 	assert(arg != NULL);
 
@@ -288,7 +288,7 @@ void *TestFork(void *arg)
 	return NULL;
 }
 
-void *TestPidfileThread(void *arg)
+static void *TestPidfileThread(void *arg)
 {
 	assert(arg != NULL);
 
@@ -429,7 +429,7 @@ void *TestPidfileThread(void *arg)
 	return NULL;
 }
 
-void *ManagerThread(void *arg)
+static void *ManagerThread(void *arg)
 {
 	/*This thread gets data from the non main threads and
 	   calls a function to take care of the problem */
