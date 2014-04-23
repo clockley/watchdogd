@@ -57,7 +57,7 @@ int LoadConfigurationFile(struct cfgoptions *s)
 	    && config_error_file(&s->cfg) == NULL) {
 		fprintf(stderr,
 			"watchdogd: cannot open configuration file: %s\n",
-			config_error_file(&s->cfg));
+			s->confile);
 		config_destroy(&s->cfg);
 		return -1;
 	} else if (!config_read_file(&s->cfg, s->confile)) {
