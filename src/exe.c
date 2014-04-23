@@ -173,7 +173,8 @@ int Spawn(int timeout, struct cfgoptions *const config, const char *file,
 					if (ret == EXIT_SUCCESS) {
 						_Exit(EXIT_FAILURE);
 					} else {
-						assert(WEXITSTATUS(ret) != EXIT_SUCCESS);
+						assert(WEXITSTATUS(ret) !=
+						       EXIT_SUCCESS);
 						_Exit(WEXITSTATUS(ret));
 					}
 				} else if (returnValue != 0) {

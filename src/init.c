@@ -134,7 +134,8 @@ int LoadConfigurationFile(struct cfgoptions *s)
 		return -1;
 
 	if ((s->options & DAEMONIZE) == true) {
-		if (config_lookup_bool(&s->cfg, "daemonize", &tmp) == CONFIG_TRUE) {
+		if (config_lookup_bool(&s->cfg, "daemonize", &tmp) ==
+		    CONFIG_TRUE) {
 			if (!tmp) {
 				s->options &= !DAEMONIZE;
 			}
@@ -596,6 +597,7 @@ int PrintVersionString(void)
 int Usage(void)
 {
 	PrintVersionString();
-	printf("%s [-F] [-q] [-s] [-b] [-f] [-c <config_file>]\n", PACKAGE_NAME);
+	printf("%s [-F] [-q] [-s] [-b] [-f] [-c <config_file>]\n",
+	       PACKAGE_NAME);
 	return 0;
 }
