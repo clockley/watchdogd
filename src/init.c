@@ -141,11 +141,9 @@ int LoadConfigurationFile(struct cfgoptions *s)
 		}
 	}
 
-	if (!(s->options & SYNC)) {
-		if (config_lookup_bool(&s->cfg, "sync", &tmp) == CONFIG_TRUE) {
-			if (tmp) {
-				s->options |= SYNC;
-			}	/*no need to unset if false because all options are false by default */
+	if (config_lookup_bool(&s->cfg, "sync", &tmp) == CONFIG_TRUE) {
+		if (tmp) {
+			s->options |= SYNC;
 		}
 	}
 
