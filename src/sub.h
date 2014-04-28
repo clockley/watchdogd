@@ -11,7 +11,7 @@ void Logmsg(int priority, const char *fmt, ...);
 int Daemon(struct cfgoptions *s);
 int UnmountAll(void);
 int Wasprintf(char **ret, const char *format, ...);
-int IsDaemon(struct cfgoptions const *s);
+int IsDaemon(struct cfgoptions *const s);
 void WriteUserAccountingDatabaseRecord(int reboot);
 void ResetSignalHandlers(int maxsigno);
 int IsExe(const char *pathname, bool returnfildes);
