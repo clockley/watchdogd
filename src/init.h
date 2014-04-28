@@ -23,7 +23,7 @@ int CheckPriority(int priority);
 int InitializePosixMemlock(void);
 int Usage(void);
 int PrintVersionString(void);
-int LoadConfigurationFile(struct cfgoptions *options);
+int LoadConfigurationFile(struct cfgoptions *const cfg);
 int ParseCommandLine(int *argc, char **argv, struct cfgoptions *s);
 bool SetDefaultConfig(struct cfgoptions *options);
 #endif

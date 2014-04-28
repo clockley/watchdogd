@@ -43,116 +43,116 @@ int InitializePosixMemlock(void)
 	return 0;
 }
 
-int LoadConfigurationFile(struct cfgoptions *s)
+int LoadConfigurationFile(struct cfgoptions *const cfg)
 {
-	assert(s != NULL);
+	assert(cfg != NULL);
 
 	int tmp = 0;
 
-	config_init(&s->cfg);
-	assert(s->confile != NULL);
-	if (!config_read_file(&s->cfg, s->confile)
-	    && config_error_file(&s->cfg) == NULL) {
+	config_init(&cfg->cfg);
+	assert(cfg->confile != NULL);
+	if (!config_read_file(&cfg->cfg, cfg->confile)
+	    && config_error_file(&cfg->cfg) == NULL) {
 		fprintf(stderr,
 			"watchdogd: cannot open configuration file: %s\n",
-			s->confile);
-		config_destroy(&s->cfg);
+			cfg->confile);
+		config_destroy(&cfg->cfg);
 		return -1;
-	} else if (!config_read_file(&s->cfg, s->confile)) {
+	} else if (!config_read_file(&cfg->cfg, cfg->confile)) {
 		fprintf(stderr, "watchdogd: %s:%d: %s\n",
-			config_error_file(&s->cfg),
-			config_error_line(&s->cfg), config_error_text(&s->cfg));
-		config_destroy(&s->cfg);
+			config_error_file(&cfg->cfg),
+			config_error_line(&cfg->cfg), config_error_text(&cfg->cfg));
+		config_destroy(&cfg->cfg);
 		return -1;
 	}
 
-	if (config_lookup_string(&s->cfg, "repair-binary", &s->exepathname) ==
+	if (config_lookup_string(&cfg->cfg, "repair-binary", &cfg->exepathname) ==
 	    CONFIG_FALSE) {
-		s->exepathname = NULL;
+		cfg->exepathname = NULL;
 	}
 
-	if (s->exepathname != NULL && IsExe(s->exepathname, false) < 0) {
+	if (cfg->exepathname != NULL && IsExe(cfg->exepathname, false) < 0) {
 		fprintf(stderr, "watchdogd: %s: Invalid executeable image\n",
-			s->exepathname);
+			cfg->exepathname);
 		fprintf(stderr, "watchdogd: ignoring repair-binary option\n");
-		s->exepathname = NULL;
+		cfg->exepathname = NULL;
 	}
 
-	if (config_lookup_string(&s->cfg, "test-binary", &s->testexepathname) ==
+	if (config_lookup_string(&cfg->cfg, "test-binary", &cfg->testexepathname) ==
 	    CONFIG_FALSE) {
-		s->testexepathname = NULL;
+		cfg->testexepathname = NULL;
 	}
 
-	if (s->exepathname != NULL && IsExe(s->testexepathname, false) < 0) {
+	if (cfg->exepathname != NULL && IsExe(cfg->testexepathname, false) < 0) {
 		fprintf(stderr, "watchdogd: %s: Invalid executeable image\n",
-			s->testexepathname);
+			cfg->testexepathname);
 		fprintf(stderr, "watchdogd: ignoring test-binary option\n");
-		s->testexepathname = NULL;
+		cfg->testexepathname = NULL;
 	}
 
-	if (config_lookup_string(&s->cfg, "test-directory", &s->testexepath) ==
+	if (config_lookup_string(&cfg->cfg, "test-directory", &cfg->testexepath) ==
 	    CONFIG_FALSE) {
-		s->testexepath = "/etc/watchdog.d";
+		cfg->testexepath = "/etc/watchdog.d";
 	}
 
-	if (CreateLinkedListOfExes(s->testexepath, &parent) < 0) {
+	if (CreateLinkedListOfExes(cfg->testexepath, &parent) < 0) {
 		fprintf(stderr, "watchdogd: CreateLinkedListOfExes failed\n");
 		return -1;
 	}
 
-	if (config_lookup_string(&s->cfg, "watchdog-device", &s->devicepath) ==
+	if (config_lookup_string(&cfg->cfg, "watchdog-device", &cfg->devicepath) ==
 	    CONFIG_FALSE) {
-		s->devicepath = "/dev/watchdog";
+		cfg->devicepath = "/dev/watchdog";
 	}
 
-	if (config_lookup_int(&s->cfg, "min-memory", &tmp) == CONFIG_TRUE) {
+	if (config_lookup_int(&cfg->cfg, "min-memory", &tmp) == CONFIG_TRUE) {
 		if (tmp < 0) {
 			fprintf(stderr,
 				"illegal value for configuration file"
 				" entry named \"min-memory\"\n");
 			fprintf(stderr,
 				"disabled memory free page monitoring\n");
-			s->minfreepages = 0;
+			cfg->minfreepages = 0;
 		} else {
-			s->minfreepages = (unsigned long)tmp;
+			cfg->minfreepages = (unsigned long)tmp;
 		}
 	}
 
-	if (config_lookup_string(&s->cfg, "pid-pathname", &s->pidfile.name) ==
+	if (config_lookup_string(&cfg->cfg, "pid-pathname", &cfg->pidfile.name) ==
 	    CONFIG_FALSE) {
-		s->pidfile.name = "/var/run/watchdogd.pid";
+		cfg->pidfile.name = "/var/run/watchdogd.pid";
 	}
 
-	if (config_lookup_string(&s->cfg, "log-dir", &s->logdir) ==
+	if (config_lookup_string(&cfg->cfg, "log-dir", &cfg->logdir) ==
 	    CONFIG_FALSE) {
-		s->logdir = "/var/log/watchdogd";
+		cfg->logdir = "/var/log/watchdogd";
 	}
 
-	if (MakeLogDir(s) < 0)
+	if (MakeLogDir(cfg) < 0)
 		return -1;
 
-	if ((s->options & DAEMONIZE) == true) {
-		if (config_lookup_bool(&s->cfg, "daemonize", &tmp) ==
+	if ((cfg->options & DAEMONIZE) == true) {
+		if (config_lookup_bool(&cfg->cfg, "daemonize", &tmp) ==
 		    CONFIG_TRUE) {
 			if (!tmp) {
-				s->options &= !DAEMONIZE;
+				cfg->options &= !DAEMONIZE;
 			}
 		}
 	}
 
-	if (config_lookup_bool(&s->cfg, "sync", &tmp) == CONFIG_TRUE) {
+	if (config_lookup_bool(&cfg->cfg, "sync", &tmp) == CONFIG_TRUE) {
 		if (tmp) {
-			s->options |= SYNC;
+			cfg->options |= SYNC;
 		}
 	}
 
-	if (config_lookup_bool(&s->cfg, "use-kexec", &tmp) == CONFIG_TRUE) {
+	if (config_lookup_bool(&cfg->cfg, "use-kexec", &tmp) == CONFIG_TRUE) {
 		if (tmp) {
-			s->options |= KEXEC;
+			cfg->options |= KEXEC;
 		}
 	}
 
-	if (config_lookup_bool(&s->cfg, "lock-memory", &tmp) == CONFIG_TRUE) {
+	if (config_lookup_bool(&cfg->cfg, "lock-memory", &tmp) == CONFIG_TRUE) {
 		if (tmp) {
 			if (InitializePosixMemlock() < 0) {
 				return -1;
@@ -160,46 +160,46 @@ int LoadConfigurationFile(struct cfgoptions *s)
 		}
 	}
 
-	if (config_lookup_bool(&s->cfg, "use-pid-file", &tmp) == CONFIG_TRUE) {
+	if (config_lookup_bool(&cfg->cfg, "use-pid-file", &tmp) == CONFIG_TRUE) {
 		if (tmp) {
-			s->options |= USEPIDFILE;
+			cfg->options |= USEPIDFILE;
 		}
 	}
 
-	if (config_lookup_bool(&s->cfg, "softboot", &tmp) == CONFIG_TRUE) {
+	if (config_lookup_bool(&cfg->cfg, "softboot", &tmp) == CONFIG_TRUE) {
 		if (tmp) {
-			s->options |= SOFTBOOT;
+			cfg->options |= SOFTBOOT;
 		}
 	}
 
-	if (config_lookup_int(&s->cfg, "realtime-priority", &tmp) ==
+	if (config_lookup_int(&cfg->cfg, "realtime-priority", &tmp) ==
 	    CONFIG_TRUE) {
 		if (CheckPriority(tmp) < 0) {
 			fprintf(stderr,
 				"illegal value for configuration file entry named \"realtime-priority\"\n");
 			fprintf(stderr, "watchdogd: using default value\n");
-			s->priority = 1;
+			cfg->priority = 1;
 		} else {
-			s->priority = tmp;
+			cfg->priority = tmp;
 		}
 	}
 
-	config_set_auto_convert(&s->cfg, true);
+	config_set_auto_convert(&cfg->cfg, true);
 
-	if (config_lookup_float(&s->cfg, "max-load-1", &s->maxLoadOne) ==
+	if (config_lookup_float(&cfg->cfg, "max-load-1", &cfg->maxLoadOne) ==
 	    CONFIG_TRUE) {
-		if (s->maxLoadOne < 0 || s->maxLoadOne > 100L) {
+		if (cfg->maxLoadOne < 0 || cfg->maxLoadOne > 100L) {
 			fprintf(stderr,
 				"watchdogd: illegal value for configuration file entry named \"max-load-1\"\n");
 			fprintf(stderr, "watchdogd: using default value\n");
-			s->maxLoadOne = 0L;
+			cfg->maxLoadOne = 0L;
 		}
 	}
 
-	if (config_lookup_float(&s->cfg, "max-load-5", &s->maxLoadFive) ==
+	if (config_lookup_float(&cfg->cfg, "max-load-5", &cfg->maxLoadFive) ==
 	    CONFIG_TRUE) {
-		if (s->maxLoadFive <= 0 || s->maxLoadFive > 100L) {
-			if (s->maxLoadFive != 0) {
+		if (cfg->maxLoadFive <= 0 || cfg->maxLoadFive > 100L) {
+			if (cfg->maxLoadFive != 0) {
 				fprintf(stderr,
 					"watchdogd: illegal value for"
 					" configuration file entry named \"max-load-5\"\n");
@@ -207,159 +207,159 @@ int LoadConfigurationFile(struct cfgoptions *s)
 
 			fprintf(stderr, "watchdogd: using default value\n");
 
-			s->maxLoadFive = s->maxLoadOne * 0.75;
+			cfg->maxLoadFive = cfg->maxLoadOne * 0.75;
 		}
 	} else {
-		s->maxLoadFive = s->maxLoadOne * 0.75;
+		cfg->maxLoadFive = cfg->maxLoadOne * 0.75;
 	}
 
-	if (config_lookup_float(&s->cfg, "max-load-15", &s->maxLoadFifteen) ==
+	if (config_lookup_float(&cfg->cfg, "max-load-15", &cfg->maxLoadFifteen) ==
 	    CONFIG_TRUE) {
-		if (s->maxLoadFifteen <= 0 || s->maxLoadFifteen > 100L) {
+		if (cfg->maxLoadFifteen <= 0 || cfg->maxLoadFifteen > 100L) {
 
-			if (s->maxLoadFifteen != 0) {
+			if (cfg->maxLoadFifteen != 0) {
 				fprintf(stderr,
 					"watchdogd: illegal value for"
 					" configuration file entry named \"max-load-15\"\n");
 			}
 
 			fprintf(stderr, "watchdogd: using default value\n");
-			s->maxLoadFifteen = s->maxLoadOne * 0.5;
+			cfg->maxLoadFifteen = cfg->maxLoadOne * 0.5;
 		}
 	} else {
-		s->maxLoadFifteen = s->maxLoadOne * 0.5;
+		cfg->maxLoadFifteen = cfg->maxLoadOne * 0.5;
 	}
 
-	if (config_lookup_float(&s->cfg, "retry-timeout", &s->retryLimit) ==
+	if (config_lookup_float(&cfg->cfg, "retry-timeout", &cfg->retryLimit) ==
 	    CONFIG_TRUE) {
-		if (s->retryLimit > 86400L) {
+		if (cfg->retryLimit > 86400L) {
 			fprintf(stderr,
 				"watchdogd: illegal value for configuration file entry named \"retry-timeout\"\n");
 			fprintf(stderr, "watchdogd: disabling retry timeout\n");
-			s->retryLimit = 0L;
+			cfg->retryLimit = 0L;
 		}
 	} else {
-		s->retryLimit = 0L;
+		cfg->retryLimit = 0L;
 	}
 
-	config_set_auto_convert(&s->cfg, false);
+	config_set_auto_convert(&cfg->cfg, false);
 
-	if (config_lookup_bool(&s->cfg, "realtime-scheduling", &tmp)) {
+	if (config_lookup_bool(&cfg->cfg, "realtime-scheduling", &tmp)) {
 		if (tmp) {
-			if (SetSchedulerPolicy(s->priority) < 0) {
+			if (SetSchedulerPolicy(cfg->priority) < 0) {
 				return -1;
 			}
-			s->options |= REALTIME;
+			cfg->options |= REALTIME;
 		}
 	} else {
-		if (SetSchedulerPolicy(s->priority) < 0) {
+		if (SetSchedulerPolicy(cfg->priority) < 0) {
 			return -1;
 		}
-		s->options |= REALTIME;
+		cfg->options |= REALTIME;
 	}
 
-	if (config_lookup_int(&s->cfg, "watchdog-timeout", &tmp) == CONFIG_TRUE) {
+	if (config_lookup_int(&cfg->cfg, "watchdog-timeout", &tmp) == CONFIG_TRUE) {
 		if (tmp < 0 || tmp > 60 || tmp == 0) {
 			fprintf(stderr,
 				"watchdogd: illegal value for configuration file entry named \"watchdog-timeout\"\n");
 			fprintf(stderr, "watchdogd: using device default\n");
-			s->watchdogTimeout = -1;
+			cfg->watchdogTimeout = -1;
 		} else {
-			s->watchdogTimeout = tmp;
+			cfg->watchdogTimeout = tmp;
 		}
 	}
 
-	if (config_lookup_int(&s->cfg, "repair-timeout", &tmp) == CONFIG_TRUE) {
+	if (config_lookup_int(&cfg->cfg, "repair-timeout", &tmp) == CONFIG_TRUE) {
 		if (tmp < 0 || tmp > 499999) {
 			fprintf(stderr,
 				"watchdogd: illegal value for configuration file entry named \"repair-timeout\"\n");
 			fprintf(stderr,
 				"watchdogd: disabled repair binary timeout\n");
-			s->repairBinTimeout = 0;
+			cfg->repairBinTimeout = 0;
 		} else {
-			s->repairBinTimeout = tmp;
+			cfg->repairBinTimeout = tmp;
 		}
 	}
 
-	if (config_lookup_int(&s->cfg, "test-timeout", &tmp) == CONFIG_TRUE) {
+	if (config_lookup_int(&cfg->cfg, "test-timeout", &tmp) == CONFIG_TRUE) {
 		if (tmp < 0 || tmp > 499999) {
 			fprintf(stderr,
 				"watchdogd: illegal value for configuration file entry named \"test-timeout\"\n");
 			fprintf(stderr,
 				"watchdogd: disabled test binary timeout\n");
-			s->testBinTimeout = 0;
+			cfg->testBinTimeout = 0;
 		} else {
-			s->testBinTimeout = tmp;
+			cfg->testBinTimeout = tmp;
 		}
 	}
 
-	if (config_lookup_int(&s->cfg, "interval", &tmp) == CONFIG_TRUE) {
+	if (config_lookup_int(&cfg->cfg, "interval", &tmp) == CONFIG_TRUE) {
 		if (tmp < 0 || tmp > 60 || tmp == 0) {
 			tmp = 1;
 			fprintf(stderr,
 				"watchdogd: illegal value for configuration file entry named \"interval\"\n");
 			fprintf(stderr, "watchdogd: using default value\n");
 		} else {
-			s->sleeptime = (time_t) tmp;
+			cfg->sleeptime = (time_t) tmp;
 		}
 	}
 
-	s->pidFiles = config_lookup(&s->cfg, "pid-files");
+	cfg->pidFiles = config_lookup(&cfg->cfg, "pid-files");
 
-	if (s->pidFiles != NULL) {
-		if (config_setting_is_array(s->pidFiles) == CONFIG_FALSE) {
+	if (cfg->pidFiles != NULL) {
+		if (config_setting_is_array(cfg->pidFiles) == CONFIG_FALSE) {
 			fprintf(stderr,
 				"watchdogd: %s:%i: illegal type for configuration file entry"
 				" \"pid-files\" expected array\n",
 				LibconfigWraperConfigSettingSourceFile
-				(s->pidFiles),
-				config_setting_source_line(s->pidFiles));
+				(cfg->pidFiles),
+				config_setting_source_line(cfg->pidFiles));
 			return -1;
 		}
 
-		if (config_setting_length(s->pidFiles) > 0) {
-			s->options |= ENABLEPIDCHECKER;
+		if (config_setting_length(cfg->pidFiles) > 0) {
+			cfg->options |= ENABLEPIDCHECKER;
 		}
 	}
 
-	s->ipAddresses = config_lookup(&s->cfg, "ping");
-	if (s->ipAddresses != NULL) {
-		if (config_setting_is_array(s->ipAddresses) == CONFIG_FALSE) {
+	cfg->ipAddresses = config_lookup(&cfg->cfg, "ping");
+	if (cfg->ipAddresses != NULL) {
+		if (config_setting_is_array(cfg->ipAddresses) == CONFIG_FALSE) {
 			fprintf(stderr,
 				"watchdogd: %s:%i: illegal type for configuration file entry"
 				" \"ip-address\" expected array\n",
 				LibconfigWraperConfigSettingSourceFile
-				(s->ipAddresses),
-				config_setting_source_line(s->ipAddresses));
+				(cfg->ipAddresses),
+				config_setting_source_line(cfg->ipAddresses));
 			return -1;
 		}
 
-		if (config_setting_length(s->ipAddresses) > 0) {
-			s->options |= ENABLEPING;
+		if (config_setting_length(cfg->ipAddresses) > 0) {
+			cfg->options |= ENABLEPING;
 		} else {
 			return 0;
 		}
 
-		s->pingObj = ping_construct();
-		if (s->pingObj == NULL) {
+		cfg->pingObj = ping_construct();
+		if (cfg->pingObj == NULL) {
 			Logmsg(LOG_CRIT,
 			       "unable to allocate memory for ping object");
-			FatalError(s);
+			FatalError(cfg);
 		}
 
-		for (int cnt = 0; cnt < config_setting_length(s->ipAddresses);
+		for (int cnt = 0; cnt < config_setting_length(cfg->ipAddresses);
 		     cnt++) {
 			const char *ipAddress =
-			    config_setting_get_string_elem(s->ipAddresses, cnt);
+			    config_setting_get_string_elem(cfg->ipAddresses, cnt);
 
-			if (ping_host_add(s->pingObj, ipAddress) != 0) {
+			if (ping_host_add(cfg->pingObj, ipAddress) != 0) {
 				fprintf(stderr, "watchdogd: %s\n",
-					ping_get_error(s->pingObj));
-				ping_destroy(s->pingObj);
+					ping_get_error(cfg->pingObj));
+				ping_destroy(cfg->pingObj);
 				return -1;
 			}
 		}
-		for (pingobj_iter_t * iter = ping_iterator_get(s->pingObj);
+		for (pingobj_iter_t * iter = ping_iterator_get(cfg->pingObj);
 		     iter != NULL; iter = ping_iterator_next(iter)) {
 			ping_iterator_set_context(iter, NULL);
 		}
@@ -486,30 +486,30 @@ int OpenPidFile(const char *path)
 	return ret;
 }
 
-int ParseCommandLine(int *argc, char **argv, struct cfgoptions *s)
+int ParseCommandLine(int *argc, char **argv, struct cfgoptions *cfg)
 {
 	int opt = 0;
 
 	while ((opt = getopt(*argc, argv, "qsfFbc:")) != -1) {
 		switch (opt) {
 		case 'F':
-			assert(s->options & DAEMONIZE);
-			s->options &= !DAEMONIZE;
+			assert(cfg->options & DAEMONIZE);
+			cfg->options &= !DAEMONIZE;
 			break;
 		case 'c':
-			s->confile = optarg;
+			cfg->confile = optarg;
 			break;
 		case 's':
-			s->options |= SYNC;
+			cfg->options |= SYNC;
 			break;
 		case 'q':
-			s->options |= NOACTION;
+			cfg->options |= NOACTION;
 			break;
 		case 'f':
-			s->options |= FORCE;
+			cfg->options |= FORCE;
 			break;
 		case 'b':
-			s->options |= SOFTBOOT;
+			cfg->options |= SOFTBOOT;
 			break;
 		default:
 			Usage();
@@ -520,12 +520,12 @@ int ParseCommandLine(int *argc, char **argv, struct cfgoptions *s)
 	return 0;
 }
 
-int MakeLogDir(struct cfgoptions *s)
+int MakeLogDir(struct cfgoptions *cfg)
 {
-	assert(s != NULL);
+	assert(cfg != NULL);
 
 	errno = 0;
-	if (mkdir(s->logdir, 0750) != 0) {
+	if (mkdir(cfg->logdir, 0750) != 0) {
 		if (errno != EEXIST) {
 			Logmsg(LOG_ERR, "watchdog: %s", strerror(errno));
 			return -1;

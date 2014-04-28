@@ -229,21 +229,21 @@ static void SignalHandler(int signum)
 	quit = 1;
 }
 
-static void PrintConfiguration(struct cfgoptions *s)
+static void PrintConfiguration(struct cfgoptions *const cfg)
 {
 	Logmsg(LOG_INFO,
 	       "int=%is realtime=%s sync=%s softboot=%s force=%s mla=%.2f mem=%li",
-	       s->sleeptime, s->options & REALTIME ? "yes" : "no",
-	       s->options & SYNC ? "yes" : "no",
-	       s->options & SOFTBOOT ? "yes" : "no",
-	       s->options & FORCE ? "yes" : "no", s->maxLoadOne,
-	       s->minfreepages);
+	       cfg->sleeptime, cfg->options & REALTIME ? "yes" : "no",
+	       cfg->options & SYNC ? "yes" : "no",
+	       cfg->options & SOFTBOOT ? "yes" : "no",
+	       cfg->options & FORCE ? "yes" : "no", cfg->maxLoadOne,
+	       cfg->minfreepages);
 
-	if (s->options & ENABLEPING) {
-		for (int cnt = 0; cnt < config_setting_length(s->ipAddresses);
+	if (cfg->options & ENABLEPING) {
+		for (int cnt = 0; cnt < config_setting_length(cfg->ipAddresses);
 		     cnt++) {
 			const char *ipAddress =
-			    config_setting_get_string_elem(s->ipAddresses, cnt);
+			    config_setting_get_string_elem(cfg->ipAddresses, cnt);
 
 			assert(ipAddress != NULL);
 
@@ -253,11 +253,11 @@ static void PrintConfiguration(struct cfgoptions *s)
 		Logmsg(LOG_INFO, "ping: no ip adresses to ping");
 	}
 
-	if (s->options & ENABLEPIDCHECKER) {
-		for (int cnt = 0; cnt < config_setting_length(s->pidFiles);
+	if (cfg->options & ENABLEPIDCHECKER) {
+		for (int cnt = 0; cnt < config_setting_length(cfg->pidFiles);
 		     cnt++) {
 			const char *pidFilePathName =
-			    config_setting_get_string_elem(s->pidFiles, cnt);
+			    config_setting_get_string_elem(cfg->pidFiles, cnt);
 
 			assert(pidFilePathName != NULL);
 
@@ -268,8 +268,8 @@ static void PrintConfiguration(struct cfgoptions *s)
 	}
 
 	Logmsg(LOG_INFO, "test=%s(%i) repair=%s(%i) no_act=%s",
-	       s->testexepathname == NULL ? "no" : s->testexepathname,
-	       s->testBinTimeout,
-	       s->exepathname == NULL ? "no" : s->exepathname,
-	       s->repairBinTimeout, s->options & NOACTION ? "yes" : "no");
+	       cfg->testexepathname == NULL ? "no" : cfg->testexepathname,
+	       cfg->testBinTimeout,
+	       cfg->exepathname == NULL ? "no" : cfg->exepathname,
+	       cfg->repairBinTimeout, cfg->options & NOACTION ? "yes" : "no");
 }
