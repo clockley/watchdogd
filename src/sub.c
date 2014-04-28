@@ -43,7 +43,7 @@ int CloseWraper(const int *pfd)
 	return 0;
 }
 
-int IsDaemon(const struct cfgoptions *s)
+int IsDaemon(struct cfgoptions const *s)
 {
 	if (s->options & DAEMONIZE)
 		return 1;
