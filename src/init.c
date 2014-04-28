@@ -15,8 +15,6 @@
  */
 
 #include "watchdogd.h"
-#include <config.h>
-#include <libconfig.h>
 #include "init.h"
 #include "sub.h"
 #include "testdir.h"

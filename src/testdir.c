@@ -17,7 +17,6 @@
 #include "watchdogd.h"
 #include "sub.h"
 #include <dirent.h>
-#include <config.h>
 #include "testdir.h"
 #include "exe.h"
 

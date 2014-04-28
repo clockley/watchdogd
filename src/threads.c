@@ -17,7 +17,6 @@
 #define _BSD_SOURCE
 #include "watchdogd.h"
 #include <pthread.h>
-#include <syslog.h>
 #include <netdb.h>
 #include <sys/wait.h>
 #include <sys/sysinfo.h>

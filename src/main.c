@@ -256,9 +256,10 @@ static void PrintConfiguration(struct cfgoptions *s)
 	if (s->options & ENABLEPIDCHECKER) {
 		for (int cnt = 0; cnt < config_setting_length(s->pidFiles);
 		     cnt++) {
-			const char *pidFilePathName = NULL;
-			pidFilePathName =
+			const char *pidFilePathName =
 			    config_setting_get_string_elem(s->pidFiles, cnt);
+
+			assert(pidFilePathName != NULL);
 
 			Logmsg(LOG_DEBUG, "pidfile: %s", pidFilePathName);
 		}

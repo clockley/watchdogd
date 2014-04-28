@@ -20,8 +20,6 @@
 #include "watchdogd.h"
 #include "sub.h"
 #include "testdir.h"
-#include <libconfig.h>
-#include <syslog.h>
 
 int CloseWraper(const int *pfd)
 {
