@@ -51,7 +51,7 @@ int IsDaemon(struct cfgoptions *const s)
 	return 0;
 }
 
-int DeletePidFile(pidfile_t *pidfile)
+int DeletePidFile(pidfile_t *const pidfile)
 {
 	if (pidfile == NULL) {
 		return 0;

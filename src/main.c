@@ -153,7 +153,7 @@ int main(int argc, char **argv)
 
 	CloseWatchdog(watchdog);
 
-	DeletePidFile(&options);
+	DeletePidFile(&options.pidfile);
 
 	if (EndDaemon(&options, false) < 0) {
 		return EXIT_FAILURE;
