@@ -51,19 +51,17 @@ int IsDaemon(struct cfgoptions *const s)
 	return 0;
 }
 
-int DeletePidFile(struct cfgoptions *s)
+int DeletePidFile(pidfile_t *pidfile)
 {
-	assert(s != NULL);
-
-	if (!(s->options & USEPIDFILE)) {
+	if (pidfile == NULL) {
 		return 0;
 	}
 
-	UnlockFile(s->pidfile.fd, getpid());
+	UnlockFile(pidfile->fd, getpid());
 
-	CloseWraper(&s->pidfile.fd);
+	CloseWraper(&pidfile->fd);
 
-	if (remove(s->pidfile.name) < 0) {
+	if (remove(pidfile->name) < 0) {
 		Logmsg(LOG_ERR, "remove failed: %s", strerror(errno));
 		return -2;
 	}
@@ -162,7 +160,7 @@ int EndDaemon(struct cfgoptions *s, int keepalive)
 		return 0;
 	}
 
-	DeletePidFile(s);
+	DeletePidFile(&s->pidfile);
 	FreeExeList(&parent);
 	Logmsg(LOG_INFO, "restarting system");
 	closelog();
@@ -323,7 +321,7 @@ void FatalError(struct cfgoptions *s)
 
 	Logmsg(LOG_CRIT, "fatal error");
 
-	DeletePidFile(s);
+	DeletePidFile(&s->pidfile);
 
 	config_destroy(&s->cfg);
 
