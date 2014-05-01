@@ -150,15 +150,14 @@ int Spawn(int timeout, struct cfgoptions *const config, const char *file,
 					    pthread_cond_timedwait(&cond, &lock,
 								   &rqtp);
 					if (once == false) {
-						if (pthread_mutex_unlock(&lock)
-						    != 0) {
-							Logmsg
-							    (LOG_ERR,
-							     "pthread_mutex_unlock failed aborting %s, %i",
-							     __FILE__,
-							     __LINE__);
+						int ret = pthread_mutex_unlock(&lock);
+
+						Logmsg(LOG_ERR, "%s", strerror(errno));
+						assert(ret != 0);
+						if (ret != 0) {
 							abort();
 						}
+
 						once = true;
 					}
 				} while (returnValue != ETIMEDOUT
