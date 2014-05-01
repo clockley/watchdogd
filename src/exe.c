@@ -152,9 +152,9 @@ int Spawn(int timeout, struct cfgoptions *const config, const char *file,
 					if (once == false) {
 						int ret = pthread_mutex_unlock(&lock);
 
-						Logmsg(LOG_ERR, "%s", strerror(errno));
-						assert(ret != 0);
-						if (ret != 0) {
+						if (ret == 1) {
+							Logmsg(LOG_ERR, "%s", strerror(errno));
+							assert(ret != 0);
 							abort();
 						}
 
