@@ -24,7 +24,8 @@ int SetSchedulerPolicy(int priority)
 	struct sched_param param;
 	param.sched_priority = priority;
 
-	if (sched_setscheduler(getpid(), SCHED_RR, &param) < 0) {
+	if (sched_setscheduler(0, SCHED_RR, &param) < 0) {
+		assert(errno != ESRCH);
 		fprintf(stderr, "watchdogd: sched_setscheduler  failed %s\n",
 			strerror(errno));
 		return -1;
