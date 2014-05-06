@@ -98,9 +98,11 @@ struct cfgoptions {
 #define PINGFAILED 0x40
 };
 
-struct parent {
+struct processlist {
 	struct list children;
 };
+
+typedef struct processlist ProcessList;
 
 struct child {
 	struct list entry;
@@ -117,7 +119,7 @@ struct watchdogDevice {
 
 typedef struct watchdogDevice watchdog_t;
 
-extern struct parent parent;
+extern ProcessList processes;
 
 #include "linux.h"
 

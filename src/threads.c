@@ -166,7 +166,7 @@ static void *TestDirThread(void *arg)
 	rqtp.tv_nsec = 5 * 1000;
 
 	for (;;) {
-		if (ExecuteRepairScripts(&parent, s) < 0) {
+		if (ExecuteRepairScripts(&processes, s) < 0) {
 			s->error |= SCRIPTFAILED;
 		} else {
 			if (s->error & SCRIPTFAILED) {

@@ -96,7 +96,7 @@ int LoadConfigurationFile(struct cfgoptions *const cfg)
 		cfg->testexepath = "/etc/watchdog.d";
 	}
 
-	if (CreateLinkedListOfExes(cfg->testexepath, &parent) < 0) {
+	if (CreateLinkedListOfExes(cfg->testexepath, &processes) < 0) {
 		fprintf(stderr, "watchdogd: CreateLinkedListOfExes failed\n");
 		return -1;
 	}

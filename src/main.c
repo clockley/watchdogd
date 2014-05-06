@@ -27,7 +27,7 @@ static volatile sig_atomic_t quit = 0;
 
 volatile sig_atomic_t stop = 0;
 bool logToSyslog = false;
-struct parent parent;
+ProcessList processes;
 
 int main(int argc, char **argv)
 {

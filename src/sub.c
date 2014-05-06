@@ -149,7 +149,7 @@ int EndDaemon(struct cfgoptions *s, int keepalive)
 	}
 
 	if (keepalive == 0) {
-		FreeExeList(&parent);
+		FreeExeList(&processes);
 
 		config_destroy(&s->cfg);
 
@@ -161,7 +161,7 @@ int EndDaemon(struct cfgoptions *s, int keepalive)
 	}
 
 	DeletePidFile(&s->pidfile);
-	FreeExeList(&parent);
+	FreeExeList(&processes);
 	Logmsg(LOG_INFO, "restarting system");
 	closelog();
 	munlockall();

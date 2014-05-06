@@ -66,7 +66,7 @@ static size_t DirentBufSize(DIR * dirp)
 		? name_end : sizeof(struct dirent));
 }
 
-int CreateLinkedListOfExes(const char *path, struct parent *p)
+int CreateLinkedListOfExes(const char *path, ProcessList *p)
 {
 	assert(p != NULL);
 	assert(path != NULL);
@@ -164,7 +164,7 @@ int CreateLinkedListOfExes(const char *path, struct parent *p)
 	return -1;
 }
 
-void FreeExeList(struct parent *p)
+void FreeExeList(ProcessList *p)
 {
 	assert(p != NULL);
 
@@ -178,7 +178,7 @@ void FreeExeList(struct parent *p)
 	}
 }
 
-int ExecuteRepairScripts(struct parent *p, struct cfgoptions *s)
+int ExecuteRepairScripts(ProcessList *p, struct cfgoptions *s)
 {
 	assert(s != NULL);
 	assert(p != NULL);
