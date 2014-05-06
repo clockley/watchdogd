@@ -570,6 +570,8 @@ int CheckPriority(int priority)
 
 bool SetDefaultConfig(struct cfgoptions * options)
 {
+	assert(options != NULL);
+
 	if (options == NULL)
 		return false;
 
