@@ -436,7 +436,7 @@ int OpenPidFile(const char *path)
 				return ret;
 			}
 
-			char buf[64] = { 0x00 };
+			char buf[64] = { 0 };
 			if (pread(ret, buf, sizeof(buf), 0) == -1) {
 				close(ret);
 				umask(oumask);

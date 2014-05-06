@@ -194,7 +194,7 @@ int ExecuteRepairScripts(ProcessList *p, struct cfgoptions *s)
 		if (c->ret == 0)
 			continue;
 
-		char buf[8] = { 0x00 };
+		char buf[8] = { 0 };
 		snprintf(buf, sizeof(buf), "%i", c->ret);
 
 		c->ret =

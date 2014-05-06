@@ -378,7 +378,7 @@ static void *TestPidfileThread(void *arg)
 				continue;
 			}
 
-			char buf[64] = { 0x00 };
+			char buf[64] = { 0 };
 			if (pread(fd, buf, sizeof(buf), 0) == -1) {
 				Logmsg(LOG_ERR, "unable to read pidfile %s: %s",
 				       pidFilePathName, strerror(errno));
