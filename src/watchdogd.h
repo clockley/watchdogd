@@ -98,11 +98,11 @@ struct cfgoptions {
 #define PINGFAILED 0x40
 };
 
-struct processlist {
+struct ProcessList {
 	struct list children;
 };
 
-typedef struct processlist ProcessList;
+typedef struct ProcessList ProcessList;
 
 struct child {
 	struct list entry;
