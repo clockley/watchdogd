@@ -280,7 +280,7 @@ watchdog_t *WatchdogConstruct(void)
 
 void WatchdogDestroy(watchdog_t * dog)
 {
-	assert(wdt != NULL);
+	assert(dog != NULL);
 	free(dog);
 	dog = NULL;
 }
