@@ -132,12 +132,9 @@ int LoadConfigurationFile(struct cfgoptions *const cfg)
 	if (MakeLogDir(cfg) < 0)
 		return -1;
 
-	if ((cfg->options & DAEMONIZE) == true) {
-		if (config_lookup_bool(&cfg->cfg, "daemonize", &tmp) ==
-		    CONFIG_TRUE) {
-			if (!tmp) {
-				cfg->options &= !DAEMONIZE;
-			}
+	if (config_lookup_bool(&cfg->cfg, "daemonize", &tmp) == CONFIG_TRUE) {
+		if (!tmp) {
+			cfg->options &= !DAEMONIZE;
 		}
 	}
 
@@ -578,7 +575,7 @@ bool SetDefaultConfig(struct cfgoptions * options)
 	options->watchdogTimeout = -1;
 	options->repairBinTimeout = 60;
 	options->testBinTimeout = 60;
-	options->options |= DAEMONIZE;
+	options->options |= DAEMONIZE|USEPIDFILE;
 
 	return true;
 }
