@@ -1,3 +1,7 @@
 2013 - 10 - 29 Christian Lockley  <clockley1@gmail.com>
 
 * First version
+
+2014 - 05 - 16 Christian Lockley <clockley1@gmail.com>
+
+* Fixed a number of bugs, in particular the pid file creation code is fixed in this version.
