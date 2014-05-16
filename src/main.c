@@ -147,8 +147,6 @@ int main(int argc, char **argv)
 		while (true) {
 			sleep(60);
 		}
-	} else {
-		assert(quit == 1);
 	}
 
 	CloseWatchdog(watchdog);
