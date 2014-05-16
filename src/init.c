@@ -84,7 +84,7 @@ int LoadConfigurationFile(struct cfgoptions *const cfg)
 		cfg->testexepathname = NULL;
 	}
 
-	if (cfg->exepathname != NULL && IsExe(cfg->testexepathname, false) < 0) {
+	if (cfg->testexepathname != NULL && IsExe(cfg->testexepathname, false) < 0) {
 		fprintf(stderr, "watchdogd: %s: Invalid executeable image\n",
 			cfg->testexepathname);
 		fprintf(stderr, "watchdogd: ignoring test-binary option\n");
