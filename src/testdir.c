@@ -89,8 +89,10 @@ int CreateLinkedListOfExes(const char *path, ProcessList *p)
 
 	DIR *dir = fdopendir(fd);
 
-	if (dir == NULL)
+	if (dir == NULL) {
+		close(fd);
 		return -1;
+	}
 
 	size = DirentBufSize(dir);
 
@@ -111,10 +113,6 @@ int CreateLinkedListOfExes(const char *path, ProcessList *p)
 	int error = 0;
 
 	while ((error = readdir_r(dir, direntbuf, &ent)) == 0 && ent != NULL) {
-
-		if (error != 0) {
-			goto error;
-		}
 
 		int statfd = dirfd(dir);
 
