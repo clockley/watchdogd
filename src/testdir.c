@@ -141,6 +141,7 @@ int CreateLinkedListOfExes(const char *path, ProcessList *p)
 		Wasprintf((char **)&child->name, "%s/%s", path, ent->d_name);
 
 		if (child->name == NULL) {
+			assert(child != NULL);
 			free(child);
 			goto error;
 		}
