@@ -34,40 +34,38 @@ int CloseStandardFileDescriptors(void)
 
 	if (fstat(fd, &statBuf) != 0) {
 		Logmsg(LOG_CRIT, "Stat failed %s", strerror(errno));
-		CloseWraper(&fd);
-		return -1;
+		goto error;
 	} else if (S_ISCHR(statBuf.st_mode) == 0
 		   && S_ISBLK(statBuf.st_mode) == 0) {
 		Logmsg(LOG_CRIT, "/dev/null is not a unix device file");
-		CloseWraper(&fd);
-		return -1;
+		goto error;
 	}
 
 	ret = dup2(fd, STDIN_FILENO);
 	if (ret < 0) {
 		Logmsg(LOG_CRIT, "dup2 failed: STDIN_FILENO: %s",
 		       strerror(errno));
-		return -1;
+		goto error;
 	}
 
 	ret = dup2(fd, STDOUT_FILENO);
 	if (ret < 0) {
 		Logmsg(LOG_CRIT, "dup2 failed: STDOUT_FILENO: %s",
 		       strerror(errno));
-		return -1;
+		goto error;
 	}
 
 	ret = dup2(fd, STDERR_FILENO);
 	if (ret < 0) {
 		Logmsg(LOG_CRIT, "dup2 failed: STDERR_FILENO: %s",
 		       strerror(errno));
-		return -1;
+		goto error;
 	}
 
-	if (CloseWraper(&fd) < 0)
-		return -1;
-
 	return 0;
+error:
+	close(fd);
+	return -1;
 }
 
 void CloseFileDescriptors(long maxfd)
