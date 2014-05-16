@@ -357,7 +357,7 @@ int _Shutdown(int errorcode, bool kexec)
 
 void WriteUserAccountingDatabaseRecord(int reboot)
 {
-	struct utmpx utmpxStruct;
+	struct utmpx utmpxStruct = { 0 };
 
 	strncpy(utmpxStruct.ut_user, reboot == 1 ? "reboot" : "shutdown",
 		sizeof(utmpxStruct.ut_user));
