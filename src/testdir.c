@@ -90,6 +90,7 @@ int CreateLinkedListOfExes(const char *path, ProcessList *p)
 	DIR *dir = fdopendir(fd);
 
 	if (dir == NULL) {
+		Logmsg(LOG_ERR, "watchdogd: %s", strerror(errno));
 		close(fd);
 		return -1;
 	}
@@ -97,15 +98,13 @@ int CreateLinkedListOfExes(const char *path, ProcessList *p)
 	size = DirentBufSize(dir);
 
 	if (size == ((size_t) (-1))) {
-		closedir(dir);
-		return -1;
+		goto error;
 	}
 
 	direntbuf = (struct dirent *)calloc(1, size);
 
 	if (direntbuf == NULL) {
-		closedir(dir);
-		return -1;
+		goto error;
 	}
 
 	errno = 0;
