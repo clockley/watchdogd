@@ -151,12 +151,17 @@ int CreateLinkedListOfExes(const char *path, ProcessList *p)
 		list_add(&child->entry, &p->children);
 	}
 
+	assert(fd != -1);
+
+	close(fd);
 	closedir(dir);
 	free(direntbuf);
 
 	return 0;
 
  error:
+	assert(fd != -1);
+	close(fd);
 	Logmsg(LOG_ERR, "watchdogd: %s", strerror(errno));
 	closedir(dir);
 	free(direntbuf);
