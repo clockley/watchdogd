@@ -161,6 +161,8 @@ int LoadConfigurationFile(struct cfgoptions *const cfg)
 	if (config_lookup_bool(&cfg->cfg, "use-pid-file", &tmp) == CONFIG_TRUE) {
 		if (tmp) {
 			cfg->options |= USEPIDFILE;
+		} else {
+			cfg->options &= !USEPIDFILE;
 		}
 	}
 
