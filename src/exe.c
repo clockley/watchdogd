@@ -73,8 +73,6 @@ int Spawn(int timeout, struct cfgoptions *const config, const char *file,
 						O_RDWR | O_APPEND | O_CREAT,
 						S_IWUSR | S_IRUSR);
 
-				fsync(fd);
-
 				if (fd < 0) {
 					Logmsg(LOG_CRIT, "open failed: %s",
 					       strerror(errno));
@@ -83,6 +81,8 @@ int Spawn(int timeout, struct cfgoptions *const config, const char *file,
 				} else {
 					close(dfd);
 				}
+
+				fsync(fd);
 
 				if (dup2(fd, STDOUT_FILENO) < 0) {
 					Logmsg(LOG_CRIT,
