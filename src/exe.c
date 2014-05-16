@@ -67,6 +67,7 @@ int Spawn(int timeout, struct cfgoptions *const config, const char *file,
 					Logmsg(LOG_CRIT,
 					       "open failed: %s: %s",
 					       config->logdir, strerror(errno));
+					return -1;
 				}
 
 				int fd = openat(dfd, "repair.out",
