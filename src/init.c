@@ -473,11 +473,6 @@ int OpenPidFile(const char *path)
 						fprintf(stdout,
 							"successfully opened pid file\n");
 					}
-
-					if (ret < 0) {
-						umask(oumask);
-						return ret;
-					}
 				}
 			}
 		}
