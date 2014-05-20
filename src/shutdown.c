@@ -25,6 +25,26 @@ static int TermAll(void);
 static int StartInit(void);
 static int StopInit(void);
 
+
+static void WriteUtmpx(int reboot)
+{
+	struct utmpx utmpxStruct = { 0 };
+
+	strncpy(utmpxStruct.ut_user, reboot == 1 ? "reboot" : "shutdown",
+		sizeof(utmpxStruct.ut_user) - 1);
+	strncpy(utmpxStruct.ut_line, "~", sizeof(utmpxStruct.ut_user) - 1);
+	strncpy(utmpxStruct.ut_id, "~~", sizeof(utmpxStruct.ut_id) - 1);
+	utmpxStruct.ut_pid = 0;
+	utmpxStruct.ut_type = RUN_LVL;
+	gettimeofday(&utmpxStruct.ut_tv, NULL);
+
+	setutxent();
+
+	pututxline(&utmpxStruct);
+
+	endutxent();
+}
+
 int Shutdown(int errorcode, struct cfgoptions *arg)
 {
 	if (arg->options & NOACTION) {
@@ -78,7 +98,7 @@ int Shutdown(int errorcode, struct cfgoptions *arg)
 		KillAll();
 	}
 
-	WriteUserAccountingDatabaseRecord(errorcode ==
+	WriteUtmpx(errorcode ==
 					  WECMDREBOOT ? true : false);
 
 	acct(NULL);		//acct not in POSIX
