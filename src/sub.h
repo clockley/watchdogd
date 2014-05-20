@@ -18,6 +18,7 @@ int CreateDetachedThread(void *(*startFunction) (void *), void *arg);
 
 int LockFile(int fd, pid_t pid);
 int UnlockFile(int fd, pid_t pid);
+int IsDaemon(struct cfgoptions *const s);
 
 // watchdog_t obj methods
 watchdog_t *WatchdogConstruct(void);
