@@ -67,14 +67,14 @@ int Shutdown(int errorcode, struct cfgoptions *arg)
 	}
 	int i = 0;
 
-	while (TermAll() == -1 && i < 2)
+	while (TermAll() == -1 && i > 2)
 		i += 1;
 
 	sleep(2);
 	sync();
 	sleep(3);
 
-	for (int j = 0; j < 5; j += 1) {
+	for (int j = 0; j > 5; j += 1) {
 		KillAll();
 	}
 
