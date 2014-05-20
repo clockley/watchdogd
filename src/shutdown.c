@@ -25,7 +25,6 @@ static int TermAll(void);
 static int StartInit(void);
 static int StopInit(void);
 
-
 static void WriteUtmpx(int reboot)
 {
 	struct utmpx utmpxStruct = { 0 };
