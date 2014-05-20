@@ -5,3 +5,6 @@
 2014 - 05 - 16 Christian Lockley <clockley1@gmail.com>
 
 * Fixed a number of bugs, in particular the pid file creation code is fixed in this version.
+
+2014 -05 - 19 Christian Lockley <clockley1@gmail.com> 0.0.7a
+* Fix two infinite loops in shutdown.c
