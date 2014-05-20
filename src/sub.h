@@ -17,11 +17,9 @@ void ResetSignalHandlers(int maxsigno);
 int IsExe(const char *pathname, bool returnfildes);
 void NormalizeTimespec(struct timespec *const tp);
 int CreateDetachedThread(void *(*startFunction) (void *), void *arg);
-int DeletePidFile(pidfile_t * const pidfile);
-int OpenPidFile(const char *path);
+
 int LockFile(int fd, pid_t pid);
 int UnlockFile(int fd, pid_t pid);
-int WritePidFile(int fd, pid_t pid, const char *name);
 
 // watchdog_t obj methods
 watchdog_t *WatchdogConstruct(void);

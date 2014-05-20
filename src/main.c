@@ -20,6 +20,7 @@
 #include "main.h"
 #include "init.h"
 #include "threads.h"
+#include "pidfile.h"
 
 #define DISARM_WATCHDOG_BEFORE_REBOOT true
 

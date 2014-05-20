@@ -20,6 +20,7 @@
 #include "watchdogd.h"
 #include "sub.h"
 #include "testdir.h"
+#include "pidfile.h"
 
 int CloseWraper(const int *pfd)
 {
@@ -51,22 +52,26 @@ int IsDaemon(struct cfgoptions *const s)
 	return 0;
 }
 
-int DeletePidFile(pidfile_t * const pidfile)
+int LockFile(int fd, pid_t pid)
 {
-	if (pidfile == NULL) {
-		return 0;
-	}
+	struct flock fl;
+	fl.l_type = F_WRLCK;
+	fl.l_whence = SEEK_SET;
+	fl.l_start = 0;
+	fl.l_len = 0;
+	fl.l_pid = pid;
+	return fcntl(fd, F_SETLKW, &fl);
+}
 
-	UnlockFile(pidfile->fd, getpid());
-
-	CloseWraper(&pidfile->fd);
-
-	if (remove(pidfile->name) < 0) {
-		Logmsg(LOG_ERR, "remove failed: %s", strerror(errno));
-		return -2;
-	}
-
-	return 0;
+int UnlockFile(int fd, pid_t pid)
+{
+	struct flock fl;
+	fl.l_type = F_UNLCK;
+	fl.l_whence = SEEK_SET;
+	fl.l_start = 0;
+	fl.l_len = 0;
+	fl.l_pid = pid;
+	return fcntl(fd, F_SETLKW, &fl);
 }
 
 int Wasprintf(char **ret, const char *format, ...)

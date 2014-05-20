@@ -17,6 +17,8 @@
 #include "watchdogd.h"
 #include <sys/wait.h>
 #include "sub.h"
+#include "init.h"
+#include "pidfile.h"
 
 int CloseStandardFileDescriptors(void)
 {
@@ -190,7 +192,7 @@ int Daemon(struct cfgoptions *s)
 			return -1;
 		}
 
-		if (WritePidFile(s->pidfile.fd, getpid(), s->pidfile.name) < 0) {
+		if (WritePidFile(&s->pidfile, getpid()) < 0) {
 			return -1;
 		}
 	}
