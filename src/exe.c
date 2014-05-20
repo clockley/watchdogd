@@ -151,10 +151,12 @@ int Spawn(int timeout, struct cfgoptions *const config, const char *file,
 					    pthread_cond_timedwait(&cond, &lock,
 								   &rqtp);
 					if (once == false) {
-						int ret = pthread_mutex_unlock(&lock);
+						int ret =
+						    pthread_mutex_unlock(&lock);
 
 						if (ret == 1) {
-							Logmsg(LOG_ERR, "%s", strerror(errno));
+							Logmsg(LOG_ERR, "%s",
+							       strerror(errno));
 							assert(ret != 0);
 							abort();
 						}

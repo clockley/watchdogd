@@ -51,7 +51,7 @@ int IsDaemon(struct cfgoptions *const s)
 	return 0;
 }
 
-int DeletePidFile(pidfile_t *const pidfile)
+int DeletePidFile(pidfile_t * const pidfile)
 {
 	if (pidfile == NULL) {
 		return 0;
@@ -285,7 +285,7 @@ void WatchdogDestroy(watchdog_t * dog)
 	dog = NULL;
 }
 
-bool CheckWatchdogTimeout(watchdog_t *const wdt, int timeout)
+bool CheckWatchdogTimeout(watchdog_t * const wdt, int timeout)
 {
 	if (timeout <= wdt->timeout) {
 		return false;
@@ -293,25 +293,25 @@ bool CheckWatchdogTimeout(watchdog_t *const wdt, int timeout)
 	return true;
 }
 
-void SetFd(watchdog_t *const wdt, int fd)
+void SetFd(watchdog_t * const wdt, int fd)
 {
 	assert(wdt != NULL);
 	wdt->fd = fd;
 }
 
-int GetFd(watchdog_t *const wdt)
+int GetFd(watchdog_t * const wdt)
 {
 	assert(wdt != NULL);
 	return wdt->fd;
 }
 
-void SetTimeout(watchdog_t *const wdt, int timeout)
+void SetTimeout(watchdog_t * const wdt, int timeout)
 {
 	assert(wdt != NULL);
 	wdt->timeout = timeout;
 }
 
-int GetTimeout(watchdog_t *const wdt)
+int GetTimeout(watchdog_t * const wdt)
 {
 	assert(wdt != NULL);
 	return wdt->timeout;

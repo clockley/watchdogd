@@ -64,7 +64,7 @@ int CloseStandardFileDescriptors(void)
 
 	close(fd);
 	return 0;
-error:
+ error:
 	close(fd);
 	return -1;
 }

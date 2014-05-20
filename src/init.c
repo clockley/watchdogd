@@ -62,13 +62,14 @@ int LoadConfigurationFile(struct cfgoptions *const cfg)
 	} else if (!config_read_file(&cfg->cfg, cfg->confile)) {
 		fprintf(stderr, "watchdogd: %s:%d: %s\n",
 			config_error_file(&cfg->cfg),
-			config_error_line(&cfg->cfg), config_error_text(&cfg->cfg));
+			config_error_line(&cfg->cfg),
+			config_error_text(&cfg->cfg));
 		config_destroy(&cfg->cfg);
 		return -1;
 	}
 
-	if (config_lookup_string(&cfg->cfg, "repair-binary", &cfg->exepathname) ==
-	    CONFIG_FALSE) {
+	if (config_lookup_string(&cfg->cfg, "repair-binary", &cfg->exepathname)
+	    == CONFIG_FALSE) {
 		cfg->exepathname = NULL;
 	}
 
@@ -79,20 +80,21 @@ int LoadConfigurationFile(struct cfgoptions *const cfg)
 		cfg->exepathname = NULL;
 	}
 
-	if (config_lookup_string(&cfg->cfg, "test-binary", &cfg->testexepathname) ==
-	    CONFIG_FALSE) {
+	if (config_lookup_string
+	    (&cfg->cfg, "test-binary", &cfg->testexepathname) == CONFIG_FALSE) {
 		cfg->testexepathname = NULL;
 	}
 
-	if (cfg->testexepathname != NULL && IsExe(cfg->testexepathname, false) < 0) {
+	if (cfg->testexepathname != NULL
+	    && IsExe(cfg->testexepathname, false) < 0) {
 		fprintf(stderr, "watchdogd: %s: Invalid executeable image\n",
 			cfg->testexepathname);
 		fprintf(stderr, "watchdogd: ignoring test-binary option\n");
 		cfg->testexepathname = NULL;
 	}
 
-	if (config_lookup_string(&cfg->cfg, "test-directory", &cfg->testexepath) ==
-	    CONFIG_FALSE) {
+	if (config_lookup_string(&cfg->cfg, "test-directory", &cfg->testexepath)
+	    == CONFIG_FALSE) {
 		cfg->testexepath = "/etc/watchdog.d";
 	}
 
@@ -101,8 +103,8 @@ int LoadConfigurationFile(struct cfgoptions *const cfg)
 		return -1;
 	}
 
-	if (config_lookup_string(&cfg->cfg, "watchdog-device", &cfg->devicepath) ==
-	    CONFIG_FALSE) {
+	if (config_lookup_string(&cfg->cfg, "watchdog-device", &cfg->devicepath)
+	    == CONFIG_FALSE) {
 		cfg->devicepath = "/dev/watchdog";
 	}
 
@@ -119,8 +121,8 @@ int LoadConfigurationFile(struct cfgoptions *const cfg)
 		}
 	}
 
-	if (config_lookup_string(&cfg->cfg, "pid-pathname", &cfg->pidfile.name) ==
-	    CONFIG_FALSE) {
+	if (config_lookup_string(&cfg->cfg, "pid-pathname", &cfg->pidfile.name)
+	    == CONFIG_FALSE) {
 		cfg->pidfile.name = "/var/run/watchdogd.pid";
 	}
 
@@ -213,8 +215,8 @@ int LoadConfigurationFile(struct cfgoptions *const cfg)
 		cfg->maxLoadFive = cfg->maxLoadOne * 0.75;
 	}
 
-	if (config_lookup_float(&cfg->cfg, "max-load-15", &cfg->maxLoadFifteen) ==
-	    CONFIG_TRUE) {
+	if (config_lookup_float(&cfg->cfg, "max-load-15", &cfg->maxLoadFifteen)
+	    == CONFIG_TRUE) {
 		if (cfg->maxLoadFifteen <= 0 || cfg->maxLoadFifteen > 100L) {
 
 			if (cfg->maxLoadFifteen != 0) {
@@ -258,7 +260,8 @@ int LoadConfigurationFile(struct cfgoptions *const cfg)
 		cfg->options |= REALTIME;
 	}
 
-	if (config_lookup_int(&cfg->cfg, "watchdog-timeout", &tmp) == CONFIG_TRUE) {
+	if (config_lookup_int(&cfg->cfg, "watchdog-timeout", &tmp) ==
+	    CONFIG_TRUE) {
 		if (tmp < 0 || tmp > 60 || tmp == 0) {
 			fprintf(stderr,
 				"watchdogd: illegal value for configuration file entry named \"watchdog-timeout\"\n");
@@ -350,7 +353,8 @@ int LoadConfigurationFile(struct cfgoptions *const cfg)
 		for (int cnt = 0; cnt < config_setting_length(cfg->ipAddresses);
 		     cnt++) {
 			const char *ipAddress =
-			    config_setting_get_string_elem(cfg->ipAddresses, cnt);
+			    config_setting_get_string_elem(cfg->ipAddresses,
+							   cnt);
 
 			if (ping_host_add(cfg->pingObj, ipAddress) != 0) {
 				fprintf(stderr, "watchdogd: %s\n",
@@ -577,7 +581,7 @@ bool SetDefaultConfig(struct cfgoptions * options)
 	options->watchdogTimeout = -1;
 	options->repairBinTimeout = 60;
 	options->testBinTimeout = 60;
-	options->options |= DAEMONIZE|USEPIDFILE;
+	options->options |= DAEMONIZE | USEPIDFILE;
 
 	return true;
 }

@@ -241,7 +241,8 @@ static void PrintConfiguration(struct cfgoptions *const cfg)
 		for (int cnt = 0; cnt < config_setting_length(cfg->ipAddresses);
 		     cnt++) {
 			const char *ipAddress =
-			    config_setting_get_string_elem(cfg->ipAddresses, cnt);
+			    config_setting_get_string_elem(cfg->ipAddresses,
+							   cnt);
 
 			assert(ipAddress != NULL);
 
