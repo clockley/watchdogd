@@ -96,8 +96,13 @@ static void *Ping(void *arg)
 									  *)));
 					void *cxt =
 					    ping_iterator_get_context(iter);
-					int *retries = (int *)cxt;
-					*retries = *retries + 1;
+					if (cxt == NULL) {
+						Logmsg(LOG_ERR, "unable to allocate memory for ping context");
+						s->error |= PINGFAILED;
+					} else {
+						int *retries = (int *)cxt;
+						*retries = *retries + 1;
+					}
 				} else {
 					int *retries = (int *)
 					    ping_iterator_get_context(iter);
