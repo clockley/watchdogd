@@ -287,7 +287,6 @@ void WatchdogDestroy(watchdog_t * dog)
 {
 	assert(dog != NULL);
 	free(dog);
-	dog = NULL;
 }
 
 bool CheckWatchdogTimeout(watchdog_t * const wdt, int timeout)
