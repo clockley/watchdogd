@@ -28,6 +28,7 @@
 #include <sys/types.h>
 #include <time.h>
 #include <unistd.h>
+#include <dirent.h>
 
 #ifndef NSIG
 #if defined(_NSIG)

@@ -247,7 +247,7 @@ int UnmountAll(void)
 {
 	struct libmnt_context *context;
 	struct libmnt_iter *iter;
-	struct libmnt_fs *currentfs;
+	struct libmnt_fs *currentfs = mnt_new_fs();
 
 	iter = mnt_new_iter(MNT_ITER_BACKWARD);
 	context = mnt_new_context();
