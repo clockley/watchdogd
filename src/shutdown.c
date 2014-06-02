@@ -96,21 +96,6 @@ int Shutdown(int errorcode, struct cfgoptions *arg)
 		return 0;
 	}
 
-/*	if (errorcode == WECMDRESET) {
-		kill(getpid(), SIGUSR1);
-
-		struct timespec rqtp;
-
-		rqtp.tv_sec = 960;
-		rqtp.tv_nsec = 960 * 1000;
-
-		nanosleep(&rqtp, &rqtp);
-
-		_Shutdown(errorcode, false);
-
-		abort();
-	}*/
-
 	if (errorcode != WECMDREBOOT && errorcode != WECMDRESET) {
 		char buf[64] = { "\0" };
 		snprintf(buf, sizeof(buf), "%d\n", errorcode);
