@@ -20,28 +20,6 @@
 #include "exe.h"
 #include "errorlist.h"
 
-static int KillAll(void)
-{
-	sync();
-	if (kill(-1, SIGKILL) != 0) {
-		if (errno != ESRCH)
-			return -1;
-	}
-
-	sync();
-	return 0;
-}
-
-static int TermAll(void)
-{
-	if (kill(-1, SIGTERM) != 0) {
-		if (errno != ESRCH)
-			return -1;
-	}
-
-	return 0;
-}
-
 static int StartInit(void)
 {
 	if (kill(1, SIGCONT) == -1)
@@ -67,8 +45,7 @@ static void KillAllProcesses(int sig)
 {
 	DIR *dirp = opendir("/proc/");
 
-	for (struct dirent *ent = ent; ent != NULL; ent = readdir(dirp))
-	{
+	for (struct dirent *ent = ent; ent != NULL; ent = readdir(dirp)) {
 		pid_t ret = (pid_t)ConvertStringToInt(ent->d_name);
 		if (ret == 0 || errno == EINVAL) {
 			continue;
