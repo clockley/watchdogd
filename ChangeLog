@@ -8,3 +8,6 @@
 
 2014 -05 - 19 Christian Lockley <clockley1@gmail.com> 0.0.7a
 * Fix two infinite loops in shutdown.c
+
+2014 - 06 - 02 Christian Lockley
+* Fixed yet another bug in Shutdown()
