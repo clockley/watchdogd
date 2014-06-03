@@ -45,7 +45,11 @@ static void KillAllProcesses(int sig)
 {
 	DIR *dirp = opendir("/proc/");
 
-	errno = 0;
+	assert(dirp != NULL);
+
+	if (dirp == NULL) {
+		return;
+	}
 
 	for (struct dirent *ent = ent; ent != NULL; ent = readdir(dirp)) {
 		pid_t ret = (pid_t)ConvertStringToInt(ent->d_name);
@@ -65,7 +69,7 @@ static void KillAllProcesses(int sig)
 				continue;
 			}
 
-			kill(-ret, sig);
+			kill(-ret, sig); //kill all processes that have the same sid at the same time.
 		}
 	}
 
