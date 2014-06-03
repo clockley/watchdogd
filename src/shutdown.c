@@ -45,9 +45,12 @@ static void KillAllProcesses(int sig)
 {
 	DIR *dirp = opendir("/proc/");
 
+	errno = 0;
+
 	for (struct dirent *ent = ent; ent != NULL; ent = readdir(dirp)) {
 		pid_t ret = (pid_t)ConvertStringToInt(ent->d_name);
 		if (ret == 0 || errno == EINVAL) {
+			errno = 0;
 			continue;
 		} else {
 			if (getsid(getpid()) == getsid(ret)) {
