@@ -122,6 +122,8 @@ int Shutdown(int errorcode, struct cfgoptions *arg)
 	sigfillset(&mask);
 	pthread_sigmask(SIG_BLOCK, &mask, NULL);
 
+	acct(NULL);		//acct not in POSIX
+
 	setsid();
 
 	sync();
@@ -133,8 +135,6 @@ int Shutdown(int errorcode, struct cfgoptions *arg)
 	KillAllProcesses(SIGKILL);
 
 	WriteUtmpx(errorcode == WECMDREBOOT ? true : false);
-
-	acct(NULL);		//acct not in POSIX
 
 	DisablePageFiles();
 
