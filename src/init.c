@@ -472,6 +472,7 @@ bool SetDefaultConfig(struct cfgoptions * options)
 		return false;
 
 	memset(options, 0, sizeof(*options));
+	memset(&options->pidfile, 0, sizeof(options->pidfile));
 
 	options->confile = "/etc/watchdogd.conf";
 	options->priority = 16;

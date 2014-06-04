@@ -99,7 +99,13 @@ int OpenPidFile(const char *path)
 
 int DeletePidFile(pidfile_t * const pidfile)
 {
+	assert(pidfile != NULL);
+
 	if (pidfile == NULL) {
+		return -1;
+	}
+
+	if (pidfile->fd == 0) {
 		return 0;
 	}
 
