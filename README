@@ -1,9 +1,55 @@
-watchdogd is a simple watchdog daemon I wrote as a learning project.
+NAME
+----
+	watchdogd - A watchdog daemon.
 
-This is the first version.
+SYNOPSIS
+--------
 
-TODO:
+	watchdogd [-F] [-q] [-s] [-b] [-f] [-c <config_file>]
 
-1.) Write better documentation.
+DESCRIPTION
+-----------
 
-2.) Organize source tree.
+	A watchdog timer(WDT) is an electronic timer that is used to automatically
+	recover from software or hardware error. Normally a software program(in this case watchdogd)
+	restarts the watchdog timer to prevent it from timing out and rebooting the system.
+
+	In addition the regularly resetting the WDT, watchdogd(the daemon) can be configured to
+	actively monitor key system metrics and take appropriate action via repair scripts.
+
+	watchdogd comes with several built-in test:
+
+	* Ping IP addresses and check for answer(IPv4 and IPv6)
+
+	* Check load average
+
+	* Execute check/repair scripts found in /etc/watchdog.d
+
+	* Execute a user defined an arbitrary command.
+
+OPTIONS
+-------
+
+	-F Skip legacy SysV daemon initialization steps, useful for systemd.
+
+	-s Regularly schedule file system synchronization with sync().
+
+	-b Reboot system for certain non-fatal errors.
+
+	-f Force a configuration that could make your system unstable.
+
+	-c Path to configuration file. default is /etc/watchdogd.conf .
+
+
+CONFIGURATION FILE OPTIONS
+--------------------------
+TODO
+
+REPAIR SCRIPTS
+--------------
+TODO
+
+FILES
+-----
+
+	/etc/watchdogd.conf .
