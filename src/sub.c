@@ -263,14 +263,12 @@ int CreateDetachedThread(void *(*startFunction) (void *), void *arg)
 	size_t stackSize = 0;
 	if (pthread_attr_getstacksize(&attr, &stackSize) == 0) {
 		const size_t targetStackSize = 1048576;
-		if (targetStackSize > PTHREAD_STACK_MIN) {
-			if (stackSize > targetStackSize) {
-				if (pthread_attr_setstacksize(&attr, 1048576) !=
-				    0) {
-					Logmsg(LOG_CRIT,
-					       "pthread_attr_setstacksize: %s\n",
-					       strerror(errno));
-				}
+		if ((targetStackSize > PTHREAD_STACK_MIN)
+		    && (stackSize > targetStackSize)) {
+			if (pthread_attr_setstacksize(&attr, 1048576) != 0) {
+				Logmsg(LOG_CRIT,
+				       "pthread_attr_setstacksize: %s\n",
+				       strerror(errno));
 			}
 		}
 	} else {
