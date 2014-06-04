@@ -260,9 +260,9 @@ int CreateDetachedThread(void *(*startFunction) (void *), void *arg)
 	if (pthread_attr_init(&attr) != 0)
 		return -1;
 
-	size_t targetStackSize = 1048576;
 	size_t stackSize = 0;
 	if (pthread_attr_getstacksize(&attr, &stackSize) == 0) {
+		const size_t targetStackSize = 1048576;
 		if (targetStackSize > PTHREAD_STACK_MIN) {
 			if (stackSize > targetStackSize) {
 				if (pthread_attr_setstacksize(&attr, 1048576) !=
