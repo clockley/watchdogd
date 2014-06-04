@@ -95,10 +95,10 @@ OPTIONS
 	will exit with an error message.
 
 	pid-files = <array>
-	pid-files is an array that contians the list of pid files that watchdogd in
+	pid-files is an array that contains the list of pid files that watchdogd in
 	to parse. If the pid specified in the pidfile is not valid the repair-binary
 	will run. Is the repair-binary return an error code greater than zero or is
-	not sepecified in the configuration watchdogd will reboot the system.
+	not specified in the configuration watchdogd will reboot the system.
 	Example:
 		pid-files= ["/var/run/sendsnail.pid", "/var/run/pumpdaudio.pid",
 		"/var/run/lightdm.pid", "/var/run/nat.pid"]

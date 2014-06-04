@@ -43,7 +43,73 @@ OPTIONS
 
 CONFIGURATION FILE OPTIONS
 --------------------------
-TODO
+
+	The configuration file uses a simple format where x is the variable name
+	and the value that is assigned comes after the the equal sign ex. x = 1
+
+	Examples:
+
+	float_option = 2.2
+	char_option = "string"
+	bool_option = true
+
+	C++ and Unix shell comments are supported.
+				       ----------------------------------------
+	test-directory = <string>
+	All scripts in this folder will be automatically executed.
+	See REPAIR SCRIPT section.
+
+	interval = <int>
+	Set the time in seconds between two pings the watchdog device.
+	Default value is 1 second.
+
+	max-load-1 = <float>
+	If the one minute system load average exceeds this value watchdogd
+	will reboot the system.
+
+	max-load-5 = <float>
+	If the five minute system load average exceeds this value watchdogd
+	will reboot the system.
+
+	max-load-15 = <float>
+	If the fifteen minute system load average exceeds this value watchdogd
+	will reboot the system.
+
+	enable-load-monitor = <bool>
+	If this option is undefined or set to false the max-load-* options are
+	ignored.
+
+	min-memory = <int>
+	The amount of virtual memory ram+pagefile in pages that must stay free.
+	If free memory is less than value given the watchdog daemon will reboot
+	the system.
+	watchdog-device = <string>
+	The path to the watchdog device.
+
+	use-pid-file = <bool>
+	This option is ignored if watchdogd is not running in daemon mode.
+
+	watchdog-timeout = <int>
+	Set the watchdog device timeout. If the daemon can't set the timeout it
+	will exit with an error message.
+
+	pid-files = <array>
+	pid-files is an array that contains the list of pid files that watchdogd in
+	to parse. If the pid specified in the pidfile is not valid the repair-binary
+	will run. Is the repair-binary return an error code greater than zero or is
+	not specified in the configuration watchdogd will reboot the system.
+	Example:
+		pid-files= ["/var/run/sendsnail.pid", "/var/run/pumpdaudio.pid",
+		"/var/run/lightdm.pid", "/var/run/nat.pid"]
+
+	softboot = <bool>
+	Reboot the system if watchdogd is unable to open a pidfile.
+
+	lock-memory = <bool>
+	Lock memory if set to true. Default true.
+
+	sync = <bool>
+	Sync file systems with the sync() call every time watchdogd is awake.
 
 REPAIR SCRIPTS
 --------------
