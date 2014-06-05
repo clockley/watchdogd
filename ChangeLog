@@ -11,3 +11,9 @@
 
 2014 - 06 - 02 Christian Lockley <clockley1@gmail.com>
 * Fixed yet another bug in Shutdown()
+
+2014 - 06 - 05 Christian Lockley <clockley1@gmail.com>
+* Fix bug that caused program to try to delete a pidfile even if is never created one in the first place
+* Automatically install systemd service files
+README: autoconfig installs watchdogd to /usr/local/sbin && systemd.service file ExecStart=/usr/sbin/watchdogd
+To fix this type ./configure --prefix=/usr
