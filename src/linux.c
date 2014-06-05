@@ -18,7 +18,7 @@
 #include "sub.h"
 
 #ifdef __linux__
-int PingWatchdog(watchdog_t * watchdog)
+int PingWatchdog(watchdog_t * const watchdog)
 {
 	if (watchdog == NULL) {
 		return -1;
@@ -39,7 +39,7 @@ int PingWatchdog(watchdog_t * watchdog)
 	return -1;
 }
 
-int CloseWatchdog(watchdog_t * watchdog)
+int CloseWatchdog(watchdog_t * const watchdog)
 {
 	if (watchdog == NULL) {
 		return -1;
@@ -67,7 +67,7 @@ int CloseWatchdog(watchdog_t * watchdog)
 	return 0;
 }
 
-static bool PrintWdtInfo(watchdog_t * wdt)
+static bool PrintWdtInfo(watchdog_t * const wdt)
 {
 	struct watchdog_info watchDogInfo;
 
@@ -84,7 +84,7 @@ static bool PrintWdtInfo(watchdog_t * wdt)
 	return false;
 }
 
-watchdog_t *OpenWatchdog(const char *path)
+watchdog_t *OpenWatchdog(const char *const path)
 {
 	if (path == NULL) {
 		return NULL;
@@ -111,7 +111,7 @@ watchdog_t *OpenWatchdog(const char *path)
 	return watchdog;
 }
 
-int ConfigureWatchdogTimeout(watchdog_t * watchdog, int timeout)
+int ConfigureWatchdogTimeout(watchdog_t * const watchdog, int timeout)
 {
 	struct watchdog_info watchDogInfo;
 
