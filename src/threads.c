@@ -360,6 +360,7 @@ static void *TestPidfileThread(void *arg)
 					s->error |= PIDFILERROR;
 					break;
 				} else {
+					close(fd);
 					continue;
 				}
 			} else {
