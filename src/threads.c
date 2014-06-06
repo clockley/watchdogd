@@ -391,6 +391,7 @@ static void *TestPidfileThread(void *arg)
 				close(fd);
 				if (s->options & SOFTBOOT) {
 					s->error |= PIDFILERROR;
+					close(fd);
 					break;
 				} else {
 					continue;
