@@ -390,8 +390,8 @@ static void *TestPidfileThread(void *arg)
 				       pidFilePathName, strerror(errno));
 				close(fd);
 				if (s->options & SOFTBOOT) {
-					s->error |= PIDFILERROR;
 					close(fd);
+					s->error |= PIDFILERROR;
 					break;
 				} else {
 					continue;
