@@ -130,8 +130,10 @@ int main(int argc, char **argv)
 
 		if (clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &rqtp, NULL)
 		    != 0) {
-			Logmsg(LOG_ERR, "clock_nanosleep failed %s",
-			       strerror(errno));
+			if (errno != 0) {
+				Logmsg(LOG_ERR, "clock_nanosleep failed %s",
+				       strerror(errno));
+			}
 		}
 
 		rqtp.tv_sec += options.sleeptime;
