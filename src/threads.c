@@ -405,13 +405,11 @@ static void *TestPidfileThread(void *arg)
 				       "unable to send null signal to pid %li: %s: %s",
 				       pid, pidFilePathName, strerror(errno));
 				if (errno == ESRCH) {
-					close(fd);
 					s->error |= PIDFILERROR;
 					break;
 				}
 
 				if (s->options & SOFTBOOT) {
-					close(fd);
 					s->error |= PIDFILERROR;
 					break;
 				}
