@@ -311,7 +311,7 @@ static void *TestPidfileThread(void *arg)
 				break;
 			}
 
-			int fd = open(pidFilePathName, O_RDONLY | O_CLOEXEC);
+			int fd = 0;
 
 			time_t startTime = 0;
 
