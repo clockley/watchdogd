@@ -335,7 +335,7 @@ static void *TestPidfileThread(void *arg)
 
 				fd = open(pidFilePathName,
 					  O_RDONLY | O_CLOEXEC);
-				if (fd > 0) {
+				if (fd >= 0) {
 					break;
 				}
 
