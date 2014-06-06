@@ -17,3 +17,6 @@
 * Automatically install systemd service files
 README: autoconfig installs watchdogd to /usr/local/sbin && systemd.service file ExecStart=/usr/sbin/watchdogd
 To fix this type ./configure --prefix=/usr
+
+2014 - 06 - 06[0.0.9] Christian Lockley
+* Fixed a number of bugs that caused daemon to crash if pidfile motioning was on
