@@ -416,7 +416,6 @@ static void *TestPidfileThread(void *arg)
 					break;
 				}
 			}
-			close(fd);
 		}
 
 		pthread_cond_wait(&workerupdate, &managerlock);
