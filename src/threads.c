@@ -320,28 +320,6 @@ static void *TestPidfileThread(void *arg)
 				break;
 			}
 
-			time_t currentTime = 0;
-
-			do {
-				struct timespec rqtp;
-				rqtp.tv_sec = 0;
-				rqtp.tv_nsec = 250;
-
-				if (time(&currentTime) == (time_t) (-1)) {
-					currentTime = 0;
-					break;
-				}
-
-				fd = open(pidFilePathName,
-					  O_RDONLY | O_CLOEXEC);
-				if (fd > 0) {
-					break;
-				}
-
-				nanosleep(&rqtp, NULL);
-			} while (difftime(currentTime, startTime) <=
-				 s->retryLimit);
-
 			if (fd < 0) {
 				Logmsg(LOG_ERR, "cannot open %s: %s",
 				       pidFilePathName, strerror(errno));
