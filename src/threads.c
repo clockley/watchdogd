@@ -97,7 +97,8 @@ static void *Ping(void *arg)
 					void *cxt =
 					    ping_iterator_get_context(iter);
 					if (cxt == NULL) {
-						Logmsg(LOG_ERR, "unable to allocate memory for ping context");
+						Logmsg(LOG_ERR,
+						       "unable to allocate memory for ping context");
 						s->error |= PINGFAILED;
 					} else {
 						int *retries = (int *)cxt;
@@ -345,9 +346,8 @@ static void *TestPidfileThread(void *arg)
 			if (fd < 0) {
 				Logmsg(LOG_ERR, "cannot open %s: %s",
 				       pidFilePathName, strerror(errno));
-
-					s->error |= PIDFILERROR;
-					break;
+				s->error |= PIDFILERROR;
+				break;
 			}
 
 			struct stat buffer;
@@ -362,18 +362,20 @@ static void *TestPidfileThread(void *arg)
 				} else {
 					continue;
 				}
-			}
-
-			if (S_ISBLK(buffer.st_mode) == true
-			    || S_ISCHR(buffer.st_mode) == true
-			    || S_ISDIR(buffer.st_mode) == true
-			    || S_ISFIFO(buffer.st_mode) == true
-			    || S_ISSOCK(buffer.st_mode) == true
-			    || S_ISREG(buffer.st_mode) == false) {
-				Logmsg(LOG_ERR, "invalid file type %s\n",
-				       pidFilePathName);
-				close(fd);
-				continue;
+			} else {
+				if (S_ISBLK(buffer.st_mode) == true
+				    || S_ISCHR(buffer.st_mode) == true
+				    || S_ISDIR(buffer.st_mode) == true
+				    || S_ISFIFO(buffer.st_mode) == true
+				    || S_ISSOCK(buffer.st_mode) == true
+				    || S_ISREG(buffer.st_mode) == false) {
+					Logmsg(LOG_ERR,
+					       "invalid file type %s",
+					       pidFilePathName);
+					close(fd);
+					s->error |= PIDFILERROR;
+					break;
+				}
 			}
 
 			char buf[64] = { 0 };
@@ -381,16 +383,11 @@ static void *TestPidfileThread(void *arg)
 				Logmsg(LOG_ERR, "unable to read pidfile %s: %s",
 				       pidFilePathName, strerror(errno));
 				close(fd);
-				if (s->options & SOFTBOOT) {
-					close(fd);
-					s->error |= PIDFILERROR;
-					break;
-				} else {
-					continue;
-				}
-			} else {
-				close(fd);
+				s->error |= PIDFILERROR;
+				break;
 			}
+
+			close(fd);
 
 			errno = 0;
 
