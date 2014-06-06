@@ -364,6 +364,7 @@ static void *TestPidfileThread(void *arg)
 				Logmsg(LOG_ERR, "%s: %s", pidFilePathName,
 				       strerror(errno));
 				if (s->options & SOFTBOOT) {
+					close(fd);
 					s->error |= PIDFILERROR;
 					break;
 				} else {
@@ -414,15 +415,18 @@ static void *TestPidfileThread(void *arg)
 				       "unable to send null signal to pid %li: %s: %s",
 				       pid, pidFilePathName, strerror(errno));
 				if (errno == ESRCH) {
+					close(fd);
 					s->error |= PIDFILERROR;
 					break;
 				}
 
 				if (s->options & SOFTBOOT) {
+					close(fd);
 					s->error |= PIDFILERROR;
 					break;
 				}
 			}
+			close(fd);
 		}
 
 		pthread_cond_wait(&workerupdate, &managerlock);
