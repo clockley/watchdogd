@@ -26,4 +26,5 @@ int PrintVersionString(void);
 int LoadConfigurationFile(struct cfgoptions *const cfg);
 int ParseCommandLine(int *argc, char **argv, struct cfgoptions *s);
 bool SetDefaultConfig(struct cfgoptions *options);
+int GetDefaultPriority(void);
 #endif

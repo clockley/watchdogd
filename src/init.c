@@ -184,10 +184,12 @@ int LoadConfigurationFile(struct cfgoptions *const cfg)
 			fprintf(stderr,
 				"illegal value for configuration file entry named \"realtime-priority\"\n");
 			fprintf(stderr, "watchdogd: using default value\n");
-			cfg->priority = 1;
+			cfg->priority = GetDefaultPriority();
 		} else {
 			cfg->priority = tmp;
 		}
+	} else {
+		cfg->priority = GetDefaultPriority();
 	}
 
 	config_set_auto_convert(&cfg->cfg, true);
@@ -438,6 +440,18 @@ int MakeLogDir(struct cfgoptions *cfg)
 	return 0;
 }
 
+int GetDefaultPriority(void)
+{
+	int ret = sched_get_priority_min(SCHED_RR);
+
+	if (ret < 0) {
+		fprintf(stderr, "watchdogd: %s\n", strerror(errno));
+		return ret;
+	}
+
+	return ret;
+}
+
 int CheckPriority(int priority)
 {
 	int max = 0;
@@ -478,7 +492,6 @@ bool SetDefaultConfig(struct cfgoptions * options)
 	memset(options, 0, sizeof(*options));
 
 	options->confile = "/etc/watchdogd.conf";
-	options->priority = 16;
 	options->sleeptime = 1;
 	options->watchdogTimeout = -1;
 	options->repairBinTimeout = 60;
