@@ -345,17 +345,9 @@ static void *TestPidfileThread(void *arg)
 			if (fd < 0) {
 				Logmsg(LOG_ERR, "cannot open %s: %s",
 				       pidFilePathName, strerror(errno));
-				if (s->options & SOFTBOOT) {
+
 					s->error |= PIDFILERROR;
 					break;
-				} else {
-					if (s->retryLimit < 1) {
-						continue;
-					} else {
-						s->error |= PIDFILERROR;
-						break;
-					}
-				}
 			}
 
 			struct stat buffer;
