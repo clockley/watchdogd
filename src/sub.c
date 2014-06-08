@@ -116,18 +116,20 @@ int EndDaemon(struct cfgoptions *s, int keepalive)
 
 	stop = 1;
 
-	struct sigaction dummy;
-	dummy.sa_handler = SIG_IGN;
-	dummy.sa_flags = 0;
+	if (keepalive == false) {
+		struct sigaction dummy;
+		dummy.sa_handler = SIG_IGN;
+		dummy.sa_flags = 0;
 
-	sigemptyset(&dummy.sa_mask);
+		sigemptyset(&dummy.sa_mask);
 
-	sigaddset(&dummy.sa_mask, SIGUSR2);
+		sigaddset(&dummy.sa_mask, SIGUSR2);
 
-	sigaction(SIGUSR2, &dummy, NULL);
+		sigaction(SIGUSR2, &dummy, NULL);
 
-	if (killpg(getpgrp(), SIGUSR2) == -1) {
-		Logmsg(LOG_ERR, "killpg failed %s", strerror(errno));
+		if (killpg(getpgrp(), SIGUSR2) == -1) {
+			Logmsg(LOG_ERR, "killpg failed %s", strerror(errno));
+		}
 	}
 
 	if (s->options & ENABLEPING) {
