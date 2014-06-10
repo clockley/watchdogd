@@ -124,8 +124,6 @@ int Shutdown(int errorcode, struct cfgoptions *arg)
 
 	acct(NULL);		//acct not in POSIX
 
-	setsid();
-
 	sync();
 
 	KillAllProcesses(SIGTERM);
