@@ -20,3 +20,17 @@ To fix this type ./configure --prefix=/usr
 
 2014 - 06 - 06[0.0.9] Christian Lockley
 * Fixed a number of bugs that caused daemon to crash if pidfile motioning was on
+
+2014-06-11  [0.1.0] <Christian Lockley>
+	* src/sub.c: Fix shutdown under systemd.
+
+	* src/shutdown.c: No use calling setsid() here, delete it.
+
+	* src/threads.c: fix fd leak in error path
+
+        * src/init.c, src/init.h: Set the default realtime priority to the
+        value returned by sched_get_priority_min
+
+        * src/threads.c: fix fd leak if fd = 0(impossible)
+
+	* src/threads.c: Fix double close(thanks to coverity)
