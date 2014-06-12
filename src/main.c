@@ -67,7 +67,7 @@ int main(int argc, char **argv)
 		FatalError(&options);
 	}
 
-	if (options.options & NOACTION) {
+	if (!(options.options & NOACTION)) {
 		watchdog = OpenWatchdog(options.devicepath);
 		if (watchdog == NULL) {
 			FatalError(&options);
@@ -83,6 +83,13 @@ int main(int argc, char **argv)
 			CloseWatchdog(watchdog);
 			return EXIT_FAILURE;
 		}
+
+		if (options.sleeptime == -1) {
+			options.sleeptime = GuessSleeptime(watchdog);
+			Logmsg(LOG_INFO, "ping interval autodetect: %i", options.sleeptime);
+		}
+
+		assert(options.sleeptime >= 1);
 
 		if (options.watchdogTimeout != -1
 		    && CheckWatchdogTimeout(watchdog,
