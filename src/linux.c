@@ -170,14 +170,14 @@ int ConfigureWatchdogTimeout(watchdog_t * const watchdog, int timeout)
 
 static int LegacyOutOfMemoryKillerConfig(void)
 {
-	int fd = open("/proc/self/om_adj");
+	int fd = open("/proc/self/om_adj",O_WRONLY);
 	
 	if (fd < 0)  {
 		Logmsg(LOG_ERR, "open failed: %s", strerror(errno));
 		return -1;
 	}
 
-	if (write(fd, "-1000", strlen("-1000")) < 0) {
+	if (write(fd, "-17", strlen("-17")) < 0) {
 		Logmsg(LOG_ERR, "write failed: %s", strerror(errno));
 		close(fd);
 		return -1;
@@ -206,11 +206,11 @@ int ConfigureKernelOutOfMemoryKiller(void)
 		close(fd);
 		close(dfd);
 
-		if (LegacyOutOfMemoryKillerConfig() < 0) {
-			return -1;
-		} else {
+		if (LegacyOutOfMemoryKillerConfig() == 0) {
 			return 0;
 		}
+
+		return -1;
 	}
 
 	if (write(fd, "-1000", strlen("-1000")) < 0) {
