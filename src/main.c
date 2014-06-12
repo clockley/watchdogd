@@ -67,7 +67,7 @@ int main(int argc, char **argv)
 		FatalError(&options);
 	}
 
-	if ((options.options & NOACTION) == 0) {
+	if (options.options & NOACTION) {
 		watchdog = OpenWatchdog(options.devicepath);
 		if (watchdog == NULL) {
 			FatalError(&options);
@@ -105,6 +105,8 @@ int main(int argc, char **argv)
 		options.sleeptime = GuessSleeptime(watchdog);
 		Logmsg(LOG_INFO, "ping interval autodetect: %i", options.sleeptime);
 	}
+
+	assert(options.sleeptime >= 1);
 
 	if (SetupAuxManagerThread(&options) < 0) {
 		FatalError(&options);
