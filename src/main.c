@@ -106,11 +106,10 @@ int main(int argc, char **argv)
 				return EXIT_FAILURE;
 			}
 		}
-	}
-
-	if (options.sleeptime == -1) {
-		options.sleeptime = GuessSleeptime(watchdog);
-		Logmsg(LOG_INFO, "ping interval autodetect: %i", options.sleeptime);
+	} else {
+		if (options.sleeptime == -1) {
+			options.sleeptime = 60;
+		}
 	}
 
 	assert(options.sleeptime >= 1);
