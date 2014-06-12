@@ -168,6 +168,24 @@ int ConfigureWatchdogTimeout(watchdog_t * const watchdog, int timeout)
 	return PingWatchdog(watchdog);
 }
 
+static int LegacyOutOfMemoryKillerConfig(void)
+{
+	int fd = open("/proc/self/om_adj");
+	
+	if (fd < 0)  {
+		Logmsg(LOG_ERR, "open failed: %s", strerror(errno));
+		return -1;
+	}
+
+	if (write(fd, "-1000", strlen("-1000")) < 0) {
+		Logmsg(LOG_ERR, "write failed: %s", strerror(errno));
+		close(fd);
+		return -1;
+	}
+
+	return 0;
+}
+
 int ConfigureKernelOutOfMemoryKiller(void)
 {
 	int fd = 0;
@@ -184,9 +202,15 @@ int ConfigureKernelOutOfMemoryKiller(void)
 
 	if (fd == -1) {
 		Logmsg(LOG_ERR, "open failed: %s", strerror(errno));
-		CloseWraper(&fd);	//CloseWraper is totally wacko, I really should remove it.
-		CloseWraper(&dfd);
-		return -1;
+
+		close(fd);
+		close(dfd);
+
+		if (LegacyOutOfMemoryKillerConfig() < 0) {
+			return -1;
+		} else {
+			return 0;
+		}
 	}
 
 	if (write(fd, "-1000", strlen("-1000")) < 0) {
@@ -196,8 +220,8 @@ int ConfigureKernelOutOfMemoryKiller(void)
 		return -1;
 	}
 
-	CloseWraper(&fd);
-	CloseWraper(&dfd);
+	close(fd);
+	close(dfd);
 
 	return 0;
 }

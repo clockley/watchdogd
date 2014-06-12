@@ -311,6 +311,8 @@ int LoadConfigurationFile(struct cfgoptions *const cfg)
 		} else {
 			cfg->sleeptime = (time_t) tmp;
 		}
+	} else {
+			cfg->sleeptime = (time_t) -1;
 	}
 
 	cfg->pidFiles = config_lookup(&cfg->cfg, "pid-files");
