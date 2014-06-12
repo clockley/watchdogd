@@ -74,14 +74,26 @@ int main(int argc, char **argv)
 		}
 
 		if (ConfigureWatchdogTimeout(watchdog, options.watchdogTimeout)
-		    < 0 && options.watchdogTimeout != -1) {
-			Logmsg(LOG_ERR,
-			       "unable to set watchdog device timeout\n");
-			Logmsg(LOG_ERR, "program exiting\n");
+		    < 0 && options.watchdogTimeout != -1
+		    && IsDaemon(&options) == 0) {
+			fprintf(stderr,
+				"unable to set watchdog device timeout\n");
+			fprintf(stderr, "program exiting\n");
 			/*Can't use FatalError() because we need to shut down watchdog device after we open it */
 			EndDaemon(&options, false);
 			CloseWatchdog(watchdog);
 			return EXIT_FAILURE;
+		} else {
+			if (ConfigureWatchdogTimeout
+			    (watchdog, options.watchdogTimeout) < 0
+			    && options.watchdogTimeout != -1) {
+				Logmsg(LOG_ERR,
+				       "unable to set watchdog device timeout");
+				Logmsg(LOG_ERR, "program exiting");
+				EndDaemon(&options, false);
+				CloseWatchdog(watchdog);
+				return EXIT_FAILURE;
+			}
 		}
 
 		if (options.watchdogTimeout != -1
