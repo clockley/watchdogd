@@ -101,6 +101,11 @@ int main(int argc, char **argv)
 		}
 	}
 
+	if (options.sleeptime == -1) {
+		options.sleeptime = GuessSleeptime(watchdog);
+		Logmsg(LOG_INFO, "ping interval autodetect: %i", options.sleeptime);
+	}
+
 	if (SetupAuxManagerThread(&options) < 0) {
 		FatalError(&options);
 	}

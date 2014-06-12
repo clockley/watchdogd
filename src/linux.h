@@ -31,6 +31,7 @@ int DisablePageFiles(void);
 int RemountRootReadOnly(void);
 int CloseWatchdog(watchdog_t *const);
 int PingWatchdog(watchdog_t *const);
+int GetOptimalPingInterval(watchdog_t * const watchdog);
 watchdog_t *OpenWatchdog(const char *const);
 int ConfigureWatchdogTimeout(watchdog_t *const , int);
 int _Shutdown(int, bool);

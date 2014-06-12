@@ -29,6 +29,7 @@ void SetFd(watchdog_t * wdt, int fd);
 int GetFd(watchdog_t * wdt);
 void SetTimeout(watchdog_t * wdt, int timeout);
 int GetTimeout(watchdog_t * wdt);
+int GuessSleeptime(watchdog_t * const watchdog);
 //
 
 void FatalError(struct cfgoptions *s);

@@ -111,6 +111,22 @@ watchdog_t *OpenWatchdog(const char *const path)
 	return watchdog;
 }
 
+int GetOptimalPingInterval(watchdog_t * const watchdog)
+{
+	int timeout = 0;
+
+	if (ioctl(GetFd(watchdog), WDIOC_GETTIMEOUT, &timeout) < 0) {
+		return 1;
+	}
+
+	timeout /= 2;
+
+	if (timeout < 1)
+		return 1;
+
+	return timeout;
+}
+
 int ConfigureWatchdogTimeout(watchdog_t * const watchdog, int timeout)
 {
 	struct watchdog_info watchDogInfo;

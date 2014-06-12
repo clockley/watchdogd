@@ -339,6 +339,15 @@ int GetTimeout(watchdog_t * const wdt)
 	return wdt->timeout;
 }
 
+int GuessSleeptime(watchdog_t * const watchdog)
+{
+	if (watchdog == NULL) {
+		return 1;
+	}
+
+	return GetOptimalPingInterval(watchdog);
+}
+
 void FatalError(struct cfgoptions *s)
 {
 	assert(s != NULL);
