@@ -153,7 +153,7 @@ static int EnableWatchdog(watchdog_t * const watchdog)
 		return -1;
 	}
 
-	options = WDIOS_ENABLECARD;
+	int options = WDIOS_ENABLECARD;
 	if (ioctl(GetFd(watchdog), WDIOC_SETOPTIONS, &options) < 0) {
 		Logmsg(LOG_CRIT, "WDIOS_ENABLECARD ioctl failed: %s",
 		       strerror(errno));
@@ -193,7 +193,7 @@ int ConfigureWatchdogTimeout(watchdog_t * const watchdog, int timeout)
 	int oldTimeout = timeout;
 
 	if (ioctl(GetFd(watchdog), WDIOC_SETTIMEOUT, &timeout) < 0) {
-		int defaultTimeout = GetOptimalPingInterval();
+		int defaultTimeout = GetOptimalPingInterval(watchdog);
 
 		fprintf(stderr, "watchdogd: unable to set WDT timeout\n");
 		fprintf(stderr, "using default: %i", defaultTimeout);
