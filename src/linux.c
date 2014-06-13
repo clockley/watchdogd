@@ -197,6 +197,8 @@ static int LegacyOutOfMemoryKillerConfig(void)
 		Logmsg(LOG_ERR, "write failed: %s", strerror(errno));
 		close(fd);
 		return -1;
+	} else {
+		close(fd);
 	}
 
 	return 0;
