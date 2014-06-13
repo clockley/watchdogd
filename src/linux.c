@@ -362,8 +362,9 @@ int DisablePageFiles(void)
 
 int _Shutdown(int errorcode, bool kexec)
 {
+	sync();
+
 	if (errorcode == WETEMP) {
-		sync();
 		errno = 0;
 		if (reboot(LINUX_REBOOT_CMD_POWER_OFF) == -1) {
 			if (errno == EPERM) {
@@ -375,7 +376,6 @@ int _Shutdown(int errorcode, bool kexec)
 	}
 
 	if (kexec == true) {
-		sync();
 		if (reboot(LINUX_REBOOT_CMD_KEXEC) == -1) {
 			if (errno == EPERM) {
 				return -1;
@@ -383,7 +383,6 @@ int _Shutdown(int errorcode, bool kexec)
 		}
 	}
 
-	sync();
 	if (reboot(LINUX_REBOOT_CMD_RESTART) == -1) {
 		if (errno == EPERM) {
 			return -1;
