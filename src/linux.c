@@ -261,7 +261,6 @@ int ConfigureKernelOutOfMemoryKiller(void)
 	if (fd == -1) {
 		Logmsg(LOG_ERR, "open failed: %s", strerror(errno));
 
-		close(fd);
 		close(dfd);
 
 		if (LegacyOutOfMemoryKillerConfig() == 0) {
@@ -325,10 +324,14 @@ int SaveRandomSeed(const char *filename)
 
 	close(fd);
 
-	fd = open(filename, O_TRUNC|O_CREAT);
+	fd = open(filename, O_TRUNC|O_CREAT, 0600);
 
 	if (fd < 1) {
 		goto error;
+	}
+
+	if (fchown(fd, 0, 0) < 0) {
+		fprintf(stderr, "%s\n", strerror(errno));
 	}
 
 	ret = write(fd, buf, sizeof(buf));
@@ -342,7 +345,7 @@ int SaveRandomSeed(const char *filename)
  error:
 	fprintf(stderr, "%s\n", strerror(errno));
 
-	if (fd > 0) {
+	if (fd != -1) {
 		close(fd);
 	}
 
