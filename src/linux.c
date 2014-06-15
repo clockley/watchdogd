@@ -345,7 +345,7 @@ int SaveRandomSeed(const char *filename)
  error:
 	fprintf(stderr, "%s\n", strerror(errno));
 
-	if (fd != -1) {
+	if (fd >= 0) {
 		close(fd);
 	}
 
