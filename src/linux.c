@@ -311,7 +311,7 @@ int SaveRandomSeed(const char *filename)
 
 	int fd = open("/dev/urandom", O_RDONLY);
 
-	if (fd != 0) {
+	if (fd < 0) {
 		return -1;
 	}
 
