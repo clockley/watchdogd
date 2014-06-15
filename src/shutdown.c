@@ -134,6 +134,8 @@ int Shutdown(int errorcode, struct cfgoptions *arg)
 
 	WriteUtmpx(errorcode == WECMDREBOOT ? true : false);
 
+	SaveRandomSeed(NULL);
+
 	DisablePageFiles();
 
 	UnmountAll();

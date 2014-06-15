@@ -284,6 +284,67 @@ int ConfigureKernelOutOfMemoryKiller(void)
 	return 0;
 }
 
+static const char *GuessRandomSeedFilename(void)
+{
+	struct stat buf;
+
+	if (stat("/var/run/random-seed", &buf) == 0) {
+		return "/var/run/random-seed";
+	}
+
+	if (stat("/usr/lib/systemd/systemd-random-seed", &buf) == 0) {
+		return "/usr/lib/systemd/systemd-random-seed";
+	}
+
+	return NULL;
+}
+
+int SaveRandomSeed(const char *filename)
+{
+	if (filename == NULL) {
+		filename = GuessRandomSeedFilename();
+	}
+
+	if (filename == NULL) {
+		return -1;
+	}
+
+	int fd = open("/dev/urandom", O_RDONLY);
+
+	if (fd != 0) {
+		return -1;
+	}
+
+	char buf[512] = {0};
+
+	int ret = read(fd, buf, sizeof(buf));
+
+	if (ret == -1) {
+		goto error;
+	}
+
+	close(fd);
+
+	fd = open(filename, O_TRUNC|O_CREAT);
+
+	if (fd < 1) {
+		goto error;
+	}
+
+	ret = write(fd, buf, sizeof(buf));
+
+	if (ret == -1) {
+		goto error;
+	}
+
+	close(fd);
+	return 0;
+ error:
+	fprintf(stderr, "%s\n", strerror(errno));
+	close(fd);
+	return -1;
+}
+
 int RemountRootReadOnly(void)
 {
 	struct libmnt_context *context;
