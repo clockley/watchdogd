@@ -300,7 +300,7 @@ static const char *GuessRandomSeedFilename(void)
 
 const char *GetDefaultRandomSeedPathName(void)
 {
-	return "/usr/lib/systemd/systemd-random-seed";
+	return GuessRandomSeedFilename();
 }
 
 int SaveRandomSeed(const char *filename)
