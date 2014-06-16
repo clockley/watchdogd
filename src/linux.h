@@ -33,6 +33,7 @@ int CloseWatchdog(watchdog_t *const);
 int PingWatchdog(watchdog_t *const);
 int GetOptimalPingInterval(watchdog_t * const);
 int SaveRandomSeed(const char *);
+const char *GetDefaultRandomSeedPathName(void);
 watchdog_t *OpenWatchdog(const char *const);
 int ConfigureWatchdogTimeout(watchdog_t *const , int);
 int _Shutdown(int, bool);

@@ -98,6 +98,11 @@ int LoadConfigurationFile(struct cfgoptions *const cfg)
 		cfg->testexepath = "/etc/watchdog.d";
 	}
 
+	if (config_lookup_string(&cfg->cfg, "random-seed", &cfg->randomSeedPath)
+	    == CONFIG_FALSE) {
+		cfg->randomSeedPath = GetDefaultRandomSeedPathName();
+	}
+
 	if (CreateLinkedListOfExes(cfg->testexepath, &processes) < 0) {
 		fprintf(stderr, "watchdogd: CreateLinkedListOfExes failed\n");
 		return -1;

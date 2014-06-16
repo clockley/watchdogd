@@ -67,6 +67,7 @@ struct cfgoptions {
 	const char *testexepathname;
 	const char *confile;
 	const char *logdir;
+	const char *randomSeedPath;
 	pidfile_t pidfile;
 	time_t sleeptime;
 	unsigned long minfreepages;

@@ -298,6 +298,11 @@ static const char *GuessRandomSeedFilename(void)
 	return NULL;
 }
 
+const char *GetDefaultRandomSeedPathName(void)
+{
+	return "/usr/lib/systemd/systemd-random-seed";
+}
+
 int SaveRandomSeed(const char *filename)
 {
 	if (filename == NULL) {
