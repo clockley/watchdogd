@@ -350,6 +350,9 @@ int SaveRandomSeed(const char *filename)
 	}
 
 	close(fd);
+
+	fprintf(stderr, "saved random seed\n");
+
 	return 0;
  error:
 	fprintf(stderr, "%s\n", strerror(errno));

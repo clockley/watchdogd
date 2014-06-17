@@ -122,6 +122,8 @@ int Shutdown(int errorcode, struct cfgoptions *arg)
 	sigfillset(&mask);
 	pthread_sigmask(SIG_BLOCK, &mask, NULL);
 
+	setsid();
+
 	acct(NULL);		//acct not in POSIX
 
 	sync();
