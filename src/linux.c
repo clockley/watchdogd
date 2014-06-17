@@ -291,8 +291,8 @@ static const char *GuessRandomSeedFilename(void)
 		return "/var/run/random-seed";
 	}
 
-	if (stat("/usr/lib/systemd/systemd-random-seed", &buf) == 0) {
-		return "/usr/lib/systemd/systemd-random-seed";
+	if (stat("/var/lib/systemd/random-seed", &buf) == 0) {
+		return "/var/lib/systemd/random-seed";
 	}
 
 	return NULL;
