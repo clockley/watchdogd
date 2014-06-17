@@ -341,6 +341,10 @@ int SaveRandomSeed(const char *filename)
 
 	ret = write(fd, buf, sizeof(buf));
 
+	if (fsync(fd) != 0) {
+		goto error;
+	}
+
 	if (ret == -1) {
 		goto error;
 	}
