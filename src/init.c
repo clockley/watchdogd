@@ -145,6 +145,12 @@ int LoadConfigurationFile(struct cfgoptions *const cfg)
 		}
 	}
 
+	if (config_lookup_bool(&cfg->cfg, "force", &tmp) == CONFIG_TRUE) {
+		if (tmp) {
+			cfg->options |= FORCE;
+		}
+	}
+
 	if (config_lookup_bool(&cfg->cfg, "sync", &tmp) == CONFIG_TRUE) {
 		if (tmp) {
 			cfg->options |= SYNC;
