@@ -409,7 +409,6 @@ int ParseCommandLine(int *argc, char **argv, struct cfgoptions *cfg)
 	while ((opt = getopt(*argc, argv, "qsfFbc:")) != -1) {
 		switch (opt) {
 		case 'F':
-			assert(cfg->options & DAEMONIZE);
 			cfg->options &= !DAEMONIZE;
 			break;
 		case 'c':
