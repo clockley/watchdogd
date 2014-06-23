@@ -172,6 +172,7 @@ static void *TestDirThread(void *arg)
 	rqtp.tv_nsec = 5 * 1000;
 
 	for (;;) {
+		pthread_mutex_lock(&managerlock);
 		if (ExecuteRepairScripts(&processes, s) < 0) {
 			s->error |= SCRIPTFAILED;
 		} else {
@@ -179,7 +180,7 @@ static void *TestDirThread(void *arg)
 				s->error &= !SCRIPTFAILED;
 			}
 		}
-
+		pthread_mutex_unlock(&managerlock);
 		nanosleep(&rqtp, NULL);
 
 		if (stop == 1) {
