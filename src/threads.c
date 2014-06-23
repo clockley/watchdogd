@@ -435,8 +435,8 @@ static void *ManagerThread(void *arg)
 	struct cfgoptions *s = (struct cfgoptions *)arg;
 	struct timespec rqtp;
 
-	rqtp.tv_sec = 1;
-	rqtp.tv_nsec = 1 * 1000;
+	rqtp.tv_sec = 5;
+	rqtp.tv_nsec = 5 * 1000;
 
 	for (;;) {
 		pthread_mutex_lock(&managerlock);
