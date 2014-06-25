@@ -44,6 +44,17 @@ int InitializePosixMemlock(void)
 	return 0;
 }
 
+static const char *LibconfigWraperConfigSettingSourceFile(const config_setting_t *
+						   setting)
+{
+	const char *fileName = config_setting_source_file(setting);
+
+	if (fileName == NULL)
+		return "(NULL)";
+
+	return fileName;
+}
+
 int LoadConfigurationFile(struct cfgoptions *const cfg)
 {
 	assert(cfg != NULL);
@@ -389,17 +400,6 @@ int LoadConfigurationFile(struct cfgoptions *const cfg)
 	}
 
 	return 0;
-}
-
-const char *LibconfigWraperConfigSettingSourceFile(const config_setting_t *
-						   setting)
-{
-	const char *fileName = config_setting_source_file(setting);
-
-	if (fileName == NULL)
-		return "(NULL)";
-
-	return fileName;
 }
 
 int ParseCommandLine(int *argc, char **argv, struct cfgoptions *cfg)
