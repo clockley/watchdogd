@@ -43,3 +43,8 @@ To fix this type ./configure --prefix=/usr
 
 	* Save random seed
 	* Fix yet another bug in shutdown.c
+
+2014-25-12 [0.2.1] <Christian Lockley>
+
+	* Fix assertion failure
+	* Add force configuration option
