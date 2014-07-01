@@ -140,6 +140,8 @@ int Shutdown(int errorcode, struct cfgoptions *arg)
 
 	DisablePageFiles();
 
+	StopNetwork();
+
 	UnmountAll();
 
 	RemountRootReadOnly();

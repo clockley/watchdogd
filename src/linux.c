@@ -482,6 +482,40 @@ int DisablePageFiles(void)
 	return 0;
 }
 
+int StopNetwork(void)
+{
+	struct ifaddrs *ifaddr;
+
+	if (getifaddrs(&ifaddr) == -1) {
+		return -1;
+	}
+
+	int sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+
+	for (struct ifaddrs *ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) {
+		if (ifa->ifa_addr == NULL)
+			continue;
+
+		if (ifa->ifa_flags & IFF_LOOPBACK) {
+			continue;
+		}
+
+		if (!(ifa->ifa_flags & IFF_UP)) {
+			continue;
+		}
+
+		struct ifreq ifr;
+		memset(&ifr, 0, sizeof ifr);
+		strncpy(ifr.ifr_name, ifa->ifa_name, IFNAMSIZ);
+		ifr.ifr_flags &= ~IFF_UP;
+
+		ioctl(sockfd, SIOCSIFFLAGS, &ifr);
+	}
+
+	shutdown(sockfd, SHUT_RDWR);
+	freeifaddrs(ifaddr);
+}
+
 int _Shutdown(int errorcode, bool kexec)
 {
 	sync();

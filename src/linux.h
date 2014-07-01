@@ -25,6 +25,9 @@
 #include <utmpx.h>
 #include <utmp.h>
 #include <sys/swap.h>
+#include <sys/types.h>
+#include <ifaddrs.h>
+#include <linux/if.h>
 #include "errorlist.h"
 
 int DisablePageFiles(void);
@@ -36,5 +39,6 @@ int SaveRandomSeed(const char *);
 const char *GetDefaultRandomSeedPathName(void);
 watchdog_t *OpenWatchdog(const char *const);
 int ConfigureWatchdogTimeout(watchdog_t *const , int);
+int StopNetwork(void);
 int _Shutdown(int, bool);
 #endif
