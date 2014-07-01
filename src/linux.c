@@ -492,6 +492,10 @@ int StopNetwork(void)
 
 	int sockfd = socket(AF_INET, SOCK_DGRAM, 0);
 
+	if (sockfd < 0) {
+		return -1;
+	}
+
 	for (struct ifaddrs *ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) {
 		if (ifa->ifa_addr == NULL)
 			continue;
@@ -506,14 +510,16 @@ int StopNetwork(void)
 
 		struct ifreq ifr;
 		memset(&ifr, 0, sizeof ifr);
-		strncpy(ifr.ifr_name, ifa->ifa_name, IFNAMSIZ);
+		strncpy(ifr.ifr_name, ifa->ifa_name, IFNAMSIZ - 1);
 		ifr.ifr_flags &= ~IFF_UP;
 
 		ioctl(sockfd, SIOCSIFFLAGS, &ifr);
 	}
 
-	shutdown(sockfd, SHUT_RDWR);
+	close(sockfd);
 	freeifaddrs(ifaddr);
+
+	return 0;
 }
 
 int _Shutdown(int errorcode, bool kexec)
