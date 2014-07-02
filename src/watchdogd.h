@@ -125,7 +125,8 @@ extern ProcessList processes;
 
 enum logTargets {
 	standardError,
-	systemLog
+	systemLog,
+	file
 };
 
 typedef enum logTargets logTargets;
