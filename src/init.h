@@ -25,4 +25,5 @@ int LoadConfigurationFile(struct cfgoptions *const cfg);
 int ParseCommandLine(int *argc, char **argv, struct cfgoptions *s);
 bool SetDefaultConfig(struct cfgoptions *options);
 int GetDefaultPriority(void);
+int PingInit(struct cfgoptions *const cfg);
 #endif

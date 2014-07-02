@@ -355,6 +355,11 @@ int LoadConfigurationFile(struct cfgoptions *const cfg)
 		}
 	}
 
+	return 0;
+}
+
+int PingInit(struct cfgoptions *const cfg)
+{
 	cfg->ipAddresses = config_lookup(&cfg->cfg, "ping");
 	if (cfg->ipAddresses != NULL) {
 		if (config_setting_is_array(cfg->ipAddresses) == CONFIG_FALSE) {

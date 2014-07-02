@@ -52,6 +52,10 @@ int main(int argc, char **argv)
 		FatalError(&options);
 	}
 
+	if (PingInit(&options) < 0) {
+		return EXIT_FAILURE;
+	}
+
 	if (SetupSignalHandlers(IsDaemon(&options)) < 0) {
 		FatalError(&options);
 	}

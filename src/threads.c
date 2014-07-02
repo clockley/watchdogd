@@ -119,7 +119,7 @@ static void *Ping(void *arg)
 				}
 			}
 		} else {
-			Logmsg(LOG_ERR, "%s", ping_get_error(s->pingObj));
+			Logmsg(LOG_ERR, "%s %i", ping_get_error(s->pingObj), __LINE__);
 			s->error |= PINGFAILED;
 		}
 
