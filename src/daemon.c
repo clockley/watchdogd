@@ -93,8 +93,7 @@ int Daemon(struct cfgoptions *s)
 	pid_t pid = 0;
 	long maxfd = 0;
 
-	extern bool logToSyslog;
-	logToSyslog = true;
+	SetLogTarget(systemLog);
 
 	if (s == NULL) {
 		return -1;

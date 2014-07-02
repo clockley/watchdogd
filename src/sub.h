@@ -7,7 +7,10 @@ int CloseWraper(const int *pfd);
 void CloseFileDescriptors(long maxfd);
 int ConfigureKernelOutOfMemoryKiller(void);
 int Shutdown(int errorcode, struct cfgoptions *arg);
+
 void Logmsg(int priority, const char *fmt, ...);
+void SetLogTarget(logTargets target);
+
 int Daemon(struct cfgoptions *s);
 int UnmountAll(void);
 int Wasprintf(char **ret, const char *format, ...);

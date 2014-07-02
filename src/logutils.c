@@ -35,6 +35,19 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 #include "watchdogd.h"
 
+static int logTarget;
+
+void SetLogTarget(logTargets target)
+{
+	if (target == standardError) {
+		logTarget = standardError;
+	}
+
+	if (target == systemLog) {
+		logTarget = systemLog;
+	}
+}
+
 void Logmsg(int priority, const char *fmt, ...)
 {
 	extern bool logToSyslog;
@@ -45,7 +58,7 @@ void Logmsg(int priority, const char *fmt, ...)
 
 	va_list args;
 
-	if (logToSyslog == false) {
+	if (logTarget == standardError) {
 		va_start(args, fmt);
 
 		switch (priority) {
@@ -88,13 +101,17 @@ void Logmsg(int priority, const char *fmt, ...)
 		return;
 	}
 
-	va_start(args, fmt);
+	if (logTarget == systemLog) {
+		va_start(args, fmt);
 
-	vsnprintf(buf, sizeof(buf) - 1, fmt, args);
+		vsnprintf(buf, sizeof(buf) - 1, fmt, args);
 
-	va_end(args);
+		va_end(args);
 
-	assert(buf[sizeof(buf) - 1] == '\0');
+		assert(buf[sizeof(buf) - 1] == '\0');
 
-	syslog(priority, "%s", buf);
+		syslog(priority, "%s", buf);
+
+		return;
+	}
 }

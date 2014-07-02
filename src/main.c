@@ -27,7 +27,6 @@
 static volatile sig_atomic_t quit = 0;
 
 volatile sig_atomic_t stop = 0;
-bool logToSyslog = false;
 ProcessList processes;
 
 int main(int argc, char **argv)
@@ -46,6 +45,8 @@ int main(int argc, char **argv)
 	if (LoadConfigurationFile(&options) < 0) {
 		return EXIT_FAILURE;
 	}
+
+	SetLogTarget(standardError); //TODO: make config file option
 
 	if (IsDaemon(&options) && Daemon(&options) < 0) {
 		FatalError(&options);

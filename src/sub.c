@@ -171,6 +171,9 @@ int EndDaemon(struct cfgoptions *s, int keepalive)
 	FreeExeList(&processes);
 	Logmsg(LOG_INFO, "restarting system");
 	closelog();
+
+	SetLogTarget(standardError);
+
 	munlockall();
 
 	return 0;
