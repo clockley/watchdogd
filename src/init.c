@@ -37,7 +37,7 @@ int SetSchedulerPolicy(int priority)
 int InitializePosixMemlock(void)
 {
 	if (mlockall(MCL_CURRENT | MCL_FUTURE) < 0) {
-		fprintf(stderr, "watchdogd: %s\n", strerror(errno));
+		fprintf(stderr, "watchdogd: unable to lock memory: %s\n", strerror(errno));
 		return -1;
 	}
 
