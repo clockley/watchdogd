@@ -181,9 +181,7 @@ int LoadConfigurationFile(struct cfgoptions *const cfg)
 			}
 		}
 	} else {
-		if (InitializePosixMemlock() < 0) {
-			return -1;
-		}
+		InitializePosixMemlock();
 	}
 
 	if (config_lookup_bool(&cfg->cfg, "use-pid-file", &tmp) == CONFIG_TRUE) {
