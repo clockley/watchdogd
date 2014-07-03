@@ -26,7 +26,7 @@ int SetSchedulerPolicy(int priority)
 
 	if (sched_setscheduler(0, SCHED_RR, &param) < 0) {
 		assert(errno != ESRCH);
-		fprintf(stderr, "watchdogd: sched_setscheduler  failed %s\n",
+		fprintf(stderr, "watchdogd: sched_setscheduler failed %s\n",
 			strerror(errno));
 		return -1;
 	}
