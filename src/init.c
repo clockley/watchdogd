@@ -361,7 +361,7 @@ int PingInit(struct cfgoptions *const cfg)
 	assert(cfg != NULL);
 
 	if (cfg == NULL) {
-		return NULL;
+		return -1;
 	}
 
 	cfg->ipAddresses = config_lookup(&cfg->cfg, "ping");
