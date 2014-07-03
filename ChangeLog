@@ -48,3 +48,8 @@ To fix this type ./configure --prefix=/usr
 
 	* Fix assertion failure
 	* Add force configuration option
+
+2014-07-03 [0.2.2] <Christian Lockley>
+	* Shutdown all network interfaces before rebooting system.
+	* Fix reboot loop when ping is enabled without the -F option.
+	* Refactor log target code.
