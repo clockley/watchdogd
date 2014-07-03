@@ -35,7 +35,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 #include "watchdogd.h"
 
-static int logTarget;
+static sig_atomic_t logTarget;
 
 void SetLogTarget(logTargets target)
 {
