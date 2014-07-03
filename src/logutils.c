@@ -40,10 +40,16 @@ static sig_atomic_t logTarget;
 void SetLogTarget(logTargets target)
 {
 	if (target == standardError) {
+		closelog();
 		logTarget = standardError;
 	}
 
 	if (target == systemLog) {
+
+		if (logTarget != systemLog) {
+			openlog("watchdogd", LOG_PID | LOG_NOWAIT | LOG_CONS, LOG_DAEMON);
+		}
+
 		logTarget = systemLog;
 	}
 }

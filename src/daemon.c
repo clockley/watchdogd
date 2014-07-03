@@ -93,8 +93,6 @@ int Daemon(struct cfgoptions *s)
 	pid_t pid = 0;
 	long maxfd = 0;
 
-	SetLogTarget(systemLog);
-
 	if (s == NULL) {
 		return -1;
 	}
@@ -206,7 +204,7 @@ int Daemon(struct cfgoptions *s)
 	if (CloseStandardFileDescriptors() < 0)
 		return -1;
 
-	openlog("watchdogd", LOG_PID | LOG_NOWAIT | LOG_CONS, LOG_DAEMON);
+	SetLogTarget(systemLog);
 
 	return 0;
 }
