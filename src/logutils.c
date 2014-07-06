@@ -37,7 +37,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 static sig_atomic_t logTarget;
 
-void SetLogTarget(logTargets target)
+void SetLogTarget(logTargets targetz, ...)
 {
 	if (target == standardError) {
 		closelog();
