@@ -39,6 +39,10 @@ int Spawn(int timeout, struct cfgoptions *const config, const char *file,
 {
 	int status = 0;
 
+	if (file == NULL) {
+		return -1;
+	}
+
 	pid_t pid = fork();
 
 	switch (pid) {
