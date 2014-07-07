@@ -3,6 +3,8 @@
 #define _XOPEN_SOURCE 700
 #define _ISOC11_SOURCE
 
+#define _FILE_OFFSET_BITS 64
+
 #include <assert.h>
 #include <config.h>
 #include <errno.h>
@@ -68,6 +70,7 @@ struct cfgoptions {
 	const char *confile;
 	const char *logdir;
 	const char *randomSeedPath;
+	const char *logTarget;
 	pidfile_t pidfile;
 	time_t sleeptime;
 	unsigned long minfreepages;
@@ -126,7 +129,8 @@ extern ProcessList processes;
 enum logTargets {
 	standardError,
 	systemLog,
-	file
+	file,
+	newFile,
 };
 
 typedef enum logTargets logTargets;

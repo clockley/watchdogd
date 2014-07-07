@@ -36,11 +36,37 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "watchdogd.h"
 
 static sig_atomic_t logTarget;
+static FILE* logFile = NULL;
+static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+
+static void CloseOldTarget(logTargets oldTarget)
+{
+
+	if (oldTarget == systemLog) {
+		closelog();
+		return;
+	}
+
+	if (oldTarget == standardError) {
+		;
+	}
+
+	if (oldTarget == newFile || oldTarget == file) {
+		if (logFile != NULL) {
+			fflush(logFile);
+			fclose(logFile);
+			logFile = NULL;
+		}
+	}
+
+}
 
 void SetLogTarget(logTargets target, ...)
 {
+	pthread_mutex_lock(&mutex);
+
 	if (target == standardError) {
-		closelog();
+		CloseOldTarget(logTarget);
 		logTarget = standardError;
 	}
 
@@ -50,8 +76,49 @@ void SetLogTarget(logTargets target, ...)
 			openlog("watchdogd", LOG_PID | LOG_NOWAIT | LOG_CONS, LOG_DAEMON);
 		}
 
+		CloseOldTarget(logTarget);
 		logTarget = systemLog;
 	}
+
+	if (target == newFile || target == file) {
+		closelog();
+		va_list ap;
+		va_start(ap, target);
+
+		const char * fileName = va_arg(ap, const char *);
+
+		assert(fileName != NULL);
+
+		if (target == newFile) {
+			logFile = fopen(fileName, "w");
+			if (logFile == NULL) {
+				if (logTarget == systemLog) {
+					syslog(LOG_ALERT, "%m", errno);
+				} else {
+					fprintf(stderr, "%s\n", strerror(errno));
+				}
+			} else {
+				CloseOldTarget(logTarget);
+				logTarget = newFile;
+			}
+		} else if (target == file) {
+			logFile = fopen(fileName, "w+");
+			if (logFile == NULL) {
+				if (logTarget == systemLog) {
+					syslog(LOG_ALERT, "%m", errno);
+				} else {
+					fprintf(stderr, "%s\n", strerror(errno));
+				}
+			} else {
+				CloseOldTarget(logTarget);
+				logTarget = file;
+			}
+		} else {
+			assert(false);
+		}
+	}
+
+	pthread_mutex_unlock(&mutex);
 }
 
 void Logmsg(int priority, const char *fmt, ...)
@@ -64,7 +131,7 @@ void Logmsg(int priority, const char *fmt, ...)
 
 	va_list args;
 
-	if (logTarget == standardError) {
+	if (logTarget == standardError || logTarget == file || logTarget == newFile) {
 		va_start(args, fmt);
 
 		switch (priority) {
@@ -102,7 +169,15 @@ void Logmsg(int priority, const char *fmt, ...)
 
 		assert(buf[sizeof(buf) - 1] == '\0');
 
-		fprintf(stderr, "%s\n", buf);
+		if (logTarget == standardError) {
+			fprintf(stderr, "%s\n", buf);
+		} else {
+			if (logFile != NULL) {
+				fprintf(logFile, "%s\n", buf);
+			} else {
+				fprintf(stderr, "%s\n", buf);
+			}
+		}
 
 		return;
 	}

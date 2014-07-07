@@ -46,8 +46,6 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 
-	SetLogTarget(standardError); //TODO: make config file option
-
 	if (IsDaemon(&options) && Daemon(&options) < 0) {
 		FatalError(&options);
 	}

@@ -55,6 +55,122 @@ static const char *LibconfigWraperConfigSettingSourceFile(const config_setting_t
 	return fileName;
 }
 
+static bool SetDefaultLogTarget(struct cfgoptions *const cfg)
+{
+	assert(cfg != NULL);
+
+	if (strcmp(cfg->logTarget, "auto") == 0) {
+		if (IsDaemon(cfg)) {
+			SetLogTarget(systemLog);
+			return true;
+		} else {
+			SetLogTarget(standardError);
+			return true;
+		}
+	}
+
+	if (strcmp(cfg->logTarget, "syslog") == 0) {
+		SetLogTarget(systemLog);
+		return true;
+	}
+
+	if (strcmp(cfg->logTarget, "stderr") == 0) {
+		SetLogTarget(standardError);
+		return true;
+	}
+
+	if (strchr(cfg->logTarget, ':') == NULL) {
+		 return false;
+	}
+
+	char *tmp;
+
+	char *copyOfLogTarget = strdup(cfg->logTarget);
+
+	if (copyOfLogTarget == NULL) {
+		fprintf(stderr, "%s\n", strerror(errno));
+		return false;
+	}
+
+	char * mode = strtok_r(copyOfLogTarget, ":", &tmp);
+
+	if (mode == NULL) {
+		goto error;
+	}
+
+	if (strcmp(mode, "file") == 0) {
+		char * fileName = strtok_r(NULL, ":", &tmp);
+
+		if (fileName == NULL) {
+			goto error;
+		}
+
+		struct stat buf;
+
+		if (stat(fileName, &buf) < 0) {
+			goto error;
+		}
+
+		if (S_ISDIR(buf.st_mode)
+			|| S_ISCHR(buf.st_mode)
+			|| S_ISBLK(buf.st_mode)
+			|| S_ISFIFO(buf.st_mode)
+			|| S_ISSOCK(buf.st_mode)
+			|| S_ISCHR(buf.st_mode) || !S_ISREG(buf.st_mode)) {
+				fprintf(stderr, "Invalid file type\n");
+				goto error;
+		}
+
+		SetLogTarget(file, fileName);
+	}
+
+	if (strcmp(mode, "newfile") == 0) {
+		char * fileName = strtok_r(NULL, ":", &tmp);
+
+		if (fileName == NULL) {
+			goto error;
+		}
+
+		struct stat buf;
+
+		if (stat(fileName, &buf) < 0) {
+			fclose(fopen(fileName, "w")); //create new file
+		}
+
+		if (stat(fileName, &buf) < 0) {
+			goto error;
+		}
+
+		if (S_ISDIR(buf.st_mode)
+			|| S_ISCHR(buf.st_mode)
+			|| S_ISBLK(buf.st_mode)
+			|| S_ISFIFO(buf.st_mode)
+			|| S_ISSOCK(buf.st_mode)
+			|| S_ISCHR(buf.st_mode) || !S_ISREG(buf.st_mode)) {
+				fprintf(stderr, "Invalid file type\n");
+				goto error;
+		}
+
+		SetLogTarget(newFile, fileName);
+	}
+
+	if (copyOfLogTarget != NULL) {
+		free(copyOfLogTarget);
+	}
+
+	return true;
+ error:
+	if (errno != 0) {
+		fprintf(stderr, "%s\n", strerror(errno));
+	}
+
+	if (copyOfLogTarget != NULL) {
+		free(copyOfLogTarget);
+	}
+
+	return false;
+}
+
 int LoadConfigurationFile(struct cfgoptions *const cfg)
 {
 	assert(cfg != NULL);
@@ -122,6 +238,15 @@ int LoadConfigurationFile(struct cfgoptions *const cfg)
 	if (config_lookup_string(&cfg->cfg, "watchdog-device", &cfg->devicepath)
 	    == CONFIG_FALSE) {
 		cfg->devicepath = "/dev/watchdog";
+	}
+
+	if (config_lookup_string(&cfg->cfg, "log-target", &cfg->logTarget) == CONFIG_FALSE) {
+		cfg->logTarget = "auto";
+	}
+
+	if (SetDefaultLogTarget(cfg) == false) {
+		fprintf(stderr, "Invalid log target\n");
+		return -1;
 	}
 
 	if (config_lookup_int(&cfg->cfg, "min-memory", &tmp) == CONFIG_TRUE) {
