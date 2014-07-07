@@ -424,7 +424,7 @@ int UnmountAll(void)
 	while (mnt_context_next_umount
 	       (context, iter, &currentfs, &returnValue, &ret) == 0) ;
 
-	//mnt_context_finalize_umount(context);
+	mnt_context_finalize_umount(context);
 
 	mnt_free_context(context);
 
