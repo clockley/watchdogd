@@ -102,7 +102,7 @@ void SetLogTarget(logTargets target, ...)
 				logTarget = newFile;
 			}
 		} else if (target == file) {
-			logFile = fopen(fileName, "w+");
+			logFile = fopen(fileName, "a");
 			if (logFile == NULL) {
 				if (logTarget == systemLog) {
 					syslog(LOG_ALERT, "%m", errno);
@@ -116,6 +116,8 @@ void SetLogTarget(logTargets target, ...)
 		} else {
 			assert(false);
 		}
+
+		va_end(ap);
 	}
 
 	pthread_mutex_unlock(&mutex);

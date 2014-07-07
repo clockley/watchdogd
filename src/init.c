@@ -105,11 +105,19 @@ static bool SetDefaultLogTarget(struct cfgoptions *const cfg)
 			goto error;
 		}
 
-		struct stat buf;
-
-		if (stat(fileName, &buf) < 0) {
+		FILE* fp = fopen(fileName, "a");
+		if (fp == NULL) {
 			goto error;
 		}
+
+		struct stat buf;
+
+		if (fstat(fileno(fp), &buf) < 0) {
+			fclose(fp);
+			goto error;
+		}
+
+		fclose(fp);
 
 		if (S_ISDIR(buf.st_mode)
 			|| S_ISCHR(buf.st_mode)
@@ -131,15 +139,19 @@ static bool SetDefaultLogTarget(struct cfgoptions *const cfg)
 			goto error;
 		}
 
-		struct stat buf;
-
-		if (stat(fileName, &buf) < 0) {
-			fclose(fopen(fileName, "w")); //create new file
-		}
-
-		if (stat(fileName, &buf) < 0) {
+		FILE* fp = fopen(fileName, "w");
+		if (fp == NULL) {
 			goto error;
 		}
+
+		struct stat buf;
+
+		if (fstat(fileno(fp), &buf) < 0) {
+			fclose(fp);
+			goto error;
+		}
+
+		fclose(fp);
 
 		if (S_ISDIR(buf.st_mode)
 			|| S_ISCHR(buf.st_mode)
