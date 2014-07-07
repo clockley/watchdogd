@@ -134,6 +134,10 @@ int Shutdown(int errorcode, struct cfgoptions *arg)
 
 	KillAllProcesses(SIGKILL);
 
+	sync();
+
+	sleep(5);
+
 	WriteUtmpx(errorcode == WECMDREBOOT ? true : false);
 
 	SaveRandomSeed(arg->randomSeedPath);
