@@ -35,12 +35,16 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 #include "watchdogd.h"
 
-static sig_atomic_t logTarget;
+static sig_atomic_t logTarget = invalidTarget;
 static FILE* logFile = NULL;
 static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 static void CloseOldTarget(logTargets oldTarget)
 {
+
+	if (oldTarget == invalidTarget) {
+		return;
+	}
 
 	if (oldTarget == systemLog) {
 		closelog();

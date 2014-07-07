@@ -127,6 +127,7 @@ typedef struct watchdogDevice watchdog_t;
 extern ProcessList processes;
 
 enum logTargets {
+	invalidTarget,
 	standardError,
 	systemLog,
 	file,
