@@ -59,6 +59,8 @@ static bool SetDefaultLogTarget(struct cfgoptions *const cfg)
 {
 	assert(cfg != NULL);
 
+	errno = 0;
+
 	if (strcmp(cfg->logTarget, "auto") == 0) {
 		if (IsDaemon(cfg)) {
 			SetLogTarget(systemLog);
@@ -130,9 +132,7 @@ static bool SetDefaultLogTarget(struct cfgoptions *const cfg)
 		}
 
 		SetLogTarget(file, fileName);
-	}
-
-	if (strcmp(mode, "newfile") == 0) {
+	} else if (strcmp(mode, "newfile") == 0) {
 		char * fileName = strtok_r(NULL, ":", &tmp);
 
 		if (fileName == NULL) {
@@ -164,6 +164,8 @@ static bool SetDefaultLogTarget(struct cfgoptions *const cfg)
 		}
 
 		SetLogTarget(newFile, fileName);
+	} else {
+		goto error;
 	}
 
 	if (copyOfLogTarget != NULL) {
