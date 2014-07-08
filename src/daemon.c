@@ -204,7 +204,5 @@ int Daemon(struct cfgoptions *s)
 	if (CloseStandardFileDescriptors() < 0)
 		return -1;
 
-	SetLogTarget(systemLog);
-
 	return 0;
 }
