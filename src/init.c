@@ -474,6 +474,17 @@ int LoadConfigurationFile(struct cfgoptions *const cfg)
 		cfg->sleeptime = -1;
 	}
 
+	if (config_lookup_int(&cfg->cfg, "sigterm-delay", &cfg->sigtermDelay) == CONFIG_FALSE) {
+		cfg->sigtermDelay = 5;
+	} else {
+		if (cfg->sigtermDelay <= 1 || cfg->sigtermDelay > 300) {
+			fprintf(stderr,
+				"watchdogd: illegal value for configuration file entry named \"sigterm-delay\"\n");
+			fprintf(stderr, "watchdogd: using default value\n");
+			cfg->sigtermDelay = 5;
+		}
+	}
+
 	cfg->pidFiles = config_lookup(&cfg->cfg, "pid-files");
 
 	if (cfg->pidFiles != NULL) {

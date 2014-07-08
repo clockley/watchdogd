@@ -73,6 +73,7 @@ struct cfgoptions {
 	const char *logTarget;
 	pidfile_t pidfile;
 	time_t sleeptime;
+	int sigtermDelay;
 	unsigned long minfreepages;
 
 	unsigned int options;

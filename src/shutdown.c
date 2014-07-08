@@ -132,6 +132,8 @@ int Shutdown(int errorcode, struct cfgoptions *arg)
 
 	sync();
 
+	sleep(arg->sigtermDelay);
+
 	KillAllProcesses(SIGKILL);
 
 	sync();
