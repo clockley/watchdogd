@@ -198,7 +198,7 @@ static bool LoadConfigurationFile(config_t * config, const char const* fileName)
 		return false;
 	}
 
-	/*if (!config_read_file(config, fileName)
+	if (!config_read_file(config, fileName)
 	    && config_error_file(config) == NULL) {
 		fprintf(stderr,
 			"watchdogd: cannot open configuration file: %s\n",
@@ -212,7 +212,7 @@ static bool LoadConfigurationFile(config_t * config, const char const* fileName)
 			config_error_text(config));
 		config_destroy(config);
 		return false;
-	}*/
+	}
 
 	return true;
 }
