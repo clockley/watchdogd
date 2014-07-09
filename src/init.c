@@ -185,7 +185,7 @@ static bool SetDefaultLogTarget(struct cfgoptions *const cfg)
 	return false;
 }
 
-static bool LoadConfigurationFile(config_t * config, const char const* fileName)
+static bool LoadConfigurationFile(config_t *const config, const char *const fileName)
 {
 	assert(config != NULL);
 	assert(fileName != NULL);
