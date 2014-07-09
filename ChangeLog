@@ -53,3 +53,9 @@ To fix this type ./configure --prefix=/usr
 	* Shutdown all network interfaces before rebooting system.
 	* Fix reboot loop when ping is enabled without the -F option.
 	* Refactor log target code.
+
+2014-07-09 [0.2.3] <Christian Lockley>
+	* Fix -q option again.
+	* Add sigterm-delay config file option "Time between the SIGTERM signal being sent to all processes and the following SIGKILL signal."
+	* Add log-target option.
+	* Quite a few bug fixes.
