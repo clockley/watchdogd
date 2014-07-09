@@ -42,7 +42,7 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 
-	if (LoadConfigurationFile(&options) < 0) {
+	if (ReadConfigurationFile(&options) < 0) {
 		return EXIT_FAILURE;
 	}
 
@@ -126,10 +126,10 @@ int main(int argc, char **argv)
 	clock_gettime(CLOCK_MONOTONIC, &rqtp);
 
 	while (quit == 0 && stop == 0) {
-		if ((options.options & NOACTION) == 0) {
-			PingWatchdog(watchdog);
-		} else {
+		if (options.options & NOACTION) {
 			assert(watchdog == NULL);
+		} else {
+			PingWatchdog(watchdog);
 		}
 
 		if (clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &rqtp, NULL)

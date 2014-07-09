@@ -185,27 +185,45 @@ static bool SetDefaultLogTarget(struct cfgoptions *const cfg)
 	return false;
 }
 
-int LoadConfigurationFile(struct cfgoptions *const cfg)
+static bool LoadConfigurationFile(config_t * config, const char const* fileName)
+{
+	assert(config != NULL);
+	assert(fileName != NULL);
+
+	int tmp = 0;
+
+	config_init(config);
+
+	if (config == NULL) {
+		return false;
+	}
+
+	/*if (!config_read_file(config, fileName)
+	    && config_error_file(config) == NULL) {
+		fprintf(stderr,
+			"watchdogd: cannot open configuration file: %s\n",
+			fileName);
+		config_destroy(config);
+		return false;
+	} else if (!config_read_file(config, fileName)) {
+		fprintf(stderr, "watchdogd: %s:%d: %s\n",
+			config_error_file(config),
+			config_error_line(config),
+			config_error_text(config));
+		config_destroy(config);
+		return false;
+	}*/
+
+	return true;
+}
+
+int ReadConfigurationFile(struct cfgoptions *const cfg)
 {
 	assert(cfg != NULL);
 
 	int tmp = 0;
 
-	config_init(&cfg->cfg);
-	assert(cfg->confile != NULL);
-	if (!config_read_file(&cfg->cfg, cfg->confile)
-	    && config_error_file(&cfg->cfg) == NULL) {
-		fprintf(stderr,
-			"watchdogd: cannot open configuration file: %s\n",
-			cfg->confile);
-		config_destroy(&cfg->cfg);
-		return -1;
-	} else if (!config_read_file(&cfg->cfg, cfg->confile)) {
-		fprintf(stderr, "watchdogd: %s:%d: %s\n",
-			config_error_file(&cfg->cfg),
-			config_error_line(&cfg->cfg),
-			config_error_text(&cfg->cfg));
-		config_destroy(&cfg->cfg);
+	if (LoadConfigurationFile(&cfg->cfg, cfg->confile) == false) {
 		return -1;
 	}
 
@@ -503,18 +521,8 @@ int LoadConfigurationFile(struct cfgoptions *const cfg)
 		}
 	}
 
-	return 0;
-}
-
-int PingInit(struct cfgoptions *const cfg)
-{
-	assert(cfg != NULL);
-
-	if (cfg == NULL) {
-		return -1;
-	}
-
 	cfg->ipAddresses = config_lookup(&cfg->cfg, "ping");
+
 	if (cfg->ipAddresses != NULL) {
 		if (config_setting_is_array(cfg->ipAddresses) == CONFIG_FALSE) {
 			fprintf(stderr,
@@ -527,18 +535,29 @@ int PingInit(struct cfgoptions *const cfg)
 		}
 
 		if (config_setting_length(cfg->ipAddresses) > 0) {
+			cfg->pingObj = ping_construct();
+			if (cfg->pingObj == NULL) {
+				Logmsg(LOG_CRIT,
+				       "unable to allocate memory for ping object");
+				FatalError(cfg);
+			}
+
 			cfg->options |= ENABLEPING;
-		} else {
-			return 0;
 		}
+	}
 
-		cfg->pingObj = ping_construct();
-		if (cfg->pingObj == NULL) {
-			Logmsg(LOG_CRIT,
-			       "unable to allocate memory for ping object");
-			FatalError(cfg);
-		}
+	return 0;
+}
 
+int PingInit(struct cfgoptions *const cfg)
+{
+	assert(cfg != NULL);
+
+	if (cfg == NULL) {
+		return -1;
+	}
+
+	if (cfg->options & ENABLEPING) {
 		for (int cnt = 0; cnt < config_setting_length(cfg->ipAddresses);
 		     cnt++) {
 			const char *ipAddress =
@@ -552,6 +571,7 @@ int PingInit(struct cfgoptions *const cfg)
 				return -1;
 			}
 		}
+
 		for (pingobj_iter_t * iter = ping_iterator_get(cfg->pingObj);
 		     iter != NULL; iter = ping_iterator_next(iter)) {
 			ping_iterator_set_context(iter, NULL);
