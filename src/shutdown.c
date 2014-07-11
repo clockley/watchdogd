@@ -148,7 +148,7 @@ int Shutdown(int errorcode, struct cfgoptions *arg)
 
 	StopNetwork();
 
-	extern stopPing;
+	extern sig_atomic_t stopPing;
 
 	stopPing = 1;
 
