@@ -52,7 +52,7 @@ static void CloseOldTarget(logTargets oldTarget)
 	}
 
 	if (oldTarget == standardError) {
-		;
+		return;
 	}
 
 	if (oldTarget == newFile || oldTarget == file) {
@@ -60,6 +60,9 @@ static void CloseOldTarget(logTargets oldTarget)
 			fflush(logFile);
 			fclose(logFile);
 			logFile = NULL;
+			return;
+		} else {
+			return;
 		}
 	}
 
