@@ -27,6 +27,7 @@
 static volatile sig_atomic_t quit = 0;
 
 volatile sig_atomic_t stop = 0;
+volatile sig_atomic_t stopPing = 0;
 ProcessList processes;
 
 int main(int argc, char **argv)
@@ -89,7 +90,8 @@ int main(int argc, char **argv)
 
 		if (options.sleeptime == -1) {
 			options.sleeptime = GuessSleeptime(watchdog);
-			Logmsg(LOG_INFO, "ping interval autodetect: %i", options.sleeptime);
+			Logmsg(LOG_INFO, "ping interval autodetect: %i",
+			       options.sleeptime);
 		}
 
 		assert(options.sleeptime >= 1);
@@ -145,14 +147,18 @@ int main(int argc, char **argv)
 	}
 
 	if (stop == 1) {
-		if (DISARM_WATCHDOG_BEFORE_REBOOT) {
-			CloseWatchdog(watchdog);
-		} else {
-			close(GetFd(watchdog));
-		}
-
 		while (true) {
-			sleep(60);
+			if (stopPing == 1) {
+				if (DISARM_WATCHDOG_BEFORE_REBOOT) {
+					CloseWatchdog(watchdog);
+				} else {
+					close(GetFd(watchdog));
+				}
+			} else {
+				PingWatchdog(watchdog);
+			}
+
+			sleep(1);
 		}
 	}
 

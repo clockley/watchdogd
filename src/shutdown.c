@@ -148,6 +148,10 @@ int Shutdown(int errorcode, struct cfgoptions *arg)
 
 	StopNetwork();
 
+	extern stopPing;
+
+	stopPing = 1;
+
 	UnmountAll();
 
 	RemountRootReadOnly();
