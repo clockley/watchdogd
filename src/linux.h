@@ -41,4 +41,6 @@ watchdog_t *OpenWatchdog(const char *const);
 int ConfigureWatchdogTimeout(watchdog_t *const , int);
 int StopNetwork(void);
 int _Shutdown(int, bool);
+int NativeShutdown(int, int);
+int LinuxRunningSystemd(void);
 #endif

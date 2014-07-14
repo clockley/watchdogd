@@ -19,6 +19,7 @@
 #include "sub.h"
 #include "exe.h"
 #include "errorlist.h"
+#include "testdir.h"
 
 static int StartInit(void)
 {
@@ -30,29 +31,68 @@ static int StartInit(void)
 
 static int StopInit(void)
 {
-	if (kill(1, SIGTSTP) == -1)
-		return -1;
+	if (LinuxRunningSystemd() == 1) {
+		if (kill(1, SIGRTMIN+5) == -1) {
+			return -1;
+		}
+	} else {
+		if (kill(1, SIGTSTP) == -1)
+			return -1;
+	}
 
 	return 0;
 }
 
-static long ConvertStringToInt(const char *const str)
+static long ConvertStringToInt(const char * str)
 {
 	assert(str != NULL);return strtol((str), (char **)NULL, 10);
 }
 
 static void KillAllProcesses(int sig)
 {
-	DIR *dirp = opendir("/proc/");
+	struct stat buffer;
+	struct dirent *ent = NULL;
+	struct dirent *direntbuf = NULL;
 
-	assert(dirp != NULL);
+	int fd = 0;
 
-	if (dirp == NULL) {
+	fd = open("/proc", O_DIRECTORY | O_RDONLY);
+
+	if (fd == -1) {
 		return;
 	}
 
-	for (struct dirent *ent = ent; ent != NULL; ent = readdir(dirp)) {
+	DIR *dir = fdopendir(fd);
+
+	if (dir == NULL) {
+		close(fd);
+		return;
+	}
+
+	size_t size = DirentBufSize(dir);
+
+	int error = 0;
+
+	if (size == ((size_t) (-1))) {
+		return;
+	}
+
+	direntbuf = (struct dirent *)calloc(1, size);
+
+	if (direntbuf == NULL) {
+		return;
+	}
+
+	errno = 0;
+
+	while ((error = readdir_r(dir, direntbuf, &ent)) == 0 && ent != NULL) {
+
+		if (ent->d_type != DT_DIR) {
+			continue;
+		}
+
 		pid_t ret = (pid_t)ConvertStringToInt(ent->d_name);
+
 		if (ret == 0 || errno == EINVAL) {
 			errno = 0;
 			continue;
@@ -69,11 +109,14 @@ static void KillAllProcesses(int sig)
 				continue;
 			}
 
-			kill(-ret, sig); //kill all processes that have the same sid at the same time.
+			kill(ret, sig);
 		}
+
 	}
 
-	closedir(dirp);
+	free(direntbuf);
+
+	return;
 }
 
 static void WriteUtmpx(int reboot)
@@ -114,6 +157,10 @@ int Shutdown(int errorcode, struct cfgoptions *arg)
 	}
 
 	EndDaemon(arg, true);	//point of no return
+
+#if 0
+	NativeShutdown(errorcode, arg->options & KEXEC ? 1 : 0); //untested
+#endif
 
 	StopInit();
 
