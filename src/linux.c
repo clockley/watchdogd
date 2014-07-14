@@ -568,7 +568,9 @@ int LinuxRunningSystemd(void)
 
 	errno = 0;
 
-	read(fd, (void *)buf, 255);
+	if (read(fd, (void *)buf, 255) < 0) {
+		return -1;
+	}
 
 	if (errno != 0) {
 		return -1;

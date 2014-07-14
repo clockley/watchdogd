@@ -80,6 +80,7 @@ static void KillAllProcesses(int sig)
 	direntbuf = (struct dirent *)calloc(1, size);
 
 	if (direntbuf == NULL) {
+		close(fd);
 		return;
 	}
 
