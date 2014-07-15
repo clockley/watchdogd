@@ -633,31 +633,28 @@ int LinuxRunningSystemd(void)
 int NativeShutdown(int errorcode, int kexec)
 {
 //http://cgit.freedesktop.org/systemd/systemd/tree/src/core/manager.c?id=f49fd1d57a429d4a05ac86352c017a845f8185b3
-
-	if (LinuxRunningSystemd() < 0) {
-		return -1;
-	}
-
 	extern sig_atomic_t stopPing;
 
 	stopPing = 1;
 
-	if (kexec == 1) {
-		kill(1, SIGRTMIN+6);
+	if (LinuxRunningSystemd() == 1) {
+		if (kexec == 1) {
+			kill(1, SIGRTMIN+6);
+		}
+
+		if (errorcode == WECMDREBOOT) {
+			kill(1, SIGINT);
+		}
+
+		if (errorcode == WETEMP) {
+			kill(1, SIGRTMIN+4);
+		}
+
+		if (errorcode == WECMDRESET) {
+			kill(1, SIGRTMIN+15);
+		}
 	}
 
-	if (errorcode == WECMDREBOOT) {
-		kill(1, SIGINT);
-	}
-
-	if (errorcode == WETEMP) {
-		kill(1, SIGRTMIN+4);
-	}
-
-	if (errorcode == WECMDRESET) {
-		kill(1, SIGRTMIN+15);
-	}
-
-	return 0;
+	return -1;
 }
 #endif
