@@ -59,3 +59,7 @@ To fix this type ./configure --prefix=/usr
 	* Add sigterm-delay config file option "Time between the SIGTERM signal being sent to all processes and the following SIGKILL signal."
 	* Add log-target option.
 	* Quite a few bug fixes.
+
+2014-07-15 [0.2.4] <Christian Lockley>
+	* Fix shutdown under systemd
+	* Fix realtime scheduling under systemd
