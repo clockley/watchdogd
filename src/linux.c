@@ -522,6 +522,49 @@ int StopNetwork(void)
 	return 0;
 }
 
+static bool IsRootStorageDaemon(pid_t pid)
+{
+//http://www.freedesktop.org/wiki/Software/systemd/RootStorageDaemons/
+	char path[1024] = {"\0"};
+	snprintf(path, sizeof(path) - 1, "/proc/%ld/cmdline", (long)pid);
+
+	int fd = open(path, O_RDONLY|O_CLOEXEC);
+
+	if (fd < 0) {
+		goto error;
+	}
+
+	char buf[64] =  {"\0"}; //overkill
+
+	if (read(fd, (void *)buf, 64) < 0) {
+		goto error;
+	}	
+
+	if (strstr(buf, "@") == NULL) { //kernel null terminates arguments so we only read the first arg.
+		goto error;
+	}
+
+	close(fd);
+
+	return true;
+
+ error:
+	if (fd > 0) {
+		close(fd);
+	}
+
+	return false;
+}
+
+bool DontKillProcess(pid_t pid)
+{
+	if (IsRootStorageDaemon(pid) == true) {
+		return true;
+	}
+
+	return false;
+}
+
 int _Shutdown(int errorcode, bool kexec)
 {
 	sync();

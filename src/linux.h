@@ -43,4 +43,5 @@ int StopNetwork(void);
 int _Shutdown(int, bool);
 int NativeShutdown(int, int);
 int LinuxRunningSystemd(void);
+bool DontKillProcess(pid_t);
 #endif

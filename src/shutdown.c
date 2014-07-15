@@ -98,6 +98,10 @@ static void KillAllProcesses(int sig)
 			errno = 0;
 			continue;
 		} else {
+			if (DontKillProcess(ret) == true) {
+				continue;
+			}
+
 			if (getsid(getpid()) == getsid(ret)) {
 				continue;
 			}
