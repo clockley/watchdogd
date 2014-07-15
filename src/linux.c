@@ -538,7 +538,7 @@ static bool IsRootStorageDaemon(pid_t pid)
 
 	if (read(fd, (void *)buf, 64) < 0) {
 		goto error;
-	}	
+	}
 
 	if (strstr(buf, "@") == NULL) { //kernel null terminates arguments so we only read the first arg.
 		goto error;
