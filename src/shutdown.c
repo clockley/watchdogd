@@ -36,8 +36,9 @@ static int StopInit(void)
 			return -1;
 		}
 	} else {
-		if (kill(1, SIGTSTP) == -1)
+		if (kill(1, SIGTSTP) == -1) {
 			return -1;
+		}
 	}
 
 	return 0;
