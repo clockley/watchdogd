@@ -549,7 +549,7 @@ static bool IsRootStorageDaemon(pid_t pid)
 	return true;
 
  error:
-	if (fd > 0) {
+	if (fd >= 0) {
 		close(fd);
 	}
 
