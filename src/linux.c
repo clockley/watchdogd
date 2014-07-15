@@ -564,11 +564,12 @@ int LinuxRunningSystemd(void)
 		return -1;
 	}
 
-	char buf[256] =  {0};
+	char buf[256] =  {"\0"};
 
 	errno = 0;
 
-	if (read(fd, (void *)buf, 255) < 0) {
+	if (read(fd, (void *)buf, 254) < 0) {
+		close(fd);
 		return -1;
 	}
 
