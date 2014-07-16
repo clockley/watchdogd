@@ -9,7 +9,7 @@ int ConfigureKernelOutOfMemoryKiller(void);
 int Shutdown(int errorcode, struct cfgoptions *arg);
 
 void Logmsg(int priority, const char *fmt, ...);
-void SetLogTarget(logTargets target, ...);
+void SetLogTarget(sig_atomic_t target, ...);
 
 int Daemon(struct cfgoptions *s);
 int UnmountAll(void);

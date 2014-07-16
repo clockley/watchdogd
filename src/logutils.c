@@ -39,7 +39,7 @@ static sig_atomic_t logTarget = invalidTarget;
 static FILE* logFile = NULL;
 static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
-static void CloseOldTarget(logTargets oldTarget)
+static void CloseOldTarget(sig_atomic_t oldTarget)
 {
 
 	if (oldTarget == invalidTarget) {
@@ -68,7 +68,7 @@ static void CloseOldTarget(logTargets oldTarget)
 
 }
 
-void SetLogTarget(logTargets target, ...)
+void SetLogTarget(sig_atomic_t target, ...)
 {
 	pthread_mutex_lock(&mutex);
 

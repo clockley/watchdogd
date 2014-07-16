@@ -530,11 +530,11 @@ static bool IsRootStorageDaemon(pid_t pid)
 
 	int fd = open(path, O_RDONLY|O_CLOEXEC);
 
+	char buf[64] =  {"\0"}; //overkill
+
 	if (fd < 0) {
 		goto error;
 	}
-
-	char buf[64] =  {"\0"}; //overkill
 
 	if (read(fd, (void *)buf, 64) < 0) {
 		goto error;
