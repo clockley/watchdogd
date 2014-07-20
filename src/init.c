@@ -694,7 +694,7 @@ bool SetDefaultConfig(struct cfgoptions * options)
 
 int PrintVersionString(void)
 {
-	printf("%s %s\n", PACKAGE_NAME, PACKAGE_VERSION);
+	printf("%s\n", PACKAGE_STRING);
 	printf("Copyright 2013-2014 Christian Lockley. All rights reserved.\n");
 	return 0;
 }
