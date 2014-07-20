@@ -41,6 +41,7 @@ AS_IF([test "x$with_systemdsystemunitdir" != "xno"],
       [AC_SUBST([systemdsystemunitdir], [$with_systemdsystemunitdir])])
 AM_CONDITIONAL(HAVE_SYSTEMD, [test "x$with_systemdsystemunitdir" != "xno"])
 
+RRA_LIB_SYSTEMD_DAEMON_OPTIONAL
 AX_PTHREAD
 
 # Checks for header files.
