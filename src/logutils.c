@@ -41,7 +41,6 @@ static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 static void CloseOldTarget(sig_atomic_t oldTarget)
 {
-
 	if (oldTarget == invalidTarget) {
 		return;
 	}

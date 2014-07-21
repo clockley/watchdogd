@@ -2,7 +2,6 @@
 #define SUB_H
 #include "watchdogd.h"
 int EndDaemon(struct cfgoptions *s, int keepalive);
-int CloseStandardFileDescriptors(void);
 int CloseWraper(const int *pfd);
 void CloseFileDescriptors(long maxfd);
 int ConfigureKernelOutOfMemoryKiller(void);

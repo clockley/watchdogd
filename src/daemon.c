@@ -20,13 +20,12 @@
 #include "init.h"
 #include "pidfile.h"
 
-int CloseStandardFileDescriptors(void)
+static int CloseStandardFileDescriptors(void)
 {
-	int fd = 0;
 	int ret = 0;
 	struct stat statBuf;
 
-	fd = open("/dev/null", O_RDWR);
+	int fd = open("/dev/null", O_RDWR);
 
 	if (fd < 0) {
 		Logmsg(LOG_CRIT, "Unable to open: /dev/null: %s:",

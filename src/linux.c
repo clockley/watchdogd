@@ -633,7 +633,7 @@ int LinuxRunningSystemd(void)
 bool PlatformInit(void)
 {
 #ifdef HAVE_SD_NOTIFY
-	sd_notifyf(0, "READY=1\n", "MAINPID=%lu", (unsigned long) getpid());
+	sd_notifyf(0, "READY=1\n" "MAINPID=%lu", (unsigned long) getpid());
 #endif
 	return true;
 }
