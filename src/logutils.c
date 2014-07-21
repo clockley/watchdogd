@@ -100,7 +100,7 @@ void SetLogTarget(sig_atomic_t target, ...)
 			logFile = fopen(fileName, "w");
 			if (logFile == NULL) {
 				if (logTarget == systemLog) {
-					syslog(LOG_ALERT, "%m", errno);
+					syslog(LOG_ALERT, "%m");
 				} else {
 					fprintf(stderr, "%s\n", strerror(errno));
 				}
@@ -112,7 +112,7 @@ void SetLogTarget(sig_atomic_t target, ...)
 			logFile = fopen(fileName, "a");
 			if (logFile == NULL) {
 				if (logTarget == systemLog) {
-					syslog(LOG_ALERT, "%m", errno);
+					syslog(LOG_ALERT, "%m");
 				} else {
 					fprintf(stderr, "%s\n", strerror(errno));
 				}
