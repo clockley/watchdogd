@@ -123,9 +123,9 @@ int main(int argc, char **argv)
 		FatalError(&options);
 	}
 
-#ifdef HAVE_SD_NOTIFY
-	sd_notify(0, "READY=1");
-#endif
+	if (PlatformInit() != true) {
+		FatalError(&options);
+	}
 
 	struct timespec rqtp;
 

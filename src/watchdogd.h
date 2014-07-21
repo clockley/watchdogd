@@ -31,9 +31,6 @@
 #include <time.h>
 #include <unistd.h>
 #include <dirent.h>
-#ifdef HAVE_SD_NOTIFY
-#include <systemd/sd-daemon.h>
-#endif
 
 #ifndef NSIG
 #if defined(_NSIG)

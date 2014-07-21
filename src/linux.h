@@ -30,6 +30,10 @@
 #include <linux/if.h>
 #include "errorlist.h"
 
+#ifdef HAVE_SD_NOTIFY
+#include <systemd/sd-daemon.h>
+#endif
+
 int DisablePageFiles(void);
 int RemountRootReadOnly(void);
 int CloseWatchdog(watchdog_t *const);
@@ -44,4 +48,5 @@ int _Shutdown(int, bool);
 int NativeShutdown(int, int);
 int LinuxRunningSystemd(void);
 bool DontKillProcess(pid_t);
+bool PlatformInit(void);
 #endif

@@ -630,6 +630,14 @@ int LinuxRunningSystemd(void)
 	return 1;
 }
 
+bool PlatformInit(void)
+{
+#ifdef HAVE_SD_NOTIFY
+	sd_notifyf(0, "READY=1\n", "MAINPID=%lu", (unsigned long) getpid());
+#endif
+	return true;
+}
+
 int NativeShutdown(int errorcode, int kexec)
 {
 //http://cgit.freedesktop.org/systemd/systemd/tree/src/core/manager.c?id=f49fd1d57a429d4a05ac86352c017a845f8185b3
