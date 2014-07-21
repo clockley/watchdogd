@@ -89,14 +89,15 @@ int Daemon(struct cfgoptions *s)
 {
 	assert(s != NULL);
 
-	pid_t pid = 0;
-	long maxfd = 0;
-
 	if (s == NULL) {
 		return -1;
 	}
 
-	maxfd = sysconf(_SC_OPEN_MAX);
+	if (IsDaemon(s) == 0) { //shall we daemonize?
+		return 0;
+	}
+
+	long maxfd = sysconf(_SC_OPEN_MAX);
 
 	if (maxfd < 0 && errno == EINVAL) {
 		fprintf(stderr, "watchdogd: %s\n", strerror(errno));
@@ -131,7 +132,7 @@ int Daemon(struct cfgoptions *s)
 
 	errno = 0;
 
-	pid = fork();
+	pid_t pid = fork();
 
 	if (pid < 0) {
 		fprintf(stderr, "watchdogd: %s\n", strerror(errno));

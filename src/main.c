@@ -47,7 +47,7 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 
-	if (IsDaemon(&options) && Daemon(&options) < 0) {
+	if (Daemon(&options) < 0) {
 		FatalError(&options);
 	}
 
