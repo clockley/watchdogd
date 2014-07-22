@@ -601,6 +601,9 @@ int _Shutdown(int errorcode, bool kexec)
 
 int LinuxRunningSystemd(void)
 {
+#ifdef HAVE_SD_NOTIFY
+	return sd_booted();
+#endif
 	int fd = open("/proc/1/cmdline", O_RDONLY);
 
 	if (fd < 0) {

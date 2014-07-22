@@ -166,9 +166,10 @@ int Shutdown(int errorcode, struct cfgoptions *arg)
 
 	EndDaemon(arg, true);	//point of no return
 
-#if 0
-	NativeShutdown(errorcode, arg->options & KEXEC ? 1 : 0); //untested
-#endif
+	if (LinuxRunningSystemd()) {
+		NativeShutdown(errorcode, arg->options & KEXEC ? 1 : 0);
+	}
+
 
 	StopInit();
 
