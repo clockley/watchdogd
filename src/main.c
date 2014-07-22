@@ -39,8 +39,12 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 
-	if (ParseCommandLine(&argc, argv, &options) != 0) {
+	const int ret = ParseCommandLine(&argc, argv, &options);
+
+	if (ret < 0) {
 		return EXIT_FAILURE;
+	} else if (ret != 0) {
+		return EXIT_SUCCESS;
 	}
 
 	if (ReadConfigurationFile(&options) < 0) {

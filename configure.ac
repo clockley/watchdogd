@@ -53,7 +53,7 @@ AC_TYPE_PID_T
 # Checks for library functions.
 AC_FUNC_FORK
 
-AC_CHECK_FUNCS([clock_gettime strerror strerror_r strtol fpathconf dirfd open openat fstatat vsnprintf snprintf sprintf])
+AC_CHECK_FUNCS([clock_gettime strerror strerror_r strtol fpathconf dirfd open openat fstatat vsnprintf snprintf sprintf getopt_long])
 
 AC_CONFIG_FILES([Makefile
                  src/Makefile

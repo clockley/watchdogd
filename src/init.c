@@ -14,6 +14,8 @@
  * permissions and limitations under the License. 
  */
 
+
+#include <getopt.h>
 #include "watchdogd.h"
 #include "init.h"
 #include "sub.h"
@@ -585,7 +587,21 @@ int ParseCommandLine(int *argc, char **argv, struct cfgoptions *cfg)
 {
 	int opt = 0;
 
-	while ((opt = getopt(*argc, argv, "qsfFbc:")) != -1) {
+	const struct option longOptions[] = {
+		{"no-action", no_argument, 0, 'q'},
+		{"foreground", no_argument, 0, 'F'},
+		{"force", no_argument, 0, 'f'},
+		{"sync", no_argument, 0, 's'},
+		{"softboot", no_argument, 0, 'b'},
+		{"help", no_argument, 0, 'h'},
+		{"version", no_argument, 0, 'h'},
+		{"config-file", required_argument, 0, 'c'},
+		{0, 0, 0, 0}
+	};
+
+	int tmp = 0;
+	while ((opt = getopt_long(*argc, argv, "qsfFbc:", longOptions, &tmp)) != -1) {
+
 		switch (opt) {
 		case 'F':
 			cfg->options &= !DAEMONIZE;
@@ -605,6 +621,10 @@ int ParseCommandLine(int *argc, char **argv, struct cfgoptions *cfg)
 		case 'b':
 			cfg->options |= SOFTBOOT;
 			break;
+		case 'v':
+		case 'h':
+			Usage();
+			return 1;
 		default:
 			Usage();
 			return -1;
@@ -702,7 +722,8 @@ int PrintVersionString(void)
 int Usage(void)
 {
 	PrintVersionString();
-	printf("%s [-F] [-q] [-s] [-b] [-f] [-c <config_file>]\n",
+	printf("%s [-F|--foreground] [-b|--softboot] [-s|--sync] [-b|--softboot]\n"
+		"\t  [-f|--force] [-c <config_file>|--config-file <config_file>]\n",
 	       PACKAGE_NAME);
 	return 0;
 }
