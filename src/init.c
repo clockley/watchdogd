@@ -56,13 +56,13 @@ int ParseCommandLine(int *argc, char **argv, struct cfgoptions *cfg)
 		{"sync", no_argument, 0, 's'},
 		{"softboot", no_argument, 0, 'b'},
 		{"help", no_argument, 0, 'h'},
-		{"version", no_argument, 0, 'h'},
+		{"version", no_argument, 0, 'V'},
 		{"config-file", required_argument, 0, 'c'},
 		{0, 0, 0, 0}
 	};
 
 	int tmp = 0;
-	while ((opt = getopt_long(*argc, argv, "qsfFbc:", longOptions, &tmp)) != -1) {
+	while ((opt = getopt_long(*argc, argv, "qsfFbVc:", longOptions, &tmp)) != -1) {
 
 		switch (opt) {
 		case 'F':
@@ -83,7 +83,9 @@ int ParseCommandLine(int *argc, char **argv, struct cfgoptions *cfg)
 		case 'b':
 			cfg->options |= SOFTBOOT;
 			break;
-		case 'v':
+		case 'V':
+			PrintVersionString();
+			return 1;
 		case 'h':
 			Usage();
 			return 1;
