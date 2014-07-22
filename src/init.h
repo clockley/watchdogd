@@ -21,7 +21,6 @@ int CheckPriority(int priority);
 int InitializePosixMemlock(void);
 int Usage(void);
 int PrintVersionString(void);
-int ReadConfigurationFile(struct cfgoptions *const cfg);
 int ParseCommandLine(int *argc, char **argv, struct cfgoptions *s);
 bool SetDefaultConfig(struct cfgoptions *options);
 int GetDefaultPriority(void);

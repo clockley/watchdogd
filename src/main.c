@@ -19,6 +19,7 @@
 #include "sub.h"
 #include "main.h"
 #include "init.h"
+#include "configfile.h"
 #include "threads.h"
 #include "pidfile.h"
 
