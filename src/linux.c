@@ -673,7 +673,7 @@ int GetConsoleColumns(void)
 {
 	struct winsize w = { 0 };
 	if (ioctl(0, TIOCGWINSZ, &w) < 0) {
-		return 40;
+		return 80;
 	}
 
 	return w.ws_col;

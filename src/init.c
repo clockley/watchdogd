@@ -191,6 +191,8 @@ static int PrintHelp(void)
 //Emulate the gnu --help output.
 	static char *const help[][2] = {
 		{"Usage: " PACKAGE_NAME " [OPTION]", ""},
+		{"A watchdog daemon for linux", ""},
+		{"",""},
 		{"-F, --foreground", "run in foreground mode"},
 		{"-b, --softboot", "ignore file open errors"},
 		{"-s, --sync", "sync file-systems regularly"},
@@ -238,8 +240,8 @@ static int PrintHelp(void)
 			char *tmp = strtok_r(ptr, " ", &save);
 			while (tmp != NULL) {
 				if (len >= col) {
-					printf("\n\t\t\t");
-					len = strlen(tmp) + 24;
+					printf("\n\t\t      ");
+					len = strlen(tmp) + 16;
 				}
 				len += printf("%s ", tmp);
 				tmp = strtok_r(NULL, " ", &save);
