@@ -191,7 +191,7 @@ static int PrintHelp(void)
 //Emulate the gnu --help output.
 	static char *const help[][2] = {
 		{"Usage: " PACKAGE_NAME " [OPTION]", ""},
-		{"A watchdog daemon for linux", ""},
+		{"A watchdog daemon for linux.", ""},
 		{"",""},
 		{"-F, --foreground", "run in foreground mode"},
 		{"-b, --softboot", "ignore file open errors"},
@@ -199,6 +199,8 @@ static int PrintHelp(void)
 		{"-f, --force",
 		 "force a ping interval or timeout even if the ping interval is less than the timeout"},
 		{"-c, --config-file", "path to configuration file"},
+		{"-V, --version", "print version info"},
+		{"-h, --help", "this help"},
 		{NULL, NULL}
 	};
 
