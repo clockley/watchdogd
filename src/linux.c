@@ -668,4 +668,14 @@ int NativeShutdown(int errorcode, int kexec)
 
 	return -1;
 }
+
+int GetConsoleColumns(void)
+{
+	struct winsize w = { 0 };
+	if (ioctl(0, TIOCGWINSZ, &w) < 0) {
+		return 40;
+	}
+
+	return w.ws_col;
+}
 #endif

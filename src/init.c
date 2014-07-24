@@ -38,7 +38,8 @@ int SetSchedulerPolicy(int priority)
 int InitializePosixMemlock(void)
 {
 	if (mlockall(MCL_CURRENT | MCL_FUTURE) < 0) {
-		fprintf(stderr, "watchdogd: unable to lock memory %s\n", strerror(errno));
+		fprintf(stderr, "watchdogd: unable to lock memory %s\n",
+			strerror(errno));
 		return -1;
 	}
 
@@ -62,7 +63,9 @@ int ParseCommandLine(int *argc, char **argv, struct cfgoptions *cfg)
 	};
 
 	int tmp = 0;
-	while ((opt = getopt_long(*argc, argv, "qsfFbVc:", longOptions, &tmp)) != -1) {
+	while ((opt =
+		getopt_long(*argc, argv, "qsfFbVc:", longOptions,
+			    &tmp)) != -1) {
 
 		switch (opt) {
 		case 'F':
@@ -183,11 +186,74 @@ int PrintVersionString(void)
 	return 0;
 }
 
+static int PrintHelp(void)
+{
+//Emulate the gnu --help output.
+	static char *const help[][2] = {
+		{"Usage: " PACKAGE_NAME " [OPTION]", ""},
+		{"-F, --foreground", "run in foreground mode"},
+		{"-b, --softboot", "ignore file open errors"},
+		{"-s, --sync", "sync file-systems regularly"},
+		{"-f, --force",
+		 "force a ping interval or timeout even if the ping interval is less than the timeout"},
+		{"-c, --config-file", "path to configuration file"},
+		{NULL, NULL}
+	};
+
+	for (int i = 0; help[i][0] != NULL; i += 1) {
+		long col = GetConsoleColumns();
+		long len = 1;
+		{
+			char *ptr = strdup(help[i][0]);
+
+			if (ptr == NULL) {
+				perror(PACKAGE_NAME);
+				return -1;
+			}
+
+			char *save = NULL;
+			char *tmp = strtok_r(ptr, "", &save);
+
+			while (tmp != NULL) {
+				len += strlen(tmp) + 1;
+				if (len >= col) {
+					printf("\n");
+					len = strlen(tmp);
+				}
+				len = printf("%-20s", tmp);
+				len += 20;
+				tmp = strtok_r(NULL, " ", &save);
+			}
+			free(ptr);
+		}
+		{
+			char *ptr = strdup(help[i][1]);
+
+			if (ptr == NULL) {
+				perror(PACKAGE_NAME);
+				return -1;
+			}
+
+			char *save = NULL;
+			char *tmp = strtok_r(ptr, " ", &save);
+			while (tmp != NULL) {
+				if (len >= col) {
+					printf("\n\t\t\t");
+					len = strlen(tmp) + 24;
+				}
+				len += printf("%s ", tmp);
+				tmp = strtok_r(NULL, " ", &save);
+			}
+			free(ptr);
+			printf("\n");
+		}
+	}
+
+	return 0;
+}
+
 int Usage(void)
 {
-	PrintVersionString();
-	printf("%s [-F|--foreground] [-b|--softboot] [-s|--sync] [-b|--softboot]\n"
-		"\t  [-f|--force] [-c <config_file>|--config-file <config_file>]\n",
-	       PACKAGE_NAME);
+	assert(PrintHelp() == 0);
 	return 0;
 }

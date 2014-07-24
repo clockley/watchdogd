@@ -28,6 +28,7 @@
 #include <sys/types.h>
 #include <ifaddrs.h>
 #include <linux/if.h>
+#include <sys/ioctl.h>
 #include "errorlist.h"
 
 #ifdef HAVE_SD_NOTIFY
@@ -49,4 +50,5 @@ int NativeShutdown(int, int);
 int LinuxRunningSystemd(void);
 bool DontKillProcess(pid_t);
 bool PlatformInit(void);
+int GetConsoleColumns(void);
 #endif

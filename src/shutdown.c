@@ -44,11 +44,6 @@ static int StopInit(void)
 	return 0;
 }
 
-static long ConvertStringToInt(const char *const str)
-{
-	assert(str != NULL);return strtol((str), (char **)NULL, 10);
-}
-
 static void KillAllProcesses(int sig)
 {
 	struct stat buffer;

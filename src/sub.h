@@ -35,4 +35,5 @@ int GuessSleeptime(watchdog_t * const watchdog);
 //
 
 void FatalError(struct cfgoptions *s);
+long ConvertStringToInt(const char *const str);
 #endif

@@ -212,6 +212,15 @@ void NormalizeTimespec(struct timespec *const tp)
 	}
 }
 
+long ConvertStringToInt(const char *const str)
+{
+	if (str == NULL) {
+		return -1;
+	}
+	return strtol((str), (char **)NULL, 10);
+}
+
+
 int IsExe(const char *pathname, bool returnfildes)
 {
 	struct stat buffer;
