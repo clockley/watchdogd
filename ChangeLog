@@ -63,3 +63,8 @@ To fix this type ./configure --prefix=/usr
 2014-07-15 [0.2.4] <Christian Lockley>
 	* Fix shutdown under systemd
 	* Fix realtime scheduling under systemd
+
+2014-07-25 [0.2.5] <Christian Lockley>
+	* Better intergration systemd.
+	* Long options.
+	* Shutdown system with systemd if installed, fallback to legacy code if not successful.

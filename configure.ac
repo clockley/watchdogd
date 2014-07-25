@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([watchdogd],[0.2.4],[clockley1@gmail.com])
+AC_INIT([watchdogd],[0.2.5],[clockley1@gmail.com])
 AM_INIT_AUTOMAKE([1.7] [foreign dist-xz dist-zip])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR([Makefile.am])
