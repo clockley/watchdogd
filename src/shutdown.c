@@ -46,7 +46,6 @@ static int StopInit(void)
 
 static void KillAllProcesses(int sig)
 {
-	struct stat buffer;
 	struct dirent *ent = NULL;
 	struct dirent *direntbuf = NULL;
 
