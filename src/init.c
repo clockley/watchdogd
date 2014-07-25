@@ -189,7 +189,7 @@ int PrintVersionString(void)
 static int PrintHelp(void)
 {
 //Emulate the gnu --help output.
-	static char *const help[][2] = {
+	static const char *const help[][2] = {
 		{"Usage: " PACKAGE_NAME " [OPTION]", ""},
 		{"A watchdog daemon for linux.", ""},
 		{"", ""},
