@@ -192,65 +192,58 @@ static int PrintHelp(void)
 	static char *const help[][2] = {
 		{"Usage: " PACKAGE_NAME " [OPTION]", ""},
 		{"A watchdog daemon for linux.", ""},
-		{"",""},
-		{"-F, --foreground", "run in foreground mode"},
-		{"-b, --softboot", "ignore file open errors"},
-		{"-s, --sync", "sync file-systems regularly"},
-		{"-f, --force",
+		{"", ""},
+		{"  -F, --foreground", "run in foreground mode"},
+		{"  -b, --softboot", "ignore file open errors"},
+		{"  -s, --sync", "sync file-systems regularly"},
+		{"  -f, --force",
 		 "force a ping interval or timeout even if the ping interval is less than the timeout"},
-		{"-c, --config-file", "path to configuration file"},
-		{"-V, --version", "print version info"},
-		{"-h, --help", "this help"},
+		{"  -c, --config-file", "path to configuration file"},
+		{"  -V, --version", "print version info"},
+		{"  -h, --help", "this help"},
 		{NULL, NULL}
 	};
 
 	for (int i = 0; help[i][0] != NULL; i += 1) {
 		long col = GetConsoleColumns();
-		long len = 1;
-		{
-			char *ptr = strdup(help[i][0]);
-
-			if (ptr == NULL) {
-				perror(PACKAGE_NAME);
-				return -1;
-			}
-
-			char *save = NULL;
-			char *tmp = strtok_r(ptr, "", &save);
-
-			while (tmp != NULL) {
-				len += strlen(tmp) + 1;
-				if (len >= col) {
-					printf("\n");
-					len = strlen(tmp);
-				}
-				len = printf("%-20s", tmp);
-				len += 20;
-				tmp = strtok_r(NULL, " ", &save);
-			}
-			free(ptr);
+		if (col >= 80) { //KLUGE
+			col += col / 2;
 		}
-		{
-			char *ptr = strdup(help[i][1]);
+		long len = 0;
+		len += printf("%-20s", help[i][0]);
 
-			if (ptr == NULL) {
-				perror(PACKAGE_NAME);
-				return -1;
-			}
+		char *ptr = strdup(help[i][1]);
 
-			char *save = NULL;
-			char *tmp = strtok_r(ptr, " ", &save);
-			while (tmp != NULL) {
-				if (len >= col) {
-					printf("\n\t\t      ");
-					len = strlen(tmp) + 16;
-				}
-				len += printf("%s ", tmp);
-				tmp = strtok_r(NULL, " ", &save);
-			}
-			free(ptr);
-			printf("\n");
+		if (ptr == NULL) {
+			perror(PACKAGE_NAME);
+			return -1;
 		}
+
+		char *save = NULL;
+		char *tmp = strtok_r(ptr, " ", &save);
+
+		while (tmp != NULL) {
+			len += strlen(tmp);
+			if (len > col) {
+				len = 0;
+				printf("%s", "\n");
+				len = printf("                      ");
+				len += printf("%s", tmp);
+				tmp = strtok_r(NULL, " ", &save);
+				if (tmp != NULL) {
+					len += printf(" ");
+				}
+			} else {
+				len += printf("%s", tmp);
+				tmp = strtok_r(NULL, " ", &save);
+				if (tmp != NULL) {
+					len += printf(" ");
+				}
+			}
+		}
+
+		free(ptr);
+		printf("\n");
 	}
 
 	return 0;
