@@ -59,5 +59,6 @@ AC_CONFIG_FILES([Makefile
                  src/Makefile
 		 conf/Makefile
 		 contrib/Makefile
-		 contrib/systemd/Makefile])
+		 contrib/systemd/Makefile
+                 man/Makefile])
 AC_OUTPUT
