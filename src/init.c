@@ -201,9 +201,9 @@ static int PrintHelp(void)
 		{"  -s, --sync", "sync file-systems regularly"},
 		{"  -f, --force",
 		 "force a ping interval or timeout even if the ping interval is less than the timeout"},
-		{"  -c, --config-file", "path to configuration file"},
-		{"  -V, --version", "print version info"},
+		{"  -c, --config-file=FILENAME ", "path to configuration file"},
 		{"  -h, --help", "this help"},
+		{"  -V, --version", "print version info"},
 		{NULL, NULL}
 	};
 
