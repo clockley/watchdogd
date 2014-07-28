@@ -197,7 +197,7 @@ static int PrintHelp(void)
 		{"A watchdog daemon for linux.", ""},
 		{"", ""},
 		{"  -b, --softboot", "ignore file open errors"},
-		{"  -c, --config-file=FILENAME ", "path to configuration file"},
+		{"  -c, --config-file ", "path to configuration file"},
 		{"  -f, --force",
 		 "force a ping interval or timeout even if the ping interval is less than the timeout"},
 		{"  -F, --foreground", "run in foreground mode"},
