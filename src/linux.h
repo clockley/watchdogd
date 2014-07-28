@@ -51,5 +51,5 @@ int LinuxRunningSystemd(void);
 bool DontKillProcess(pid_t);
 bool PlatformInit(void);
 int GetConsoleColumns(void);
-int SystemdWatchdogEnabled(int, long long int *);
+int SystemdWatchdogEnabled(const int, long long int *const);
 #endif

@@ -679,7 +679,7 @@ int GetConsoleColumns(void)
 	return w.ws_col;
 }
 
-int SystemdWatchdogEnabled(int unset, long long int *interval)
+int SystemdWatchdogEnabled(const int unset, long long int * const interval)
 {
 	if (LinuxRunningSystemd() == 0) {
 		return 0;
