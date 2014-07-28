@@ -709,7 +709,7 @@ int SystemdWatchdogEnabled(int unset, long long int *interval)
 
 	if (unset != 0) {
 		if (unsetenv("WATCHDOG_PID") < 0) {
-			return -1;
+			;
 		} else if (unsetenv("WATCHDOG_USEC") < 0) {
 			return -1;
 		}
