@@ -681,7 +681,6 @@ int GetConsoleColumns(void)
 
 int SystemdWatchdogEnabled(int unset, long long int *interval)
 {
-#if defined(__linux__)
 	if (LinuxRunningSystemd() == 0) {
 		return 0;
 	}
@@ -717,8 +716,5 @@ int SystemdWatchdogEnabled(int unset, long long int *interval)
 	}
 
 	return 1;
-#else
-	return 0;
-#endif
 }
 #endif
