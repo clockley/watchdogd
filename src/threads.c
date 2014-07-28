@@ -555,7 +555,9 @@ static void *ManagerThread(void *arg)
 
 int StartHelperThreads(struct cfgoptions *options)
 {
-	StartServiceManagerKeepAliveNotification(NULL);
+	if (StartServiceManagerKeepAliveNotification(NULL) < 0) {
+		return -1;
+	}
 
 	if (SetupTestFork(options) < 0) {
 		return -1;
