@@ -37,6 +37,34 @@ static void GetPageSize(void)
 	pageSize = sysconf(_SC_PAGESIZE);
 }
 
+static void *ServiceManagerKeepAliveNotification(void * arg)
+{
+#if defined(__linux__)
+	assert(arg != NULL);
+
+	struct timespec *tp = (struct timespec*)arg;
+
+	struct timespec ts = {0};
+	
+	ts.tv_sec = tp->tv_sec;
+	ts.tv_nsec = tp->tv_nsec;
+
+	assert(ts.tv_sec == tp->tv_sec);
+	assert(ts.tv_nsec == tp->tv_nsec);
+
+	free(arg);
+
+	for (;;) {
+		int ret = sd_notify(0, "WATCHDOG=1");
+		if (ret < 0) {
+			Logmsg(LOG_ERR, "%s", strerror(-errno));
+		}
+		nanosleep(&ts, NULL);
+	}
+#endif
+	return NULL;
+}
+
 static void *Sync(void *arg)
 {
 	for (;;) {
@@ -527,6 +555,8 @@ static void *ManagerThread(void *arg)
 
 int StartHelperThreads(struct cfgoptions *options)
 {
+	StartServiceManagerKeepAliveNotification(NULL);
+
 	if (SetupTestFork(options) < 0) {
 		return -1;
 	}
@@ -660,5 +690,45 @@ int StartPingThread(void *arg)
 	if (CreateDetachedThread(Ping, arg) < 0)
 		return -1;
 
+	return 0;
+}
+
+int StartServiceManagerKeepAliveNotification(void *arg)
+{
+#if defined(__linux__)
+	long long int usec = 0;
+
+	int ret = SystemdWatchdogEnabled(0, &usec);
+
+	if (ret == 0) {
+		return 0;
+	}
+
+	if (ret < 0) {
+		return 0;
+	}
+
+	usec /= 2;
+	usec *= 1000;
+
+	struct timespec *tp = calloc(1, sizeof(struct timespec));
+
+	if (tp == NULL) {
+		return -1;
+	}
+
+	while (usec > 999999999) {
+		tp->tv_sec += 1;
+		usec -= 999999999;
+	}
+
+	tp->tv_nsec = usec;
+
+	if (CreateDetachedThread(ServiceManagerKeepAliveNotification, tp) < 0) {
+		return -1;
+	}
+
+	return 0;
+#endif
 	return 0;
 }

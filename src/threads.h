@@ -1,6 +1,7 @@
 #if !defined(THREADS_H)
 #define THREADS_H
 int StartHelperThreads(struct cfgoptions *options);
+int StartServiceManagerKeepAliveNotification(void *arg);
 int SetupLogTick(void *arg);
 int SetupAuxManagerThread(void *arg);
 int SetupTestBinThread(void *arg);

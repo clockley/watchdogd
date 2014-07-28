@@ -678,4 +678,47 @@ int GetConsoleColumns(void)
 
 	return w.ws_col;
 }
+
+int SystemdWatchdogEnabled(int unset, long long int *interval)
+{
+#if defined(__linux__)
+	if (LinuxRunningSystemd() == 0) {
+		return 0;
+	}
+
+	const char *str = getenv("WATCHDOG_USEC");
+	if (str == NULL) {
+		return -1;
+	}
+
+	const char *watchdogPid = getenv("WATCHDOG_PID");
+	if (watchdogPid != NULL) {
+		if (getpid() != (pid_t)strtoll(watchdogPid, NULL, 10)) {
+			return -1;
+		}
+	} else {
+		Logmsg(LOG_WARNING, "Your version of systemd is out of date. Upgrade for better integration with watchdogd");
+	}
+
+	if (interval != NULL) {
+		if (strtoll(str, NULL, 10) <= 0) {
+			return -1;
+		}
+
+		*interval = strtoll(str, NULL, 10);
+	}
+
+	if (unset != 0) {
+		if (unsetenv("WATCHDOG_PID") < 0) {
+			return -1;
+		} else if (unsetenv("WATCHDOG_USEC") < 0) {
+			return -1;
+		}
+	}
+
+	return 1;
+#else
+	return 0;
+#endif
+}
 #endif
