@@ -713,7 +713,7 @@ int SystemdWatchdogEnabled(const int unset, long long int * const interval)
 
 	if (unset != 0) {
 		if (unsetenv("WATCHDOG_PID") < 0) {
-			;
+			Logmsg(LOG_WARNING, "Unable to delete WATCHDOG_PID environment variable:%s", strerror(errno));
 		} else if (unsetenv("WATCHDOG_USEC") < 0) {
 			return -1;
 		}
