@@ -57,7 +57,7 @@ static void *ServiceManagerKeepAliveNotification(void * arg)
 	for (;;) {
 		int ret = sd_notify(0, "WATCHDOG=1");
 		if (ret < 0) {
-			Logmsg(LOG_ERR, "%s", strerror(-errno));
+			Logmsg(LOG_ERR, "%s", strerror(-ret));
 		}
 		nanosleep(&ts, NULL);
 	}
