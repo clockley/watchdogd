@@ -700,8 +700,12 @@ int SystemdWatchdogEnabled(const int unset, long long int * const interval)
 	}
 
 	if (interval != NULL) {
-		if (strtoll(str, NULL, 10) <= 0) {
+		if (strtoll(str, NULL, 10) < 0) {
 			return -1;
+		}
+
+		if (strtoll(str, NULL, 10) == 0) {
+			return 0;
 		}
 
 		*interval = strtoll(str, NULL, 10);
