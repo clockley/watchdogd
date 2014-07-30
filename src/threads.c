@@ -713,7 +713,7 @@ int StartServiceManagerKeepAliveNotification(void *arg)
 	usec /= 2;
 	usec *= 1000;
 
-	struct timespec *tp = calloc(1, sizeof(struct timespec));
+	struct timespec *tp = (struct timespec*)calloc(1, sizeof(struct timespec));
 
 	if (tp == NULL) {
 		return -1;
