@@ -716,6 +716,7 @@ int StartServiceManagerKeepAliveNotification(void *arg)
 	struct timespec *tp = (struct timespec*)calloc(1, sizeof(struct timespec));
 
 	if (tp == NULL) {
+		Logmsg(LOG_ERR, "Unable to allocate memory: %s", strerror(errno));
 		return -1;
 	}
 
