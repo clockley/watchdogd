@@ -68,3 +68,10 @@ To fix this type ./configure --prefix=/usr
 	* Better intergration systemd.
 	* Long options.
 	* Shutdown system with systemd if installed, fallback to legacy code if not successful.
+
+2014-07-31 [0.3.0] <Christian Lockley>
+	* Ping systemd watchdog if user put WatchdogSec=N in service file.
+	This is a service monitoring software watchdog, it has nothing to do with the hardware watchdog timer.
+	See threads.c:ServiceManagerKeepAliveNotification() of line 40.
+
+	* Cleanup the codebase.
