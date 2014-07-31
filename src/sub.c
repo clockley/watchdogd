@@ -360,7 +360,7 @@ int GuessSleeptime(watchdog_t * const watchdog)
 	return GetOptimalPingInterval(watchdog);
 }
 
-noreturn void FatalError(struct cfgoptions *s)
+void FatalError(struct cfgoptions *s)
 {
 	assert(s != NULL);
 
