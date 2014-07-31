@@ -13,16 +13,7 @@
  * implied. See the License for the specific language governing
  * permissions and limitations under the License. 
  */
-#if !defined(INIT_H)
-#define INIT_H
-int MakeLogDir(struct cfgoptions *const s);
-int SetSchedulerPolicy(int priority);
-int CheckPriority(int priority);
-int InitializePosixMemlock(void);
-int Usage(void);
-int PrintVersionString(void);
-int ParseCommandLine(int *argc, char **argv, struct cfgoptions *s);
-bool SetDefaultConfig(struct cfgoptions *const options);
-int GetDefaultPriority(void);
-int PingInit(struct cfgoptions *const cfg);
+#if !defined(DAEMON_H)
+#define DAEMON_H
+int Daemonize(struct cfgoptions *const s);
 #endif

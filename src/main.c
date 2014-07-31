@@ -22,6 +22,7 @@
 #include "configfile.h"
 #include "threads.h"
 #include "pidfile.h"
+#include "daemon.h"
 
 #define DISARM_WATCHDOG_BEFORE_REBOOT true
 
@@ -52,7 +53,7 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 
-	if (Daemon(&options) < 0) {
+	if (Daemonize(&options) < 0) {
 		FatalError(&options);
 	}
 
@@ -67,10 +68,6 @@ int main(int argc, char **argv)
 	Logmsg(LOG_INFO, "starting daemon (%s)", PACKAGE_VERSION);
 
 	PrintConfiguration(&options);
-
-	if (ConfigureKernelOutOfMemoryKiller() < 0) {
-		Logmsg(LOG_ERR, "unable to configure out of memory killer");
-	}
 
 	if (StartHelperThreads(&options) != 0) {
 		FatalError(&options);

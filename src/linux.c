@@ -244,7 +244,7 @@ static int LegacyOutOfMemoryKillerConfig(void)
 	return 0;
 }
 
-int ConfigureKernelOutOfMemoryKiller(void)
+static int ConfigureKernelOutOfMemoryKiller(void)
 {
 	int fd = 0;
 	int dfd = 0;
@@ -638,6 +638,11 @@ bool PlatformInit(void)
 #ifdef HAVE_SD_NOTIFY
 	sd_notifyf(0, "READY=1\n" "MAINPID=%lu", (unsigned long) getpid());
 #endif
+	if (ConfigureKernelOutOfMemoryKiller() < 0) {
+		Logmsg(LOG_ERR, "unable to configure out of memory killer");
+		return false;
+	}
+
 	return true;
 }
 

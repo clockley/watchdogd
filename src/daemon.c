@@ -19,6 +19,7 @@
 #include "sub.h"
 #include "init.h"
 #include "pidfile.h"
+#include "daemon.h"
 
 static int CloseStandardFileDescriptors(void)
 {
@@ -70,7 +71,7 @@ static int CloseStandardFileDescriptors(void)
 	return -1;
 }
 
-void CloseFileDescriptors(long maxfd)
+static void CloseFileDescriptors(long maxfd)
 {
 	long fd = 0;
 
@@ -85,7 +86,7 @@ void CloseFileDescriptors(long maxfd)
 	}
 }
 
-int Daemon(struct cfgoptions *s)
+int Daemonize(struct cfgoptions *const s)
 {
 	assert(s != NULL);
 

@@ -17,6 +17,7 @@
 #include "sub.h"
 #include "init.h"
 #include "testdir.h"
+#include "daemon.h"
 
 static const char *LibconfigWraperConfigSettingSourceFile(const config_setting_t *
 						   setting)

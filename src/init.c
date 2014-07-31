@@ -101,7 +101,7 @@ int ParseCommandLine(int *argc, char **argv, struct cfgoptions *cfg)
 	return 0;
 }
 
-int MakeLogDir(struct cfgoptions *cfg)
+int MakeLogDir(struct cfgoptions *const cfg)
 {
 	assert(cfg != NULL);
 
@@ -160,7 +160,7 @@ int CheckPriority(int priority)
 	return 0;
 }
 
-bool SetDefaultConfig(struct cfgoptions * options)
+bool SetDefaultConfig(struct cfgoptions *const options)
 {
 	assert(options != NULL);
 

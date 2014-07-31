@@ -129,7 +129,7 @@ void SetLogTarget(sig_atomic_t target, ...)
 	pthread_mutex_unlock(&mutex);
 }
 
-void Logmsg(int priority, const char *fmt, ...)
+void Logmsg(int priority, const char *const fmt, ...)
 {
 	extern bool logToSyslog;
 
