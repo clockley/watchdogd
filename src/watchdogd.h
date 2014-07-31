@@ -121,7 +121,6 @@ struct watchdogDevice {
 	const char *path;
 	int fd;
 	int timeout;
-	void *tem;
 };
 
 typedef struct watchdogDevice watchdog_t;
