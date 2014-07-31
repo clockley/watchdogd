@@ -34,6 +34,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  * permissions and limitations under the License. 
  */
 #include "watchdogd.h"
+#include "sub.h"
 
 static sig_atomic_t logTarget = invalidTarget;
 static FILE* logFile = NULL;

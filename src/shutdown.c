@@ -21,14 +21,6 @@
 #include "errorlist.h"
 #include "testdir.h"
 
-static int StartInit(void)
-{
-	if (kill(1, SIGCONT) == -1)
-		return -1;
-
-	return 0;
-}
-
 static int StopInit(void)
 {
 	if (LinuxRunningSystemd() == 1) {
