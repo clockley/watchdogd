@@ -36,26 +36,26 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "watchdogd.h"
 #include "sub.h"
 
-static sig_atomic_t logTarget = invalidTarget;
+static sig_atomic_t logTarget = INVALID_LOG_TARGET;
 static FILE* logFile = NULL;
 static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 static void CloseOldTarget(sig_atomic_t oldTarget)
 {
-	if (oldTarget == invalidTarget) {
+	if (oldTarget == INVALID_LOG_TARGET) {
 		return;
 	}
 
-	if (oldTarget == systemLog) {
+	if (oldTarget == SYSTEM_LOG) {
 		closelog();
 		return;
 	}
 
-	if (oldTarget == standardError) {
+	if (oldTarget == STANDARD_ERROR) {
 		return;
 	}
 
-	if (oldTarget == newFile || oldTarget == file) {
+	if (oldTarget == FILE_NEW || oldTarget == FILE_APPEND) {
 		if (logFile != NULL) {
 			fflush(logFile);
 			fclose(logFile);
@@ -72,22 +72,22 @@ void SetLogTarget(sig_atomic_t target, ...)
 {
 	pthread_mutex_lock(&mutex);
 
-	if (target == standardError) {
+	if (target == STANDARD_ERROR) {
 		CloseOldTarget(logTarget);
-		logTarget = standardError;
+		logTarget = STANDARD_ERROR;
 	}
 
-	if (target == systemLog) {
+	if (target == SYSTEM_LOG) {
 
-		if (logTarget != systemLog) {
+		if (logTarget != SYSTEM_LOG) {
 			openlog("watchdogd", LOG_PID | LOG_NOWAIT | LOG_CONS, LOG_DAEMON);
 		}
 
 		CloseOldTarget(logTarget);
-		logTarget = systemLog;
+		logTarget = SYSTEM_LOG;
 	}
 
-	if (target == newFile || target == file) {
+	if (target == FILE_NEW || target == FILE_APPEND) {
 		closelog();
 		va_list ap;
 		va_start(ap, target);
@@ -96,29 +96,29 @@ void SetLogTarget(sig_atomic_t target, ...)
 
 		assert(fileName != NULL);
 
-		if (target == newFile) {
+		if (target == FILE_NEW) {
 			logFile = fopen(fileName, "w");
 			if (logFile == NULL) {
-				if (logTarget == systemLog) {
+				if (logTarget == SYSTEM_LOG) {
 					syslog(LOG_ALERT, "%m");
 				} else {
 					fprintf(stderr, "%s\n", strerror(errno));
 				}
 			} else {
 				CloseOldTarget(logTarget);
-				logTarget = newFile;
+				logTarget = FILE_NEW;
 			}
-		} else if (target == file) {
+		} else if (target == FILE_APPEND) {
 			logFile = fopen(fileName, "a");
 			if (logFile == NULL) {
-				if (logTarget == systemLog) {
+				if (logTarget == SYSTEM_LOG) {
 					syslog(LOG_ALERT, "%m");
 				} else {
 					fprintf(stderr, "%s\n", strerror(errno));
 				}
 			} else {
 				CloseOldTarget(logTarget);
-				logTarget = file;
+				logTarget = FILE_APPEND;
 			}
 		} else {
 			assert(false);
@@ -138,7 +138,7 @@ void Logmsg(int priority, const char *const fmt, ...)
 
 	va_list args;
 
-	if (logTarget == standardError || logTarget == file || logTarget == newFile) {
+	if (logTarget == STANDARD_ERROR || logTarget == FILE_APPEND || logTarget == FILE_NEW) {
 		va_start(args, fmt);
 
 		switch (priority) {
@@ -176,7 +176,7 @@ void Logmsg(int priority, const char *const fmt, ...)
 
 		assert(buf[sizeof(buf) - 1] == '\0');
 
-		if (logTarget == standardError) {
+		if (logTarget == STANDARD_ERROR) {
 			fprintf(stderr, "%s\n", buf);
 		} else {
 			if (logFile != NULL) {
@@ -189,7 +189,7 @@ void Logmsg(int priority, const char *const fmt, ...)
 		return;
 	}
 
-	if (logTarget == systemLog) {
+	if (logTarget == SYSTEM_LOG) {
 		va_start(args, fmt);
 
 		vsnprintf(buf, sizeof(buf) - 1, fmt, args);

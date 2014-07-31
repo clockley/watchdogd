@@ -39,21 +39,21 @@ static bool SetDefaultLogTarget(struct cfgoptions *const cfg)
 
 	if (strcmp(cfg->logTarget, "auto") == 0) {
 		if (IsDaemon(cfg)) {
-			SetLogTarget(systemLog);
+			SetLogTarget(SYSTEM_LOG);
 			return true;
 		} else {
-			SetLogTarget(standardError);
+			SetLogTarget(STANDARD_ERROR);
 			return true;
 		}
 	}
 
 	if (strcmp(cfg->logTarget, "syslog") == 0) {
-		SetLogTarget(systemLog);
+		SetLogTarget(SYSTEM_LOG);
 		return true;
 	}
 
 	if (strcmp(cfg->logTarget, "stderr") == 0) {
-		SetLogTarget(standardError);
+		SetLogTarget(STANDARD_ERROR);
 		return true;
 	}
 
@@ -107,7 +107,7 @@ static bool SetDefaultLogTarget(struct cfgoptions *const cfg)
 				goto error;
 		}
 
-		SetLogTarget(file, fileName);
+		SetLogTarget(FILE_APPEND, fileName);
 	} else if (strcmp(mode, "newfile") == 0) {
 		char * fileName = strtok_r(NULL, ":", &tmp);
 
@@ -139,7 +139,7 @@ static bool SetDefaultLogTarget(struct cfgoptions *const cfg)
 				goto error;
 		}
 
-		SetLogTarget(newFile, fileName);
+		SetLogTarget(FILE_NEW, fileName);
 	} else {
 		goto error;
 	}

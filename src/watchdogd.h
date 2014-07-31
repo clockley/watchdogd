@@ -127,15 +127,13 @@ typedef struct watchdogDevice watchdog_t;
 
 extern ProcessList processes;
 
-enum logTargets {
-	invalidTarget,
-	standardError,
-	systemLog,
-	file,
-	newFile,
+enum logTarget_t {
+	INVALID_LOG_TARGET,
+	STANDARD_ERROR,
+	SYSTEM_LOG,
+	FILE_APPEND,
+	FILE_NEW,
 };
-
-typedef enum logTargets logTargets;
 
 #include "linux.h"
 

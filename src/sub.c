@@ -172,7 +172,7 @@ int EndDaemon(struct cfgoptions *s, int keepalive)
 	Logmsg(LOG_INFO, "restarting system");
 	closelog();
 
-	SetLogTarget(standardError);
+	SetLogTarget(STANDARD_ERROR);
 
 	munlockall();
 
