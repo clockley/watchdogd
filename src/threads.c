@@ -725,7 +725,7 @@ int StartServiceManagerKeepAliveNotification(void *arg)
 		usec -= 999999999;
 	}
 
-	tp->tv_nsec = usec;
+	tp->tv_nsec = (long)usec;
 
 	if (CreateDetachedThread(ServiceManagerKeepAliveNotification, tp) < 0) {
 		return -1;

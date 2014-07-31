@@ -166,8 +166,6 @@ static bool LoadConfigurationFile(config_t *const config, const char *const file
 	assert(config != NULL);
 	assert(fileName != NULL);
 
-	int tmp = 0;
-
 	config_init(config);
 
 	if (config == NULL) {

@@ -132,8 +132,6 @@ void SetLogTarget(sig_atomic_t target, ...)
 
 void Logmsg(int priority, const char *const fmt, ...)
 {
-	extern bool logToSyslog;
-
 	char buf[2048] = { '\0' };
 
 	assert(fmt != NULL);
