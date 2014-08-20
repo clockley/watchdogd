@@ -38,7 +38,7 @@ void list_init(struct list *list)
 	list->next = list->prev = list;
 }
 
-static void __list_add(struct list *entry, struct list *prev, struct list *next)
+static void __list_add(struct list *const entry, struct list *const prev, struct list *const next)
 {
 	next->prev = entry;
 	entry->next = next;
@@ -113,7 +113,7 @@ static void __list_del(struct list *prev, struct list *next)
 	prev->next = next;
 }
 
-static void _list_del(struct list *entry)
+static void _list_del(struct list *const entry)
 {
 	assert(entry->prev->next == entry);
 	assert(entry->next->prev == entry);
