@@ -105,7 +105,7 @@ int Spawn(int timeout, struct cfgoptions *const config, const char *file,
 				}
 
 				va_list ap;
-				const char *array[33];
+				const char *array[33] = {"\0"};
 				int argno = 0;
 
 				va_start(ap, args);
