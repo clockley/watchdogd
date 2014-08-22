@@ -145,8 +145,6 @@ int CreateLinkedListOfExes(const char *path, ProcessList * p)
 			goto error;
 		}
 
-		child->ret = 0;
-
 		list_add(&child->entry, &p->children);
 	}
 
