@@ -210,9 +210,16 @@ int Spawn(int timeout, struct cfgoptions *const config, const char *file,
 int SpawnAttr(spawnattr_t *spawnattr, struct cfgoptions *const config, const char *file,
 	  const char *args, ...)
 {
+
+	assert(spawnattr != NULL);
+
 	int status = 0;
 
 	if (file == NULL) {
+		return -1;
+	}
+
+	if (spawnattr == NULL) {
 		return -1;
 	}
 
@@ -278,8 +285,11 @@ int SpawnAttr(spawnattr_t *spawnattr, struct cfgoptions *const config, const cha
 				array[argno] = NULL;
 				va_end(ap);
 
-				if (chdir(spawnattr->workingDirectory) < 0) {
-					Logmsg(LOG_CRIT, "Unable to change working directory to: %s: %s", spawnattr->workingDirectory, 							strerror(errno));
+				if (spawnattr->workingDirectory != NULL) {
+					if (chdir(spawnattr->workingDirectory) < 0) {
+						Logmsg(LOG_CRIT, "Unable to change working directory to: %s: %s",
+						spawnattr->workingDirectory, strerror(errno));
+					}
 				}
 
 				if (spawnattr->user != NULL) {
