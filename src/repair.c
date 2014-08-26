@@ -124,6 +124,7 @@ bool LoadRepairScriptLink(repair_t *obj, char * const filename)
 
 	return true;
 }
+
 char *RepairScriptGetExecStart(repair_t *obj)
 {
 	return obj->execStart;
