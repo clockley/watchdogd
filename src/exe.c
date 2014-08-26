@@ -18,6 +18,7 @@
 #include <sys/wait.h>
 #include "sub.h"
 #include "exe.h"
+#include "user.h"
 
 static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_cond_t cond = PTHREAD_COND_INITIALIZER;

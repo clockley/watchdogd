@@ -18,19 +18,6 @@
 #include "sub.h"
 #include "user.h"
 
-static const int ADMIN_USER_ID = 0;
-
-static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-
-static bool IsAdmin(void)
-{
-	if (getuid() == 0) {
-		return true;
-	}
-
-	return false;
-}
-
 int RunAsUser(const char *restrict const user)
 {
 	assert(user != NULL);

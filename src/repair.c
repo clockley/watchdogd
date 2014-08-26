@@ -148,15 +148,3 @@ char * RepairScriptGetWorkingDirectory(repair_t *obj)
 {
 	return obj->workingDirectory;
 }
-
-bool DestroyRepairScriptObj(repair_t *obj, int internalOnly)
-{
-	if (obj == NULL) {
-		return false;
-	}
-
-	free(obj->execStart);
-	free(obj->user);
-
-	return true;
-}
