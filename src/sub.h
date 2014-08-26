@@ -33,6 +33,6 @@ int GetTimeout(watchdog_t * wdt);
 int GuessSleeptime(watchdog_t * const watchdog);
 //
 
-noreturn void FatalError(struct cfgoptions *s);
+void FatalError(struct cfgoptions *s);
 long ConvertStringToInt(const char *const str);
 #endif
