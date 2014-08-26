@@ -18,6 +18,6 @@
 int Spawn(int timeout, struct cfgoptions *const config, const char *file,
 	  const char *args, ...);
 
-int SpawnAsUser(int timeout, struct cfgoptions *const config, char *const user, const char *file,
+int SpawnAttr(spawnattr_t *, struct cfgoptions *const config, const char *file,
 	  const char *args, ...);
 #endif

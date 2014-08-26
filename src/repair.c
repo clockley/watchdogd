@@ -36,6 +36,20 @@ static bool ParseConfigfile(char *name, char *value, repair_t *obj)
 		obj->user = strdup(value);
 	}
 
+	if (strcmp(name, "WorkingDirectory") == 0) {
+		obj->workingDirectory = strdup(value);
+	}
+
+	if (strcmp(name, "Nice") == 0) {
+		int ret = (int)strtol(value, (char **)NULL, 10);
+
+		if (ret == 0 && errno == EINVAL) {
+			ret = -1;
+		}
+
+		obj->nice = ret;
+	}
+
 	return true;
 }
 
@@ -71,7 +85,6 @@ static bool Validate(char * name, char *value)
 int IsRepairScriptConfig(const char *filename)
 {
 	char *filext = strrchr(filename, '.');
-
 
 	if (strcmp(filext, ".repair") == 0) {
 		return 1;
@@ -126,6 +139,16 @@ long RepairScriptGetTimeout(repair_t *obj)
 	return obj->timeout;
 }
 
+int RepairScriptGetNice(repair_t *obj)
+{
+	return obj->nice;
+}
+
+char * RepairScriptGetWorkingDirectory(repair_t *obj)
+{
+	return obj->workingDirectory;
+}
+
 bool DestroyRepairScriptObj(repair_t *obj, int internalOnly)
 {
 	if (obj == NULL) {
@@ -134,7 +157,6 @@ bool DestroyRepairScriptObj(repair_t *obj, int internalOnly)
 
 	free(obj->execStart);
 	free(obj->user);
-	free(obj->timeout);
 
 	return true;
 }

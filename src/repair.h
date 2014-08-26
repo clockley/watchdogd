@@ -18,9 +18,11 @@
 #ifndef REPAIR_H
 #define REPAIR_H
 bool LoadRepairScriptLink(repair_t *obj, char * const filename);
-char * RepairScriptGetExecStart(repair_t *obj);
+char *RepairScriptGetExecStart(repair_t *obj);
 char *RepairScriptGetUser(repair_t *obj);
 long RepairScriptGetTimeout(repair_t *obj);
+char *RepairScriptGetWorkingDirectory(repair_t *obj);
 bool DestroyRepairScriptObj(repair_t *obj, int internalOnly);
+int RepairScriptGetNice(repair_t *obj);
 int IsRepairScriptConfig(const char *filename);
 #endif

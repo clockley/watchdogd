@@ -207,7 +207,7 @@ int Spawn(int timeout, struct cfgoptions *const config, const char *file,
 	}
 }
 
-int SpawnAsUser(int timeout, struct cfgoptions *const config, char *const user, const char *file,
+int SpawnAttr(spawnattr_t *spawnattr, struct cfgoptions *const config, const char *file,
 	  const char *args, ...)
 {
 	int status = 0;
@@ -235,7 +235,10 @@ int SpawnAsUser(int timeout, struct cfgoptions *const config, char *const user, 
 
 				sched_setscheduler(getpid(), SCHED_OTHER,
 						   &param);
-				nice(0);
+
+				if (nice(spawnattr->nice) == -1) {
+					Logmsg(LOG_ERR, "nice failed: %s", strerror(errno));
+				}
 
 				int dfd = open(config->logdir,
 					       O_DIRECTORY | O_RDONLY);
@@ -262,20 +265,6 @@ int SpawnAsUser(int timeout, struct cfgoptions *const config, char *const user, 
 
 				fsync(fd);
 
-				if (dup2(fd, STDOUT_FILENO) < 0) {
-					Logmsg(LOG_CRIT,
-					       "dup2 failed: STDOUT_FILENO: %s",
-					       strerror(errno));
-					return -1;
-				}
-
-				if (dup2(fd, STDERR_FILENO) < 0) {
-					Logmsg(LOG_CRIT,
-					       "dup2 failed: STDERR_FILENO %s",
-					       strerror(errno));
-					return -1;
-				}
-
 				va_list ap;
 				const char *array[33] = {"\0"};
 				int argno = 0;
@@ -289,10 +278,28 @@ int SpawnAsUser(int timeout, struct cfgoptions *const config, char *const user, 
 				array[argno] = NULL;
 				va_end(ap);
 
-				if (user != NULL) {
-					if (RunAsUser(user) != 0) {
-						Logmsg(LOG_CRIT, "Unable to run: %s as user: %s", file, user);
+				if (chdir(spawnattr->workingDirectory) < 0) {
+					Logmsg(LOG_CRIT, "Unable to change working directory to: %s: %s", spawnattr->workingDirectory, 							strerror(errno));
+				}
+
+				if (spawnattr->user != NULL) {
+					if (RunAsUser(spawnattr->user) != 0) {
+						Logmsg(LOG_CRIT, "Unable to run: %s as user: %s", file, spawnattr->user);
 					}
+				}
+
+				if (dup2(fd, STDOUT_FILENO) < 0) {
+					Logmsg(LOG_CRIT,
+					       "dup2 failed: STDOUT_FILENO: %s",
+					       strerror(errno));
+					return -1;
+				}
+
+				if (dup2(fd, STDERR_FILENO) < 0) {
+					Logmsg(LOG_CRIT,
+					       "dup2 failed: STDERR_FILENO %s",
+					       strerror(errno));
+					return -1;
 				}
 
 				execv(file, (char *const *)array);
@@ -308,7 +315,7 @@ int SpawnAsUser(int timeout, struct cfgoptions *const config, char *const user, 
 				return -1;
 			}
 
-			if (timeout > 0) {
+			if (spawnattr->timeout > 0) {
 				int ret = 0;
 
 				pthread_mutex_lock(&lock);
@@ -322,7 +329,7 @@ int SpawnAsUser(int timeout, struct cfgoptions *const config, char *const user, 
 
 				clock_gettime(CLOCK_REALTIME, &rqtp);
 
-				rqtp.tv_sec += (time_t) timeout;
+				rqtp.tv_sec += (time_t) spawnattr->timeout;
 				NormalizeTimespec(&rqtp);
 
 				bool once = false;
@@ -353,7 +360,7 @@ int SpawnAsUser(int timeout, struct cfgoptions *const config, char *const user, 
 					kill(worker, SIGKILL);
 					Logmsg(LOG_ERR,
 					       "binary %s exceeded time limit %ld",
-					       file, timeout);
+					       file, spawnattr->timeout);
 					//assert(ret != EXIT_SUCCESS); //Can't count on that.
 					if (ret == EXIT_SUCCESS) {
 						_Exit(EXIT_FAILURE);

@@ -112,18 +112,29 @@ struct ProcessList {
 
 typedef struct ProcessList ProcessList;
 
-struct child {
-	struct list entry;
-	const char *name;
-	int ret;
+struct spawnattr {
+	int nice;
+	char *workingDirectory;
 	char *user;
 	int timeout;
 };
 
+typedef struct spawnattr spawnattr_t;
+
+struct child {
+	struct list entry;
+	const char *name;
+	int ret;
+	spawnattr_t spawnattr;
+	bool legacy;
+};
+
 struct repair {
 	char *execStart;
-	long timeout;
+	char *workingDirectory;
 	char *user;
+	int nice;
+	long timeout;
 };
 
 typedef struct repair repair_t;

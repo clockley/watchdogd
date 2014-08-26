@@ -69,13 +69,13 @@ int RunAsUser(const char *restrict const user)
 
 	if (setgid(pwd.pw_gid) != 0) {
 		goto error;
-	}		
+	}
 
 	if (setuid(pwd.pw_uid) != 0) {
 		goto error;
 	}
 
-	if (setuid(0) == 0) {
+	if (setgid(0) == 0) {
 		goto error;
 	}
 

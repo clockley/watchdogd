@@ -150,18 +150,23 @@ int CreateLinkedListOfExes(const char *path, ProcessList * p)
 		}
 
 		if (IsRepairScriptConfig(ent->d_name) == 0) {
-			child->timeout = -1;
-			child->user = NULL;
+			child->legacy = true;
 		} else {
 			repair_t rs = {0};
 
 			if (LoadRepairScriptLink(&rs, child->name) == false) {
 				continue;
 			}
+
 			free((void*)child->name);
-			child->name    = RepairScriptGetExecStart(&rs);
-			child->timeout = RepairScriptGetTimeout(&rs);
-			child->user    = RepairScriptGetUser(&rs);
+
+			child->name = RepairScriptGetExecStart(&rs);
+			child->spawnattr.timeout = RepairScriptGetTimeout(&rs);
+			child->spawnattr.user = RepairScriptGetUser(&rs);
+			child->spawnattr.workingDirectory = RepairScriptGetWorkingDirectory(&rs);
+			child->spawnattr.nice = RepairScriptGetNice(&rs);
+			child->legacy = false;
+			
 		}
 
 		list_add(&child->entry, &p->children);
@@ -195,7 +200,8 @@ void FreeExeList(ProcessList * p)
 	list_for_each_entry(c, next, &p->children, entry, struct child *) {
 		list_del(&c->entry);
 		free((void *)c->name);
-		free((void*)c->user);
+		free((void*)c->spawnattr.user);
+		free((void*)c->spawnattr.workingDirectory);
 		free(c);
 	}
 }
@@ -209,32 +215,54 @@ int ExecuteRepairScripts(ProcessList * p, struct cfgoptions *s)
 	struct child *next = NULL;
 
 	list_for_each_entry(c, next, &p->children, entry, struct child *) {
-		int timeout = 0;
 
-		if (c->timeout < 0 || c->timeout > 499999) {
-			timeout = s->repairBinTimeout;
+		if (c->legacy == true) {
+			c->ret =
+			    Spawn(s->repairBinTimeout, s, c->name, c->name, "test",
+				  NULL);
+
+			if (c->ret == 0) {
+				continue;
+			}
+
+			char buf[8] = { 0 };
+			snprintf(buf, sizeof(buf), "%i", c->ret);
+
+			c->ret =
+			    Spawn(s->repairBinTimeout, s, c->name, c->name, "repair",
+				  buf, NULL);
+
+			if (c->ret != 0) {
+				c->ret = 0;	//reset to zero
+				return -1;	//exit
+			}
 		} else {
-			timeout = c->timeout;
-		}
+			int timeout = 0;
+			if (c->spawnattr.timeout < 0 || c->spawnattr.timeout > 499999) {
+				timeout = s->repairBinTimeout;
+			} else {
+				timeout = c->spawnattr.timeout;
+			}
 
-		c->ret =
-		    SpawnAsUser(timeout, s, c->user, c->name, c->name, "test",
-			  NULL);
+			c->ret =
+			    SpawnAttr(&c->spawnattr, s, c->name, c->name, "test",
+				  NULL);
 
-		if (c->ret == 0) {
-			continue;
-		}
+			if (c->ret == 0) {
+				continue;
+			}
 
-		char buf[8] = { 0 };
-		snprintf(buf, sizeof(buf), "%i", c->ret);
+			char buf[8] = { 0 };
+			snprintf(buf, sizeof(buf), "%i", c->ret);
 
-		c->ret =
-		    SpawnAsUser(timeout, s, c->user , c->name, c->name, "repair",
-			  buf, NULL);
+			c->ret =
+			    SpawnAttr(&c->spawnattr, s, c->name, c->name, "repair",
+				  buf, NULL);
 
-		if (c->ret != 0) {
-			c->ret = 0;	//reset to zero
-			return -1;	//exit
+			if (c->ret != 0) {
+				c->ret = 0;	//reset to zero
+				return -1;	//exit
+			}
 		}
 	}
 
