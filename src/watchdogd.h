@@ -14,6 +14,7 @@
 #include <oping.h>
 #include <limits.h>
 #include <pthread.h>
+#include <pwd.h>
 #include <sched.h>
 #include <signal.h>
 #include <stdarg.h>
@@ -115,7 +116,17 @@ struct child {
 	struct list entry;
 	const char *name;
 	int ret;
+	char *user;
+	int timeout;
 };
+
+struct repair {
+	char *execStart;
+	long timeout;
+	char *user;
+};
+
+typedef struct repair repair_t;
 
 struct watchdogDevice {
 	const char *path;

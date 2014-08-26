@@ -19,6 +19,7 @@
 #include <dirent.h>
 #include "testdir.h"
 #include "exe.h"
+#include "repair.h"
 
 //The dirent_buf_size function was written by Ben Hutchings and released under the following license.
 
@@ -122,14 +123,17 @@ int CreateLinkedListOfExes(const char *path, ProcessList * p)
 		if (fstatat(statfd, ent->d_name, &buffer, 0) < 0)
 			continue;
 
-		if (S_ISREG(buffer.st_mode) == 0)
-			continue;
+		if (IsRepairScriptConfig(ent->d_name) == 0) {
+			if (S_ISREG(buffer.st_mode) == 0) {
+				continue;
+			}
 
-		if (!(buffer.st_mode & S_IXUSR))
-			continue;
+			if (!(buffer.st_mode & S_IXUSR))
+				continue;
 
-		if (!(buffer.st_mode & S_IRUSR))
-			continue;
+			if (!(buffer.st_mode & S_IRUSR))
+				continue;
+		}
 
 		struct child *child = (struct child *)calloc(1, sizeof(*child));
 
@@ -137,12 +141,27 @@ int CreateLinkedListOfExes(const char *path, ProcessList * p)
 			goto error;
 		}
 
-		Wasprintf((char **)&child->name, "%s/%s", path, ent->d_name);
+		Wasprintf((char **)&child->name, "%s/%s", path, ent->d_name); //Will have to free this memeory to use v3 repair script config
 
 		if (child->name == NULL) {
 			assert(child != NULL);
 			free(child);
 			goto error;
+		}
+
+		if (IsRepairScriptConfig(ent->d_name) == 0) {
+			child->timeout = -1;
+			child->user = NULL;
+		} else {
+			repair_t rs = {0};
+
+			if (LoadRepairScriptLink(&rs, child->name) == false) {
+				continue;
+			}
+			free((void*)child->name);
+			child->name    = RepairScriptGetExecStart(&rs);
+			child->timeout = RepairScriptGetTimeout(&rs);
+			child->user    = RepairScriptGetUser(&rs);
 		}
 
 		list_add(&child->entry, &p->children);
@@ -176,6 +195,7 @@ void FreeExeList(ProcessList * p)
 	list_for_each_entry(c, next, &p->children, entry, struct child *) {
 		list_del(&c->entry);
 		free((void *)c->name);
+		free((void*)c->user);
 		free(c);
 	}
 }
@@ -189,18 +209,27 @@ int ExecuteRepairScripts(ProcessList * p, struct cfgoptions *s)
 	struct child *next = NULL;
 
 	list_for_each_entry(c, next, &p->children, entry, struct child *) {
+		int timeout = 0;
+
+		if (c->timeout < 0 || c->timeout > 499999) {
+			timeout = s->repairBinTimeout;
+		} else {
+			timeout = c->timeout;
+		}
+
 		c->ret =
-		    Spawn(s->repairBinTimeout, s, c->name, c->name, "test",
+		    SpawnAsUser(timeout, s, c->user, c->name, c->name, "test",
 			  NULL);
 
-		if (c->ret == 0)
+		if (c->ret == 0) {
 			continue;
+		}
 
 		char buf[8] = { 0 };
 		snprintf(buf, sizeof(buf), "%i", c->ret);
 
 		c->ret =
-		    Spawn(s->repairBinTimeout, s, c->name, c->name, "repair",
+		    SpawnAsUser(timeout, s, c->user , c->name, c->name, "repair",
 			  buf, NULL);
 
 		if (c->ret != 0) {

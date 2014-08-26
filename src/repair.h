@@ -13,11 +13,14 @@
  * implied. See the License for the specific language governing
  * permissions and limitations under the License. 
  */
-#ifndef EXE_H
-#define EXE_H
-int Spawn(int timeout, struct cfgoptions *const config, const char *file,
-	  const char *args, ...);
 
-int SpawnAsUser(int timeout, struct cfgoptions *const config, char *const user, const char *file,
-	  const char *args, ...);
+#include "watchdogd.h"
+#ifndef REPAIR_H
+#define REPAIR_H
+bool LoadRepairScriptLink(repair_t *obj, char * const filename);
+char * RepairScriptGetExecStart(repair_t *obj);
+char *RepairScriptGetUser(repair_t *obj);
+long RepairScriptGetTimeout(repair_t *obj);
+bool DestroyRepairScriptObj(repair_t *obj, int internalOnly);
+int IsRepairScriptConfig(const char *filename);
 #endif
