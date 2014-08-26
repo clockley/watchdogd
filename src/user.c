@@ -75,6 +75,10 @@ int RunAsUser(const char *restrict const user)
 		goto error;
 	}
 
+	if (setuid(0) == 0) {
+		goto error;
+	}
+
 	free(buf);
 	return 0;
  error:
