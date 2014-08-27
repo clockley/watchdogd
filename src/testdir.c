@@ -161,8 +161,16 @@ int CreateLinkedListOfExes(const char *path, ProcessList * p)
 			}
 
 			free((void*)child->name);
+			child->name = NULL;
 
 			child->name = RepairScriptGetExecStart(&rs);
+
+			if (child->name == NULL) {
+				fprintf(stderr, "Ignoring malformed repair file: %s\n", ent->d_name);
+				free(child);
+				continue;
+			}
+
 			child->spawnattr.timeout = RepairScriptGetTimeout(&rs);
 			child->spawnattr.user = RepairScriptGetUser(&rs);
 			child->spawnattr.workingDirectory = RepairScriptGetWorkingDirectory(&rs);
