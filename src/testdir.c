@@ -171,8 +171,6 @@ int CreateLinkedListOfExes(const char *path, ProcessList * p)
 				continue;
 			}
 
-			int fd = open(child->name, O_CLOEXEC|O_RDONLY);
-
 			if (fd < 0) {
 				fprintf(stderr, "unable to open file %s:\n", strerror(errno));
 				free((void*)child->name);
