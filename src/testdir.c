@@ -175,15 +175,15 @@ int CreateLinkedListOfExes(const char *path, ProcessList * p)
 
 			if (fd < 0) {
 				fprintf(stderr, "unable to open file %s:\n", strerror(errno));
-				free(child->name);
-				free(child);
+				free((void*)child->name);
+				free((void*)child);
 				continue;
 			}
 
 			if (IsExe(child->name, false) < 0) {
 				fprintf(stderr, "%s is not an executable\n", child->name);
-				free(child->name);
-				free(child);
+				free((void*)child->name);
+				free((void*)child);
 			}
 
 			child->spawnattr.timeout = RepairScriptGetTimeout(&rs);
