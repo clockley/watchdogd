@@ -171,6 +171,21 @@ int CreateLinkedListOfExes(const char *path, ProcessList * p)
 				continue;
 			}
 
+			int fd = open(child->name, O_CLOEXEC|O_RDONLY);
+
+			if (fd < 0) {
+				fprintf(stderr, "unable to open file %s:\n", strerror(errno));
+				free(child->name);
+				free(child);
+				continue;
+			}
+
+			if (IsExe(child->name, false) < 0) {
+				fprintf(stderr, "%s is not an executable\n", child->name);
+				free(child->name);
+				free(child);
+			}
+
 			child->spawnattr.timeout = RepairScriptGetTimeout(&rs);
 			child->spawnattr.user = RepairScriptGetUser(&rs);
 			child->spawnattr.workingDirectory = RepairScriptGetWorkingDirectory(&rs);
