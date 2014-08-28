@@ -133,6 +133,10 @@ int CreateLinkedListOfExes(const char *path, ProcessList * p)
 
 			if (!(buffer.st_mode & S_IRUSR))
 				continue;
+		} else {
+			if (S_ISREG(buffer.st_mode) == 0) {
+				continue;
+			}
 		}
 
 		struct child *child = (struct child *)calloc(1, sizeof(*child));
