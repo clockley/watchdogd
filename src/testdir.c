@@ -234,37 +234,23 @@ void FreeExeList(ProcessList * p)
 	}
 }
 
-int ExecuteRepairScripts(ProcessList * p, struct cfgoptions *s)
+struct threadStruct {
+	ProcessList * p;
+	struct cfgoptions *s;
+	int ret;
+};
+
+static void * _ExecuteRepairScripts(void *arg)
 {
-	assert(s != NULL);
-	assert(p != NULL);
+	struct threadStruct* thread = arg;
+	ProcessList *p = thread->p;
+	struct cfgoptions *s = thread->s;
 
 	struct child *c = NULL;
 	struct child *next = NULL;
 
 	list_for_each_entry(c, next, &p->children, entry, struct child *) {
-
-		if (c->legacy == true) {
-			c->ret =
-			    Spawn(s->repairBinTimeout, s, c->name, c->name, "test",
-				  NULL);
-
-			if (c->ret == 0) {
-				continue;
-			}
-
-			char buf[8] = { 0 };
-			snprintf(buf, sizeof(buf), "%i", c->ret);
-
-			c->ret =
-			    Spawn(s->repairBinTimeout, s, c->name, c->name, "repair",
-				  buf, NULL);
-
-			if (c->ret != 0) {
-				c->ret = 0;	//reset to zero
-				return -1;	//exit
-			}
-		} else {
+		if (c->legacy == false) {
 			int timeout = 0;
 			if (c->spawnattr.timeout < 0 || c->spawnattr.timeout > 499999) {
 				timeout = s->repairBinTimeout;
@@ -289,10 +275,78 @@ int ExecuteRepairScripts(ProcessList * p, struct cfgoptions *s)
 
 			if (c->ret != 0) {
 				c->ret = 0;	//reset to zero
-				return -1;	//exit
+				thread->ret = -1;
 			}
 		}
 	}
 
-	return 0;
+	thread->ret = 0;
+	return NULL;
+}
+
+static void * _ExecuteRepairScriptsLegacy(void *arg)
+{
+	struct threadStruct* thread = arg;
+	ProcessList *p = thread->p;
+	struct cfgoptions *s = thread->s;
+
+	struct child *c = NULL;
+	struct child *next = NULL;
+
+	list_for_each_entry(c, next, &p->children, entry, struct child *) {
+		if (c->legacy == true) {
+			c->ret =
+			    Spawn(s->repairBinTimeout, s, c->name, c->name, "test",
+				  NULL);
+
+			if (c->ret == 0) {
+				continue;
+			}
+
+			char buf[8] = { 0 };
+			snprintf(buf, sizeof(buf), "%i", c->ret);
+
+			c->ret =
+			    Spawn(s->repairBinTimeout, s, c->name, c->name, "repair",
+				  buf, NULL);
+
+			if (c->ret != 0) {
+				c->ret = 0;	//reset to zero
+				thread->ret = -1;	//exit
+			}
+		}
+	}
+
+	thread->ret = 0;
+	return NULL;
+}
+
+int ExecuteRepairScripts(ProcessList * p, struct cfgoptions *s)
+{
+	assert(s != NULL);
+	assert(p != NULL);
+
+	pthread_t legacy;
+	pthread_t newt;
+	struct threadStruct legacyThread = { .s = s, .p = p,  .ret = 0 };
+	struct threadStruct newThread = { .s = s, .p = p,  .ret = 0 };
+
+	if (CreateThread(_ExecuteRepairScriptsLegacy, &legacy, &legacyThread, true) < 0) {
+		Logmsg(LOG_ERR, "Unable to create thread");
+		return -1;
+	}
+
+	if (CreateThread(_ExecuteRepairScripts, &newt, &newThread, true) < 0) {
+		Logmsg(LOG_ERR, "Unable to create thread");
+		return -1;
+	}
+
+	pthread_join(legacy, NULL);
+	pthread_join(newt, NULL);
+
+	if (legacyThread.ret == 0 && newThread.ret == 0) {
+		return 0;
+	}
+
+	return -1;
 }
