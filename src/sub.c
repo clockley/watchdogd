@@ -260,54 +260,6 @@ int IsExe(const char *pathname, bool returnfildes)
 	return 0;
 }
 
-int CreateThread(void *(*startFunction) (void *), pthread_t *const thread, void *const arg, bool smallstack)
-{
-	pthread_attr_t attr;
-
-	if (arg == NULL)
-		return -1;
-
-	if (*startFunction == NULL)
-		return -1;
-
-	if (pthread_attr_init(&attr) != 0) {
-		return -1;
-	}
-
-	if (smallstack == true) {
-		size_t stackSize = 0;
-		if (pthread_attr_getstacksize(&attr, &stackSize) == 0) {
-			const size_t targetStackSize = 1048576;
-			if ((targetStackSize >= PTHREAD_STACK_MIN)
-			    && (stackSize > targetStackSize)) {
-				if (pthread_attr_setstacksize(&attr, 1048576) != 0) {
-					Logmsg(LOG_CRIT,
-					       "pthread_attr_setstacksize: %s\n",
-					       strerror(errno));
-				}
-			}
-		} else {
-			Logmsg(LOG_CRIT, "pthread_attr_getstacksize: %s\n",
-			       strerror(errno));
-		}
-	}
-
-	pthread_attr_setguardsize(&attr, 0);
-
-	errno = 0;
-
-	if (pthread_create(thread, &attr, startFunction, arg) != 0) {
-		Logmsg(LOG_CRIT, "watchdogd: pthread_create failed: %s\n",
-		       strerror(errno));
-		pthread_attr_destroy(&attr);
-		return -1;
-	}
-
-	pthread_attr_destroy(&attr);
-
-	return 0;
-}
-
 int CreateDetachedThread(void *(*startFunction) (void *), void *const arg)
 {
 	pthread_t thread;
