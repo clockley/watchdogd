@@ -114,6 +114,7 @@ typedef struct ProcessList ProcessList;
 struct spawnattr {
 	int nice;
 	char *workingDirectory;
+	const char *logDirectory;
 	char *user;
 	int timeout;
 };

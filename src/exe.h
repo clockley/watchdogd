@@ -17,7 +17,5 @@
 #define EXE_H
 int Spawn(int timeout, struct cfgoptions *const config, const char *file,
 	  const char *args, ...);
-
-int SpawnAttr(spawnattr_t *, struct cfgoptions *const config, const char *file,
-	  const char *args, ...);
+int SpawnAttr(spawnattr_t *spawnattr, const char *file, const char *args, ...);
 #endif

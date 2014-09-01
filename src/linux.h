@@ -19,6 +19,7 @@
 #include <stdbool.h>
 #include <libmount.h>
 #include <sys/ioctl.h>
+#include <sys/prctl.h>
 #include <linux/watchdog.h>
 #include <sys/reboot.h>
 #include <linux/reboot.h>
@@ -28,7 +29,6 @@
 #include <sys/types.h>
 #include <ifaddrs.h>
 #include <linux/if.h>
-#include <sys/ioctl.h>
 #include "errorlist.h"
 
 #ifdef HAVE_SD_NOTIFY
@@ -52,4 +52,5 @@ bool DontKillProcess(pid_t);
 bool PlatformInit(void);
 int GetConsoleColumns(void);
 int SystemdWatchdogEnabled(const int, long long int *const);
+bool OnParentDeathSend(int);
 #endif

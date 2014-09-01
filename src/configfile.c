@@ -236,11 +236,6 @@ int ReadConfigurationFile(struct cfgoptions *const cfg)
 		cfg->randomSeedPath = GetDefaultRandomSeedPathName();
 	}
 
-	if (CreateLinkedListOfExes(cfg->testexepath, &processes) < 0) {
-		fprintf(stderr, "watchdogd: CreateLinkedListOfExes failed\n");
-		return -1;
-	}
-
 	if (config_lookup_string(&cfg->cfg, "watchdog-device", &cfg->devicepath)
 	    == CONFIG_FALSE) {
 		cfg->devicepath = "/dev/watchdog";
@@ -280,6 +275,11 @@ int ReadConfigurationFile(struct cfgoptions *const cfg)
 
 	if (MakeLogDir(cfg) < 0)
 		return -1;
+
+	if (CreateLinkedListOfExes(cfg->testexepath, &processes, cfg) < 0) {
+		fprintf(stderr, "watchdogd: CreateLinkedListOfExes failed\n");
+		return -1;
+	}
 
 	if (config_lookup_bool(&cfg->cfg, "daemonize", &tmp) == CONFIG_TRUE) {
 		if (!tmp) {

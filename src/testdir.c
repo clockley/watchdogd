@@ -67,7 +67,7 @@ size_t DirentBufSize(DIR * dirp)
 		? name_end : sizeof(struct dirent));
 }
 
-int CreateLinkedListOfExes(const char *path, ProcessList * p)
+int CreateLinkedListOfExes(const char *path, ProcessList * p, struct cfgoptions *const config)
 {
 	assert(p != NULL);
 	assert(path != NULL);
@@ -193,6 +193,7 @@ int CreateLinkedListOfExes(const char *path, ProcessList * p)
 			child->spawnattr.user = RepairScriptGetUser(&rs);
 			child->spawnattr.workingDirectory = RepairScriptGetWorkingDirectory(&rs);
 			child->spawnattr.nice = RepairScriptGetNice(&rs);
+			child->spawnattr.logDirectory = config->logdir;
 			child->legacy = false;
 			
 		}
@@ -273,7 +274,7 @@ int ExecuteRepairScripts(ProcessList * p, struct cfgoptions *s)
 			}
 
 			c->ret =
-			    SpawnAttr(&c->spawnattr, s, c->name, c->name, "test",
+			    SpawnAttr(&c->spawnattr, c->name, c->name, "test",
 				  NULL);
 
 			if (c->ret == 0) {
@@ -284,7 +285,7 @@ int ExecuteRepairScripts(ProcessList * p, struct cfgoptions *s)
 			snprintf(buf, sizeof(buf), "%i", c->ret);
 
 			c->ret =
-			    SpawnAttr(&c->spawnattr, s, c->name, c->name, "repair",
+			    SpawnAttr(&c->spawnattr, c->name, c->name, "repair",
 				  buf, NULL);
 
 			if (c->ret != 0) {

@@ -55,10 +55,12 @@ int Spawn(int timeout, struct cfgoptions *const config, const char *file,
 #if defined(NSIG)
 			ResetSignalHandlers(NSIG);
 #endif
+			OnParentDeathSend(SIGKILL);
 
 			pid_t worker = fork();
 
 			if (worker == 0) {
+				OnParentDeathSend(SIGKILL);
 				struct sched_param param;
 				param.sched_priority = 0;
 
@@ -208,12 +210,8 @@ int Spawn(int timeout, struct cfgoptions *const config, const char *file,
 	}
 }
 
-int SpawnAttr(spawnattr_t *spawnattr, struct cfgoptions *const config, const char *file,
-	  const char *args, ...)
+int SpawnAttr(spawnattr_t *spawnattr, const char *file, const char *args, ...)
 {
-
-	assert(spawnattr != NULL);
-
 	int status = 0;
 
 	if (file == NULL) {
@@ -235,9 +233,12 @@ int SpawnAttr(spawnattr_t *spawnattr, struct cfgoptions *const config, const cha
 			ResetSignalHandlers(NSIG);
 #endif
 
+			OnParentDeathSend(SIGKILL);
+
 			pid_t worker = fork();
 
 			if (worker == 0) {
+				OnParentDeathSend(SIGKILL);
 				struct sched_param param;
 				param.sched_priority = 0;
 
@@ -248,13 +249,13 @@ int SpawnAttr(spawnattr_t *spawnattr, struct cfgoptions *const config, const cha
 					Logmsg(LOG_ERR, "nice failed: %s", strerror(errno));
 				}
 
-				int dfd = open(config->logdir,
+				int dfd = open(spawnattr->logDirectory,
 					       O_DIRECTORY | O_RDONLY);
 
 				if (dfd < 0) {
 					Logmsg(LOG_CRIT,
 					       "open failed: %s: %s",
-					       config->logdir, strerror(errno));
+					       spawnattr->logDirectory, strerror(errno));
 					return -1;
 				}
 
