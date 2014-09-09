@@ -36,9 +36,64 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "watchdogd.h"
 #include "sub.h"
 
+#define KNRM  "\x1B[0m"
+#define KRED  "\x1B[31m"
+#define KGRN  "\x1B[32m"
+#define KYEL  "\x1B[33m"
+#define KBLU  "\x1B[34m"
+#define KMAG  "\x1B[35m"
+#define KCYN  "\x1B[36m"
+#define KWHT  "\x1B[37m"
+
+
 static sig_atomic_t logTarget = INVALID_LOG_TARGET;
 static FILE* logFile = NULL;
 static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+
+static void SetTextColor(int priority)
+{
+	if (logTarget != STANDARD_ERROR) {
+		return;
+	}
+
+	if (isatty(fileno(stderr)) == 0) {
+		return;
+	}
+	switch (priority) {
+	case LOG_EMERG:
+		fprintf(stderr, "%s", KRED);
+		break;
+	case LOG_ALERT:
+		fprintf(stderr, "%s", KRED);
+		break;
+	case LOG_CRIT:
+		fprintf(stderr, "%s", KRED);
+		break;
+	case LOG_ERR:
+		fprintf(stderr, "%s", KRED);
+		break;
+	case LOG_WARNING:
+		fprintf(stderr, "%s", KMAG);
+		break;
+	case LOG_NOTICE:
+		;
+		break;
+	case LOG_INFO:
+		;
+		break;
+	case LOG_DEBUG:
+		;
+		break;
+	default:
+		assert(false);
+	}
+	
+}
+
+void ResetTestColor()
+{
+	fprintf(stderr, "%s", "\x1B[0m");
+}
 
 static void CloseOldTarget(sig_atomic_t oldTarget)
 {
@@ -177,7 +232,9 @@ void Logmsg(int priority, const char *const fmt, ...)
 		assert(buf[sizeof(buf) - 1] == '\0');
 
 		if (logTarget == STANDARD_ERROR) {
+			SetTextColor(priority);
 			fprintf(stderr, "%s\n", buf);
+			ResetTestColor();
 		} else {
 			if (logFile != NULL) {
 				fprintf(logFile, "%s\n", buf);
