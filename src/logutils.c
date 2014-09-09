@@ -59,6 +59,9 @@ static void SetTextColor(int priority)
 	if (isatty(fileno(stderr)) == 0) {
 		return;
 	}
+
+	ResetTextColor();
+
 	switch (priority) {
 	case LOG_EMERG:
 		fprintf(stderr, "%s", KRED);
@@ -90,7 +93,7 @@ static void SetTextColor(int priority)
 	
 }
 
-void ResetTestColor()
+void ResetTextColor(void)
 {
 	fprintf(stderr, "%s", "\x1B[0m");
 }
@@ -234,7 +237,7 @@ void Logmsg(int priority, const char *const fmt, ...)
 		if (logTarget == STANDARD_ERROR) {
 			SetTextColor(priority);
 			fprintf(stderr, "%s\n", buf);
-			ResetTestColor();
+			ResetTextColor();
 		} else {
 			if (logFile != NULL) {
 				fprintf(logFile, "%s\n", buf);
