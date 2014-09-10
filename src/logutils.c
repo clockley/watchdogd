@@ -50,6 +50,12 @@ static sig_atomic_t logTarget = INVALID_LOG_TARGET;
 static FILE* logFile = NULL;
 static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
+static void ResetTextColor(void)
+{
+	fprintf(stderr, "%s", "\x1B[0m");
+}
+
+
 static void SetTextColor(int priority)
 {
 	if (logTarget != STANDARD_ERROR) {
@@ -91,11 +97,6 @@ static void SetTextColor(int priority)
 		assert(false);
 	}
 	
-}
-
-void ResetTextColor(void)
-{
-	fprintf(stderr, "%s", "\x1B[0m");
 }
 
 static void CloseOldTarget(sig_atomic_t oldTarget)
