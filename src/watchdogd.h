@@ -113,11 +113,14 @@ struct ProcessList {
 typedef struct ProcessList ProcessList;
 
 struct spawnattr {
-	int nice;
 	char *workingDirectory;
+	const char *repairFilePathname;
+	char *execStart;
 	const char *logDirectory;
 	char *user;
+	char *umask;
 	int timeout;
+	int nice;
 	bool noNewPrivileges;
 };
 
@@ -129,15 +132,6 @@ struct child {
 	int ret;
 	spawnattr_t spawnattr;
 	bool legacy;
-};
-
-struct repair {
-	char *execStart;
-	char *workingDirectory;
-	char *user;
-	int nice;
-	long timeout;
-	bool noNewPrivileges;
 };
 
 typedef struct repair repair_t;

@@ -17,12 +17,6 @@
 #include "watchdogd.h"
 #ifndef REPAIR_H
 #define REPAIR_H
-bool LoadRepairScriptLink(repair_t *obj, char * const filename);
-char *RepairScriptGetExecStart(repair_t *obj);
-char *RepairScriptGetUser(repair_t *obj);
-long RepairScriptGetTimeout(repair_t *obj);
-char *RepairScriptGetWorkingDirectory(repair_t *obj);
-int RepairScriptGetNice(repair_t *obj);
-int IsRepairScriptConfig(const char *filename);
-bool NoNewPrivileges(repair_t *obj);
+bool LoadRepairScriptLink(spawnattr_t *, char * const);
+int IsRepairScriptConfig(const char *);
 #endif

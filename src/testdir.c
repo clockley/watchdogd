@@ -156,18 +156,18 @@ int CreateLinkedListOfExes(const char *path, ProcessList * p, struct cfgoptions 
 		if (IsRepairScriptConfig(ent->d_name) == 0) {
 			child->legacy = true;
 		} else {
-			repair_t rs = {0};
-
-			if (LoadRepairScriptLink(&rs, (char*)child->name) == false) {
+			if (LoadRepairScriptLink(&child->spawnattr, (char*)child->name) == false) {
 				free((void*)child->name);
 				free(child);
 				continue;
 			}
 
+			child->spawnattr.repairFilePathname = strdup(child->name);
 			free((void*)child->name);
 			child->name = NULL;
 
-			child->name = RepairScriptGetExecStart(&rs);
+			child->name = child->spawnattr.execStart;
+			child->spawnattr.logDirectory = config->logdir;
 
 			if (child->name == NULL) {
 				fprintf(stderr, "Ignoring malformed repair file: %s\n", ent->d_name);
@@ -189,14 +189,7 @@ int CreateLinkedListOfExes(const char *path, ProcessList * p, struct cfgoptions 
 				continue;
 			}
 
-			child->spawnattr.timeout = RepairScriptGetTimeout(&rs);
-			child->spawnattr.user = RepairScriptGetUser(&rs);
-			child->spawnattr.workingDirectory = RepairScriptGetWorkingDirectory(&rs);
-			child->spawnattr.nice = RepairScriptGetNice(&rs);
-			child->spawnattr.logDirectory = config->logdir;
-			child->spawnattr.noNewPrivileges = NoNewPrivileges(&rs);
 			child->legacy = false;
-			
 		}
 
 		list_add(&child->entry, &p->children);
@@ -232,6 +225,7 @@ void FreeExeList(ProcessList * p)
 		free((void *)c->name);
 		free((void*)c->spawnattr.user);
 		free((void*)c->spawnattr.workingDirectory);
+		free((void*)c->spawnattr.repairFilePathname);
 		free(c);
 	}
 }

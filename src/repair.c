@@ -16,7 +16,7 @@
 #include "sub.h"
 #include "repair.h"
 
-static bool ParseConfigfile(char *name, char *value, repair_t * obj)
+static bool ParseConfigfile(char *name, char *value, spawnattr_t * obj)
 {
 	if (strcmp(name, "ExecStart") == 0) {
 		obj->execStart = strdup(value);
@@ -38,6 +38,14 @@ static bool ParseConfigfile(char *name, char *value, repair_t * obj)
 
 	if (strcmp(name, "WorkingDirectory") == 0) {
 		obj->workingDirectory = strdup(value);
+	}
+
+	if (strcmp(name, "Umask") == 0) {
+		obj->umask = strdup(value);
+		if (obj->umask == NULL) {
+			fprintf(stderr, "watchdogd: out of memory: %s", strerror(errno));
+			return false;
+		}
 	}
 
 	if (strcmp(name, "NoNewPrivileges") == 0) {
@@ -126,7 +134,7 @@ int IsRepairScriptConfig(const char *filename)
 	return 0;
 }
 
-bool LoadRepairScriptLink(repair_t * obj, char *const filename)
+bool LoadRepairScriptLink(spawnattr_t * obj, char *const filename)
 {
 	if (IsRepairScriptConfig(filename) == 0) {
 		return false;
@@ -138,7 +146,7 @@ bool LoadRepairScriptLink(repair_t * obj, char *const filename)
 		return false;
 	}
 
-	memset(obj, 0, sizeof(repair_t));
+	memset(obj, 0, sizeof(spawnattr_t));
 	char *buf = NULL;
 	size_t len = 0;
 	while (getline(&buf, &len, fp) != -1) {
@@ -156,34 +164,4 @@ bool LoadRepairScriptLink(repair_t * obj, char *const filename)
 	fclose(fp);
 
 	return true;
-}
-
-char *RepairScriptGetExecStart(repair_t * obj)
-{
-	return obj->execStart;
-}
-
-char *RepairScriptGetUser(repair_t * obj)
-{
-	return obj->user;
-}
-
-long RepairScriptGetTimeout(repair_t * obj)
-{
-	return obj->timeout;
-}
-
-int RepairScriptGetNice(repair_t * obj)
-{
-	return obj->nice;
-}
-
-char *RepairScriptGetWorkingDirectory(repair_t * obj)
-{
-	return obj->workingDirectory;
-}
-
-bool NoNewPrivileges(repair_t * obj)
-{
-	return obj->noNewPrivileges;
 }

@@ -312,6 +312,18 @@ int SpawnAttr(spawnattr_t *spawnattr, const char *file, const char *args, ...)
 
 				}
 
+				if (spawnattr->umask != NULL) {
+					long long ret = strtoll(spawnattr->umask, (char **)NULL, 10);
+
+					if (ret < 0) {
+						Logmsg(LOG_ERR, "error parsing configfile option \"Umask\": %s", strerror(errno));
+					}
+
+					mode_t mode = (mode_t)ret;
+
+					umask(mode);
+				}
+
 				if (dup2(fd, STDOUT_FILENO) < 0) {
 					Logmsg(LOG_CRIT,
 					       "dup2 failed: STDOUT_FILENO: %s",
