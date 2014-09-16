@@ -158,7 +158,7 @@ int CreateLinkedListOfExes(const char *path, ProcessList * p, struct cfgoptions 
 		} else {
 			repair_t rs = {0};
 
-			if (LoadRepairScriptLink(&rs, child->name) == false) {
+			if (LoadRepairScriptLink(&rs, (char*)child->name) == false) {
 				free((void*)child->name);
 				free(child);
 				continue;
