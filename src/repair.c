@@ -16,7 +16,7 @@
 #include "sub.h"
 #include "repair.h"
 
-static bool ParseConfigfile(char *name, char *value, repair_t *obj)
+static bool ParseConfigfile(char *name, char *value, repair_t * obj)
 {
 	if (strcmp(name, "ExecStart") == 0) {
 		obj->execStart = strdup(value);
@@ -50,18 +50,19 @@ static bool ParseConfigfile(char *name, char *value, repair_t *obj)
 		char *tmp = strdup(value);
 
 		if (tmp == NULL) {
-			fprintf(stderr, "watchdogd: out of memory: %s", strerror(errno));
+			fprintf(stderr, "watchdogd: out of memory: %s",
+				strerror(errno));
 			return false;
 		}
 
-		for (int i = strlen(tmp); i >= 0 ; i -= 1) {
+		for (int i = strlen(tmp); i >= 0; i -= 1) {
 			tmp[i] = tolower(tmp[i]);
 		}
 
 		if (ret > 0) {
-			obj->noNewPrivileges= true;
+			obj->noNewPrivileges = true;
 		} else if (strcmp(tmp, "true")) {
-			obj->noNewPrivileges= true;
+			obj->noNewPrivileges = true;
 		} else if (strcmp(tmp, "yes")) {
 			obj->noNewPrivileges = true;
 		} else {
@@ -93,7 +94,7 @@ static void StripNewline(char *str)
 	strtok(str, "\n");
 }
 
-static bool Validate(char * name, char *value)
+static bool Validate(char *name, char *value)
 {
 	if (name == NULL) {
 		return false;
@@ -106,7 +107,8 @@ static bool Validate(char * name, char *value)
 	StripNewline(name);
 	StripNewline(value);
 
-	if (strcmp(name, "\n") == 0 || strcmp(value, "\n") == 0 || strcmp(value, "\0") == 0) {
+	if (strcmp(name, "\n") == 0 || strcmp(value, "\n") == 0
+	    || strcmp(value, "\0") == 0) {
 		return false;
 	}
 
@@ -124,7 +126,7 @@ int IsRepairScriptConfig(const char *filename)
 	return 0;
 }
 
-bool LoadRepairScriptLink(repair_t *obj, char * const filename)
+bool LoadRepairScriptLink(repair_t * obj, char *const filename)
 {
 	if (IsRepairScriptConfig(filename) == 0) {
 		return false;
@@ -156,32 +158,32 @@ bool LoadRepairScriptLink(repair_t *obj, char * const filename)
 	return true;
 }
 
-char *RepairScriptGetExecStart(repair_t *obj)
+char *RepairScriptGetExecStart(repair_t * obj)
 {
 	return obj->execStart;
 }
 
-char *RepairScriptGetUser(repair_t *obj)
+char *RepairScriptGetUser(repair_t * obj)
 {
 	return obj->user;
 }
 
-long RepairScriptGetTimeout(repair_t *obj)
+long RepairScriptGetTimeout(repair_t * obj)
 {
 	return obj->timeout;
 }
 
-int RepairScriptGetNice(repair_t *obj)
+int RepairScriptGetNice(repair_t * obj)
 {
 	return obj->nice;
 }
 
-char * RepairScriptGetWorkingDirectory(repair_t *obj)
+char *RepairScriptGetWorkingDirectory(repair_t * obj)
 {
 	return obj->workingDirectory;
 }
 
-bool NoNewPrivileges(repair_t *obj)
+bool NoNewPrivileges(repair_t * obj)
 {
 	return obj->noNewPrivileges;
 }
