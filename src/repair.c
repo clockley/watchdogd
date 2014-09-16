@@ -58,7 +58,7 @@ static bool ParseConfigfile(char *name, char *value, repair_t *obj)
 			tmp[i] = tolower(tmp[i]);
 		}
 
-		if (ret < 0) {
+		if (ret > 0) {
 			obj->noNewPrivileges= true;
 		} else if (strcmp(tmp, "true")) {
 			obj->noNewPrivileges= true;
