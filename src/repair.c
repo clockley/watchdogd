@@ -40,6 +40,32 @@ static bool ParseConfigfile(char *name, char *value, repair_t *obj)
 		obj->workingDirectory = strdup(value);
 	}
 
+	if (strcmp(name, "NoNewPrivileges") == 0) {
+		int ret = (int)strtol(value, (char **)NULL, 10);
+
+		if (ret == 0 && errno == EINVAL) {
+			obj->noNewPrivileges = false;
+		}
+
+		char *tmp = strdup(value);
+
+		for (int i = strlen(tmp); i >= 0 ; i -= 1) {
+			tmp[i] = tolower(tmp[i]);
+		}
+
+		if (ret < 0) {
+			obj->noNewPrivileges= true;
+		} else if (strcmp(tmp, "true")) {
+			obj->noNewPrivileges= true;
+		} else if (strcmp(tmp, "yes")) {
+			obj->noNewPrivileges = true;
+		} else {
+			obj->noNewPrivileges = false;
+		}
+
+		free(tmp);
+	}
+
 	if (strcmp(name, "Nice") == 0) {
 		int ret = (int)strtol(value, (char **)NULL, 10);
 
@@ -148,4 +174,9 @@ int RepairScriptGetNice(repair_t *obj)
 char * RepairScriptGetWorkingDirectory(repair_t *obj)
 {
 	return obj->workingDirectory;
+}
+
+bool NoNewPrivileges(repair_t *obj)
+{
+	return obj->noNewPrivileges;
 }

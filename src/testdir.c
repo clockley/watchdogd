@@ -194,6 +194,7 @@ int CreateLinkedListOfExes(const char *path, ProcessList * p, struct cfgoptions 
 			child->spawnattr.workingDirectory = RepairScriptGetWorkingDirectory(&rs);
 			child->spawnattr.nice = RepairScriptGetNice(&rs);
 			child->spawnattr.logDirectory = config->logdir;
+			child->spawnattr.noNewPrivileges = NoNewPrivileges(&rs);
 			child->legacy = false;
 			
 		}

@@ -53,4 +53,5 @@ bool PlatformInit(void);
 int GetConsoleColumns(void);
 int SystemdWatchdogEnabled(const int, long long int *const);
 bool OnParentDeathSend(int);
+int NoNewProvileges(void);
 #endif

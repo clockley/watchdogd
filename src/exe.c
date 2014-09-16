@@ -300,6 +300,18 @@ int SpawnAttr(spawnattr_t *spawnattr, const char *file, const char *args, ...)
 					}
 				}
 
+				if (spawnattr->noNewPrivileges == true) {
+					int ret = NoNewProvileges();
+					if (ret != 0) {
+						if (ret < 0) {
+							Logmsg(LOG_CRIT, "NoNewPrivileges %s", strerror(-ret));
+						} else {
+							Logmsg(LOG_CRIT, "unable to set no new privleges bit");
+						}
+					}
+
+				}
+
 				if (dup2(fd, STDOUT_FILENO) < 0) {
 					Logmsg(LOG_CRIT,
 					       "dup2 failed: STDOUT_FILENO: %s",

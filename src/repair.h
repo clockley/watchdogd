@@ -24,4 +24,5 @@ long RepairScriptGetTimeout(repair_t *obj);
 char *RepairScriptGetWorkingDirectory(repair_t *obj);
 int RepairScriptGetNice(repair_t *obj);
 int IsRepairScriptConfig(const char *filename);
+bool NoNewPrivileges(repair_t *obj);
 #endif

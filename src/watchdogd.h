@@ -7,6 +7,7 @@
 
 #include <assert.h>
 #include <config.h>
+#include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <inttypes.h>
@@ -117,6 +118,7 @@ struct spawnattr {
 	const char *logDirectory;
 	char *user;
 	int timeout;
+	bool noNewPrivileges;
 };
 
 typedef struct spawnattr spawnattr_t;
@@ -135,6 +137,7 @@ struct repair {
 	char *user;
 	int nice;
 	long timeout;
+	bool noNewPrivileges;
 };
 
 typedef struct repair repair_t;

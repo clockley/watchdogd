@@ -735,4 +735,17 @@ bool OnParentDeathSend(int sig)
 
 	return true;
 }
+
+int NoNewProvileges(void)
+{
+	if (prctl(PR_SET_NO_NEW_PRIVS, 0, 0, 0, 0) < 0) {
+		if (errno != 0) {
+			return -errno;
+		} else {
+			return 1;
+		}
+	}
+
+	return 0;
+}
 #endif
