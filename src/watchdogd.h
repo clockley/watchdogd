@@ -129,12 +129,10 @@ typedef struct spawnattr spawnattr_t;
 struct child {
 	struct list entry;
 	const char *name;
-	int ret;
 	spawnattr_t spawnattr;
+	int ret;
 	bool legacy;
 };
-
-typedef struct repair repair_t;
 
 struct watchdogDevice {
 	const char *path;
