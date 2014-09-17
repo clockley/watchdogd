@@ -223,9 +223,15 @@ void FreeExeList(ProcessList * p)
 	list_for_each_entry(c, next, &p->children, entry, struct child *) {
 		list_del(&c->entry);
 		free((void *)c->name);
-		free((void*)c->spawnattr.user);
-		free((void*)c->spawnattr.workingDirectory);
-		free((void*)c->spawnattr.repairFilePathname);
+		if (c->legacy == false) {
+			free((void*)c->spawnattr.user);
+			free((void*)c->spawnattr.workingDirectory);
+			free((void*)c->spawnattr.repairFilePathname);
+			free((void*)c->spawnattr.workingDirectory);
+			free((void*)c->spawnattr.umask);
+			free((void*)c->spawnattr.execStart);
+			free((void*)c->spawnattr.noNewPrivileges);
+		}
 		free(c);
 	}
 }
