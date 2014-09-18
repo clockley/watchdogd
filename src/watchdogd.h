@@ -126,13 +126,15 @@ struct spawnattr {
 
 typedef struct spawnattr spawnattr_t;
 
-struct repaircmd {
+struct repaircmd_t {
 	struct list entry;
 	const char *name;
 	spawnattr_t spawnattr;
 	int ret;
 	bool legacy;
 };
+
+typedef struct repaircmd_t repaircmd_t;
 
 struct watchdogDevice {
 	const char *path;
