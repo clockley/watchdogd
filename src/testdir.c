@@ -79,7 +79,7 @@ int CreateLinkedListOfExes(const char *path, ProcessList * p, struct cfgoptions 
 	size_t size = 0;
 	int fd = 0;
 
-	list_init(&p->children);
+	list_init(&p->head);
 
 	fd = open(path, O_DIRECTORY | O_RDONLY);
 
@@ -139,7 +139,7 @@ int CreateLinkedListOfExes(const char *path, ProcessList * p, struct cfgoptions 
 			}
 		}
 
-		struct child *child = (struct child *)calloc(1, sizeof(*child));
+		struct repaircmd *child = (struct repaircmd *)calloc(1, sizeof(*child));
 
 		if (child == NULL) {
 			goto error;
@@ -192,7 +192,7 @@ int CreateLinkedListOfExes(const char *path, ProcessList * p, struct cfgoptions 
 			child->legacy = false;
 		}
 
-		list_add(&child->entry, &p->children);
+		list_add(&child->entry, &p->head);
 	}
 
 	assert(fd != -1);
@@ -217,10 +217,10 @@ void FreeExeList(ProcessList * p)
 {
 	assert(p != NULL);
 
-	struct child *c = NULL;
-	struct child *next = NULL;
+	struct repaircmd *c = NULL;
+	struct repaircmd *next = NULL;
 
-	list_for_each_entry(c, next, &p->children, entry, struct child *) {
+	list_for_each_entry(c, next, &p->head, entry, struct repaircmd *) {
 		list_del(&c->entry);
 		free((void *)c->name);
 		if (c->legacy == false) {
@@ -241,10 +241,10 @@ int ExecuteRepairScripts(ProcessList * p, struct cfgoptions *s)
 	assert(s != NULL);
 	assert(p != NULL);
 
-	struct child *c = NULL;
-	struct child *next = NULL;
+	struct repaircmd *c = NULL;
+	struct repaircmd *next = NULL;
 
-	list_for_each_entry(c, next, &p->children, entry, struct child *) {
+	list_for_each_entry(c, next, &p->head, entry, struct repaircmd *) {
 
 		if (c->legacy == true) {
 			c->ret =

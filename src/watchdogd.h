@@ -107,7 +107,7 @@ struct cfgoptions {
 };
 
 struct ProcessList {
-	struct list children;
+	struct list head;
 };
 
 typedef struct ProcessList ProcessList;
@@ -126,7 +126,7 @@ struct spawnattr {
 
 typedef struct spawnattr spawnattr_t;
 
-struct child {
+struct repaircmd {
 	struct list entry;
 	const char *name;
 	spawnattr_t spawnattr;
