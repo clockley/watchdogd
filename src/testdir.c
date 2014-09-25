@@ -67,10 +67,10 @@ size_t DirentBufSize(DIR * dirp)
 		? name_end : sizeof(struct dirent));
 }
 
-int CreateLinkedListOfExes(const char *path, ProcessList * p, struct cfgoptions *const config)
+int CreateLinkedListOfExes(const char *repairScriptFolder, ProcessList * p, struct cfgoptions *const config)
 {
 	assert(p != NULL);
-	assert(path != NULL);
+	assert(repairScriptFolder != NULL);
 
 	struct stat buffer;
 	struct dirent *ent = NULL;
@@ -81,10 +81,10 @@ int CreateLinkedListOfExes(const char *path, ProcessList * p, struct cfgoptions 
 
 	list_init(&p->head);
 
-	fd = open(path, O_DIRECTORY | O_RDONLY);
+	fd = open(repairScriptFolder, O_DIRECTORY | O_RDONLY);
 
 	if (fd == -1) {
-		fprintf(stderr, "watchdogd: %s: %s\n", path, strerror(errno));
+		fprintf(stderr, "watchdogd: %s: %s\n", repairScriptFolder, strerror(errno));
 		return 1;
 	}
 
@@ -139,60 +139,61 @@ int CreateLinkedListOfExes(const char *path, ProcessList * p, struct cfgoptions 
 			}
 		}
 
-		repaircmd_t *child = (repaircmd_t *)calloc(1, sizeof(*child));
+		repaircmd_t *cmd = (repaircmd_t *)calloc(1, sizeof(*cmd));
 
-		if (child == NULL) {
+		if (cmd == NULL) {
 			goto error;
 		}
 
-		Wasprintf((char **)&child->name, "%s/%s", path, ent->d_name); //Will have to free this memeory to use v3 repair script config
+		Wasprintf((char **)&cmd->path, "%s/%s", repairScriptFolder, ent->d_name); //Will have to free this memeory to use v3 repair script config
 
-		if (child->name == NULL) {
-			assert(child != NULL);
-			free(child);
+		if (cmd->path == NULL) {
+			assert(cmd != NULL);
+			free(cmd);
 			goto error;
 		}
 
 		if (IsRepairScriptConfig(ent->d_name) == 0) {
-			child->legacy = true;
+			cmd->legacy = true;
 		} else {
-			if (LoadRepairScriptLink(&child->spawnattr, (char*)child->name) == false) {
-				free((void*)child->name);
-				free(child);
+			//For V3 repair scripts cmd->path refers to the pathname of the repair script config file
+			if (LoadRepairScriptLink(&cmd->spawnattr, (char*)cmd->path) == false) {
+				free((void*)cmd->path);
+				free(cmd);
 				continue;
 			}
 
-			child->spawnattr.repairFilePathname = strdup(child->name);
-			free((void*)child->name);
-			child->name = NULL;
+			cmd->spawnattr.repairFilePathname = strdup(cmd->path);
+			free((void*)cmd->path);
+			cmd->path = NULL;
 
-			child->name = child->spawnattr.execStart;
-			child->spawnattr.logDirectory = config->logdir;
+			cmd->path = cmd->spawnattr.execStart;
+			cmd->spawnattr.logDirectory = config->logdir;
 
-			if (child->name == NULL) {
+			if (cmd->path == NULL) {
 				fprintf(stderr, "Ignoring malformed repair file: %s\n", ent->d_name);
-				free(child);
+				free(cmd);
 				continue;
 			}
 
 			if (fd < 0) {
 				fprintf(stderr, "unable to open file %s:\n", strerror(errno));
-				free((void*)child->name);
-				free((void*)child);
+				free((void*)cmd->path);
+				free((void*)cmd);
 				continue;
 			}
 
-			if (IsExe(child->name, false) < 0) {
-				fprintf(stderr, "%s is not an executable\n", child->name);
-				free((void*)child->name);
-				free((void*)child);
+			if (IsExe(cmd->path, false) < 0) {
+				fprintf(stderr, "%s is not an executable\n", cmd->path);
+				free((void*)cmd->path);
+				free((void*)cmd);
 				continue;
 			}
 
-			child->legacy = false;
+			cmd->legacy = false;
 		}
 
-		list_add(&child->entry, &p->head);
+		list_add(&cmd->entry, &p->head);
 	}
 
 	assert(fd != -1);
@@ -222,7 +223,7 @@ void FreeExeList(ProcessList * p)
 
 	list_for_each_entry(c, next, &p->head, entry, repaircmd_t *) {
 		list_del(&c->entry);
-		free((void *)c->name);
+		free((void *)c->path);
 		if (c->legacy == false) {
 			free((void*)c->spawnattr.user);
 			free((void*)c->spawnattr.workingDirectory);
@@ -248,7 +249,7 @@ int ExecuteRepairScripts(ProcessList * p, struct cfgoptions *s)
 
 		if (c->legacy == true) {
 			c->ret =
-			    Spawn(s->repairBinTimeout, s, c->name, c->name, "test",
+			    Spawn(s->repairBinTimeout, s, c->path, c->path, "test",
 				  NULL);
 
 			if (c->ret == 0) {
@@ -259,7 +260,7 @@ int ExecuteRepairScripts(ProcessList * p, struct cfgoptions *s)
 			snprintf(buf, sizeof(buf), "%i", c->ret);
 
 			c->ret =
-			    Spawn(s->repairBinTimeout, s, c->name, c->name, "repair",
+			    Spawn(s->repairBinTimeout, s, c->path, c->path, "repair",
 				  buf, NULL);
 
 			if (c->ret != 0) {
@@ -275,7 +276,7 @@ int ExecuteRepairScripts(ProcessList * p, struct cfgoptions *s)
 			}
 
 			c->ret =
-			    SpawnAttr(&c->spawnattr, c->name, c->name, "test",
+			    SpawnAttr(&c->spawnattr, c->path, c->path, "test",
 				  NULL);
 
 			if (c->ret == 0) {
@@ -286,7 +287,7 @@ int ExecuteRepairScripts(ProcessList * p, struct cfgoptions *s)
 			snprintf(buf, sizeof(buf), "%i", c->ret);
 
 			c->ret =
-			    SpawnAttr(&c->spawnattr, c->name, c->name, "repair",
+			    SpawnAttr(&c->spawnattr, c->path, c->path, "repair",
 				  buf, NULL);
 
 			if (c->ret != 0) {

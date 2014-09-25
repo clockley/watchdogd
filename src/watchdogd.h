@@ -128,7 +128,7 @@ typedef struct spawnattr spawnattr_t;
 
 struct repaircmd_t {
 	struct list entry;
-	const char *name;
+	const char *path;
 	spawnattr_t spawnattr;
 	int ret;
 	bool legacy;
