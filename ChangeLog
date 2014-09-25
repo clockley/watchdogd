@@ -79,3 +79,8 @@ To fix this type ./configure --prefix=/usr
 2014-08-28 [0.3.2] <Christian Lockley>
 	*Fix a quite a few bugs.
 	*Add systemd-esque .repair unit file support (see example included in zipfile)
+
+2014-09-25 [0.3.3] <Christian Lockley>
+	* Add Umask .repair option
+	* Kill worker processes when main daemon exits
+	* Refactored much of the codebase, should be readable, though some parts are still messy.

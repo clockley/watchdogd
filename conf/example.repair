@@ -5,3 +5,4 @@ Timeout=2
 User=robert
 WorkingDirectory=/home/robert
 Nice=20
+Umask=666
