@@ -125,7 +125,7 @@ static bool Validate(char *name, char *value)
 
 int IsRepairScriptConfig(const char *filename)
 {
-	char *filext = strrchr(filename, '.');
+	const char *filext = strrchr(filename, '.');
 
 	if (strcmp(filext, ".repair") == 0) {
 		return 1;

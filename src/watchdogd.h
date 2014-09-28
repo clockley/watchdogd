@@ -48,6 +48,10 @@
 
 #include "list.h"
 
+#if defined __cplusplus
+#define restrict
+#endif
+
 struct pidfile {
 	const char *name;
 	int fd;

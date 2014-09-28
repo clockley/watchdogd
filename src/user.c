@@ -38,7 +38,7 @@ int RunAsUser(const char *restrict const user)
 		len = (size_t) initlen;
 	}
 
-	char *buf = calloc(1, len);
+	char *buf = (char*)calloc(1, len);
 
 	if (buf == NULL) {
 		return -1;
