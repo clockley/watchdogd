@@ -201,14 +201,10 @@ static void *TestDirThread(void *arg)
 
 	for (;;) {
 		if (ExecuteRepairScripts(&processes, s) < 0) {
-			pthread_mutex_lock(&managerlock);
 			s->error |= SCRIPTFAILED;
-			pthread_mutex_unlock(&managerlock);
 		} else {
 			if (s->error & SCRIPTFAILED) {
-				pthread_mutex_lock(&managerlock);
 				s->error &= !SCRIPTFAILED;
-				pthread_mutex_unlock(&managerlock);
 			}
 		}
 		nanosleep(&rqtp, NULL);

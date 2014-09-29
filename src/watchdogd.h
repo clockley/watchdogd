@@ -100,7 +100,7 @@ struct cfgoptions {
 	int testBinTimeout;
 	int repairBinTimeout;
 
-	volatile unsigned int error;
+	volatile _Atomic(unsigned int) error;
 #define SCRIPTFAILED 0x1
 #define FORKFAILED 0x2
 #define OUTOFMEMORY 0x4
