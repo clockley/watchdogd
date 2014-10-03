@@ -86,12 +86,6 @@ static bool SetGroup(const char *restrict const group)
 
 int RunAsUser(const char *restrict const user, const char *restrict const group)
 {
-	assert(user != NULL);
-
-	if (user == NULL) {
-		return -1;
-	}
-
 	struct passwd pwd = {0};
 	struct passwd *result = NULL;
 
@@ -110,33 +104,35 @@ int RunAsUser(const char *restrict const user, const char *restrict const group)
 		return -1;
 	}
 
-	if (strtoll(user, NULL, 10) != 0) {
-		uid_t uid = (uid_t)strtoll(group, NULL, 10);
+	if (user != NULL) {
+		if (strtoll(user, NULL, 10) != 0) {
+			uid_t uid = (uid_t)strtoll(group, NULL, 10);
 
-		if (getpwuid_r(uid, &pwd, buf, len, &result) != 0) {
+			if (getpwuid_r(uid, &pwd, buf, len, &result) != 0) {
+				goto error;
+			}
+
+			if (setgid(pwd.pw_uid) != 0) {
+				goto error;
+			}
+
+			free(buf);
+
+			return 0;
+		}
+
+		int ret = getpwnam_r(user, &pwd, buf, len, &result);
+
+		if (result == NULL) {
 			goto error;
 		}
 
-		if (setgid(pwd.pw_uid) != 0) {
+		if (ret != 0) {
 			goto error;
 		}
-
-		free(buf);
-
-		return 0;
 	}
 
-	int ret = getpwnam_r(user, &pwd, buf, len, &result);
-
-	if (result == NULL) {
-		goto error;
-	}
-
-	if (ret != 0) {
-		goto error;
-	}
-
-	if (group == NULL) {
+	if (group == NULL && user != NULL) {
 		if (setgid(pwd.pw_gid) != 0) {
 			goto error;
 		}
@@ -157,7 +153,7 @@ int RunAsUser(const char *restrict const user, const char *restrict const group)
 				goto error;
 			}
 
-			if (setuid(pwd.pw_uid) != 0) {
+			if (user != NULL && setuid(pwd.pw_uid) != 0) {
 				goto error;
 			}
 
@@ -165,7 +161,7 @@ int RunAsUser(const char *restrict const user, const char *restrict const group)
 				goto error;
 			}
 		} else {
-			if (setuid(pwd.pw_uid) != 0) {
+			if (user != NULL && setuid(pwd.pw_uid) != 0) {
 				goto error;
 			}
 		}
