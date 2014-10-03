@@ -295,7 +295,7 @@ int SpawnAttr(spawnattr_t *spawnattr, const char *file, const char *args, ...)
 				}
 
 				if (spawnattr->user != NULL) {
-					if (RunAsUser(spawnattr->user) != 0) {
+					if (RunAsUser(spawnattr->user, spawnattr->group) != 0) {
 						Logmsg(LOG_CRIT, "Unable to run: %s as user: %s", file, spawnattr->user);
 					}
 				}

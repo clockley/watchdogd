@@ -18,7 +18,73 @@
 #include "sub.h"
 #include "user.h"
 
-int RunAsUser(const char *restrict const user)
+static bool SetGroup(const char *restrict const group)
+{
+	assert(group != NULL);
+
+	if (group == NULL) {
+		return false;
+	}
+
+	long int initlen = sysconf(_SC_GETGR_R_SIZE_MAX);
+	size_t len = 0;
+
+	if (initlen == -1) {
+		len = 4096;
+	} else {
+		len = (size_t) initlen;
+	}
+
+	char *buf = (char*)calloc(1, len);
+
+	if (buf == NULL) {
+		goto error;
+	}
+
+	struct group grp = {0};
+	struct group *result = NULL;
+
+	if (strtoll(group, NULL, 10) != 0) {
+		gid_t gid = (gid_t)strtoll(group, NULL, 10);
+
+		if (getgrgid_r(gid, &grp, buf, len, &result) != 0) {
+			goto error;
+		}
+
+		if (setgid(grp.gr_gid) != 0) {
+			goto error;
+		}
+
+		free(buf);
+
+		return true;
+	}
+
+	int ret = getgrnam_r(group, &grp, buf, len, &result);
+
+	if (ret != 0) {
+		goto error;
+	}
+
+	if (setgid(grp.gr_gid) != 0) {
+		goto error;
+	}
+
+	free(buf);
+
+	return true;
+
+ error:
+	{
+		int serrno = errno;
+		free(buf);
+		errno = serrno;
+	}
+
+	return false;
+}
+
+int RunAsUser(const char *restrict const user, const char *restrict const group)
 {
 	assert(user != NULL);
 
@@ -44,6 +110,22 @@ int RunAsUser(const char *restrict const user)
 		return -1;
 	}
 
+	if (strtoll(user, NULL, 10) != 0) {
+		uid_t uid = (uid_t)strtoll(group, NULL, 10);
+
+		if (getpwuid_r(uid, &pwd, buf, len, &result) != 0) {
+			goto error;
+		}
+
+		if (setgid(pwd.pw_uid) != 0) {
+			goto error;
+		}
+
+		free(buf);
+
+		return 0;
+	}
+
 	int ret = getpwnam_r(user, &pwd, buf, len, &result);
 
 	if (result == NULL) {
@@ -54,16 +136,39 @@ int RunAsUser(const char *restrict const user)
 		goto error;
 	}
 
-	if (setgid(pwd.pw_gid) != 0) {
-		goto error;
-	}
+	if (group == NULL) {
+		if (setgid(pwd.pw_gid) != 0) {
+			goto error;
+		}
 
-	if (setuid(pwd.pw_uid) != 0) {
-		goto error;
-	}
+		if (setuid(pwd.pw_uid) != 0) {
+			goto error;
+		}
 
-	if (setgid(0) == 0) {
-		goto error;
+		if (setgid(0) == 0) {
+			goto error;
+		}
+	} else {
+		if (SetGroup(group) == false) {
+			Logmsg(LOG_ERR, "unable run executable in group: %s", group);
+			Logmsg(LOG_ERR, "trying default group");
+
+			if (setgid(pwd.pw_gid) != 0) {
+				goto error;
+			}
+
+			if (setuid(pwd.pw_uid) != 0) {
+				goto error;
+			}
+
+			if (setgid(0) == 0 && pwd.pw_gid != 0) {
+				goto error;
+			}
+		} else {
+			if (setuid(pwd.pw_uid) != 0) {
+				goto error;
+			}
+		}
 	}
 
 	free(buf);

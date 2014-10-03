@@ -10,6 +10,7 @@
 #include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <grp.h>
 #include <inttypes.h>
 #include <libconfig.h>
 #include <oping.h>
@@ -123,6 +124,7 @@ struct spawnattr {
 	char *execStart;
 	const char *logDirectory;
 	char *user;
+	char *group;
 	char *umask;
 	int timeout;
 	int nice;

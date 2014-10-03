@@ -36,6 +36,10 @@ static bool ParseConfigfile(char *name, char *value, spawnattr_t * obj)
 		obj->user = strdup(value);
 	}
 
+	if (strcmp(name, "Group") == 0) {
+		obj->group = strdup(value);
+	}
+
 	if (strcmp(name, "WorkingDirectory") == 0) {
 		obj->workingDirectory = strdup(value);
 	}
