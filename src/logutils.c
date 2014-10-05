@@ -52,6 +52,10 @@ static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 static void ResetTextColor(void)
 {
+	if (isatty(fileno(stderr)) == 0) {
+		return;
+	}
+
 	fprintf(stderr, "%s", "\x1B[0m");
 }
 
