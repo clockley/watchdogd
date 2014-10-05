@@ -50,9 +50,21 @@ static sig_atomic_t logTarget = INVALID_LOG_TARGET;
 static FILE* logFile = NULL;
 static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
+static bool IsTty(void)
+{
+	if (logTarget != STANDARD_ERROR) {
+		return false;
+	}
+
+	if (isatty(fileno(stderr)) == 0) {
+		return false;
+	}
+	return true;
+}
+
 static void ResetTextColor(void)
 {
-	if (isatty(fileno(stderr)) == 0) {
+	if (IsTty() == false) {
 		return;
 	}
 
@@ -62,11 +74,7 @@ static void ResetTextColor(void)
 
 static void SetTextColor(int priority)
 {
-	if (logTarget != STANDARD_ERROR) {
-		return;
-	}
-
-	if (isatty(fileno(stderr)) == 0) {
+	if (IsTty() == false) {
 		return;
 	}
 
