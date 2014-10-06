@@ -215,7 +215,7 @@ static int PrintHelp(void)
 		long len = 0;
 		len += printf("%-20s", help[i][0]);
 
-		char *ptr = strndup(help[i][1], strlen(help[i][1]));
+		char *ptr = strdup(help[i][1]);
 
 		if (ptr == NULL) {
 			perror(PACKAGE_NAME);
