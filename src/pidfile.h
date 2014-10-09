@@ -1,7 +1,7 @@
 #ifndef PIDFILE_H
 #define PIDFILE_H
 #include "watchdogd.h"
-int DeletePidFile(pidfile_t * const pidfile);
-int WritePidFile(pidfile_t * pidfile, pid_t pid);
-int OpenPidFile(const char *path);
+int DeletePidFile(pidfile_t * const);
+int WritePidFile(pidfile_t * const, pid_t);
+int OpenPidFile(const char * const);
 #endif

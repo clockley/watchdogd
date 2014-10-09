@@ -17,7 +17,7 @@
 #include "pidfile.h"
 #include "sub.h"
 
-int WritePidFile(pidfile_t *pidfile, pid_t pid)
+int WritePidFile(pidfile_t *const pidfile, pid_t pid)
 {
 	if (dprintf(pidfile->fd, "%d\n", pid) < 0) {
 		if (pidfile->name != NULL) {
@@ -36,7 +36,7 @@ int WritePidFile(pidfile_t *pidfile, pid_t pid)
 	return 0;
 }
 
-int OpenPidFile(const char *path)
+int OpenPidFile(const char *const path)
 {
 	mode_t oumask = umask(0027);
 	int ret = open(path, O_WRONLY | O_CREAT | O_EXCL | O_CLOEXEC, 0644);
