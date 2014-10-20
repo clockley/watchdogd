@@ -120,6 +120,10 @@ int CreateLinkedListOfExes(const char *repairScriptFolder, ProcessList * p, stru
 			goto error;
 		}
 
+		if (strchr(".", ent->d_name[0]) != NULL) {
+			continue;
+		}
+
 		if (fstatat(statfd, ent->d_name, &buffer, 0) < 0)
 			continue;
 
