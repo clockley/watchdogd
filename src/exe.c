@@ -36,6 +36,15 @@ static void *WaitThread(void *arg)
 	return NULL;
 }
 
+static void *ExitIfParentDied(void *arg)
+{
+	while (getppid() != 1) {
+		sleep(1);
+	}
+
+	exit(0);
+}
+
 int Spawn(int timeout, struct cfgoptions *const config, const char *file,
 	  const char *args, ...)
 {
@@ -55,12 +64,21 @@ int Spawn(int timeout, struct cfgoptions *const config, const char *file,
 #if defined(NSIG)
 			ResetSignalHandlers(NSIG);
 #endif
+
+#ifdef __linux__
 			OnParentDeathSend(SIGKILL);
+#else
+			CreateDetachedThread(ExitIfParentDied, NULL);
+#endif
 
 			pid_t worker = fork();
 
 			if (worker == 0) {
+#ifdef __linux__
 				OnParentDeathSend(SIGKILL);
+#else
+				CreateDetachedThread(ExitIfParentDied, NULL);
+#endif
 				struct sched_param param;
 				param.sched_priority = 0;
 
@@ -233,12 +251,20 @@ int SpawnAttr(spawnattr_t *spawnattr, const char *file, const char *args, ...)
 			ResetSignalHandlers(NSIG);
 #endif
 
+#ifdef __linux__
 			OnParentDeathSend(SIGKILL);
+#else
+			CreateDetachedThread(ExitIfParentDied, NULL);
+#endif
 
 			pid_t worker = fork();
 
 			if (worker == 0) {
+#ifdef __linux__
 				OnParentDeathSend(SIGKILL);
+#else
+				CreateDetachedThread(ExitIfParentDied, NULL);
+#endif
 				struct sched_param param;
 				param.sched_priority = 0;
 
