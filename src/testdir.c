@@ -230,6 +230,7 @@ void FreeExeList(ProcessList * p)
 		free((void *)c->path);
 		if (c->legacy == false) {
 			free((void*)c->spawnattr.user);
+			free((void*)c->spawnattr.group);
 			free((void*)c->spawnattr.workingDirectory);
 			free((void*)c->spawnattr.repairFilePathname);
 			free((void*)c->spawnattr.workingDirectory);
