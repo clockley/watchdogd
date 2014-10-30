@@ -65,20 +65,18 @@ int Spawn(int timeout, struct cfgoptions *const config, const char *file,
 			ResetSignalHandlers(NSIG);
 #endif
 
-#ifdef __linux__
-			OnParentDeathSend(SIGKILL);
-#else
-			CreateDetachedThread(ExitIfParentDied, NULL);
-#endif
+			if (OnParentDeathSend(SIGKILL) == false) {
+				CreateDetachedThread(ExitIfParentDied, NULL);
+			}
+
 
 			pid_t worker = fork();
 
 			if (worker == 0) {
-#ifdef __linux__
-				OnParentDeathSend(SIGKILL);
-#else
-				CreateDetachedThread(ExitIfParentDied, NULL);
-#endif
+				if (OnParentDeathSend(SIGKILL) == false) {
+					CreateDetachedThread(ExitIfParentDied, NULL);
+				}
+
 				struct sched_param param;
 				param.sched_priority = 0;
 
@@ -251,20 +249,16 @@ int SpawnAttr(spawnattr_t *spawnattr, const char *file, const char *args, ...)
 			ResetSignalHandlers(NSIG);
 #endif
 
-#ifdef __linux__
-			OnParentDeathSend(SIGKILL);
-#else
-			CreateDetachedThread(ExitIfParentDied, NULL);
-#endif
+			if (OnParentDeathSend(SIGKILL) == false) {
+				CreateDetachedThread(ExitIfParentDied, NULL);
+			}
 
 			pid_t worker = fork();
 
 			if (worker == 0) {
-#ifdef __linux__
-				OnParentDeathSend(SIGKILL);
-#else
-				CreateDetachedThread(ExitIfParentDied, NULL);
-#endif
+				if (OnParentDeathSend(SIGKILL) == false) {
+					CreateDetachedThread(ExitIfParentDied, NULL);
+				}
 				struct sched_param param;
 				param.sched_priority = 0;
 
