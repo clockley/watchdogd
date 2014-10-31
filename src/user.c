@@ -28,6 +28,7 @@ static bool SetGroup(const char *restrict const group)
 
 	long int initlen = sysconf(_SC_GETGR_R_SIZE_MAX);
 	size_t len = 0;
+	int ret = 0;
 
 	if (initlen == -1) {
 		len = 4096;
@@ -35,14 +36,14 @@ static bool SetGroup(const char *restrict const group)
 		len = (size_t) initlen;
 	}
 
+	struct group grp = {0};
+	struct group *result = NULL;
+
 	char *buf = (char*)calloc(1, len);
 
 	if (buf == NULL) {
 		goto error;
 	}
-
-	struct group grp = {0};
-	struct group *result = NULL;
 
 	if (strtoll(group, NULL, 10) != 0) {
 		gid_t gid = (gid_t)strtoll(group, NULL, 10);
@@ -60,7 +61,7 @@ static bool SetGroup(const char *restrict const group)
 		return true;
 	}
 
-	int ret = getgrnam_r(group, &grp, buf, len, &result);
+	ret = getgrnam_r(group, &grp, buf, len, &result);
 
 	if (ret != 0) {
 		goto error;

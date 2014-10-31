@@ -2,7 +2,6 @@
 #define WATCHDOGD_H
 #define _XOPEN_SOURCE 700
 #define _ISOC11_SOURCE
-
 #define _FILE_OFFSET_BITS 64
 
 #include <assert.h>
@@ -20,7 +19,11 @@
 #include <sched.h>
 #include <signal.h>
 #include <stdarg.h>
+#ifndef __cplusplus
 #include <stdatomic.h>
+#else
+#include <atomic>
+#endif
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -101,8 +104,11 @@ struct cfgoptions {
 	int testExeReturnValue;
 	int testBinTimeout;
 	int repairBinTimeout;
-
+#ifndef __cplusplus
 	volatile _Atomic(unsigned int) error;
+#else
+	std::atomic<unsigned int> error;
+#endif
 #define SCRIPTFAILED 0x1
 #define FORKFAILED 0x2
 #define OUTOFMEMORY 0x4
