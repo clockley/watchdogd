@@ -64,7 +64,7 @@ int ParseCommandLine(int *argc, char **argv, struct cfgoptions *cfg)
 
 	int tmp = 0;
 	while ((opt =
-		getopt_long(*argc, argv, "qsfFbVc:", longOptions,
+		getopt_long(*argc, argv, "hqsfFbVc:", longOptions,
 			    &tmp)) != -1) {
 
 		switch (opt) {
