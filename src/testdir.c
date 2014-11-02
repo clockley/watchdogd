@@ -273,13 +273,6 @@ int ExecuteRepairScripts(ProcessList * p, struct cfgoptions *s)
 				return -1;	//exit
 			}
 		} else {
-			int timeout = 0;
-			if (c->spawnattr.timeout < 0 || c->spawnattr.timeout > 499999) {
-				timeout = s->repairBinTimeout;
-			} else {
-				timeout = c->spawnattr.timeout;
-			}
-
 			c->ret =
 			    SpawnAttr(&c->spawnattr, c->path, c->path, "test",
 				  NULL);
