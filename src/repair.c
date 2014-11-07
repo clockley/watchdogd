@@ -59,29 +59,15 @@ static bool ParseConfigfile(char *name, char *value, spawnattr_t * obj)
 			obj->noNewPrivileges = false;
 		}
 
-		char *tmp = strdup(value);
-
-		if (tmp == NULL) {
-			fprintf(stderr, "watchdogd: out of memory: %s",
-				strerror(errno));
-			return false;
-		}
-
-		for (int i = strlen(tmp); i >= 0; i -= 1) {
-			tmp[i] = tolower(tmp[i]);
-		}
-
 		if (ret > 0) {
 			obj->noNewPrivileges = true;
-		} else if (strcmp(tmp, "true")) {
+		} else if (strcasecmp(value, "true")) {
 			obj->noNewPrivileges = true;
-		} else if (strcmp(tmp, "yes")) {
+		} else if (strcasecmp(value, "yes")) {
 			obj->noNewPrivileges = true;
 		} else {
 			obj->noNewPrivileges = false;
 		}
-
-		free(tmp);
 	}
 
 	if (strcmp(name, "Nice") == 0) {
