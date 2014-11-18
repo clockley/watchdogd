@@ -99,6 +99,7 @@ struct cfgoptions {
 #define FORCE 0x80
 #define NOACTION 0x100
 #define REALTIME 0x200
+#define VERBOSE 0x400
 
 	int priority;
 	int watchdogTimeout;
