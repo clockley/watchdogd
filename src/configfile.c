@@ -465,6 +465,10 @@ int ReadConfigurationFile(struct cfgoptions *const cfg)
 		cfg->sleeptime = -1;
 	}
 
+	if (config_lookup_int(&cfg->cfg, "allocatable-memory", &cfg->allocatableMemory) == CONFIG_FALSE) {
+		cfg->allocatableMemory = 0;
+	}
+
 	if (config_lookup_int(&cfg->cfg, "sigterm-delay", &cfg->sigtermDelay) == CONFIG_TRUE) {
 		if (cfg->sigtermDelay <= 1 || cfg->sigtermDelay > 300) {
 			fprintf(stderr,

@@ -285,6 +285,41 @@ static void *MinPagesThread(void *arg)
 	return NULL;
 }
 
+static void *TestMemoryAllocation(void *arg)
+{
+	struct cfgoptions *config = (struct cfgoptions *)arg;
+
+	if (config->allocatableMemory <= 0) {
+		return NULL;
+	}
+
+	pthread_once(&getPageSize, GetPageSize);
+
+	for (;;) {
+		pthread_mutex_lock(&managerlock);
+
+		void *buf = mmap(NULL, config->allocatableMemory * pageSize, PROT_READ | PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, 0 ,0);
+
+		if (buf == MAP_FAILED) {
+			Logmsg(LOG_ALERT, "mmap failed: %s", strerror(errno));
+			config->error |= OUTOFMEMORY;
+		}
+
+		for (int i = 0; i < ((config->allocatableMemory * pageSize)/pageSize)-1; i += 1) {
+			memset(buf + (pageSize*i), 0, 1);
+		}
+
+		if (munmap(buf, config->allocatableMemory * pageSize) != 0) {
+			Logmsg(LOG_CRIT, "munmap failed: %s", strerror(errno));
+		}
+
+		pthread_cond_wait(&workerupdate, &managerlock);
+		pthread_mutex_unlock(&managerlock);
+	}
+
+	return NULL;
+}
+
 static void *TestFork(void *arg)
 {
 	assert(arg != NULL);
@@ -596,6 +631,10 @@ int StartHelperThreads(struct cfgoptions *options)
 		return -1;
 	}
 
+	if (SetupTestMemoryAllocationThread(options) < 0) {
+		return -1;
+	}
+
 	return 0;
 }
 
@@ -646,6 +685,17 @@ int SetupTestBinThread(void *arg)
 
 	if (CreateDetachedThread(TestBinThread, arg) < 0)
 		return -1;
+
+	return 0;
+}
+
+int SetupTestMemoryAllocationThread(void *arg)
+{
+	assert(arg != NULL);
+
+	if (CreateDetachedThread(TestMemoryAllocation, arg) < 0) {
+		return -1;
+	}
 
 	return 0;
 }

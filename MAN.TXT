@@ -106,6 +106,10 @@ OPTIONS
 	softboot = <bool>
 	Reboot the system if watchdogd is unable to open a pidfile.
 
+	allocatable-memory = <int>
+	Reboot system if unable to allocate and fault at least x pages of memory with mmap.
+	e.g allocatable-memory = 64
+
 	lock-memory = <bool>
 	Lock memory if set to true. Default true.
 
