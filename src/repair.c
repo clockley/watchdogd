@@ -18,11 +18,11 @@
 
 static bool ParseConfigfile(char *name, char *value, spawnattr_t * obj)
 {
-	if (strcmp(name, "ExecStart") == 0) {
+	if (strcasecmp(name, "ExecStart") == 0) {
 		obj->execStart = strdup(value);
 	}
 
-	if (strcmp(name, "Timeout") == 0) {
+	if (strcasecmp(name, "Timeout") == 0) {
 		long ret = strtol(value, (char **)NULL, 10);
 
 		if (ret == 0 && errno == EINVAL) {
@@ -32,19 +32,19 @@ static bool ParseConfigfile(char *name, char *value, spawnattr_t * obj)
 		obj->timeout = ret;
 	}
 
-	if (strcmp(name, "User") == 0) {
+	if (strcasecmp(name, "User") == 0) {
 		obj->user = strdup(value);
 	}
 
-	if (strcmp(name, "Group") == 0) {
+	if (strcasecmp(name, "Group") == 0) {
 		obj->group = strdup(value);
 	}
 
-	if (strcmp(name, "WorkingDirectory") == 0) {
+	if (strcasecmp(name, "WorkingDirectory") == 0) {
 		obj->workingDirectory = strdup(value);
 	}
 
-	if (strcmp(name, "Umask") == 0) {
+	if (strcasecmp(name, "Umask") == 0) {
 		obj->umask = strdup(value);
 		if (obj->umask == NULL) {
 			fprintf(stderr, "watchdogd: out of memory: %s", strerror(errno));
@@ -52,7 +52,7 @@ static bool ParseConfigfile(char *name, char *value, spawnattr_t * obj)
 		}
 	}
 
-	if (strcmp(name, "NoNewPrivileges") == 0) {
+	if (strcasecmp(name, "NoNewPrivileges") == 0) {
 		int ret = (int)strtol(value, (char **)NULL, 10);
 
 		if (ret == 0 && errno == EINVAL) {
@@ -70,7 +70,7 @@ static bool ParseConfigfile(char *name, char *value, spawnattr_t * obj)
 		}
 	}
 
-	if (strcmp(name, "Nice") == 0) {
+	if (strcasecmp(name, "Nice") == 0) {
 		int ret = (int)strtol(value, (char **)NULL, 10);
 
 		if (ret == 0 && errno == EINVAL) {
@@ -117,7 +117,7 @@ int IsRepairScriptConfig(const char *filename)
 {
 	const char *filext = strrchr(filename, '.');
 
-	if (strcmp(filext, ".repair") == 0) {
+	if (strcasecmp(filext, ".repair") == 0) {
 		return 1;
 	}
 
