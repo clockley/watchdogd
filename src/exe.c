@@ -135,7 +135,11 @@ int Spawn(int timeout, struct cfgoptions *const config, const char *file,
 				}
 				array[argno] = NULL;
 				va_end(ap);
-
+#if defined(__linux__)
+				if (LinuxRunningSystemd() == 1) {
+					unsetenv("NOTIFY_SOCKET");
+				}
+#endif
 				execv(file, (char *const *)array);
 
 				Logmsg(LOG_CRIT, "execv failed %s",
@@ -355,7 +359,11 @@ int SpawnAttr(spawnattr_t *spawnattr, const char *file, const char *args, ...)
 					       strerror(errno));
 					return -1;
 				}
-
+#if defined(__linux__)
+				if (LinuxRunningSystemd() == 1) {
+					unsetenv("NOTIFY_SOCKET");
+				}
+#endif
 				execv(file, (char *const *)array);
 
 				Logmsg(LOG_CRIT, "execv failed %s",
