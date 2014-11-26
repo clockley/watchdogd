@@ -106,6 +106,7 @@ struct cfgoptions {
 	int testExeReturnValue;
 	int testBinTimeout;
 	int repairBinTimeout;
+	int allocatableMemory;
 #ifndef __cplusplus
 	volatile _Atomic(unsigned int) error;
 #else

@@ -31,7 +31,7 @@ static pthread_mutex_t managerlock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_cond_t workerupdate = PTHREAD_COND_INITIALIZER;
 
 static long pageSize = 0;
-
+static pthread_once_t getPageSize = PTHREAD_ONCE_INIT;
 static void GetPageSize(void)
 {
 	pageSize = sysconf(_SC_PAGESIZE);
@@ -251,7 +251,6 @@ static void *MinPagesThread(void *arg)
 {
 	struct cfgoptions *s = (struct cfgoptions *)arg;
 	struct sysinfo infostruct;
-	static pthread_once_t getPageSize = PTHREAD_ONCE_INIT;
 
 	pthread_once(&getPageSize, GetPageSize);
 
