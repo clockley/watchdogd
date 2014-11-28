@@ -200,6 +200,8 @@ int ReadConfigurationFile(struct cfgoptions *const cfg)
 		return -1;
 	}
 
+	config_set_auto_convert(&cfg->cfg, true);
+
 	if (config_lookup_string(&cfg->cfg, "repair-binary", &cfg->exepathname)
 	    == CONFIG_FALSE) {
 		cfg->exepathname = NULL;
@@ -342,8 +344,6 @@ int ReadConfigurationFile(struct cfgoptions *const cfg)
 		cfg->priority = GetDefaultPriority();
 	}
 
-	config_set_auto_convert(&cfg->cfg, true);
-
 	if (config_lookup_float(&cfg->cfg, "max-load-1", &cfg->maxLoadOne) ==
 	    CONFIG_TRUE) {
 		if (cfg->maxLoadOne < 0 || cfg->maxLoadOne > 100L) {
@@ -399,8 +399,6 @@ int ReadConfigurationFile(struct cfgoptions *const cfg)
 	} else {
 		cfg->retryLimit = 0L;
 	}
-
-	config_set_auto_convert(&cfg->cfg, false);
 
 	if (config_lookup_bool(&cfg->cfg, "realtime-scheduling", &tmp)) {
 		if (tmp) {
