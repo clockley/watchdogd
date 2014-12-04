@@ -218,7 +218,6 @@ int SetupSignalHandlers(int isDaemon)
 
 	sigemptyset(&act.sa_mask);
 	act.sa_handler = SignalHandler;
-	act.sa_flags = SA_SIGINFO;
 
 	int ret = InstallSignalAction(&act, SIGTERM, SIGINT, 0);
 
