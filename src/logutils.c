@@ -326,7 +326,9 @@ void Logmsg(int priority, const char *const fmt, ...)
 		assert(buf[sizeof(buf) - 1] == '\0');
 
 		if (logTarget == STANDARD_ERROR) {
-			SetTextColor(priority);
+			if (applesquePriority == 0) {
+				SetTextColor(priority);
+			}
 			fprintf(stderr, "%s\n", buf);
 			ResetTextColor();
 		} else {
