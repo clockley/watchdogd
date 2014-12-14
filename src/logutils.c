@@ -49,6 +49,9 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 static sig_atomic_t logTarget = INVALID_LOG_TARGET;
 static FILE* logFile = NULL;
 static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+static sig_atomic_t applesquePriority = 0;
+static sig_atomic_t autoUpperCase = 0;
+static sig_atomic_t autoPeriod = 1;
 
 static bool IsTty(void)
 {
@@ -70,7 +73,6 @@ static void ResetTextColor(void)
 
 	fprintf(stderr, "%s", "\x1B[0m");
 }
-
 
 static void SetTextColor(int priority)
 {
@@ -137,6 +139,30 @@ static void CloseOldTarget(sig_atomic_t oldTarget)
 		}
 	}
 
+}
+
+void SetAutoPeriod(bool x) {
+	if (x) {
+		autoPeriod = 1;
+	} else {
+		autoPeriod = 0;
+	}
+}
+
+void SetAutoUpperCase(bool x) {
+	if (x) {
+		autoUpperCase = 1;
+	} else {
+		autoUpperCase = 0;
+	}
+}
+
+void HashTagPriority(bool x) {
+	if (x) {
+		applesquePriority = 1;
+	} else {
+		applesquePriority = 0;
+	}
 }
 
 void SetLogTarget(sig_atomic_t target, ...)
@@ -208,9 +234,9 @@ void Logmsg(int priority, const char *const fmt, ...)
 	assert(fmt != NULL);
 
 	va_list args;
+	va_start(args, fmt);
 
-	if (logTarget == STANDARD_ERROR || logTarget == FILE_APPEND || logTarget == FILE_NEW) {
-		va_start(args, fmt);
+	if ((logTarget == STANDARD_ERROR || logTarget == FILE_APPEND || logTarget == FILE_NEW) && applesquePriority == 0) {
 
 		switch (priority) {
 		case LOG_EMERG:
@@ -246,6 +272,58 @@ void Logmsg(int priority, const char *const fmt, ...)
 		va_end(args);
 
 		assert(buf[sizeof(buf) - 1] == '\0');
+	} else if (logTarget != SYSTEM_LOG && applesquePriority == 1) {
+
+		vsnprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), fmt,
+			  args);
+		va_end(args);
+
+		if (autoPeriod == 1) {
+			if (buf[strlen(buf) - 1] != '.') {
+				strncat(buf, ".", sizeof(buf) - 1);
+			}
+		}
+
+		if (autoUpperCase == 1) {
+			if (strstr(buf, "=") == NULL) {
+				if (islower(buf[0])) {
+					buf[0] = toupper(buf[0]);
+				}
+			}
+		}
+
+		switch (priority) {
+		case LOG_EMERG:
+			strncat(buf, " #System #Panic", sizeof(buf) - 1);
+			break;
+		case LOG_ALERT:
+			strncat(buf, " #System #Attention", sizeof(buf) - 1);
+			break;
+		case LOG_CRIT:
+			strncat(buf, " #System #Critical", sizeof(buf) - 1);
+			break;
+		case LOG_ERR:
+			strncat(buf, " #System #Error", sizeof(buf) - 1);
+			break;
+		case LOG_WARNING:
+			strncat(buf, " #System #Warning", sizeof(buf) - 1);
+			break;
+		case LOG_NOTICE:
+			strncat(buf, " #System #Notice", sizeof(buf) - 1);
+			break;
+		case LOG_INFO:
+			strncat(buf, " #System #Comment", sizeof(buf) - 1);
+			break;
+		case LOG_DEBUG:
+			strncat(buf, " #System #Developer ", sizeof(buf) - 1);
+			break;
+		default:
+			assert(false);
+		}
+	}
+
+	if (logTarget == STANDARD_ERROR || logTarget == FILE_APPEND || logTarget == FILE_NEW) {
+		assert(buf[sizeof(buf) - 1] == '\0');
 
 		if (logTarget == STANDARD_ERROR) {
 			SetTextColor(priority);
@@ -258,13 +336,9 @@ void Logmsg(int priority, const char *const fmt, ...)
 				fprintf(stderr, "%s\n", buf);
 			}
 		}
-
-		return;
 	}
 
 	if (logTarget == SYSTEM_LOG) {
-		va_start(args, fmt);
-
 		vsnprintf(buf, sizeof(buf) - 1, fmt, args);
 
 		va_end(args);

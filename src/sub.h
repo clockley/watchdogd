@@ -10,6 +10,9 @@ int Shutdown(int errorcode, struct cfgoptions *arg);
 
 void Logmsg(int priority, const char *const fmt, ...);
 void SetLogTarget(sig_atomic_t target, ...);
+void SetAutoUpperCase(bool);
+void SetAutoPeriod(bool);
+void HashTagPriority(bool);
 
 int UnmountAll(void);
 int Wasprintf(char **ret, const char *format, ...);

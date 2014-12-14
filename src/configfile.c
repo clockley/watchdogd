@@ -330,6 +330,19 @@ int ReadConfigurationFile(struct cfgoptions *const cfg)
 		}
 	}
 
+	if (config_lookup_bool(&cfg->cfg, "os-x-hashtag-loging", &tmp) == CONFIG_TRUE) {
+		if (tmp) {
+			SetAutoPeriod(true);
+			HashTagPriority(true);
+			//SetAutoUpperCase(true); //lot's of magic in logmsg.c
+		} else {
+			SetAutoPeriod(false);
+			HashTagPriority(false);
+		}
+	} else {
+		SetAutoPeriod(false);
+	}
+
 	if (config_lookup_int(&cfg->cfg, "realtime-priority", &tmp) ==
 	    CONFIG_TRUE) {
 		if (CheckPriority(tmp) < 0) {
