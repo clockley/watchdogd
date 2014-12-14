@@ -84,3 +84,12 @@ To fix this type ./configure --prefix=/usr
 	* Add Umask .repair option
 	* Kill worker processes when main daemon exits
 	* Refactored much of the codebase, should be readable, though some parts are still messy.
+
+2014-12-13 [0.3.4] <Christian Lockley>
+	* Fix bug in signal handler code
+	* Ignore case when parsing .repair files
+	* Don't print ANSI escape code if not running on tty
+	* Use default values if unable to read configuration file
+	* Add group .repair option
+	* Add allocatable-memory option.
+	* Many more bug fixes
