@@ -35,6 +35,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 #include "watchdogd.h"
 #include "sub.h"
+#include "logutils.h"
 
 #define KNRM  "\x1B[0m"
 #define KRED  "\x1B[31m"
@@ -45,13 +46,13 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #define KCYN  "\x1B[36m"
 #define KWHT  "\x1B[37m"
 
-
 static sig_atomic_t logTarget = INVALID_LOG_TARGET;
 static FILE* logFile = NULL;
 static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 static sig_atomic_t applesquePriority = 0;
 static sig_atomic_t autoUpperCase = 0;
 static sig_atomic_t autoPeriod = 1;
+static unsigned int logMask = 0xff;
 
 static bool IsTty(void)
 {
@@ -165,6 +166,13 @@ void HashTagPriority(bool x) {
 	}
 }
 
+static void SetLogMask(unsigned int mask) {
+	setlogmask(mask);
+	if (mask != 0) {
+		logMask = mask;
+	}
+}
+
 void SetLogTarget(sig_atomic_t target, ...)
 {
 	pthread_mutex_lock(&mutex);
@@ -227,11 +235,76 @@ void SetLogTarget(sig_atomic_t target, ...)
 	pthread_mutex_unlock(&mutex);
 }
 
+bool LogUpTo(const char * const str)
+{
+	assert(str != NULL);
+
+	if (str == NULL) {
+		return false;
+	}
+
+	char *tmp = strdup(str);
+
+	assert(tmp != NULL);
+
+	if (tmp == NULL) {
+		return false;
+	}
+
+	pthread_mutex_lock(&mutex);
+
+	for (int i = 0; tmp[i] != '\0'; i += 1) {
+		if (tmp[i] == '-' || tmp[i] == '.') {
+			tmp[i] = '_';
+		}
+		tmp[i] = toupper(tmp[i]);
+	}
+
+	if (strstr(tmp, "LOG_") == NULL) {
+		char *buf  = calloc(1, strlen(tmp) + strlen("LOG_") + 2);
+		snprintf(buf, strlen(tmp) + strlen("LOG_") + 1, "%s%s", "LOG_", tmp);
+		free(tmp);
+		tmp = NULL;
+		tmp = buf;
+	}
+
+	static int ipri[] = {LOG_EMERG, LOG_ALERT, LOG_CRIT, LOG_ERR, LOG_WARNING,
+		      LOG_NOTICE, LOG_INFO, LOG_DEBUG};
+
+	static const char * spri[] = {"LOG_EMERG", "LOG_ALERT", "LOG_CRIT", "LOG_ERR",
+		      "LOG_WARNING", "LOG_NOTICE", "LOG_INFO", "LOG_DEBUG"};
+
+	bool matched = false;
+
+	for (int i = 0; i < ARRAY_SIZE(spri); i += 1) {
+		if (strcasecmp(tmp, spri[i]) == 0) {
+			SetLogMask(LOG_UPTO(ipri[i]));
+			matched = true;
+		}
+	}
+
+	if (matched == false) {
+		fprintf(stderr,
+			"illegal value for configuration file entry named"
+			" \"log-up-to\": %s\n", tmp);
+	}
+
+	free(tmp);
+
+	pthread_mutex_unlock(&mutex);
+
+	return true;
+}
+
 void Logmsg(int priority, const char *const fmt, ...)
 {
 	char buf[2048] = { '\0' };
 
 	assert(fmt != NULL);
+
+	if ((LOG_MASK (LOG_PRI (priority)) & logMask) == 0) {
+		return;
+	}
 
 	va_list args;
 	va_start(args, fmt);

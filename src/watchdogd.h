@@ -58,6 +58,8 @@
 #define restrict
 #endif
 
+#define ARRAY_SIZE(a) (sizeof(a)/sizeof((a)[0]))
+
 struct pidfile {
 	const char *name;
 	int fd;
@@ -83,6 +85,7 @@ struct cfgoptions {
 	const char *logdir;
 	const char *randomSeedPath;
 	const char *logTarget;
+	const char *logUpto;
 	pidfile_t pidfile;
 	time_t sleeptime;
 	int sigtermDelay;

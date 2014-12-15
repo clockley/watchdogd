@@ -246,6 +246,10 @@ int ReadConfigurationFile(struct cfgoptions *const cfg)
 		cfg->logTarget = "auto";
 	}
 
+	if (config_lookup_string(&cfg->cfg, "log-up-to", &cfg->logUpto) == CONFIG_TRUE) {
+		LogUpTo(cfg->logUpto);
+	}
+
 	if (SetDefaultLogTarget(cfg) == false) {
 		fprintf(stderr, "Invalid log target\n");
 		return -1;
