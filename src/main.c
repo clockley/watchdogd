@@ -214,8 +214,8 @@ static int InstallSignalAction(struct sigaction *act, ...)
 
 int SetupSignalHandlers(int isDaemon)
 {
-	struct sigaction act = {0};
-
+	struct sigaction act;
+	memset(&act, 0, sizeof(act));
 	sigemptyset(&act.sa_mask);
 	act.sa_handler = SignalHandler;
 
