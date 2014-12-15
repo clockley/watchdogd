@@ -305,7 +305,6 @@ static void *TestMemoryAllocation(void *arg)
 			config->error |= OUTOFMEMORY;
 		}
 
-
 		unsigned int seed = (unsigned int)time(NULL);
 
 		memset(buf, rand_r(&seed), (config->allocatableMemory * pageSize));
