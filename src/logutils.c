@@ -254,7 +254,7 @@ bool LogUpTo(const char * const str)
 	pthread_mutex_lock(&mutex);
 
 	for (int i = 0; tmp[i] != '\0'; i += 1) {
-		if (tmp[i] == '-' || tmp[i] == '.') {
+		if (tmp[i] == '-' || ispunct(tmp[i])) {
 			tmp[i] = '_';
 		}
 		tmp[i] = toupper(tmp[i]);
@@ -286,7 +286,7 @@ bool LogUpTo(const char * const str)
 	if (matched == false) {
 		fprintf(stderr,
 			"illegal value for configuration file entry named"
-			" \"log-up-to\": %s\n", tmp);
+			" \"log-up-to\": %s\n", str);
 	}
 
 	free(tmp);
