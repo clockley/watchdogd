@@ -261,7 +261,7 @@ bool LogUpTo(const char * const str)
 	}
 
 	if (strstr(tmp, "LOG_") == NULL) {
-		char *buf  = calloc(1, strlen(tmp) + strlen("LOG_") + 2);
+		char *buf  = (char*)calloc(1, strlen(tmp) + strlen("LOG_") + 2);
 		snprintf(buf, strlen(tmp) + strlen("LOG_") + 1, "%s%s", "LOG_", tmp);
 		free(tmp);
 		tmp = NULL;
@@ -276,7 +276,7 @@ bool LogUpTo(const char * const str)
 
 	bool matched = false;
 
-	for (int i = 0; i < ARRAY_SIZE(spri); i += 1) {
+	for (size_t i = 0; i < ARRAY_SIZE(spri); i += 1) {
 		if (strcasecmp(tmp, spri[i]) == 0) {
 			SetLogMask(LOG_UPTO(ipri[i]));
 			matched = true;
