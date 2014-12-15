@@ -312,6 +312,7 @@ static void *TestMemoryAllocation(void *arg)
 
 		if (munmap(buf, config->allocatableMemory * pageSize) != 0) {
 			Logmsg(LOG_CRIT, "munmap failed: %s", strerror(errno));
+			assert(false);
 		}
 
 		pthread_cond_wait(&workerupdate, &managerlock);
