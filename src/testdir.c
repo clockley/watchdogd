@@ -225,7 +225,7 @@ void FreeExeList(ProcessList * p)
 	repaircmd_t *c = NULL;
 	repaircmd_t *next = NULL;
 
-	list_for_each_entry(c, next, &p->head, entry, repaircmd_t *) {
+	list_for_each_entry(c, next, &p->head, entry) {
 		list_del(&c->entry);
 		free((void *)c->path);
 		if (c->legacy == false) {
@@ -250,7 +250,7 @@ int ExecuteRepairScripts(ProcessList * p, struct cfgoptions *s)
 	repaircmd_t *c = NULL;
 	repaircmd_t *next = NULL;
 
-	list_for_each_entry(c, next, &p->head, entry, repaircmd_t *) {
+	list_for_each_entry(c, next, &p->head, entry) {
 
 		if (c->legacy == true) {
 			c->ret =

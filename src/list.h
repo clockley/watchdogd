@@ -157,23 +157,9 @@ void list_add(struct list *entry, struct list *head);
 #define list_last_entry(ptr, type, member) \
     list_entry((ptr)->prev, type, member)
 
-#define __container_of(ptr, sample, member, type)				\
-    (type)((char *)(ptr)						\
+#define __container_of(ptr, sample, member)				\
+    (typeof(sample))((char *)(ptr)						\
 	     - ((char *)&(sample)->member - (char *)(sample)))
-/**
- * Loop through the list given by head and set pos to struct in the list.
- *
- * Example:
- * struct foo *iterator;
- * list_for_each_entry(iterator, &bar->list_of_foos, entry) {
- *      [modify iterator]
- * }
- *
- * @param pos Iterator variable of the type of the list elements.
- * @param head List head
- * @param member Member name of the struct list in the list elements.
- *
- */
 
 /**
  * Loop through the list, keeping a backup pointer to the element. This
@@ -182,14 +168,14 @@ void list_add(struct list *entry, struct list *head);
  *
  * See list_for_each_entry for more details.
  */
-#define list_for_each_entry(pos, tmp, head, member, type)		\
-    for (pos = __container_of((head)->next, pos, member, type),		\
-	 tmp = __container_of(pos->member.next, pos, member, type);		\
+#define list_for_each_entry(pos, tmp, head, member)		\
+    for (pos = __container_of((head)->next, pos, member),		\
+	 tmp = __container_of(pos->member.next, pos, member);		\
 	 &pos->member != (head);					\
-	 pos = tmp, tmp = __container_of(pos->member.next, tmp, member, type))
+	 pos = tmp, tmp = __container_of(pos->member.next, tmp, member))
 
-#undef container_of
-#define container_of(ptr, type, member) \
-	((type *)((char *)(ptr) - (char *) &((type *)0)->member))
+#define container_of(ptr, type, member) ({ \
+                const typeof( ((type *)0)->member ) *__mptr = (ptr); \
+                (type *)( (char *)__mptr - offsetof(type,member));})
 
 #endif				/* LIST_H_ */
