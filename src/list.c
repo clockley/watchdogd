@@ -79,12 +79,6 @@ void list_replace(struct list *old, struct list *_new)
 	_new->prev->next = _new;
 }
 
-#define list_last_entry(ptr, type, member) \
-    list_entry((ptr)->prev, type, member)
-
-#define list_for_each(pos, head)				\
-    for (pos = (head)->next; pos != (head); pos = pos->next)
-
 /**
  * Append a new element to the end of the list given with this list head.
  *

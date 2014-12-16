@@ -174,6 +174,9 @@ void list_add(struct list *entry, struct list *head);
 	 &pos->member != (head);					\
 	 pos = tmp, tmp = __container_of(pos->member.next, tmp, member))
 
+#define list_last_entry(ptr, type, member) \
+    list_entry((ptr)->prev, type, member)
+
 #define container_of(ptr, type, member) ({ \
                 const typeof( ((type *)0)->member ) *__mptr = (ptr); \
                 (type *)( (char *)__mptr - offsetof(type,member));})
