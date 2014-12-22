@@ -22,4 +22,5 @@ void SetAutoUpperCase(bool);
 void SetAutoPeriod(bool);
 void HashTagPriority(bool);
 bool LogUpTo(const char *const);
+bool LogUpToInt(long pri);
 #endif

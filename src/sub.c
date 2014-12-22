@@ -217,7 +217,15 @@ long ConvertStringToInt(const char *const str)
 	if (str == NULL) {
 		return -1;
 	}
-	return strtol((str), (char **)NULL, 10);
+	char *endptr = NULL;
+	long ret = strtol((str), &endptr, 10);
+
+	if (*endptr != '\0') {
+		errno = ERANGE;
+		return -1;
+	}
+
+	return ret;
 }
 
 

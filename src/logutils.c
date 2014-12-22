@@ -53,6 +53,11 @@ static sig_atomic_t applesquePriority = 0;
 static sig_atomic_t autoUpperCase = 0;
 static sig_atomic_t autoPeriod = 1;
 static unsigned int logMask = 0xff;
+static int ipri[] = {LOG_EMERG, LOG_ALERT, LOG_CRIT, LOG_ERR, LOG_WARNING,
+	      LOG_NOTICE, LOG_INFO, LOG_DEBUG};
+
+static const char * spri[] = {"LOG_EMERG", "LOG_ALERT", "LOG_CRIT", "LOG_ERR",
+	      "LOG_WARNING", "LOG_NOTICE", "LOG_INFO", "LOG_DEBUG"};
 
 static bool IsTty(void)
 {
@@ -167,10 +172,12 @@ void HashTagPriority(bool x) {
 }
 
 static void SetLogMask(unsigned int mask) {
+	pthread_mutex_lock(&mutex);
 	setlogmask(mask);
 	if (mask != 0) {
 		logMask = mask;
 	}
+	pthread_mutex_unlock(&mutex);
 }
 
 void SetLogTarget(sig_atomic_t target, ...)
@@ -235,23 +242,27 @@ void SetLogTarget(sig_atomic_t target, ...)
 	pthread_mutex_unlock(&mutex);
 }
 
-bool LogUpTo(const char * const str)
+bool LogUpToInt(long pri)
 {
-	assert(str != NULL);
-
-	if (str == NULL) {
+	if (pri < 0 || pri > 7) {
+		fprintf(stderr,
+			"illegal value for configuration file entry named"
+			" \"log-up-to\": %li\n", pri);
 		return false;
 	}
 
-	char *tmp = strdup(str);
+	SetLogMask(LOG_UPTO(ipri[pri]));
 
-	assert(tmp != NULL);
+	return true;
+}
+
+static bool LogUpToString(const char * const str)
+{
+	char *tmp = strdup(str);
 
 	if (tmp == NULL) {
 		return false;
 	}
-
-	pthread_mutex_lock(&mutex);
 
 	for (int i = 0; tmp[i] != '\0'; i += 1) {
 		if (tmp[i] == '-' || ispunct(tmp[i])) {
@@ -267,12 +278,6 @@ bool LogUpTo(const char * const str)
 		tmp = NULL;
 		tmp = buf;
 	}
-
-	static int ipri[] = {LOG_EMERG, LOG_ALERT, LOG_CRIT, LOG_ERR, LOG_WARNING,
-		      LOG_NOTICE, LOG_INFO, LOG_DEBUG};
-
-	static const char * spri[] = {"LOG_EMERG", "LOG_ALERT", "LOG_CRIT", "LOG_ERR",
-		      "LOG_WARNING", "LOG_NOTICE", "LOG_INFO", "LOG_DEBUG"};
 
 	bool matched = false;
 
@@ -291,9 +296,26 @@ bool LogUpTo(const char * const str)
 
 	free(tmp);
 
-	pthread_mutex_unlock(&mutex);
+	return matched;
+}
 
-	return true;
+bool LogUpTo(const char * const str)
+{
+	assert(str != NULL);
+
+	if (str == NULL) {
+		return false;
+	}
+
+	errno = 0;
+
+	long logPri = ConvertStringToInt(str);
+
+	if (errno != 0) {
+		return LogUpToString(str);
+	}
+
+	return LogUpToInt(logPri);
 }
 
 void Logmsg(int priority, const char *const fmt, ...)
