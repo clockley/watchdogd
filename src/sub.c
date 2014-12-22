@@ -221,7 +221,9 @@ long ConvertStringToInt(const char *const str)
 	long ret = strtol((str), &endptr, 10);
 
 	if (*endptr != '\0') {
-		errno = ERANGE;
+		if (errno == 0) {
+			errno = ERANGE;
+		}
 		return -1;
 	}
 
