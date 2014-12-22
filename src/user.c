@@ -20,10 +20,8 @@
 
 static bool SetGroup(const char *restrict const group)
 {
-	assert(group != NULL);
-
 	if (group == NULL) {
-		return false;
+		return true;
 	}
 
 	long int initlen = sysconf(_SC_GETGR_R_SIZE_MAX);
