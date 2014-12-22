@@ -154,11 +154,16 @@ void list_add(struct list *entry, struct list *head);
  * @param member Member name of the struct list field in the list element.
  * @return A pointer to the last list element.
  */
+
+#ifndef __cplusplus
+#define decltype __typeof__
+#endif
+
 #define list_last_entry(ptr, type, member) \
     list_entry((ptr)->prev, type, member)
 
 #define __container_of(ptr, sample, member)				\
-    (typeof(sample))((char *)(ptr)						\
+    (decltype(sample))((char *)(ptr)						\
 	     - ((char *)&(sample)->member - (char *)(sample)))
 
 /**
@@ -168,6 +173,7 @@ void list_add(struct list *entry, struct list *head);
  *
  * See list_for_each_entry for more details.
  */
+
 #define list_for_each_entry(pos, tmp, head, member)		\
     for (pos = __container_of((head)->next, pos, member),		\
 	 tmp = __container_of(pos->member.next, pos, member);		\
@@ -178,7 +184,6 @@ void list_add(struct list *entry, struct list *head);
     list_entry((ptr)->prev, type, member)
 
 #define container_of(ptr, type, member) ({ \
-                const typeof( ((type *)0)->member ) *__mptr = (ptr); \
+                decltype( ((type *)0)->member ) *__mptr = (ptr); \
                 (type *)( (char *)__mptr - offsetof(type,member));})
-
 #endif				/* LIST_H_ */
