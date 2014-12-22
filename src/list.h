@@ -163,7 +163,7 @@ void list_add(struct list *entry, struct list *head);
     list_entry((ptr)->prev, type, member)
 
 #define __container_of(ptr, sample, member)				\
-    (decltype(sample))((char *)(ptr)						\
+    (decltype(sample))(void*)((char *)(ptr)						\
 	     - ((char *)&(sample)->member - (char *)(sample)))
 
 /**
