@@ -275,7 +275,6 @@ static bool LogUpToString(const char * const str)
 		char *buf = NULL;
 		Wasprintf(&buf, "%s%s", "LOG_", tmp);
 		free(tmp);
-		tmp = NULL;
 		tmp = buf;
 	}
 
