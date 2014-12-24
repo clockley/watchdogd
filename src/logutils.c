@@ -320,8 +320,6 @@ bool LogUpTo(const char * const str)
 
 void Logmsg(int priority, const char *const fmt, ...)
 {
-	char buf[2048] = { '\0' };
-
 	assert(fmt != NULL);
 
 	if ((LOG_MASK (LOG_PRI (priority)) & logMask) == 0) {
@@ -330,6 +328,20 @@ void Logmsg(int priority, const char *const fmt, ...)
 
 	va_list args;
 	va_start(args, fmt);
+
+	int len = vsnprintf(NULL, 0, fmt, args) + strlen((applesquePriority == 0) ? "<0>":" #System #Attention") + 1;
+
+	if (len <= 0) {
+		len = 2048;
+	}
+
+	if (len > 2048) {
+		len = 2048;
+	}
+
+	char buf[len];
+
+	memset(buf, 0, len);
 
 	if ((logTarget == STANDARD_ERROR || logTarget == FILE_APPEND || logTarget == FILE_NEW) && applesquePriority == 0) {
 
@@ -410,7 +422,7 @@ void Logmsg(int priority, const char *const fmt, ...)
 			strncat(buf, " #System #Comment", sizeof(buf) - 1);
 			break;
 		case LOG_DEBUG:
-			strncat(buf, " #System #Developer ", sizeof(buf) - 1);
+			strncat(buf, " #System #Developer", sizeof(buf) - 1);
 			break;
 		default:
 			assert(false);
@@ -443,7 +455,5 @@ void Logmsg(int priority, const char *const fmt, ...)
 		assert(buf[sizeof(buf) - 1] == '\0');
 
 		syslog(priority, "%s", buf);
-
-		return;
 	}
 }
