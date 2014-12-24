@@ -21,7 +21,8 @@
 static bool SetGroup(const char *restrict const group)
 {
 	if (group == NULL) {
-		return true;
+		errno = -1;
+		return false;
 	}
 
 	long int initlen = sysconf(_SC_GETGR_R_SIZE_MAX);
@@ -145,8 +146,11 @@ int RunAsUser(const char *restrict const user, const char *restrict const group)
 		}
 	} else {
 		if (SetGroup(group) == false) {
-			Logmsg(LOG_ERR, "unable run executable in group: %s", group);
-			Logmsg(LOG_ERR, "trying default group");
+
+			if (errno != -1) {
+				Logmsg(LOG_ERR, "unable run executable in group: %s", group);
+				Logmsg(LOG_ERR, "trying default group");
+			}
 
 			if (setgid(pwd.pw_gid) != 0) {
 				goto error;
