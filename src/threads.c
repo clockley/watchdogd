@@ -305,9 +305,7 @@ static void *TestMemoryAllocation(void *arg)
 			config->error |= OUTOFMEMORY;
 		}
 
-		unsigned int seed = (unsigned int)time(NULL);
-
-		memset(buf, rand_r(&seed), (config->allocatableMemory * pageSize));
+		memset(buf, 0, (config->allocatableMemory * pageSize));
 
 		if (munmap(buf, config->allocatableMemory * pageSize) != 0) {
 			Logmsg(LOG_CRIT, "munmap failed: %s", strerror(errno));
