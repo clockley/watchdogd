@@ -272,8 +272,8 @@ static bool LogUpToString(const char * const str)
 	}
 
 	if (strstr(tmp, "LOG_") == NULL) {
-		char *buf  = (char*)calloc(1, strlen(tmp) + strlen("LOG_") + 2);
-		snprintf(buf, strlen(tmp) + strlen("LOG_") + 1, "%s%s", "LOG_", tmp);
+		char *buf = NULL;
+		Wasprintf(&buf, "%s%s", "LOG_", tmp);
 		free(tmp);
 		tmp = NULL;
 		tmp = buf;
