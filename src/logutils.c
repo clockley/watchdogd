@@ -47,17 +47,31 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #define KWHT  "\x1B[37m"
 
 static sig_atomic_t logTarget = INVALID_LOG_TARGET;
-static FILE* logFile = NULL;
+static FILE *logFile = NULL;
 static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 static sig_atomic_t applesquePriority = 0;
 static sig_atomic_t autoUpperCase = 0;
 static sig_atomic_t autoPeriod = 1;
 static unsigned int logMask = 0xff;
-static int ipri[] = {LOG_EMERG, LOG_ALERT, LOG_CRIT, LOG_ERR, LOG_WARNING,
-	      LOG_NOTICE, LOG_INFO, LOG_DEBUG};
+static int ipri[] = { LOG_EMERG, LOG_ALERT, LOG_CRIT, LOG_ERR, LOG_WARNING,
+	LOG_NOTICE, LOG_INFO, LOG_DEBUG
+};
 
-static const char * spri[] = {"LOG_EMERG", "LOG_ALERT", "LOG_CRIT", "LOG_ERR",
-	      "LOG_WARNING", "LOG_NOTICE", "LOG_INFO", "LOG_DEBUG"};
+enum {
+	SHORT,
+	LONG
+};
+
+static const char * const spri[][2] = {
+		{"LOG_EMERG", "LOG_Emergency"},
+		{"LOG_ALERT", ""},
+		{"LOG_CRIT", "LOG_Critical"},
+		{"LOG_ERR", "LOG_Error"},
+		{"LOG_WARNING", ""},
+		{"LOG_NOTICE", ""},
+		{"LOG_INFO", ""},
+		{"LOG_DEBUG", ""}
+};
 
 static bool IsTty(void)
 {
@@ -116,7 +130,7 @@ static void SetTextColor(int priority)
 	default:
 		assert(false);
 	}
-	
+
 }
 
 static void CloseOldTarget(sig_atomic_t oldTarget)
@@ -147,7 +161,8 @@ static void CloseOldTarget(sig_atomic_t oldTarget)
 
 }
 
-void SetAutoPeriod(bool x) {
+void SetAutoPeriod(bool x)
+{
 	if (x) {
 		autoPeriod = 1;
 	} else {
@@ -155,7 +170,8 @@ void SetAutoPeriod(bool x) {
 	}
 }
 
-void SetAutoUpperCase(bool x) {
+void SetAutoUpperCase(bool x)
+{
 	if (x) {
 		autoUpperCase = 1;
 	} else {
@@ -163,7 +179,8 @@ void SetAutoUpperCase(bool x) {
 	}
 }
 
-void HashTagPriority(bool x) {
+void HashTagPriority(bool x)
+{
 	if (x) {
 		applesquePriority = 1;
 	} else {
@@ -171,7 +188,8 @@ void HashTagPriority(bool x) {
 	}
 }
 
-static void SetLogMask(unsigned int mask) {
+static void SetLogMask(unsigned int mask)
+{
 	pthread_mutex_lock(&mutex);
 	setlogmask(mask);
 	if (mask != 0) {
@@ -192,7 +210,8 @@ void SetLogTarget(sig_atomic_t target, ...)
 	if (target == SYSTEM_LOG) {
 
 		if (logTarget != SYSTEM_LOG) {
-			openlog("watchdogd", LOG_PID | LOG_NOWAIT | LOG_CONS, LOG_DAEMON);
+			openlog("watchdogd", LOG_PID | LOG_NOWAIT | LOG_CONS,
+				LOG_DAEMON);
 		}
 
 		CloseOldTarget(logTarget);
@@ -204,7 +223,7 @@ void SetLogTarget(sig_atomic_t target, ...)
 		va_list ap;
 		va_start(ap, target);
 
-		const char * fileName = va_arg(ap, const char *);
+		const char *fileName = va_arg(ap, const char *);
 
 		assert(fileName != NULL);
 
@@ -214,7 +233,8 @@ void SetLogTarget(sig_atomic_t target, ...)
 				if (logTarget == SYSTEM_LOG) {
 					syslog(LOG_ALERT, "%m");
 				} else {
-					fprintf(stderr, "%s\n", strerror(errno));
+					fprintf(stderr, "%s\n",
+						strerror(errno));
 				}
 			} else {
 				CloseOldTarget(logTarget);
@@ -226,7 +246,8 @@ void SetLogTarget(sig_atomic_t target, ...)
 				if (logTarget == SYSTEM_LOG) {
 					syslog(LOG_ALERT, "%m");
 				} else {
-					fprintf(stderr, "%s\n", strerror(errno));
+					fprintf(stderr, "%s\n",
+						strerror(errno));
 				}
 			} else {
 				CloseOldTarget(logTarget);
@@ -256,7 +277,7 @@ bool LogUpToInt(long pri)
 	return true;
 }
 
-static bool LogUpToString(const char * const str)
+static bool LogUpToString(const char *const str)
 {
 	char *tmp = strdup(str);
 
@@ -281,7 +302,12 @@ static bool LogUpToString(const char * const str)
 	bool matched = false;
 
 	for (size_t i = 0; i < ARRAY_SIZE(spri); i += 1) {
-		if (strcasecmp(tmp, spri[i]) == 0) {
+		if (strcasecmp(tmp, spri[i][SHORT]) == 0) {
+			SetLogMask(LOG_UPTO(ipri[i]));
+			matched = true;
+		}
+
+		if (strcasecmp(tmp, spri[i][LONG]) == 0) {
 			SetLogMask(LOG_UPTO(ipri[i]));
 			matched = true;
 		}
@@ -298,7 +324,7 @@ static bool LogUpToString(const char * const str)
 	return matched;
 }
 
-bool LogUpTo(const char * const str)
+bool LogUpTo(const char *const str)
 {
 	assert(str != NULL);
 
@@ -321,14 +347,17 @@ void Logmsg(int priority, const char *const fmt, ...)
 {
 	assert(fmt != NULL);
 
-	if ((LOG_MASK (LOG_PRI (priority)) & logMask) == 0) {
+	if ((LOG_MASK(LOG_PRI(priority)) & logMask) == 0) {
 		return;
 	}
 
 	va_list args;
 	va_start(args, fmt);
 
-	int len = vsnprintf(NULL, 0, fmt, args) + strlen((applesquePriority == 0) ? "<0>":" #System #Attention") + 1;
+	int len =
+	    vsnprintf(NULL, 0, fmt,
+		      args) + strlen((applesquePriority ==
+				      0) ? "<0>" : " #System #Attention") + 1;
 
 	if (len <= 0) {
 		len = 2048;
@@ -342,7 +371,8 @@ void Logmsg(int priority, const char *const fmt, ...)
 
 	memset(buf, 0, len);
 
-	if ((logTarget == STANDARD_ERROR || logTarget == FILE_APPEND || logTarget == FILE_NEW) && applesquePriority == 0) {
+	if ((logTarget == STANDARD_ERROR || logTarget == FILE_APPEND
+	     || logTarget == FILE_NEW) && applesquePriority == 0) {
 
 		switch (priority) {
 		case LOG_EMERG:
@@ -428,7 +458,8 @@ void Logmsg(int priority, const char *const fmt, ...)
 		}
 	}
 
-	if (logTarget == STANDARD_ERROR || logTarget == FILE_APPEND || logTarget == FILE_NEW) {
+	if (logTarget == STANDARD_ERROR || logTarget == FILE_APPEND
+	    || logTarget == FILE_NEW) {
 		assert(buf[sizeof(buf) - 1] == '\0');
 
 		if (logTarget == STANDARD_ERROR) {
