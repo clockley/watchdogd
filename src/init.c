@@ -207,11 +207,10 @@ static int PrintHelp(void)
 		{"  -F, --foreground", "run in foreground mode"},
 		{"  -s, --sync", "sync file-systems regularly"},
 		{"  -h, --help", "this help"},
-		{"  -V, --version", "print version info"},
-		{NULL, NULL}
+		{"  -V, --version", "print version info"}
 	};
 
-	for (int i = 0; help[i][0] != NULL; i += 1) {
+	for (int i = 0; i < ARRAY_SIZE(help); i += 1) {
 		long col = GetConsoleColumns();
 		if (col >= 80) { //KLUGE
 			col += col / 2;
