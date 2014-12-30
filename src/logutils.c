@@ -48,7 +48,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 static sig_atomic_t logTarget = INVALID_LOG_TARGET;
 static FILE *logFile = NULL;
-static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t mutex;
 static sig_atomic_t applesquePriority = 0;
 static sig_atomic_t autoUpperCase = 0;
 static sig_atomic_t autoPeriod = 1;
@@ -56,6 +56,17 @@ static unsigned int logMask = 0xff;
 static int ipri[] = { LOG_EMERG, LOG_ALERT, LOG_CRIT, LOG_ERR, LOG_WARNING,
 	LOG_NOTICE, LOG_INFO, LOG_DEBUG
 };
+
+static pthread_once_t initMutex = PTHREAD_ONCE_INIT;
+
+static void MutexInit(void)
+{
+	pthread_mutexattr_t attr;
+	pthread_mutexattr_init(&attr);
+	pthread_mutexattr_setpshared(&attr, PTHREAD_PROCESS_SHARED);
+	pthread_mutex_init(&mutex, &attr);
+	pthread_mutexattr_destroy(&attr);
+}
 
 enum {
 	SHORT,
@@ -190,6 +201,7 @@ void HashTagPriority(bool x)
 
 static void SetLogMask(unsigned int mask)
 {
+	pthread_once(&initMutex, MutexInit);
 	pthread_mutex_lock(&mutex);
 	setlogmask(mask);
 	if (mask != 0) {
@@ -200,6 +212,7 @@ static void SetLogMask(unsigned int mask)
 
 void SetLogTarget(sig_atomic_t target, ...)
 {
+	pthread_once(&initMutex, MutexInit);
 	pthread_mutex_lock(&mutex);
 
 	if (target == STANDARD_ERROR) {
