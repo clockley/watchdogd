@@ -22,6 +22,7 @@
 #include <sys/prctl.h>
 #include <linux/watchdog.h>
 #include <sys/reboot.h>
+#include <sys/sysinfo.h>
 #include <linux/reboot.h>
 #include <utmpx.h>
 #include <utmp.h>
@@ -54,4 +55,5 @@ int GetConsoleColumns(void);
 int SystemdWatchdogEnabled(const int, long long int *const);
 bool OnParentDeathSend(int);
 int NoNewProvileges(void);
+int GetCpuCount(void);
 #endif

@@ -40,6 +40,12 @@
 
 //Copied into this program Sun September 8, 2013 by Christian Lockley
 
+#ifndef __cplusplus
+	static volatile _Atomic(unsigned long long) workerThreadCount = 0;
+#else
+	static std::atomic<unsigned long long> workerThreadCount = 0;
+#endif
+
 size_t DirentBufSize(DIR * dirp)
 {
 	long name_max;
@@ -241,37 +247,189 @@ void FreeExeList(ProcessList * p)
 	}
 }
 
-int ExecuteRepairScripts(ProcessList * p, struct cfgoptions *s)
+static void *__ExecScriptWorkerThreadLegacy(void *a)
 {
-	assert(s != NULL);
-	assert(p != NULL);
+	assert(a != NULL);
 
+	__ExecWorker *worker = (__ExecWorker*)a;
+	repaircmd_t *c = worker->command;
+	struct cfgoptions *s = worker->config;
+
+	workerThreadCount += 1;
+
+	if (worker->retString == NULL) {
+		c->ret = Spawn(s->repairBinTimeout, s, c->path, c->path, worker->mode,
+			       NULL);
+	} else {
+		c->ret = Spawn(s->repairBinTimeout, s, c->path, c->path, worker->mode,
+			       worker->retString, NULL);
+	}
+
+	free(worker->mode);
+	free(worker->retString);
+
+	if (worker->last == true) {
+		pthread_barrier_wait(&worker->barrier);
+	}
+
+	free(a);
+
+	workerThreadCount -= 1;
+
+	return NULL;
+}
+
+static void __WaitForWorkers(struct cfgoptions *s)
+{
+	if (s->repairBinTimeout > 0) { //Just sleep
+		struct timespec rqtp = {0};
+		clock_gettime(CLOCK_MONOTONIC, &rqtp);
+		rqtp.tv_sec += s->repairBinTimeout;
+		NormalizeTimespec(&rqtp);
+		while (clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &rqtp, NULL) != 0
+			&& errno == EINTR) {
+			;
+		}
+	} else { //if not given a timeout value busy wait
+		sched_yield();
+		while (workerThreadCount != 0) {
+			sleep(1);
+		}
+	}
+}
+
+static void * __ExecuteRepairScriptsLegacy(void *a)
+{
+	struct executeScriptsStruct *arg = (struct executeScriptsStruct*)a;
+	ProcessList *p = arg->list;
+	struct cfgoptions *s = arg->config;
+	
+	repaircmd_t *c = NULL;
+	repaircmd_t *next = NULL;
+	long count = 0;
+	static bool warnOnce = false;
+
+	list_for_each_entry(c, next, &p->head, entry) {
+		if (c->legacy == true) {
+			count += 1;
+		}
+	}
+
+	list_for_each_entry(c, next, &p->head, entry) {
+		if (c->legacy == false) {
+			continue;
+		}
+		__ExecWorker *targ = (__ExecWorker *)calloc(1, sizeof(__ExecWorker));
+		if (targ == NULL) {
+			Logmsg(LOG_ERR, "unable to allocate memory: %s", strerror(errno));
+		}
+		targ->command = c;
+		targ->config = s;
+		targ->mode = strdup("test");
+		if (targ->mode == NULL) {
+			Logmsg(LOG_ERR, "unable to allocate memory: %s", strerror(errno));
+		}
+		targ->last = false;
+		targ->retString = NULL;
+
+		int ret = CreateDetachedThread(__ExecScriptWorkerThreadLegacy, targ);
+		if (ret != 0) { //fallback
+			if (warnOnce == false) {
+				Logmsg(LOG_DEBUG, "failed to create thread,... using non-threaded code path");
+				warnOnce = true;
+			}
+			c->ret = Spawn(s->repairBinTimeout, s, c->path, c->path, targ->mode,
+				       NULL);
+			free((void*)targ->retString);
+			free((void*)targ->mode);
+			free((void*)targ);
+		} else {
+			sched_yield();
+			while (workerThreadCount > GetCpuCount()*2) {
+				int tmp = s->repairBinTimeout / 2;
+				if (tmp == 0) {
+					tmp = 1;
+				}
+				sleep(tmp);
+			}
+		}
+	}
+
+	c = NULL;
+	next = NULL;
+
+	__WaitForWorkers(s);
+
+	list_for_each_entry(c, next, &p->head, entry) {
+		if (c->legacy == false) {
+			continue;
+		}
+
+		if (c->ret == 0) {
+			continue;
+		}
+
+		__ExecWorker *targ = (__ExecWorker *)calloc(1, sizeof(__ExecWorker));
+		if (targ == NULL) {
+			Logmsg(LOG_ERR, "unable to allocate memory: %s", strerror(errno));
+		}
+		targ->command = c;
+		targ->config = s;
+		Wasprintf(&targ->retString, "%i", c->ret);
+		if (targ->retString == NULL) {
+			Logmsg(LOG_ERR, "unable to allocate memory: %s", strerror(errno)); //tell user then crash
+		}
+		targ->mode = strdup("repair");
+		if (targ->mode == NULL) {
+			Logmsg(LOG_ERR, "unable to allocate memory: %s", strerror(errno));
+		}
+
+		if (next == NULL && s->repairBinTimeout <= 0) {
+			targ->last = true;
+			pthread_barrier_init(&targ->barrier, NULL, 2);
+		}
+
+		int ret = CreateDetachedThread(__ExecScriptWorkerThreadLegacy, targ);
+
+		if (ret != 0) {
+			c->ret = Spawn(s->repairBinTimeout, s, c->path, c->path, targ->mode,
+				       targ->retString, NULL);
+			free((void*)targ->mode);
+			free((void*)targ->retString);
+			free((void*)targ);
+		}
+	
+		if (next == NULL) {
+			pthread_barrier_wait(&targ->barrier);
+			pthread_barrier_destroy(&targ->barrier);
+		}
+	}
+
+	__WaitForWorkers(s);
+
+	list_for_each_entry(c, next, &p->head, entry) {
+		if (c->ret != 0) {
+			Logmsg(LOG_DEBUG, "repair %s script failed", c->path);
+			arg->ret = 1;
+			break;
+		}
+	}
+
+	pthread_barrier_wait(&arg->barrier);
+	return NULL;
+}
+
+static void * __ExecuteRepairScripts(void *a)
+{
+	struct executeScriptsStruct *arg = (struct executeScriptsStruct*)a;
+	ProcessList *p = arg->list;
+	struct cfgoptions *s = arg->config;
+	
 	repaircmd_t *c = NULL;
 	repaircmd_t *next = NULL;
 
 	list_for_each_entry(c, next, &p->head, entry) {
-
-		if (c->legacy == true) {
-			c->ret =
-			    Spawn(s->repairBinTimeout, s, c->path, c->path, "test",
-				  NULL);
-
-			if (c->ret == 0) {
-				continue;
-			}
-
-			char buf[8] = { 0 };
-			snprintf(buf, sizeof(buf), "%i", c->ret);
-
-			c->ret =
-			    Spawn(s->repairBinTimeout, s, c->path, c->path, "repair",
-				  buf, NULL);
-
-			if (c->ret != 0) {
-				c->ret = 0;	//reset to zero
-				return -1;	//exit
-			}
-		} else {
+		if (c->legacy == false) {
 			c->ret =
 			    SpawnAttr(&c->spawnattr, c->path, c->path, "test",
 				  NULL);
@@ -288,10 +446,63 @@ int ExecuteRepairScripts(ProcessList * p, struct cfgoptions *s)
 				  buf, NULL);
 
 			if (c->ret != 0) {
+				Logmsg(LOG_DEBUG, "repair %s script failed", c->path);
 				c->ret = 0;	//reset to zero
-				return -1;	//exit
+				arg->ret = 1;	//exit
+				break;
 			}
 		}
+	}
+
+	pthread_barrier_wait(&arg->barrier);
+	return NULL;
+}
+
+int ExecuteRepairScripts(ProcessList * p, struct cfgoptions *s)
+{
+	assert(s != NULL);
+	assert(p != NULL);
+
+	pid_t pid = fork();
+
+	if (pid == 0) {
+		if (OnParentDeathSend(SIGKILL) == false) {
+			CreateDetachedThread(ExitIfParentDied, NULL);
+		}
+		struct executeScriptsStruct ess;
+		ess.list = p;
+		ess.config = s;
+		ess.ret = 0;
+
+		pthread_barrier_init(&ess.barrier, NULL, 3);
+
+		CreateDetachedThread(__ExecuteRepairScriptsLegacy, &ess);
+		CreateDetachedThread(__ExecuteRepairScripts, &ess);
+
+		pthread_barrier_wait(&ess.barrier);
+		pthread_barrier_destroy(&ess.barrier);
+
+		if (workerThreadCount != 0) {
+			Logmsg(LOG_ERR, "work thread not equal to zero on exit: %i", workerThreadCount);
+		}
+
+		if (ess.ret != 0) {
+			exit(1);
+		}
+		exit(0);
+	}
+
+	int ret = 0;
+	if (pid != -1) {
+		while (waitpid (pid, &ret, 0) == -1 && errno == EINTR)
+			;
+
+		if (WEXITSTATUS(ret) != 0) {
+			return -1;
+		}
+	} else {
+		Logmsg(LOG_ERR, "fork failed: %s", strerror(errno));
+		return -1;
 	}
 
 	return 0;

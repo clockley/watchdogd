@@ -286,7 +286,7 @@ int CreateDetachedThread(void *(*startFunction) (void *), void *const arg)
 
 	size_t stackSize = 0;
 	if (pthread_attr_getstacksize(&attr, &stackSize) == 0) {
-		const size_t targetStackSize = 1048576;
+		const size_t targetStackSize = 131072;
 		if ((targetStackSize >= PTHREAD_STACK_MIN)
 		    && (stackSize > targetStackSize)) {
 			if (pthread_attr_setstacksize(&attr, 1048576) != 0) {
@@ -306,10 +306,9 @@ int CreateDetachedThread(void *(*startFunction) (void *), void *const arg)
 	errno = 0;
 
 	if (pthread_create(&thread, &attr, startFunction, arg) != 0) {
-		Logmsg(LOG_CRIT, "watchdogd: pthread_create failed: %s\n",
-		       strerror(errno));
+		int ret = -errno;
 		pthread_attr_destroy(&attr);
-		return -1;
+		return ret;
 	}
 
 	pthread_attr_destroy(&attr);
@@ -381,4 +380,13 @@ void FatalError(struct cfgoptions *s)
 	config_destroy(&s->cfg);
 
 	abort();
+}
+
+void *ExitIfParentDied(void *arg)
+{
+	while (getppid() != 1) {
+		sleep(1);
+	}
+
+	exit(0);
 }

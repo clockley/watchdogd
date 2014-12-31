@@ -36,15 +36,6 @@ static void *WaitThread(void *arg)
 	return NULL;
 }
 
-static void *ExitIfParentDied(void *arg)
-{
-	while (getppid() != 1) {
-		sleep(1);
-	}
-
-	exit(0);
-}
-
 int Spawn(int timeout, struct cfgoptions *const config, const char *file,
 	  const char *args, ...)
 {

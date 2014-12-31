@@ -541,12 +541,12 @@ int StopNetwork(void)
 static bool IsRootStorageDaemon(pid_t pid)
 {
 //http://www.freedesktop.org/wiki/Software/systemd/RootStorageDaemons/
-	char path[1024] = {"\0"};
+	char path[512] = {"\0"};
 	snprintf(path, sizeof(path) - 1, "/proc/%ld/cmdline", (long)pid);
 
 	int fd = open(path, O_RDONLY|O_CLOEXEC);
 
-	char buf[64] =  {"\0"}; //overkill
+	char buf[32] =  {"\0"};
 
 	if (fd < 0) {
 		goto error;
@@ -763,5 +763,14 @@ int NoNewProvileges(void)
 	}
 
 	return 0;
+}
+
+int GetCpuCount(void)
+{
+	struct sysinfo info;
+	if (sysinfo(&info) < 0) {
+		return 1;
+	}
+	return info.procs;
 }
 #endif
