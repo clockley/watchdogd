@@ -306,14 +306,6 @@ static void * __ExecuteRepairScriptsLegacy(void *a)
 	
 	repaircmd_t *c = NULL;
 	repaircmd_t *next = NULL;
-	long count = 0;
-	static bool warnOnce = false;
-
-	list_for_each_entry(c, next, &p->head, entry) {
-		if (c->legacy == true) {
-			count += 1;
-		}
-	}
 
 	list_for_each_entry(c, next, &p->head, entry) {
 		if (c->legacy == false) {
@@ -334,10 +326,6 @@ static void * __ExecuteRepairScriptsLegacy(void *a)
 
 		int ret = CreateDetachedThread(__ExecScriptWorkerThreadLegacy, targ);
 		if (ret != 0) { //fallback
-			if (warnOnce == false) {
-				Logmsg(LOG_DEBUG, "failed to create thread,... using non-threaded code path");
-				warnOnce = true;
-			}
 			c->ret = Spawn(s->repairBinTimeout, s, c->path, c->path, targ->mode,
 				       NULL);
 			free((void*)targ->retString);
