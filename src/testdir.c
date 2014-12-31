@@ -471,7 +471,7 @@ int ExecuteRepairScripts(ProcessList * p, struct cfgoptions *s)
 		pthread_barrier_destroy(&ess.barrier);
 
 		if (workerThreadCount != 0) {
-			Logmsg(LOG_ERR, "work thread not equal to zero on exit: %i", workerThreadCount);
+			Logmsg(LOG_ERR, "worker thread count not equal to zero on exit: %i", workerThreadCount);
 		}
 
 		if (ess.ret != 0) {
