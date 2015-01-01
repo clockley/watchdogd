@@ -83,10 +83,7 @@ static void *Sync(void *arg)
 static void *Ping(void *arg)
 {
 	struct cfgoptions *s = (struct cfgoptions *)arg;
-	char * buf = malloc(NI_MAXHOST);
-	if (buf == NULL) {
-		abort();
-	}
+	static char buf[NI_MAXHOST];
 	for (;;) {
 		pthread_mutex_lock(&managerlock);
 		if (ping_send(s->pingObj) > 0) {
@@ -97,8 +94,6 @@ static void *Ping(void *arg)
 				size_t len = sizeof(latency);
 				ping_iterator_get_info(iter, PING_INFO_LATENCY,
 						       &latency, &len);
-
-				memset(buf, 0, NI_MAXHOST);
 
 				len = NI_MAXHOST;
 				ping_iterator_get_info(iter, PING_INFO_ADDRESS,
@@ -121,6 +116,8 @@ static void *Ping(void *arg)
 					       "no response from ping (target: %s)",
 					       buf);
 				}
+
+				memset(buf, 0, NI_MAXHOST);
 
 				if (ping_iterator_get_context(iter) == NULL) {
 					ping_iterator_set_context(iter,
@@ -160,8 +157,6 @@ static void *Ping(void *arg)
 		pthread_cond_wait(&workerupdate, &managerlock);
 		pthread_mutex_unlock(&managerlock);
 	}
-
-	free(buf);
 
 	return NULL;
 }
