@@ -247,6 +247,14 @@ void FreeExeList(ProcessList * p)
 	}
 }
 
+static ThrottleWorkerThreadCreation(struct cfgoptions *const config)
+{
+	sched_yield();
+	while (workerThreadCount > GetCpuCount()*2) {
+		sleep((config->repairBinTimeout / 2 == 0) ? 1: (config->repairBinTimeout / 2));
+	}
+}
+
 static void *__ExecScriptWorkerThreadLegacy(void *a)
 {
 	assert(a != NULL);
@@ -332,14 +340,7 @@ static void * __ExecuteRepairScriptsLegacy(void *a)
 			free((void*)targ->mode);
 			free((void*)targ);
 		} else {
-			sched_yield();
-			while (workerThreadCount > GetCpuCount()*2) {
-				int tmp = s->repairBinTimeout / 2;
-				if (tmp == 0) {
-					tmp = 1;
-				}
-				sleep(tmp);
-			}
+			ThrottleWorkerThreadCreation(s);
 		}
 	}
 
