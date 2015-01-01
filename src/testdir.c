@@ -333,15 +333,11 @@ static void * __ExecuteRepairScriptsLegacy(void *a)
 		targ->retString = NULL;
 
 		int ret = CreateDetachedThread(__ExecScriptWorkerThreadLegacy, targ);
-		if (ret != 0) { //fallback
-			c->ret = Spawn(s->repairBinTimeout, s, c->path, c->path, targ->mode,
-				       NULL);
-			free((void*)targ->retString);
-			free((void*)targ->mode);
-			free((void*)targ);
-		} else {
-			ThrottleWorkerThreadCreation(s);
+		if (ret != 0) {
+			Logmsg(LOG_ERR, "Unable to create thread %s", strerror(-ret));
+			abort();
 		}
+		ThrottleWorkerThreadCreation(s);
 	}
 
 	c = NULL;
@@ -381,13 +377,10 @@ static void * __ExecuteRepairScriptsLegacy(void *a)
 		int ret = CreateDetachedThread(__ExecScriptWorkerThreadLegacy, targ);
 
 		if (ret != 0) {
-			c->ret = Spawn(s->repairBinTimeout, s, c->path, c->path, targ->mode,
-				       targ->retString, NULL);
-			free((void*)targ->mode);
-			free((void*)targ->retString);
-			free((void*)targ);
+			Logmsg(LOG_ERR, "Unable to create thread %s", strerror(-ret));
+			abort();
 		}
-	
+
 		if (next == NULL) {
 			pthread_barrier_wait(&targ->barrier);
 			pthread_barrier_destroy(&targ->barrier);
