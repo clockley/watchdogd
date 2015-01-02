@@ -24,6 +24,17 @@ struct __ExecScriptWorkerThread
 
 typedef struct __ExecScriptWorkerThread __ExecWorker;
 
+struct container {
+#ifndef __cplusplus
+	volatile _Atomic(unsigned long long) workerThreadCount;
+#else
+	std::atomic<volatile unsigned long long> workerThreadCount;
+#endif
+	__ExecWorker *targ;
+};
+
+typedef struct container Container;
+
 int CreateLinkedListOfExes(const char *repairScriptFolder, ProcessList * p, struct cfgoptions *const);
 int ExecuteRepairScripts(ProcessList * p, struct cfgoptions *s);
 void FreeExeList(ProcessList * p);

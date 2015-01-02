@@ -14,6 +14,7 @@
  * permissions and limitations under the License. 
  */
 
+#define _BSD_SOURCE
 #include "watchdogd.h"
 #include "sub.h"
 #include <dirent.h>
@@ -40,11 +41,7 @@
 
 //Copied into this program Sun September 8, 2013 by Christian Lockley
 
-#ifndef __cplusplus
-	static volatile _Atomic(unsigned long long) workerThreadCount = 0;
-#else
-	static std::atomic<unsigned long long> workerThreadCount = 0;
-#endif
+static const size_t MAX_WORKER_THREADS = 32;
 
 size_t DirentBufSize(DIR * dirp)
 {
@@ -73,7 +70,8 @@ size_t DirentBufSize(DIR * dirp)
 		? name_end : sizeof(struct dirent));
 }
 
-int CreateLinkedListOfExes(const char *repairScriptFolder, ProcessList * p, struct cfgoptions *const config)
+int CreateLinkedListOfExes(const char *repairScriptFolder, ProcessList * p,
+			   struct cfgoptions *const config)
 {
 	assert(p != NULL);
 	assert(repairScriptFolder != NULL);
@@ -90,7 +88,8 @@ int CreateLinkedListOfExes(const char *repairScriptFolder, ProcessList * p, stru
 	fd = open(repairScriptFolder, O_DIRECTORY | O_RDONLY);
 
 	if (fd == -1) {
-		fprintf(stderr, "watchdogd: %s: %s\n", repairScriptFolder, strerror(errno));
+		fprintf(stderr, "watchdogd: %s: %s\n", repairScriptFolder,
+			strerror(errno));
 		return 1;
 	}
 
@@ -149,13 +148,13 @@ int CreateLinkedListOfExes(const char *repairScriptFolder, ProcessList * p, stru
 			}
 		}
 
-		repaircmd_t *cmd = (repaircmd_t *)calloc(1, sizeof(*cmd));
+		repaircmd_t *cmd = (repaircmd_t *) calloc(1, sizeof(*cmd));
 
 		if (cmd == NULL) {
 			goto error;
 		}
 
-		Wasprintf((char **)&cmd->path, "%s/%s", repairScriptFolder, ent->d_name); //Will have to free this memeory to use v3 repair script config
+		Wasprintf((char **)&cmd->path, "%s/%s", repairScriptFolder, ent->d_name);	//Will have to free this memeory to use v3 repair script config
 
 		if (cmd->path == NULL) {
 			assert(cmd != NULL);
@@ -167,36 +166,41 @@ int CreateLinkedListOfExes(const char *repairScriptFolder, ProcessList * p, stru
 			cmd->legacy = true;
 		} else {
 			//For V3 repair scripts cmd->path refers to the pathname of the repair script config file
-			if (LoadRepairScriptLink(&cmd->spawnattr, (char*)cmd->path) == false) {
-				free((void*)cmd->path);
+			if (LoadRepairScriptLink
+			    (&cmd->spawnattr, (char *)cmd->path) == false) {
+				free((void *)cmd->path);
 				free(cmd);
 				continue;
 			}
 
 			cmd->spawnattr.repairFilePathname = strdup(cmd->path);
-			free((void*)cmd->path);
+			free((void *)cmd->path);
 			cmd->path = NULL;
 
 			cmd->path = cmd->spawnattr.execStart;
 			cmd->spawnattr.logDirectory = config->logdir;
 
 			if (cmd->path == NULL) {
-				fprintf(stderr, "Ignoring malformed repair file: %s\n", ent->d_name);
+				fprintf(stderr,
+					"Ignoring malformed repair file: %s\n",
+					ent->d_name);
 				free(cmd);
 				continue;
 			}
 
 			if (fd < 0) {
-				fprintf(stderr, "unable to open file %s:\n", strerror(errno));
-				free((void*)cmd->path);
-				free((void*)cmd);
+				fprintf(stderr, "unable to open file %s:\n",
+					strerror(errno));
+				free((void *)cmd->path);
+				free((void *)cmd);
 				continue;
 			}
 
 			if (IsExe(cmd->path, false) < 0) {
-				fprintf(stderr, "%s is not an executable\n", cmd->path);
-				free((void*)cmd->path);
-				free((void*)cmd);
+				fprintf(stderr, "%s is not an executable\n",
+					cmd->path);
+				free((void *)cmd->path);
+				free((void *)cmd);
 				continue;
 			}
 
@@ -235,23 +239,38 @@ void FreeExeList(ProcessList * p)
 		list_del(&c->entry);
 		free((void *)c->path);
 		if (c->legacy == false) {
-			free((void*)c->spawnattr.user);
-			free((void*)c->spawnattr.group);
-			free((void*)c->spawnattr.workingDirectory);
-			free((void*)c->spawnattr.repairFilePathname);
-			free((void*)c->spawnattr.workingDirectory);
-			free((void*)c->spawnattr.umask);
-			free((void*)c->spawnattr.noNewPrivileges);
+			free((void *)c->spawnattr.user);
+			free((void *)c->spawnattr.group);
+			free((void *)c->spawnattr.workingDirectory);
+			free((void *)c->spawnattr.repairFilePathname);
+			free((void *)c->spawnattr.workingDirectory);
+			free((void *)c->spawnattr.umask);
+			free((void *)c->spawnattr.noNewPrivileges);
 		}
 		free(c);
 	}
 }
 
-static ThrottleWorkerThreadCreation(struct cfgoptions *const config)
+static void ThrottleWorkerThreadCreation(struct cfgoptions *const config,
+					 Container * const container)
 {
 	sched_yield();
-	while (workerThreadCount > GetCpuCount()*2) {
-		sleep((config->repairBinTimeout / 2 == 0) ? 1: (config->repairBinTimeout / 2));
+
+	int numberOfCpus = GetCpuCount();
+
+	double load[3] = { 0 };
+	getloadavg(load, 3);
+
+	double loadavg = ((load[0] + load[1] + load[2]) / 3) / numberOfCpus;
+
+	while (container->workerThreadCount > numberOfCpus * 2 ||
+	       (loadavg <= numberOfCpus
+		&& container->workerThreadCount < (numberOfCpus * 4 <=
+						   MAX_WORKER_THREADS ?
+						   numberOfCpus *
+						   4 : MAX_WORKER_THREADS))) {
+		sleep((config->repairBinTimeout / 2 ==
+		       0) ? 1 : (config->repairBinTimeout / 2));
 	}
 }
 
@@ -259,18 +278,21 @@ static void *__ExecScriptWorkerThreadLegacy(void *a)
 {
 	assert(a != NULL);
 
-	__ExecWorker *worker = (__ExecWorker*)a;
+	Container *container = (Container *) a;
+	__ExecWorker *worker = container->targ;
 	repaircmd_t *c = worker->command;
 	struct cfgoptions *s = worker->config;
 
-	workerThreadCount += 1;
+	container->workerThreadCount += 1;
 
 	if (worker->retString == NULL) {
-		c->ret = Spawn(s->repairBinTimeout, s, c->path, c->path, worker->mode,
-			       NULL);
+		c->ret =
+		    Spawn(s->repairBinTimeout, s, c->path, c->path,
+			  worker->mode, NULL);
 	} else {
-		c->ret = Spawn(s->repairBinTimeout, s, c->path, c->path, worker->mode,
-			       worker->retString, NULL);
+		c->ret =
+		    Spawn(s->repairBinTimeout, s, c->path, c->path,
+			  worker->mode, worker->retString, NULL);
 	}
 
 	free(worker->mode);
@@ -280,38 +302,41 @@ static void *__ExecScriptWorkerThreadLegacy(void *a)
 		pthread_barrier_wait(&worker->barrier);
 	}
 
-	free(a);
+	free(container->targ);
 
-	workerThreadCount -= 1;
+	container->workerThreadCount -= 1;
 
 	return NULL;
 }
 
-static void __WaitForWorkers(struct cfgoptions *s)
+static void __WaitForWorkers(struct cfgoptions *s, Container const *container)
 {
-	if (s->repairBinTimeout > 0) { //Just sleep
-		struct timespec rqtp = {0};
+	if (s->repairBinTimeout > 0) {	//Just sleep
+		struct timespec rqtp = { 0 };
 		clock_gettime(CLOCK_MONOTONIC, &rqtp);
 		rqtp.tv_sec += s->repairBinTimeout;
 		NormalizeTimespec(&rqtp);
-		while (clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &rqtp, NULL) != 0
-			&& errno == EINTR) {
+		while (clock_nanosleep
+		       (CLOCK_MONOTONIC, TIMER_ABSTIME, &rqtp, NULL) != 0
+		       && errno == EINTR) {
 			;
 		}
-	} else { //if not given a timeout value busy wait
+	} else {		//if not given a timeout value busy wait
 		sched_yield();
-		while (workerThreadCount != 0) {
+		while (container->workerThreadCount != 0) {
 			sleep(1);
 		}
 	}
 }
 
-static void * __ExecuteRepairScriptsLegacy(void *a)
+static void *__ExecuteRepairScriptsLegacy(void *a)
 {
-	struct executeScriptsStruct *arg = (struct executeScriptsStruct*)a;
+	struct executeScriptsStruct *arg = (struct executeScriptsStruct *)a;
 	ProcessList *p = arg->list;
 	struct cfgoptions *s = arg->config;
-	
+
+	Container container = { 0 };
+
 	repaircmd_t *c = NULL;
 	repaircmd_t *next = NULL;
 
@@ -319,31 +344,37 @@ static void * __ExecuteRepairScriptsLegacy(void *a)
 		if (c->legacy == false) {
 			continue;
 		}
-		__ExecWorker *targ = (__ExecWorker *)calloc(1, sizeof(__ExecWorker));
-		if (targ == NULL) {
-			Logmsg(LOG_ERR, "unable to allocate memory: %s", strerror(errno));
+		container.targ =
+		    (__ExecWorker *) calloc(1, sizeof(__ExecWorker));
+		if (container.targ == NULL) {
+			Logmsg(LOG_ERR, "unable to allocate memory: %s",
+			       strerror(errno));
 		}
-		targ->command = c;
-		targ->config = s;
-		targ->mode = strdup("test");
-		if (targ->mode == NULL) {
-			Logmsg(LOG_ERR, "unable to allocate memory: %s", strerror(errno));
+		container.targ->command = c;
+		container.targ->config = s;
+		container.targ->mode = strdup("test");
+		if (container.targ->mode == NULL) {
+			Logmsg(LOG_ERR, "unable to allocate memory: %s",
+			       strerror(errno));
 		}
-		targ->last = false;
-		targ->retString = NULL;
+		container.targ->last = false;
+		container.targ->retString = NULL;
 
-		int ret = CreateDetachedThread(__ExecScriptWorkerThreadLegacy, targ);
+		int ret =
+		    CreateDetachedThread(__ExecScriptWorkerThreadLegacy,
+					 &container);
 		if (ret != 0) {
-			Logmsg(LOG_ERR, "Unable to create thread %s", strerror(-ret));
+			Logmsg(LOG_ERR, "Unable to create thread %s",
+			       strerror(-ret));
 			abort();
 		}
-		ThrottleWorkerThreadCreation(s);
+		ThrottleWorkerThreadCreation(s, &container);
 	}
 
 	c = NULL;
 	next = NULL;
 
-	__WaitForWorkers(s);
+	__WaitForWorkers(s, &container);
 
 	list_for_each_entry(c, next, &p->head, entry) {
 		if (c->legacy == false) {
@@ -354,19 +385,22 @@ static void * __ExecuteRepairScriptsLegacy(void *a)
 			continue;
 		}
 
-		__ExecWorker *targ = (__ExecWorker *)calloc(1, sizeof(__ExecWorker));
+		__ExecWorker *targ =
+		    (__ExecWorker *) calloc(1, sizeof(__ExecWorker));
 		if (targ == NULL) {
-			Logmsg(LOG_ERR, "unable to allocate memory: %s", strerror(errno));
+			Logmsg(LOG_ERR, "unable to allocate memory: %s",
+			       strerror(errno));
 		}
 		targ->command = c;
 		targ->config = s;
 		Wasprintf(&targ->retString, "%i", c->ret);
 		if (targ->retString == NULL) {
-			Logmsg(LOG_ERR, "unable to allocate memory: %s", strerror(errno)); //tell user then crash
+			Logmsg(LOG_ERR, "unable to allocate memory: %s", strerror(errno));	//tell user then crash
 		}
 		targ->mode = strdup("repair");
 		if (targ->mode == NULL) {
-			Logmsg(LOG_ERR, "unable to allocate memory: %s", strerror(errno));
+			Logmsg(LOG_ERR, "unable to allocate memory: %s",
+			       strerror(errno));
 		}
 
 		if (next == NULL && s->repairBinTimeout <= 0) {
@@ -374,10 +408,12 @@ static void * __ExecuteRepairScriptsLegacy(void *a)
 			pthread_barrier_init(&targ->barrier, NULL, 2);
 		}
 
-		int ret = CreateDetachedThread(__ExecScriptWorkerThreadLegacy, targ);
+		int ret =
+		    CreateDetachedThread(__ExecScriptWorkerThreadLegacy, targ);
 
 		if (ret != 0) {
-			Logmsg(LOG_ERR, "Unable to create thread %s", strerror(-ret));
+			Logmsg(LOG_ERR, "Unable to create thread %s",
+			       strerror(-ret));
 			abort();
 		}
 
@@ -387,7 +423,7 @@ static void * __ExecuteRepairScriptsLegacy(void *a)
 		}
 	}
 
-	__WaitForWorkers(s);
+	__WaitForWorkers(s, &container);
 
 	list_for_each_entry(c, next, &p->head, entry) {
 		if (c->ret != 0) {
@@ -401,12 +437,12 @@ static void * __ExecuteRepairScriptsLegacy(void *a)
 	return NULL;
 }
 
-static void * __ExecuteRepairScripts(void *a)
+static void *__ExecuteRepairScripts(void *a)
 {
-	struct executeScriptsStruct *arg = (struct executeScriptsStruct*)a;
+	struct executeScriptsStruct *arg = (struct executeScriptsStruct *)a;
 	ProcessList *p = arg->list;
 	struct cfgoptions *s = arg->config;
-	
+
 	repaircmd_t *c = NULL;
 	repaircmd_t *next = NULL;
 
@@ -414,7 +450,7 @@ static void * __ExecuteRepairScripts(void *a)
 		if (c->legacy == false) {
 			c->ret =
 			    SpawnAttr(&c->spawnattr, c->path, c->path, "test",
-				  NULL);
+				      NULL);
 
 			if (c->ret == 0) {
 				continue;
@@ -425,10 +461,11 @@ static void * __ExecuteRepairScripts(void *a)
 
 			c->ret =
 			    SpawnAttr(&c->spawnattr, c->path, c->path, "repair",
-				  buf, NULL);
+				      buf, NULL);
 
 			if (c->ret != 0) {
-				Logmsg(LOG_DEBUG, "repair %s script failed", c->path);
+				Logmsg(LOG_DEBUG, "repair %s script failed",
+				       c->path);
 				c->ret = 0;	//reset to zero
 				arg->ret = 1;	//exit
 				break;
@@ -464,10 +501,6 @@ int ExecuteRepairScripts(ProcessList * p, struct cfgoptions *s)
 		pthread_barrier_wait(&ess.barrier);
 		pthread_barrier_destroy(&ess.barrier);
 
-		if (workerThreadCount != 0) {
-			Logmsg(LOG_ERR, "worker thread count not equal to zero on exit: %i", workerThreadCount);
-		}
-
 		if (ess.ret != 0) {
 			exit(1);
 		}
@@ -476,8 +509,7 @@ int ExecuteRepairScripts(ProcessList * p, struct cfgoptions *s)
 
 	int ret = 0;
 	if (pid != -1) {
-		while (waitpid (pid, &ret, 0) == -1 && errno == EINTR)
-			;
+		while (waitpid(pid, &ret, 0) == -1 && errno == EINTR) ;
 
 		if (WEXITSTATUS(ret) != 0) {
 			return -1;
