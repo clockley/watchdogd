@@ -482,7 +482,9 @@ void Logmsg(int priority, const char *const fmt, ...)
 			fprintf(stderr, "%s\n", buf);
 			ResetTextColor();
 		} else {
+
 			if (logFile != NULL) {
+				fsync(fileno(logFile));
 				fprintf(logFile, "%s\n", buf);
 			} else {
 				fprintf(stderr, "%s\n", buf);
