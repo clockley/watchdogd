@@ -376,6 +376,8 @@ static void *__ExecuteRepairScriptsLegacy(void *a)
 
 	__WaitForWorkers(s, &container);
 
+	memset(&container, 0, sizeof(container));
+
 	list_for_each_entry(c, next, &p->head, entry) {
 		if (c->legacy == false) {
 			continue;
@@ -385,31 +387,31 @@ static void *__ExecuteRepairScriptsLegacy(void *a)
 			continue;
 		}
 
-		__ExecWorker *targ =
+		container.targ =
 		    (__ExecWorker *) calloc(1, sizeof(__ExecWorker));
-		if (targ == NULL) {
+		if (container.targ == NULL) {
 			Logmsg(LOG_ERR, "unable to allocate memory: %s",
 			       strerror(errno));
 		}
-		targ->command = c;
-		targ->config = s;
-		Wasprintf(&targ->retString, "%i", c->ret);
-		if (targ->retString == NULL) {
+		container.targ->command = c;
+		container.targ->config = s;
+		Wasprintf(&container.targ->retString, "%i", c->ret);
+		if (container.targ->retString == NULL) {
 			Logmsg(LOG_ERR, "unable to allocate memory: %s", strerror(errno));	//tell user then crash
 		}
-		targ->mode = strdup("repair");
-		if (targ->mode == NULL) {
+		container.targ->mode = strdup("repair");
+		if (container.targ->mode == NULL) {
 			Logmsg(LOG_ERR, "unable to allocate memory: %s",
 			       strerror(errno));
 		}
 
 		if (next == NULL && s->repairBinTimeout <= 0) {
-			targ->last = true;
-			pthread_barrier_init(&targ->barrier, NULL, 2);
+			container.targ->last = true;
+			pthread_barrier_init(&container.targ->barrier, NULL, 2);
 		}
 
 		int ret =
-		    CreateDetachedThread(__ExecScriptWorkerThreadLegacy, targ);
+		    CreateDetachedThread(__ExecScriptWorkerThreadLegacy, &container);
 
 		if (ret != 0) {
 			Logmsg(LOG_ERR, "Unable to create thread %s",
@@ -418,8 +420,8 @@ static void *__ExecuteRepairScriptsLegacy(void *a)
 		}
 
 		if (next == NULL) {
-			pthread_barrier_wait(&targ->barrier);
-			pthread_barrier_destroy(&targ->barrier);
+			pthread_barrier_wait(&container.targ->barrier);
+			pthread_barrier_destroy(&container.targ->barrier);
 		}
 	}
 
