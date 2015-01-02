@@ -41,7 +41,7 @@
 
 //Copied into this program Sun September 8, 2013 by Christian Lockley
 
-static const size_t MAX_WORKER_THREADS = 32;
+static const size_t MAX_WORKER_THREADS = 16;
 
 size_t DirentBufSize(DIR * dirp)
 {
@@ -263,12 +263,9 @@ static void ThrottleWorkerThreadCreation(struct cfgoptions *const config,
 
 	double loadavg = ((load[0] + load[1] + load[2]) / 3) / numberOfCpus;
 
-	while (container->workerThreadCount > numberOfCpus * 2 ||
-	       !(loadavg <= numberOfCpus
-		&& container->workerThreadCount < (numberOfCpus * 4 <=
-						   MAX_WORKER_THREADS ?
-						   numberOfCpus *
-						   4 : MAX_WORKER_THREADS))) {
+	bool overrideWorkerCount = loadavg <= numberOfCpus*1.5 && container->workerThreadCount < MAX_WORKER_THREADS;
+
+	while (container->workerThreadCount > numberOfCpus * 2 || overrideWorkerCount == true) {
 		sleep((config->repairBinTimeout / 2 ==
 		       0) ? 1 : (config->repairBinTimeout / 2));
 	}
