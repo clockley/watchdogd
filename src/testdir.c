@@ -14,7 +14,6 @@
  * permissions and limitations under the License. 
  */
 
-#define _BSD_SOURCE
 #include "watchdogd.h"
 #include "sub.h"
 #include <dirent.h>
@@ -40,8 +39,6 @@
 //DEALINGS IN THE SOFTWARE.
 
 //Copied into this program Sun September 8, 2013 by Christian Lockley
-
-static const size_t MAX_WORKER_THREADS = 16;
 
 size_t DirentBufSize(DIR * dirp)
 {
@@ -258,14 +255,11 @@ static void ThrottleWorkerThreadCreation(struct cfgoptions *const config,
 
 	int numberOfCpus = GetCpuCount();
 
-	double load[3] = { 0 };
-	getloadavg(load, 3);
+	if (numberOfCpus > 32) {
+		numberOfCpus = 32;
+	}
 
-	double loadavg = ((load[0] + load[1] + load[2]) / 3) / numberOfCpus;
-
-	bool overrideWorkerCount = loadavg <= numberOfCpus*1.5 && container->workerThreadCount < MAX_WORKER_THREADS;
-
-	while (container->workerThreadCount > numberOfCpus * 2 || overrideWorkerCount == true) {
+	while (container->workerThreadCount > numberOfCpus * 2) {
 		sleep((config->repairBinTimeout / 2 ==
 		       0) ? 1 : (config->repairBinTimeout / 2));
 	}
