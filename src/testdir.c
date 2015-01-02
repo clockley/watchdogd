@@ -264,7 +264,7 @@ static void ThrottleWorkerThreadCreation(struct cfgoptions *const config,
 	double loadavg = ((load[0] + load[1] + load[2]) / 3) / numberOfCpus;
 
 	while (container->workerThreadCount > numberOfCpus * 2 ||
-	       (loadavg <= numberOfCpus
+	       !(loadavg <= numberOfCpus
 		&& container->workerThreadCount < (numberOfCpus * 4 <=
 						   MAX_WORKER_THREADS ?
 						   numberOfCpus *
@@ -283,8 +283,10 @@ static void *__ExecScriptWorkerThreadLegacy(void *a)
 	repaircmd_t *c = worker->command;
 	struct cfgoptions *s = worker->config;
 
-	container->workerThreadCount += 1;
+	pthread_barrier_wait(&container->membarrier);
 
+	container->workerThreadCount += 1;
+	Logmsg(LOG_ERR, "%s", c->path);
 	if (worker->retString == NULL) {
 		c->ret =
 		    Spawn(s->repairBinTimeout, s, c->path, c->path,
@@ -302,7 +304,45 @@ static void *__ExecScriptWorkerThreadLegacy(void *a)
 		pthread_barrier_wait(&worker->barrier);
 	}
 
-	free(container->targ);
+	free(worker);
+
+	container->workerThreadCount -= 1;
+
+	return NULL;
+}
+
+static void *__ExecScriptWorkerThread(void *a)
+{
+	assert(a != NULL);
+
+	Container *container = (Container *) a;
+	__ExecWorker *worker = container->targ;
+	repaircmd_t *c = worker->command;
+	struct cfgoptions *s = worker->config;
+
+	pthread_barrier_wait(&container->membarrier);
+
+	container->workerThreadCount += 1;
+
+	Logmsg(LOG_ERR, "%s", c->path);
+	if (worker->retString == NULL) {
+		c->ret =
+		    SpawnAttr(&c->spawnattr, c->path, c->path, worker->mode,
+			      NULL);
+	} else {
+		c->ret =
+		    SpawnAttr(&c->spawnattr, c->path, c->path, worker->mode, worker->retString,
+			      NULL);
+	}
+
+	free(worker->mode);
+	free(worker->retString);
+
+	if (worker->last == true) {
+		pthread_barrier_wait(&worker->barrier);
+	}
+
+	free(worker);
 
 	container->workerThreadCount -= 1;
 
@@ -339,11 +379,15 @@ static void *__ExecuteRepairScriptsLegacy(void *a)
 
 	repaircmd_t *c = NULL;
 	repaircmd_t *next = NULL;
+	unsigned count = 0;
 
 	list_for_each_entry(c, next, &p->head, entry) {
 		if (c->legacy == false) {
 			continue;
 		}
+
+		pthread_barrier_init(&container.membarrier, NULL, 2);
+
 		container.targ =
 		    (__ExecWorker *) calloc(1, sizeof(__ExecWorker));
 		if (container.targ == NULL) {
@@ -368,6 +412,9 @@ static void *__ExecuteRepairScriptsLegacy(void *a)
 			       strerror(-ret));
 			abort();
 		}
+		pthread_barrier_wait(&container.membarrier);
+		pthread_barrier_destroy(&container.membarrier);
+
 		ThrottleWorkerThreadCreation(s, &container);
 	}
 
@@ -405,6 +452,8 @@ static void *__ExecuteRepairScriptsLegacy(void *a)
 			       strerror(errno));
 		}
 
+		pthread_barrier_init(&container.membarrier, NULL, 2);
+
 		if (next == NULL && s->repairBinTimeout <= 0) {
 			container.targ->last = true;
 			pthread_barrier_init(&container.targ->barrier, NULL, 2);
@@ -419,6 +468,9 @@ static void *__ExecuteRepairScriptsLegacy(void *a)
 			abort();
 		}
 
+		pthread_barrier_wait(&container.membarrier);
+		pthread_barrier_destroy(&container.membarrier);
+
 		if (next == NULL) {
 			pthread_barrier_wait(&container.targ->barrier);
 			pthread_barrier_destroy(&container.targ->barrier);
@@ -428,6 +480,9 @@ static void *__ExecuteRepairScriptsLegacy(void *a)
 	__WaitForWorkers(s, &container);
 
 	list_for_each_entry(c, next, &p->head, entry) {
+		if (c->legacy == false) {
+			continue;
+		}
 		if (c->ret != 0) {
 			Logmsg(LOG_DEBUG, "repair %s script failed", c->path);
 			arg->ret = 1;
@@ -445,33 +500,117 @@ static void *__ExecuteRepairScripts(void *a)
 	ProcessList *p = arg->list;
 	struct cfgoptions *s = arg->config;
 
+	Container container = { 0 };
+
 	repaircmd_t *c = NULL;
 	repaircmd_t *next = NULL;
 
 	list_for_each_entry(c, next, &p->head, entry) {
-		if (c->legacy == false) {
-			c->ret =
-			    SpawnAttr(&c->spawnattr, c->path, c->path, "test",
-				      NULL);
+		if (c->legacy == true) {
+			continue;
+		}
+		container.targ =
+		    (__ExecWorker *) calloc(1, sizeof(__ExecWorker));
+		if (container.targ == NULL) {
+			Logmsg(LOG_ERR, "unable to allocate memory: %s",
+			       strerror(errno));
+		}
+		container.targ->command = c;
+		container.targ->config = s;
+		container.targ->mode = strdup("test");
+		if (container.targ->mode == NULL) {
+			Logmsg(LOG_ERR, "unable to allocate memory: %s",
+			       strerror(errno));
+		}
+		container.targ->last = false;
+		container.targ->retString = NULL;
 
-			if (c->ret == 0) {
-				continue;
-			}
+		pthread_barrier_init(&container.membarrier, NULL, 2);
 
-			char buf[8] = { 0 };
-			snprintf(buf, sizeof(buf), "%i", c->ret);
+		int ret =
+		    CreateDetachedThread(__ExecScriptWorkerThread,
+					 &container);
+		if (ret != 0) {
+			Logmsg(LOG_ERR, "Unable to create thread %s",
+			       strerror(-ret));
+			abort();
+		}
 
-			c->ret =
-			    SpawnAttr(&c->spawnattr, c->path, c->path, "repair",
-				      buf, NULL);
+		pthread_barrier_wait(&container.membarrier);
+		pthread_barrier_destroy(&container.membarrier);
 
-			if (c->ret != 0) {
-				Logmsg(LOG_DEBUG, "repair %s script failed",
-				       c->path);
-				c->ret = 0;	//reset to zero
-				arg->ret = 1;	//exit
-				break;
-			}
+		ThrottleWorkerThreadCreation(s, &container);
+	}
+
+	c = NULL;
+	next = NULL;
+
+	__WaitForWorkers(s, &container);
+
+	memset(&container, 0, sizeof(container));
+
+	list_for_each_entry(c, next, &p->head, entry) {
+		if (c->legacy == true) {
+			continue;
+		}
+
+		if (c->ret == 0) {
+			continue;
+		}
+
+		container.targ =
+		    (__ExecWorker *) calloc(1, sizeof(__ExecWorker));
+		if (container.targ == NULL) {
+			Logmsg(LOG_ERR, "unable to allocate memory: %s",
+			       strerror(errno));
+		}
+		container.targ->command = c;
+		container.targ->config = s;
+		Wasprintf(&container.targ->retString, "%i", c->ret);
+		if (container.targ->retString == NULL) {
+			Logmsg(LOG_ERR, "unable to allocate memory: %s", strerror(errno));
+		}
+		container.targ->mode = strdup("repair");
+		if (container.targ->mode == NULL) {
+			Logmsg(LOG_ERR, "unable to allocate memory: %s",
+			       strerror(errno));
+		}
+
+		if (next == NULL && s->repairBinTimeout <= 0) {
+			container.targ->last = true;
+			pthread_barrier_init(&container.targ->barrier, NULL, 2);
+		}
+
+		pthread_barrier_init(&container.membarrier, NULL, 2);
+
+		int ret =
+		    CreateDetachedThread(__ExecScriptWorkerThread, &container);
+
+		if (ret != 0) {
+			Logmsg(LOG_ERR, "Unable to create thread %s",
+			       strerror(-ret));
+			abort();
+		}
+
+		pthread_barrier_wait(&container.membarrier);
+		pthread_barrier_destroy(&container.membarrier);
+
+		if (next == NULL) {
+			pthread_barrier_wait(&container.targ->barrier);
+			pthread_barrier_destroy(&container.targ->barrier);
+		}
+	}
+
+	__WaitForWorkers(s, &container);
+
+	list_for_each_entry(c, next, &p->head, entry) {
+		if (c->legacy == true) {
+			continue;
+		}
+		if (c->ret != 0) {
+			Logmsg(LOG_DEBUG, "repair %s script failed", c->path);
+			arg->ret = 1;
+			break;
 		}
 	}
 

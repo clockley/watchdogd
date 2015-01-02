@@ -31,6 +31,7 @@ struct container {
 	std::atomic<volatile unsigned long long> workerThreadCount;
 #endif
 	__ExecWorker *targ;
+	pthread_barrier_t membarrier;
 };
 
 typedef struct container Container;
