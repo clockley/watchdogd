@@ -277,7 +277,7 @@ static void *__ExecScriptWorkerThreadLegacy(void *a)
 	pthread_barrier_wait(&container->membarrier);
 
 	container->workerThreadCount += 1;
-	Logmsg(LOG_ERR, "%s", c->path);
+
 	if (worker->retString == NULL) {
 		c->ret =
 		    Spawn(s->repairBinTimeout, s, c->path, c->path,
@@ -315,7 +315,6 @@ static void *__ExecScriptWorkerThread(void *a)
 
 	container->workerThreadCount += 1;
 
-	Logmsg(LOG_ERR, "%s", c->path);
 	if (worker->retString == NULL) {
 		c->ret =
 		    SpawnAttr(&c->spawnattr, c->path, c->path, worker->mode,
