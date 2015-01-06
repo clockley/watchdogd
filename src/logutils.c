@@ -476,7 +476,7 @@ void Logmsg(int priority, const char *const fmt, ...)
 		assert(buf[sizeof(buf) - 1] == '\0');
 
 		const char * format;
-		if (strstr(buf, "\n") != NULL && strcasecmp(strstr(buf, "\n") + 1, "\0") == 0) {
+		if (strstr(buf, "\n") != NULL && strcmp(strstr(buf, "\n") + 1, "\0") == 0) {
 			format = "%s";
 		} else {
 			format = "%s\n";
