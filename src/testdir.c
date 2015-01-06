@@ -13,7 +13,8 @@
  * implied. See the License for the specific language governing
  * permissions and limitations under the License. 
  */
-
+#define _BSD_SOURCE
+const int MAX_WORKER_THREADS = 16;
 #include "watchdogd.h"
 #include "sub.h"
 #include <dirent.h>
@@ -255,8 +256,16 @@ static void ThrottleWorkerThreadCreation(struct cfgoptions *const config,
 
 	int numberOfCpus = GetCpuCount();
 
-	if (numberOfCpus > 32) {
-		numberOfCpus = 32;
+	double loadavg;
+
+	if (getloadavg(&loadavg, 1) != -1) {
+		if (loadavg < numberOfCpus && container->workerThreadCount < MAX_WORKER_THREADS) {
+			return;
+		}
+	}
+
+	if (numberOfCpus > MAX_WORKER_THREADS) {
+		numberOfCpus = MAX_WORKER_THREADS;
 	}
 
 	while (container->workerThreadCount > numberOfCpus * 2) {
