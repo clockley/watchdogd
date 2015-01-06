@@ -186,7 +186,7 @@ bool SetDefaultConfig(struct cfgoptions *const options)
 int PrintVersionString(void)
 {
 	printf("%s\n", PACKAGE_STRING);
-	printf("Copyright 2013-2014 Christian Lockley. All rights reserved.\n");
+	printf("Copyright 2013-2015 Christian Lockley. All rights reserved.\n");
 	printf("Licensed under the Apache License, Version 2.0.\n");
 	printf("There is NO WARRANTY, to the extent permitted by law.\n");
 
