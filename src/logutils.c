@@ -475,19 +475,26 @@ void Logmsg(int priority, const char *const fmt, ...)
 	    || logTarget == FILE_NEW) {
 		assert(buf[sizeof(buf) - 1] == '\0');
 
+		const char * format;
+		if (strstr(buf, "\n") != NULL && strcasecmp(strstr(buf, "\n") + 1, "\0") == 0) {
+			format = "%s";
+		} else {
+			format = "%s\n";
+		}
+
 		if (logTarget == STANDARD_ERROR) {
 			if (applesquePriority == 0) {
 				SetTextColor(priority);
 			}
-			fprintf(stderr, "%s\n", buf);
+			fprintf(stderr, format, buf);
 			ResetTextColor();
 		} else {
 
 			if (logFile != NULL) {
 				fsync(fileno(logFile));
-				fprintf(logFile, "%s\n", buf);
+				fprintf(logFile, format, buf);
 			} else {
-				fprintf(stderr, "%s\n", buf);
+				fprintf(stderr, format, buf);
 			}
 		}
 	}
