@@ -607,7 +607,7 @@ static void *__ExecuteRepairScripts(void *a)
 			continue;
 		}
 		if (c->ret != 0) {
-			Logmsg(LOG_DEBUG, "repair %s script failed", c->path);
+			Logmsg(LOG_DEBUG, "repair %s script failed", c->spawnattr.repairFilePathname);
 			arg->ret = 1;
 			break;
 		}
