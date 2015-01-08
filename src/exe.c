@@ -81,7 +81,7 @@ int Spawn(int timeout, struct cfgoptions *const config, const char *file,
 				if (dfd < 0) {
 					Logmsg(LOG_CRIT,
 					       "open failed: %s: %s",
-					       config->logdir, strerror(errno));
+					       config->logdir, MyStrerror(errno));
 					return -1;
 				}
 
@@ -91,7 +91,7 @@ int Spawn(int timeout, struct cfgoptions *const config, const char *file,
 
 				if (fd < 0) {
 					Logmsg(LOG_CRIT, "open failed: %s",
-					       strerror(errno));
+					       MyStrerror(errno));
 					close(dfd);
 					return -1;
 				} else {
@@ -103,14 +103,14 @@ int Spawn(int timeout, struct cfgoptions *const config, const char *file,
 				if (dup2(fd, STDOUT_FILENO) < 0) {
 					Logmsg(LOG_CRIT,
 					       "dup2 failed: STDOUT_FILENO: %s",
-					       strerror(errno));
+					       MyStrerror(errno));
 					return -1;
 				}
 
 				if (dup2(fd, STDERR_FILENO) < 0) {
 					Logmsg(LOG_CRIT,
 					       "dup2 failed: STDERR_FILENO %s",
-					       strerror(errno));
+					       MyStrerror(errno));
 					return -1;
 				}
 
@@ -134,7 +134,7 @@ int Spawn(int timeout, struct cfgoptions *const config, const char *file,
 				execv(file, (char *const *)array);
 
 				Logmsg(LOG_CRIT, "execv failed %s",
-				       strerror(errno));
+				       MyStrerror(errno));
 
 				close(fd);
 				return -1;
@@ -150,7 +150,7 @@ int Spawn(int timeout, struct cfgoptions *const config, const char *file,
 				pthread_mutex_lock(&lock);
 
 				if (CreateDetachedThread(WaitThread, &ret) < 0) {
-					Logmsg(LOG_ERR, "%s", strerror(errno));
+					Logmsg(LOG_ERR, "%s", MyStrerror(errno));
 					return -1;
 				}
 
@@ -175,7 +175,7 @@ int Spawn(int timeout, struct cfgoptions *const config, const char *file,
 
 						if (ret == 1) {
 							Logmsg(LOG_ERR, "%s",
-							       strerror(errno));
+							       MyStrerror(errno));
 							assert(ret != 0);
 							abort();
 						}
@@ -261,7 +261,7 @@ int SpawnAttr(spawnattr_t *spawnattr, const char *file, const char *args, ...)
 						   &param);
 
 				if (nice(spawnattr->nice) == -1) {
-					Logmsg(LOG_ERR, "nice failed: %s", strerror(errno));
+					Logmsg(LOG_ERR, "nice failed: %s", MyStrerror(errno));
 				}
 
 				int dfd = open(spawnattr->logDirectory,
@@ -270,7 +270,7 @@ int SpawnAttr(spawnattr_t *spawnattr, const char *file, const char *args, ...)
 				if (dfd < 0) {
 					Logmsg(LOG_CRIT,
 					       "open failed: %s: %s",
-					       spawnattr->logDirectory, strerror(errno));
+					       spawnattr->logDirectory, MyStrerror(errno));
 					return -1;
 				}
 
@@ -280,7 +280,7 @@ int SpawnAttr(spawnattr_t *spawnattr, const char *file, const char *args, ...)
 
 				if (fd < 0) {
 					Logmsg(LOG_CRIT, "open failed: %s",
-					       strerror(errno));
+					       MyStrerror(errno));
 					close(dfd);
 					return -1;
 				} else {
@@ -305,7 +305,7 @@ int SpawnAttr(spawnattr_t *spawnattr, const char *file, const char *args, ...)
 				if (spawnattr->workingDirectory != NULL) {
 					if (chdir(spawnattr->workingDirectory) < 0) {
 						Logmsg(LOG_CRIT, "Unable to change working directory to: %s: %s",
-						spawnattr->workingDirectory, strerror(errno));
+						spawnattr->workingDirectory, MyStrerror(errno));
 					}
 				}
 
@@ -317,7 +317,7 @@ int SpawnAttr(spawnattr_t *spawnattr, const char *file, const char *args, ...)
 					int ret = NoNewProvileges();
 					if (ret != 0) {
 						if (ret < 0) {
-							Logmsg(LOG_CRIT, "NoNewPrivileges %s", strerror(-ret));
+							Logmsg(LOG_CRIT, "NoNewPrivileges %s", MyStrerror(-ret));
 						} else {
 							Logmsg(LOG_CRIT, "unable to set no new privleges bit");
 						}
@@ -329,7 +329,7 @@ int SpawnAttr(spawnattr_t *spawnattr, const char *file, const char *args, ...)
 					long long ret = strtoll(spawnattr->umask, (char **)NULL, 10);
 
 					if (ret < 0) {
-						Logmsg(LOG_ERR, "error parsing configfile option \"Umask\": %s", strerror(errno));
+						Logmsg(LOG_ERR, "error parsing configfile option \"Umask\": %s", MyStrerror(errno));
 					}
 
 					mode_t mode = (mode_t)ret;
@@ -340,14 +340,14 @@ int SpawnAttr(spawnattr_t *spawnattr, const char *file, const char *args, ...)
 				if (dup2(fd, STDOUT_FILENO) < 0) {
 					Logmsg(LOG_CRIT,
 					       "dup2 failed: STDOUT_FILENO: %s",
-					       strerror(errno));
+					       MyStrerror(errno));
 					return -1;
 				}
 
 				if (dup2(fd, STDERR_FILENO) < 0) {
 					Logmsg(LOG_CRIT,
 					       "dup2 failed: STDERR_FILENO %s",
-					       strerror(errno));
+					       MyStrerror(errno));
 					return -1;
 				}
 #if defined(__linux__)
@@ -374,7 +374,7 @@ int SpawnAttr(spawnattr_t *spawnattr, const char *file, const char *args, ...)
 				pthread_mutex_lock(&lock);
 
 				if (CreateDetachedThread(WaitThread, &ret) < 0) {
-					Logmsg(LOG_ERR, "%s", strerror(errno));
+					Logmsg(LOG_ERR, "%s", MyStrerror(errno));
 					return -1;
 				}
 
@@ -399,7 +399,7 @@ int SpawnAttr(spawnattr_t *spawnattr, const char *file, const char *args, ...)
 
 						if (ret == 1) {
 							Logmsg(LOG_ERR, "%s",
-							       strerror(errno));
+							       MyStrerror(errno));
 							assert(ret != 0);
 							abort();
 						}

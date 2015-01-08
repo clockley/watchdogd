@@ -53,6 +53,8 @@ static sig_atomic_t applesquePriority = 0;
 static sig_atomic_t autoUpperCase = 0;
 static sig_atomic_t autoPeriod = 1;
 static unsigned int logMask = 0xff;
+static 	locale_t locale;
+
 static int ipri[] = { LOG_EMERG, LOG_ALERT, LOG_CRIT, LOG_ERR, LOG_WARNING,
 	LOG_NOTICE, LOG_INFO, LOG_DEBUG
 };
@@ -508,4 +510,22 @@ void Logmsg(int priority, const char *const fmt, ...)
 
 		syslog(priority, "%s", buf);
 	}
+}
+
+bool MyStrerrorInit(void)
+{
+	locale = newlocale(LC_CTYPE_MASK|LC_NUMERIC_MASK|LC_TIME_MASK|
+			   LC_COLLATE_MASK|LC_MONETARY_MASK|LC_MESSAGES_MASK,
+			   "",(locale_t)0);
+
+	if (locale == (locale_t)0) {
+		return false;
+	}
+
+	return true;
+}
+
+char * MyStrerror(int error)
+{
+	return strerror_l(error, locale);
 }

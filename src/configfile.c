@@ -66,7 +66,7 @@ static bool SetDefaultLogTarget(struct cfgoptions *const cfg)
 	char *copyOfLogTarget = strdup(cfg->logTarget);
 
 	if (copyOfLogTarget == NULL) {
-		fprintf(stderr, "%s\n", strerror(errno));
+		fprintf(stderr, "%s\n", MyStrerror(errno));
 		return false;
 	}
 
@@ -151,7 +151,7 @@ static bool SetDefaultLogTarget(struct cfgoptions *const cfg)
 	return true;
  error:
 	if (errno != 0) {
-		fprintf(stderr, "%s\n", strerror(errno));
+		fprintf(stderr, "%s\n", MyStrerror(errno));
 	}
 
 	if (copyOfLogTarget != NULL) {

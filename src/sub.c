@@ -128,7 +128,7 @@ int EndDaemon(struct cfgoptions *s, int keepalive)
 		sigaction(SIGUSR2, &dummy, NULL);
 
 		if (killpg(getpgrp(), SIGUSR2) == -1) {
-			Logmsg(LOG_ERR, "killpg failed %s", strerror(errno));
+			Logmsg(LOG_ERR, "killpg failed %s", MyStrerror(errno));
 		}
 	}
 
@@ -292,12 +292,12 @@ int CreateDetachedThread(void *(*startFunction) (void *), void *const arg)
 			if (pthread_attr_setstacksize(&attr, 1048576) != 0) {
 				Logmsg(LOG_CRIT,
 				       "pthread_attr_setstacksize: %s\n",
-				       strerror(errno));
+				       MyStrerror(errno));
 			}
 		}
 	} else {
 		Logmsg(LOG_CRIT, "pthread_attr_getstacksize: %s\n",
-		       strerror(errno));
+		       MyStrerror(errno));
 	}
 
 	pthread_attr_setguardsize(&attr, 0);

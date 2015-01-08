@@ -57,7 +57,7 @@ static void *ServiceManagerKeepAliveNotification(void * arg)
 	for (;;) {
 		int ret = sd_notify(0, "WATCHDOG=1");
 		if (ret < 0) {
-			Logmsg(LOG_ERR, "%s", strerror(-ret));
+			Logmsg(LOG_ERR, "%s", MyStrerror(-ret));
 		}
 		nanosleep(&ts, NULL);
 	}
@@ -258,7 +258,7 @@ static void *MinPagesThread(void *arg)
 	pthread_once(&getPageSize, GetPageSize);
 
 	if (pageSize < 0) {
-		Logmsg(LOG_ERR, "%s", strerror(errno));
+		Logmsg(LOG_ERR, "%s", MyStrerror(errno));
 		return NULL;
 	}
 
@@ -304,14 +304,14 @@ static void *TestMemoryAllocation(void *arg)
 		void *buf = mmap(NULL, config->allocatableMemory * pageSize, PROT_READ | PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, 0 ,0);
 
 		if (buf == MAP_FAILED) {
-			Logmsg(LOG_ALERT, "mmap failed: %s", strerror(errno));
+			Logmsg(LOG_ALERT, "mmap failed: %s", MyStrerror(errno));
 			config->error |= OUTOFMEMORY;
 		}
 
 		memset(buf, 0, (config->allocatableMemory * pageSize));
 
 		if (munmap(buf, config->allocatableMemory * pageSize) != 0) {
-			Logmsg(LOG_CRIT, "munmap failed: %s", strerror(errno));
+			Logmsg(LOG_CRIT, "munmap failed: %s", MyStrerror(errno));
 			assert(false);
 		}
 
@@ -343,7 +343,7 @@ static void *TestFork(void *arg)
 		} else {
 			if (waitpid(pid, NULL, 0) != pid) {
 				Logmsg(LOG_ERR, "watchdogd: %s",
-				       strerror(errno));
+				       MyStrerror(errno));
 				Logmsg(LOG_ERR, "watchdogd: waitpid failed");
 			}
 		}
@@ -408,7 +408,7 @@ static void *TestPidfileThread(void *arg)
 
 			if (fd < 0) {
 				Logmsg(LOG_ERR, "cannot open %s: %s",
-				       pidFilePathName, strerror(errno));
+				       pidFilePathName, MyStrerror(errno));
 				s->error |= PIDFILERROR;
 				break;
 			}
@@ -417,7 +417,7 @@ static void *TestPidfileThread(void *arg)
 
 			if (fstat(fd, &buffer) != 0) {
 				Logmsg(LOG_ERR, "%s: %s", pidFilePathName,
-				       strerror(errno));
+				       MyStrerror(errno));
 				if (s->options & SOFTBOOT) {
 					close(fd);
 					s->error |= PIDFILERROR;
@@ -445,7 +445,7 @@ static void *TestPidfileThread(void *arg)
 			char buf[64] = { 0 };
 			if (pread(fd, buf, sizeof(buf), 0) == -1) {
 				Logmsg(LOG_ERR, "unable to read pidfile %s: %s",
-				       pidFilePathName, strerror(errno));
+				       pidFilePathName, MyStrerror(errno));
 				close(fd);
 				s->error |= PIDFILERROR;
 				break;
@@ -459,7 +459,7 @@ static void *TestPidfileThread(void *arg)
 
 			if (pid == 0) {
 				Logmsg(LOG_ERR, "strtol failed: %s",
-				       strerror(errno));
+				       MyStrerror(errno));
 				s->error |= UNKNOWNPIDFILERROR;
 				break;
 			}
@@ -467,7 +467,7 @@ static void *TestPidfileThread(void *arg)
 			if (kill(pid, 0) == -1) {
 				Logmsg(LOG_ERR,
 				       "unable to send null signal to pid %li: %s: %s",
-				       pid, pidFilePathName, strerror(errno));
+				       pid, pidFilePathName, MyStrerror(errno));
 				if (errno == ESRCH) {
 					s->error |= PIDFILERROR;
 					break;
@@ -763,7 +763,7 @@ int StartServiceManagerKeepAliveNotification(void *arg)
 	struct timespec *tp = (struct timespec*)calloc(1, sizeof(struct timespec));
 
 	if (tp == NULL) {
-		Logmsg(LOG_ERR, "Unable to allocate memory: %s", strerror(errno));
+		Logmsg(LOG_ERR, "Unable to allocate memory: %s", MyStrerror(errno));
 		return -1;
 	}
 

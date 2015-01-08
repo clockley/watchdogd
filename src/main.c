@@ -41,6 +41,11 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 
+	if (MyStrerrorInit() == false) {
+		perror("Unable to create a new locale object");
+		return EXIT_FAILURE;
+	}
+
 	const int ret = ParseCommandLine(&argc, argv, &options);
 
 	if (ret < 0) {
@@ -144,7 +149,7 @@ int main(int argc, char **argv)
 		    != 0) {
 			if (errno != 0) {
 				Logmsg(LOG_ERR, "clock_nanosleep failed %s",
-				       strerror(errno));
+				       MyStrerror(errno));
 			}
 		}
 
@@ -208,7 +213,7 @@ static int InstallSignalAction(struct sigaction *act, ...)
  error:
 	va_end(ap);
 	assert(sig != 0);
-	Logmsg(LOG_ERR, "sigaction failed: %s:", strerror(errno));
+	Logmsg(LOG_ERR, "sigaction failed: %s:", MyStrerror(errno));
 	return sig;
 }
 

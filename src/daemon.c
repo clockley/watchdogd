@@ -30,12 +30,12 @@ static int CloseStandardFileDescriptors(void)
 
 	if (fd < 0) {
 		Logmsg(LOG_CRIT, "Unable to open: /dev/null: %s:",
-		       strerror(errno));
+		       MyStrerror(errno));
 		return -1;
 	}
 
 	if (fstat(fd, &statBuf) != 0) {
-		Logmsg(LOG_CRIT, "Stat failed %s", strerror(errno));
+		Logmsg(LOG_CRIT, "Stat failed %s", MyStrerror(errno));
 		goto error;
 	} else if (S_ISCHR(statBuf.st_mode) == 0
 		   && S_ISBLK(statBuf.st_mode) == 0) {
@@ -46,21 +46,21 @@ static int CloseStandardFileDescriptors(void)
 	ret = dup2(fd, STDIN_FILENO);
 	if (ret < 0) {
 		Logmsg(LOG_CRIT, "dup2 failed: STDIN_FILENO: %s",
-		       strerror(errno));
+		       MyStrerror(errno));
 		goto error;
 	}
 
 	ret = dup2(fd, STDOUT_FILENO);
 	if (ret < 0) {
 		Logmsg(LOG_CRIT, "dup2 failed: STDOUT_FILENO: %s",
-		       strerror(errno));
+		       MyStrerror(errno));
 		goto error;
 	}
 
 	ret = dup2(fd, STDERR_FILENO);
 	if (ret < 0) {
 		Logmsg(LOG_CRIT, "dup2 failed: STDERR_FILENO: %s",
-		       strerror(errno));
+		       MyStrerror(errno));
 		goto error;
 	}
 
@@ -101,7 +101,7 @@ int Daemonize(struct cfgoptions *const s)
 	long maxfd = sysconf(_SC_OPEN_MAX);
 
 	if (maxfd < 0 && errno == EINVAL) {
-		fprintf(stderr, "watchdogd: %s\n", strerror(errno));
+		fprintf(stderr, "watchdogd: %s\n", MyStrerror(errno));
 		exit(EXIT_FAILURE);
 	}
 
@@ -122,12 +122,12 @@ int Daemonize(struct cfgoptions *const s)
 	sigset_t sa;
 
 	if (sigfillset(&sa) != 0) {
-		fprintf(stderr, "watchdogd: %s\n", strerror(errno));
+		fprintf(stderr, "watchdogd: %s\n", MyStrerror(errno));
 		exit(EXIT_FAILURE);	//If sigfillset fails exit. Cannot use sa uninitialized.
 	}
 
 	if (sigprocmask(SIG_UNBLOCK, &sa, NULL) != 0) {
-		fprintf(stderr, "watchdogd: %s\n", strerror(errno));
+		fprintf(stderr, "watchdogd: %s\n", MyStrerror(errno));
 		fprintf(stderr, "watchdogd: unable to reset signal mask\n");
 	}
 
@@ -136,13 +136,13 @@ int Daemonize(struct cfgoptions *const s)
 	pid_t pid = fork();
 
 	if (pid < 0) {
-		fprintf(stderr, "watchdogd: %s\n", strerror(errno));
+		fprintf(stderr, "watchdogd: %s\n", MyStrerror(errno));
 		_Exit(EXIT_FAILURE);
 	}
 
 	if (pid > 0) {
 		if (waitpid(pid, NULL, 0) != pid) {
-			fprintf(stderr, "watchdogd: %s\n", strerror(errno));
+			fprintf(stderr, "watchdogd: %s\n", MyStrerror(errno));
 			_Exit(EXIT_FAILURE);
 		}
 
@@ -152,19 +152,19 @@ int Daemonize(struct cfgoptions *const s)
 	pid_t sid = setsid();
 
 	if (sid < 0) {
-		fprintf(stderr, "watchdogd: %s\n", strerror(errno));
+		fprintf(stderr, "watchdogd: %s\n", MyStrerror(errno));
 		_Exit(EXIT_FAILURE);
 	}
 
 	if (signal(SIGHUP, SIG_IGN) == SIG_ERR) {
-		fprintf(stderr, "watchdogd: %s\n", strerror(errno));
+		fprintf(stderr, "watchdogd: %s\n", MyStrerror(errno));
 		_Exit(EXIT_FAILURE);
 	}
 
 	pid = fork();
 
 	if (pid < 0) {
-		fprintf(stderr, "watchdogd: %s\n", strerror(errno));
+		fprintf(stderr, "watchdogd: %s\n", MyStrerror(errno));
 		_Exit(EXIT_FAILURE);
 	}
 
@@ -173,7 +173,7 @@ int Daemonize(struct cfgoptions *const s)
 	}
 
 	if (signal(SIGHUP, SIG_DFL) == SIG_ERR) {
-		fprintf(stderr, "watchdogd: %s\n", strerror(errno));
+		fprintf(stderr, "watchdogd: %s\n", MyStrerror(errno));
 		_Exit(EXIT_FAILURE);
 	}
 
@@ -186,7 +186,7 @@ int Daemonize(struct cfgoptions *const s)
 
 		if (LockFile(s->pidfile.fd, getpid()) < 0) {
 			fprintf(stderr, "watchdogd: LockFile failed: %s\n",
-				strerror(errno));
+				MyStrerror(errno));
 			return -1;
 		}
 
@@ -196,7 +196,7 @@ int Daemonize(struct cfgoptions *const s)
 	}
 
 	if (chdir("/") < 0) {
-		fprintf(stderr, "watchdogd: %s\n", strerror(errno));
+		fprintf(stderr, "watchdogd: %s\n", MyStrerror(errno));
 		exit(EXIT_FAILURE);
 	}
 

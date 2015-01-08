@@ -23,4 +23,6 @@ void SetAutoPeriod(bool);
 void HashTagPriority(bool);
 bool LogUpTo(const char *const);
 bool LogUpToInt(long pri);
+bool MyStrerrorInit(void);
+char * MyStrerror(int);
 #endif

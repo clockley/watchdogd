@@ -47,7 +47,7 @@ static bool ParseConfigfile(char *name, char *value, spawnattr_t * obj)
 	if (strcasecmp(name, "Umask") == 0) {
 		obj->umask = strdup(value);
 		if (obj->umask == NULL) {
-			fprintf(stderr, "watchdogd: out of memory: %s", strerror(errno));
+			fprintf(stderr, "watchdogd: out of memory: %s", MyStrerror(errno));
 			return false;
 		}
 	}

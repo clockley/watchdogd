@@ -87,14 +87,14 @@ int CreateLinkedListOfExes(const char *repairScriptFolder, ProcessList * p,
 
 	if (fd == -1) {
 		fprintf(stderr, "watchdogd: %s: %s\n", repairScriptFolder,
-			strerror(errno));
+			MyStrerror(errno));
 		return 1;
 	}
 
 	DIR *dir = fdopendir(fd);
 
 	if (dir == NULL) {
-		Logmsg(LOG_ERR, "watchdogd: %s", strerror(errno));
+		Logmsg(LOG_ERR, "watchdogd: %s", MyStrerror(errno));
 		close(fd);
 		return -1;
 	}
@@ -188,7 +188,7 @@ int CreateLinkedListOfExes(const char *repairScriptFolder, ProcessList * p,
 
 			if (fd < 0) {
 				fprintf(stderr, "unable to open file %s:\n",
-					strerror(errno));
+					MyStrerror(errno));
 				free((void *)cmd->path);
 				free((void *)cmd);
 				continue;
@@ -219,7 +219,7 @@ int CreateLinkedListOfExes(const char *repairScriptFolder, ProcessList * p,
  error:
 	assert(fd != -1);
 	close(fd);
-	Logmsg(LOG_ERR, "watchdogd: %s", strerror(errno));
+	Logmsg(LOG_ERR, "watchdogd: %s", MyStrerror(errno));
 	closedir(dir);
 	free(direntbuf);
 
@@ -391,14 +391,14 @@ static void *__ExecuteRepairScriptsLegacy(void *a)
 		    (__ExecWorker *) calloc(1, sizeof(__ExecWorker));
 		if (container.targ == NULL) {
 			Logmsg(LOG_ERR, "unable to allocate memory: %s",
-			       strerror(errno));
+			       MyStrerror(errno));
 		}
 		container.targ->command = c;
 		container.targ->config = s;
 		container.targ->mode = strdup("test");
 		if (container.targ->mode == NULL) {
 			Logmsg(LOG_ERR, "unable to allocate memory: %s",
-			       strerror(errno));
+			       MyStrerror(errno));
 		}
 		container.targ->last = false;
 		container.targ->retString = NULL;
@@ -408,7 +408,7 @@ static void *__ExecuteRepairScriptsLegacy(void *a)
 					 &container);
 		if (ret != 0) {
 			Logmsg(LOG_ERR, "Unable to create thread %s",
-			       strerror(-ret));
+			       MyStrerror(-ret));
 			abort();
 		}
 		pthread_barrier_wait(&container.membarrier);
@@ -437,18 +437,18 @@ static void *__ExecuteRepairScriptsLegacy(void *a)
 		    (__ExecWorker *) calloc(1, sizeof(__ExecWorker));
 		if (container.targ == NULL) {
 			Logmsg(LOG_ERR, "unable to allocate memory: %s",
-			       strerror(errno));
+			       MyStrerror(errno));
 		}
 		container.targ->command = c;
 		container.targ->config = s;
 		Wasprintf(&container.targ->retString, "%i", c->ret);
 		if (container.targ->retString == NULL) {
-			Logmsg(LOG_ERR, "unable to allocate memory: %s", strerror(errno));	//tell user then crash
+			Logmsg(LOG_ERR, "unable to allocate memory: %s", MyStrerror(errno));	//tell user then crash
 		}
 		container.targ->mode = strdup("repair");
 		if (container.targ->mode == NULL) {
 			Logmsg(LOG_ERR, "unable to allocate memory: %s",
-			       strerror(errno));
+			       MyStrerror(errno));
 		}
 
 		pthread_barrier_init(&container.membarrier, NULL, 2);
@@ -463,7 +463,7 @@ static void *__ExecuteRepairScriptsLegacy(void *a)
 
 		if (ret != 0) {
 			Logmsg(LOG_ERR, "Unable to create thread %s",
-			       strerror(-ret));
+			       MyStrerror(-ret));
 			abort();
 		}
 
@@ -512,14 +512,14 @@ static void *__ExecuteRepairScripts(void *a)
 		    (__ExecWorker *) calloc(1, sizeof(__ExecWorker));
 		if (container.targ == NULL) {
 			Logmsg(LOG_ERR, "unable to allocate memory: %s",
-			       strerror(errno));
+			       MyStrerror(errno));
 		}
 		container.targ->command = c;
 		container.targ->config = s;
 		container.targ->mode = strdup("test");
 		if (container.targ->mode == NULL) {
 			Logmsg(LOG_ERR, "unable to allocate memory: %s",
-			       strerror(errno));
+			       MyStrerror(errno));
 		}
 		container.targ->last = false;
 		container.targ->retString = NULL;
@@ -531,7 +531,7 @@ static void *__ExecuteRepairScripts(void *a)
 					 &container);
 		if (ret != 0) {
 			Logmsg(LOG_ERR, "Unable to create thread %s",
-			       strerror(-ret));
+			       MyStrerror(-ret));
 			abort();
 		}
 
@@ -561,18 +561,18 @@ static void *__ExecuteRepairScripts(void *a)
 		    (__ExecWorker *) calloc(1, sizeof(__ExecWorker));
 		if (container.targ == NULL) {
 			Logmsg(LOG_ERR, "unable to allocate memory: %s",
-			       strerror(errno));
+			       MyStrerror(errno));
 		}
 		container.targ->command = c;
 		container.targ->config = s;
 		Wasprintf(&container.targ->retString, "%i", c->ret);
 		if (container.targ->retString == NULL) {
-			Logmsg(LOG_ERR, "unable to allocate memory: %s", strerror(errno));
+			Logmsg(LOG_ERR, "unable to allocate memory: %s", MyStrerror(errno));
 		}
 		container.targ->mode = strdup("repair");
 		if (container.targ->mode == NULL) {
 			Logmsg(LOG_ERR, "unable to allocate memory: %s",
-			       strerror(errno));
+			       MyStrerror(errno));
 		}
 
 		if (next == NULL && s->repairBinTimeout <= 0) {
@@ -587,7 +587,7 @@ static void *__ExecuteRepairScripts(void *a)
 
 		if (ret != 0) {
 			Logmsg(LOG_ERR, "Unable to create thread %s",
-			       strerror(-ret));
+			       MyStrerror(-ret));
 			abort();
 		}
 
@@ -655,7 +655,7 @@ int ExecuteRepairScripts(ProcessList * p, struct cfgoptions *s)
 			return -1;
 		}
 	} else {
-		Logmsg(LOG_ERR, "fork failed: %s", strerror(errno));
+		Logmsg(LOG_ERR, "fork failed: %s", MyStrerror(errno));
 		return -1;
 	}
 

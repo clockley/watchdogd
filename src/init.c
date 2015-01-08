@@ -28,7 +28,7 @@ int SetSchedulerPolicy(int priority)
 	if (sched_setscheduler(0, SCHED_RR, &param) < 0) {
 		assert(errno != ESRCH);
 		fprintf(stderr, "watchdogd: sched_setscheduler failed %s\n",
-			strerror(errno));
+			MyStrerror(errno));
 		return -1;
 	}
 
@@ -39,7 +39,7 @@ int InitializePosixMemlock(void)
 {
 	if (mlockall(MCL_CURRENT | MCL_FUTURE) < 0) {
 		fprintf(stderr, "watchdogd: unable to lock memory %s\n",
-			strerror(errno));
+			MyStrerror(errno));
 		return -1;
 	}
 
@@ -112,7 +112,7 @@ int MakeLogDir(struct cfgoptions *const cfg)
 	errno = 0;
 	if (mkdir(cfg->logdir, 0750) != 0) {
 		if (errno != EEXIST) {
-			Logmsg(LOG_ERR, "watchdog: %s", strerror(errno));
+			Logmsg(LOG_ERR, "watchdog: %s", MyStrerror(errno));
 			return -1;
 		} else {
 			return 0;
@@ -127,7 +127,7 @@ int GetDefaultPriority(void)
 	int ret = sched_get_priority_min(SCHED_RR);
 
 	if (ret < 0) {
-		fprintf(stderr, "watchdogd: %s\n", strerror(errno));
+		fprintf(stderr, "watchdogd: %s\n", MyStrerror(errno));
 		return ret;
 	}
 
@@ -142,14 +142,14 @@ int CheckPriority(int priority)
 	max = sched_get_priority_max(SCHED_RR);
 
 	if (max < 0) {
-		fprintf(stderr, "watchdogd: %s\n", strerror(errno));
+		fprintf(stderr, "watchdogd: %s\n", MyStrerror(errno));
 		return -1;
 	}
 
 	min = sched_get_priority_min(SCHED_RR);
 
 	if (min < 0) {
-		fprintf(stderr, "watchdogd: %s\n", strerror(errno));
+		fprintf(stderr, "watchdogd: %s\n", MyStrerror(errno));
 		return -1;
 	}
 

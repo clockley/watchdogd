@@ -34,7 +34,7 @@ int PingWatchdog(watchdog_t * const watchdog)
 		return 0;
 	}
 
-	Logmsg(LOG_ERR, "WDIOC_KEEPALIVE ioctl failed: %s", strerror(errno));
+	Logmsg(LOG_ERR, "WDIOC_KEEPALIVE ioctl failed: %s", MyStrerror(errno));
 
 	return -1;
 }
@@ -49,12 +49,12 @@ int CloseWatchdog(watchdog_t * const watchdog)
 
 	if (ioctl(GetFd(watchdog), WDIOC_SETOPTIONS, &options) < 0) {
 		Logmsg(LOG_CRIT, "WDIOS_DISABLECARD ioctl failed: %s",
-		       strerror(errno));
+		       MyStrerror(errno));
 	}
 
 	if (write(GetFd(watchdog), "V", strlen("V")) < 0) {
 		Logmsg(LOG_CRIT, "write to watchdog device failed: %s",
-		       strerror(errno));
+		       MyStrerror(errno));
 		close(GetFd(watchdog));
 		WatchdogDestroy(watchdog);
 		Logmsg(LOG_CRIT, "unable to close watchdog device");
@@ -72,7 +72,7 @@ static bool CanMagicClose(watchdog_t * const wdt)
 	struct watchdog_info watchDogInfo;
 
 	if (ioctl(GetFd(wdt), WDIOC_GETSUPPORT, &watchDogInfo) < 0) {
-		Logmsg(LOG_ERR, "%s", strerror(errno));
+		Logmsg(LOG_ERR, "%s", MyStrerror(errno));
 		return false;
 	}
 
@@ -86,7 +86,7 @@ static bool PrintWdtInfo(watchdog_t * const wdt)
 	assert(wdt != NULL);
 
 	if (ioctl(GetFd(wdt), WDIOC_GETSUPPORT, &watchDogInfo) < 0) {
-		Logmsg(LOG_ERR, "%s", strerror(errno));
+		Logmsg(LOG_ERR, "%s", MyStrerror(errno));
 	} else {
 		Logmsg(LOG_DEBUG, "Hardware watchdog '%s', version %lu",
 		       watchDogInfo.identity, watchDogInfo.firmware_version);
@@ -109,7 +109,7 @@ watchdog_t *OpenWatchdog(const char *const path)
 	SetFd(watchdog, open(path, O_WRONLY | O_CLOEXEC));
 	if (GetFd(watchdog) == -1) {
 		Logmsg(LOG_ERR,
-		       "unable to open watchdog device: %s", strerror(errno));
+		       "unable to open watchdog device: %s", MyStrerror(errno));
 		WatchdogDestroy(watchdog);
 		return NULL;
 	}
@@ -154,7 +154,7 @@ static int DisableWatchdog(watchdog_t * const watchdog)
 	int options = WDIOS_DISABLECARD;
 	if (ioctl(GetFd(watchdog), WDIOC_SETOPTIONS, &options) < 0) {
 		Logmsg(LOG_CRIT, "WDIOS_DISABLECARD ioctl failed: %s",
-		       strerror(errno));
+		       MyStrerror(errno));
 		return -1;
 	}
 
@@ -172,7 +172,7 @@ static int EnableWatchdog(watchdog_t * const watchdog)
 	int options = WDIOS_ENABLECARD;
 	if (ioctl(GetFd(watchdog), WDIOC_SETOPTIONS, &options) < 0) {
 		Logmsg(LOG_CRIT, "WDIOS_ENABLECARD ioctl failed: %s",
-		       strerror(errno));
+		       MyStrerror(errno));
 		return -1;
 	}
 
@@ -198,7 +198,7 @@ int ConfigureWatchdogTimeout(watchdog_t * const watchdog, int timeout)
 
 	if (ioctl(GetFd(watchdog), WDIOC_GETSUPPORT, &watchDogInfo) < 0) {
 		Logmsg(LOG_CRIT, "WDIOC_GETSUPPORT ioctl failed: %s",
-		       strerror(errno));
+		       MyStrerror(errno));
 		return -1;
 	}
 
@@ -245,12 +245,12 @@ static int LegacyOutOfMemoryKillerConfig(void)
 	int fd = open("/proc/self/om_adj",O_WRONLY);
 	
 	if (fd < 0)  {
-		Logmsg(LOG_ERR, "open failed: %s", strerror(errno));
+		Logmsg(LOG_ERR, "open failed: %s", MyStrerror(errno));
 		return -1;
 	}
 
 	if (write(fd, "-17", strlen("-17")) < 0) {
-		Logmsg(LOG_ERR, "write failed: %s", strerror(errno));
+		Logmsg(LOG_ERR, "write failed: %s", MyStrerror(errno));
 		close(fd);
 		return -1;
 	} else {
@@ -268,14 +268,14 @@ static int ConfigureKernelOutOfMemoryKiller(void)
 	dfd = open("/proc/self", O_DIRECTORY | O_RDONLY);
 
 	if (dfd == -1) {
-		Logmsg(LOG_ERR, "open failed: %s", strerror(errno));
+		Logmsg(LOG_ERR, "open failed: %s", MyStrerror(errno));
 		return -1;
 	}
 
 	fd = openat(dfd, "oom_score_adj", O_WRONLY);
 
 	if (fd == -1) {
-		Logmsg(LOG_ERR, "open failed: %s", strerror(errno));
+		Logmsg(LOG_ERR, "open failed: %s", MyStrerror(errno));
 
 		close(dfd);
 
@@ -287,7 +287,7 @@ static int ConfigureKernelOutOfMemoryKiller(void)
 	}
 
 	if (write(fd, "-1000", strlen("-1000")) < 0) {
-		Logmsg(LOG_ERR, "write failed: %s", strerror(errno));
+		Logmsg(LOG_ERR, "write failed: %s", MyStrerror(errno));
 		CloseWraper(&fd);
 		CloseWraper(&dfd);
 		return -1;
@@ -352,7 +352,7 @@ int SaveRandomSeed(const char *filename)
 	}
 
 	if (fchown(fd, 0, 0) < 0) {
-		fprintf(stderr, "%s\n", strerror(errno));
+		fprintf(stderr, "%s\n", MyStrerror(errno));
 	}
 
 	ret = write(fd, buf, sizeof(buf));
@@ -371,7 +371,7 @@ int SaveRandomSeed(const char *filename)
 
 	return 0;
  error:
-	fprintf(stderr, "%s\n", strerror(errno));
+	fprintf(stderr, "%s\n", MyStrerror(errno));
 
 	if (fd >= 0) {
 		close(fd);
@@ -734,7 +734,7 @@ int SystemdWatchdogEnabled(const int unset, long long int * const interval)
 
 	if (unset != 0) {
 		if (unsetenv("WATCHDOG_PID") < 0) {
-			Logmsg(LOG_WARNING, "Unable to delete WATCHDOG_PID environment variable:%s", strerror(errno));
+			Logmsg(LOG_WARNING, "Unable to delete WATCHDOG_PID environment variable:%s", MyStrerror(errno));
 		} else if (unsetenv("WATCHDOG_USEC") < 0) {
 			return -1;
 		}

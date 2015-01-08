@@ -14,6 +14,7 @@
 #include <libconfig.h>
 #include <oping.h>
 #include <limits.h>
+#include <locale.h>
 #include <pthread.h>
 #include <pwd.h>
 #include <sched.h>

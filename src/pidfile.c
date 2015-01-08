@@ -23,11 +23,11 @@ int WritePidFile(pidfile_t *const pidfile, pid_t pid)
 		if (pidfile->name != NULL) {
 			fprintf(stderr,
 				"watchdogd: unable to write pid to %s: %s\n",
-				pidfile->name, strerror(errno));
+				pidfile->name, MyStrerror(errno));
 		} else {
 			fprintf(stderr,
 				"watchdogd: unable to write pid to %i: %s\n",
-				pidfile->fd, strerror(errno));
+				pidfile->fd, MyStrerror(errno));
 		}
 		return -1;
 	}
@@ -42,7 +42,7 @@ int OpenPidFile(const char *const path)
 	int ret = open(path, O_WRONLY | O_CREAT | O_EXCL | O_CLOEXEC, 0644);
 	if (ret < 0) {
 		fprintf(stderr, "watchdogd: open failed: %s\n",
-			strerror(errno));
+			MyStrerror(errno));
 		if (errno == EEXIST) {
 			ret = open(path, O_RDONLY | O_CLOEXEC);
 
@@ -81,7 +81,7 @@ int OpenPidFile(const char *const path)
 					if (ret < 0) {
 						fprintf(stderr,
 							"watchdogd: open failed: %s\n",
-							strerror(errno));
+							MyStrerror(errno));
 						umask(oumask);
 						return ret;
 					} else {
@@ -114,7 +114,7 @@ int DeletePidFile(pidfile_t * const pidfile)
 	CloseWraper(&pidfile->fd);
 
 	if (remove(pidfile->name) < 0) {
-		Logmsg(LOG_ERR, "remove failed: %s", strerror(errno));
+		Logmsg(LOG_ERR, "remove failed: %s", MyStrerror(errno));
 		return -2;
 	}
 
