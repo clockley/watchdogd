@@ -431,7 +431,7 @@ void Logmsg(int priority, const char *const fmt, ...)
 
 		if (autoPeriod == 1) {
 			if (buf[strlen(buf) - 1] != '.') {
-				strncat(buf, ".", sizeof(buf) - 1);
+				strncat(buf, ".", sizeof(buf) - strlen(buf) - 1);
 			}
 		}
 
@@ -445,28 +445,28 @@ void Logmsg(int priority, const char *const fmt, ...)
 
 		switch (priority) {
 		case LOG_EMERG:
-			strncat(buf, " #System #Panic", sizeof(buf) - 1);
+			strncat(buf, " #System #Panic", sizeof(buf) - strlen(buf) - 1);
 			break;
 		case LOG_ALERT:
-			strncat(buf, " #System #Attention", sizeof(buf) - 1);
+			strncat(buf, " #System #Attention", sizeof(buf) - strlen(buf) - 1);
 			break;
 		case LOG_CRIT:
-			strncat(buf, " #System #Critical", sizeof(buf) - 1);
+			strncat(buf, " #System #Critical", sizeof(buf) - strlen(buf) - 1);
 			break;
 		case LOG_ERR:
-			strncat(buf, " #System #Error", sizeof(buf) - 1);
+			strncat(buf, " #System #Error", sizeof(buf) - strlen(buf) - 1);
 			break;
 		case LOG_WARNING:
-			strncat(buf, " #System #Warning", sizeof(buf) - 1);
+			strncat(buf, " #System #Warning", sizeof(buf) - strlen(buf) - 1);
 			break;
 		case LOG_NOTICE:
-			strncat(buf, " #System #Notice", sizeof(buf) - 1);
+			strncat(buf, " #System #Notice", sizeof(buf) - strlen(buf) - 1);
 			break;
 		case LOG_INFO:
-			strncat(buf, " #System #Comment", sizeof(buf) - 1);
+			strncat(buf, " #System #Comment", sizeof(buf) - strlen(buf) - 1);
 			break;
 		case LOG_DEBUG:
-			strncat(buf, " #System #Developer", sizeof(buf) - 1);
+			strncat(buf, " #System #Developer", sizeof(buf) - strlen(buf) - 1);
 			break;
 		default:
 			assert(false);
