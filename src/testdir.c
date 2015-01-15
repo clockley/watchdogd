@@ -317,7 +317,6 @@ static void *__ExecScriptWorkerThread(void *a)
 	Container *container = (Container *) a;
 	__ExecWorker *worker = container->targ;
 	repaircmd_t *c = worker->command;
-	struct cfgoptions *s = worker->config;
 
 	pthread_barrier_wait(&container->membarrier);
 
