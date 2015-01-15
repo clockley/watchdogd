@@ -390,6 +390,7 @@ static void *__ExecuteRepairScriptsLegacy(void *a)
 		if (container.targ == NULL) {
 			Logmsg(LOG_ERR, "unable to allocate memory: %s",
 			       MyStrerror(errno));
+			abort();
 		}
 		container.targ->command = c;
 		container.targ->config = s;
@@ -397,6 +398,7 @@ static void *__ExecuteRepairScriptsLegacy(void *a)
 		if (container.targ->mode == NULL) {
 			Logmsg(LOG_ERR, "unable to allocate memory: %s",
 			       MyStrerror(errno));
+			abort();
 		}
 		container.targ->last = false;
 		container.targ->retString = NULL;
@@ -436,17 +438,20 @@ static void *__ExecuteRepairScriptsLegacy(void *a)
 		if (container.targ == NULL) {
 			Logmsg(LOG_ERR, "unable to allocate memory: %s",
 			       MyStrerror(errno));
+			abort();
 		}
 		container.targ->command = c;
 		container.targ->config = s;
 		Wasprintf(&container.targ->retString, "%i", c->ret);
 		if (container.targ->retString == NULL) {
 			Logmsg(LOG_ERR, "unable to allocate memory: %s", MyStrerror(errno));	//tell user then crash
+			abort();
 		}
 		container.targ->mode = strdup("repair");
 		if (container.targ->mode == NULL) {
 			Logmsg(LOG_ERR, "unable to allocate memory: %s",
 			       MyStrerror(errno));
+			abort();
 		}
 
 		pthread_barrier_init(&container.membarrier, NULL, 2);
@@ -511,6 +516,7 @@ static void *__ExecuteRepairScripts(void *a)
 		if (container.targ == NULL) {
 			Logmsg(LOG_ERR, "unable to allocate memory: %s",
 			       MyStrerror(errno));
+			abort();
 		}
 		container.targ->command = c;
 		container.targ->config = s;
@@ -560,17 +566,20 @@ static void *__ExecuteRepairScripts(void *a)
 		if (container.targ == NULL) {
 			Logmsg(LOG_ERR, "unable to allocate memory: %s",
 			       MyStrerror(errno));
+			abort();
 		}
 		container.targ->command = c;
 		container.targ->config = s;
 		Wasprintf(&container.targ->retString, "%i", c->ret);
 		if (container.targ->retString == NULL) {
 			Logmsg(LOG_ERR, "unable to allocate memory: %s", MyStrerror(errno));
+			abort();
 		}
 		container.targ->mode = strdup("repair");
 		if (container.targ->mode == NULL) {
 			Logmsg(LOG_ERR, "unable to allocate memory: %s",
 			       MyStrerror(errno));
+			abort();
 		}
 
 		if (next == NULL && s->repairBinTimeout <= 0) {
