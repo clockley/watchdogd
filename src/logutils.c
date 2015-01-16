@@ -372,7 +372,7 @@ void Logmsg(int priority, const char *const fmt, ...)
 	int len =
 	    vsnprintf(NULL, 0, fmt,
 		      args) + strlen((applesquePriority ==
-				      0) ? "<0>" : " #System #Attention") + 1;
+				      0) ? "<0>" : " #System #Attention") + 2;
 
 	if (len <= 0) {
 		len = 2048;
