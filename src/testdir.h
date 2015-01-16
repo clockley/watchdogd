@@ -37,7 +37,8 @@ struct container {
 typedef struct container Container;
 
 int CreateLinkedListOfExes(const char *repairScriptFolder, ProcessList * p, struct cfgoptions *const);
-int ExecuteRepairScripts(ProcessList * p, struct cfgoptions *s);
+int ExecuteRepairScripts(void);
 void FreeExeList(ProcessList * p);
 size_t DirentBufSize(DIR * dirp);
+bool ExecuteRepairScriptsPreFork(ProcessList *, struct cfgoptions *);
 #endif

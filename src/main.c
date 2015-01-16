@@ -74,6 +74,11 @@ int main(int argc, char **argv)
 
 	PrintConfiguration(&options);
 
+	if (ExecuteRepairScriptsPreFork(&processes, &options) == false) {
+		Logmsg(LOG_ERR, "ExecuteRepairScriptsPreFork failed");
+		FatalError(&options);
+	}
+
 	if (StartHelperThreads(&options) != 0) {
 		FatalError(&options);
 	}

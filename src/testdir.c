@@ -14,13 +14,15 @@
  * permissions and limitations under the License. 
  */
 #define _BSD_SOURCE
-const int MAX_WORKER_THREADS = 16;
 #include "watchdogd.h"
 #include "sub.h"
 #include <dirent.h>
 #include "testdir.h"
 #include "exe.h"
 #include "repair.h"
+
+const int MAX_WORKER_THREADS = 16;
+static int * ret = NULL;
 
 //The dirent_buf_size function was written by Ben Hutchings and released under the following license.
 
@@ -486,7 +488,7 @@ static void *__ExecuteRepairScriptsLegacy(void *a)
 			continue;
 		}
 		if (c->ret != 0) {
-			Logmsg(LOG_DEBUG, "repair %s script failed", c->path);
+			Logmsg(LOG_ERR, "repair %s script failed", c->path);
 			arg->ret = 1;
 			break;
 		}
@@ -614,7 +616,7 @@ static void *__ExecuteRepairScripts(void *a)
 			continue;
 		}
 		if (c->ret != 0) {
-			Logmsg(LOG_DEBUG, "repair %s script failed", c->spawnattr.repairFilePathname);
+			Logmsg(LOG_ERR, "repair %s script failed", c->spawnattr.repairFilePathname);
 			arg->ret = 1;
 			break;
 		}
@@ -624,45 +626,85 @@ static void *__ExecuteRepairScripts(void *a)
 	return NULL;
 }
 
-int ExecuteRepairScripts(ProcessList * p, struct cfgoptions *s)
+static int fd[2];
+static int fd2[2];
+
+bool ExecuteRepairScriptsPreFork(ProcessList * p, struct cfgoptions *s)
 {
-	assert(s != NULL);
-	assert(p != NULL);
+	pipe(fd);
+	pipe(fd2);
+
+	ret = (int*)mmap(NULL, sizeof(int), PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, -1, 0);
+
+	if (ret == MAP_FAILED) {
+		Logmsg(LOG_ALERT, "mmap failed: %s", MyStrerror(errno));
+		exit(1);
+	}
 
 	pid_t pid = fork();
 
+	if (pid != -1) {
+		close(fd[0]);
+		close(fd2[1]);
+		wait(NULL);
+	} else if (pid == -1) {
+		Logmsg(LOG_ERR, "%s\n", MyStrerror(errno));
+		return false;
+	}
+
 	if (pid == 0) {
-		if (OnParentDeathSend(SIGKILL) == false) {
-			CreateDetachedThread(ExitIfParentDied, NULL);
+		pid_t pid = fork();
+
+		if (pid > 0) {
+			_Exit(0);
 		}
-		struct executeScriptsStruct ess;
-		ess.list = p;
-		ess.config = s;
-		ess.ret = 0;
 
-		pthread_barrier_init(&ess.barrier, NULL, 3);
 
-		CreateDetachedThread(__ExecuteRepairScriptsLegacy, &ess);
-		CreateDetachedThread(__ExecuteRepairScripts, &ess);
-
-		pthread_barrier_wait(&ess.barrier);
-		pthread_barrier_destroy(&ess.barrier);
-
-		if (ess.ret != 0) {
-			exit(1);
+		if (pid < 0 ) {
+			Logmsg(LOG_ERR, "fork failed: %s", MyStrerror(errno));
+			abort();
 		}
+
+		close(fd[1]);
+		close(fd2[0]);
+
+		char b[1];
+
+		while (read(fd[0], b, sizeof(b)) != 0) {
+			Logmsg(LOG_DEBUG, "READ");
+			if (OnParentDeathSend(SIGKILL) == false) {
+				CreateDetachedThread(ExitIfParentDied, NULL);
+			}
+			struct executeScriptsStruct ess;
+			ess.list = p;
+			ess.config = s;
+			ess.ret = 0;
+
+			pthread_barrier_init(&ess.barrier, NULL, 3);
+
+			CreateDetachedThread(__ExecuteRepairScriptsLegacy, &ess);
+			CreateDetachedThread(__ExecuteRepairScripts, &ess);
+
+			pthread_barrier_wait(&ess.barrier);
+			pthread_barrier_destroy(&ess.barrier);
+			*ret = ess.ret;
+			write(fd2[1], "", strlen(""));
+		}
+
 		exit(0);
 	}
 
-	int ret = 0;
-	if (pid != -1) {
-		while (waitpid(pid, &ret, 0) == -1 && errno == EINTR) ;
+	return true;
+}
 
-		if (WEXITSTATUS(ret) != 0) {
-			return -1;
-		}
-	} else {
-		Logmsg(LOG_ERR, "fork failed: %s", MyStrerror(errno));
+int ExecuteRepairScripts(void)
+{
+	write(fd[1], "", strlen(""));
+	char b[1];
+
+	while (read(fd2[0], b, sizeof(b)) != 0);
+
+	if (*ret != 0) {
 		return -1;
 	}
 
