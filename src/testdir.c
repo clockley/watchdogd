@@ -671,7 +671,6 @@ bool ExecuteRepairScriptsPreFork(ProcessList * p, struct cfgoptions *s)
 		char b[1];
 
 		while (read(fd[0], b, sizeof(b)) != 0) {
-			Logmsg(LOG_DEBUG, "READ");
 			if (OnParentDeathSend(SIGKILL) == false) {
 				CreateDetachedThread(ExitIfParentDied, NULL);
 			}
