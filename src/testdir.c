@@ -671,9 +671,6 @@ bool ExecuteRepairScriptsPreFork(ProcessList * p, struct cfgoptions *s)
 		char b[1];
 
 		while (read(fd[0], b, sizeof(b)) != 0) {
-			if (OnParentDeathSend(SIGKILL) == false) {
-				CreateDetachedThread(ExitIfParentDied, NULL);
-			}
 			struct executeScriptsStruct ess;
 			ess.list = p;
 			ess.config = s;
