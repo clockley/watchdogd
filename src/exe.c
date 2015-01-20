@@ -36,67 +36,6 @@ static void *WaitThread(void *arg)
 	return NULL;
 }
 
-struct fds
-{
-	int stdoutfd;
-	int stderrfd;
-};
-
-static struct fds OpenLogFiles(const char *logDirectory, const char *file)
-{
-	int dfd = open(logDirectory, O_DIRECTORY | O_RDONLY);
-	struct fds error = {-1, -1};
-	if (dfd < 0) {
-		Logmsg(LOG_CRIT,
-		       "open failed: %s: %s",
-		       logDirectory, MyStrerror(errno));
-				return error;
-	}
-
-	int stdoutfd = openat(dfd, "test-bin.stdout", O_RDWR | O_APPEND | O_CREAT,
-			S_IWUSR | S_IRUSR);
-
-	if (stdoutfd < 0) {
-		Logmsg(LOG_CRIT, "open failed: %s",
-			       MyStrerror(errno));
-				close(dfd);
-		return error;
-	}
-
-	int stderrfd = openat(dfd, "test-bin.stderr",
-				O_RDWR | O_APPEND | O_CREAT,
-				S_IWUSR | S_IRUSR);
-
-	if (stderrfd < 0) {
-		Logmsg(LOG_CRIT, "open failed: %s",
-		       MyStrerror(errno));
-		close(stdoutfd);
-		close(dfd);
-		return error;
-	} else {
-		close(dfd);
-	}
-
-	fsync(stdoutfd);
-	fsync(stderrfd);
-
-	if (dup2(stdoutfd, STDOUT_FILENO) < 0) {
-		Logmsg(LOG_CRIT,
-		       "dup2 failed: STDOUT_FILENO: %s",
-		       MyStrerror(errno));
-		return error;
-	}
-
-	if (dup2(stderrfd, STDERR_FILENO) < 0) {
-		Logmsg(LOG_CRIT,
-		       "dup2 failed: STDERR_FILENO %s",
-		       MyStrerror(errno));
-		return error;
-	}
-
-	return (struct fds){stdoutfd, stderrfd};
-}
-
 int Spawn(int timeout, struct cfgoptions *const config, const char *file,
 	  const char *args, ...)
 {
@@ -136,7 +75,44 @@ int Spawn(int timeout, struct cfgoptions *const config, const char *file,
 						   &param);
 				nice(0);
 
-				struct fds fds = OpenLogFiles(config->logdir, file);
+				int dfd = open(config->logdir,
+					       O_DIRECTORY | O_RDONLY);
+
+				if (dfd < 0) {
+					Logmsg(LOG_CRIT,
+					       "open failed: %s: %s",
+					       config->logdir, MyStrerror(errno));
+					return -1;
+				}
+
+				int fd = openat(dfd, "repair.out",
+						O_RDWR | O_APPEND | O_CREAT,
+						S_IWUSR | S_IRUSR);
+
+				if (fd < 0) {
+					Logmsg(LOG_CRIT, "open failed: %s",
+					       MyStrerror(errno));
+					close(dfd);
+					return -1;
+				} else {
+					close(dfd);
+				}
+
+				fsync(fd);
+
+				if (dup2(fd, STDOUT_FILENO) < 0) {
+					Logmsg(LOG_CRIT,
+					       "dup2 failed: STDOUT_FILENO: %s",
+					       MyStrerror(errno));
+					return -1;
+				}
+
+				if (dup2(fd, STDERR_FILENO) < 0) {
+					Logmsg(LOG_CRIT,
+					       "dup2 failed: STDERR_FILENO %s",
+					       MyStrerror(errno));
+					return -1;
+				}
 
 				va_list ap;
 				const char *array[33] = {"\0"};
@@ -160,8 +136,7 @@ int Spawn(int timeout, struct cfgoptions *const config, const char *file,
 				Logmsg(LOG_CRIT, "execv failed %s",
 				       MyStrerror(errno));
 
-				close(fds.stdoutfd);
-				close(fds.stderrfd);
+				close(fd);
 				return -1;
 			}
 
@@ -289,6 +264,31 @@ int SpawnAttr(spawnattr_t *spawnattr, const char *file, const char *args, ...)
 					Logmsg(LOG_ERR, "nice failed: %s", MyStrerror(errno));
 				}
 
+				int dfd = open(spawnattr->logDirectory,
+					       O_DIRECTORY | O_RDONLY);
+
+				if (dfd < 0) {
+					Logmsg(LOG_CRIT,
+					       "open failed: %s: %s",
+					       spawnattr->logDirectory, MyStrerror(errno));
+					return -1;
+				}
+
+				int fd = openat(dfd, "repair.out",
+						O_RDWR | O_APPEND | O_CREAT,
+						S_IWUSR | S_IRUSR);
+
+				if (fd < 0) {
+					Logmsg(LOG_CRIT, "open failed: %s",
+					       MyStrerror(errno));
+					close(dfd);
+					return -1;
+				} else {
+					close(dfd);
+				}
+
+				fsync(fd);
+
 				va_list ap;
 				const char *array[33] = {"\0"};
 				int argno = 0;
@@ -337,7 +337,19 @@ int SpawnAttr(spawnattr_t *spawnattr, const char *file, const char *args, ...)
 					umask(mode);
 				}
 
-				struct fds fds = OpenLogFiles(spawnattr->logDirectory, file);
+				if (dup2(fd, STDOUT_FILENO) < 0) {
+					Logmsg(LOG_CRIT,
+					       "dup2 failed: STDOUT_FILENO: %s",
+					       MyStrerror(errno));
+					return -1;
+				}
+
+				if (dup2(fd, STDERR_FILENO) < 0) {
+					Logmsg(LOG_CRIT,
+					       "dup2 failed: STDERR_FILENO %s",
+					       MyStrerror(errno));
+					return -1;
+				}
 #if defined(__linux__)
 				if (LinuxRunningSystemd() == 1) {
 					unsetenv("NOTIFY_SOCKET");
@@ -348,8 +360,7 @@ int SpawnAttr(spawnattr_t *spawnattr, const char *file, const char *args, ...)
 				Logmsg(LOG_CRIT, "execv failed %s",
 				       file);
 
-				close(fds.stdoutfd);
-				close(fds.stderrfd);
+				close(fd);
 				return -1;
 			}
 
