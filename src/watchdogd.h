@@ -42,6 +42,8 @@
 #include <time.h>
 #include <unistd.h>
 #include <dirent.h>
+#include "myvsnprintf_ss.h"
+#include "mysnprintf_ss.h"
 
 #ifndef NSIG
 #if defined(_NSIG)
@@ -150,6 +152,8 @@ typedef struct spawnattr spawnattr_t;
 
 struct repaircmd_t {
 	struct list entry;
+	bool mode;
+	char retString[64];
 	const char *path;
 	spawnattr_t spawnattr;
 	int ret;

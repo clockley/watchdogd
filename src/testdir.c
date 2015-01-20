@@ -280,32 +280,24 @@ static void *__ExecScriptWorkerThreadLegacy(void *a)
 	assert(a != NULL);
 
 	Container *container = (Container *) a;
-	__ExecWorker *worker = container->targ;
-	repaircmd_t *c = worker->command;
-	struct cfgoptions *s = worker->config;
+	repaircmd_t *c = container->cmd;
+	struct cfgoptions *s = container->config;
 
 	pthread_barrier_wait(&container->membarrier);
 
 	container->workerThreadCount += 1;
 
-	if (worker->retString == NULL) {
+	if (c->retString == NULL) {
 		c->ret =
 		    Spawn(s->repairBinTimeout, s, c->path, c->path,
-			  worker->mode, NULL);
+			  c->mode == TEST ? "test": "repair", NULL);
 	} else {
 		c->ret =
 		    Spawn(s->repairBinTimeout, s, c->path, c->path,
-			  worker->mode, worker->retString, NULL);
+			  c->mode == TEST ? "test": "repair", c->retString, NULL);
 	}
 
-	free(worker->mode);
-	free(worker->retString);
-
-	if (worker->last == true) {
-		pthread_barrier_wait(&worker->barrier);
-	}
-
-	free(worker);
+	c->retString[0] = '\0';
 
 	container->workerThreadCount -= 1;
 
@@ -317,31 +309,24 @@ static void *__ExecScriptWorkerThread(void *a)
 	assert(a != NULL);
 
 	Container *container = (Container *) a;
-	__ExecWorker *worker = container->targ;
-	repaircmd_t *c = worker->command;
+	repaircmd_t *c = container->cmd;
+	struct cfgoptions *s = container->config;
 
 	pthread_barrier_wait(&container->membarrier);
 
 	container->workerThreadCount += 1;
 
-	if (worker->retString == NULL) {
+	if (c->retString == NULL) {
 		c->ret =
-		    SpawnAttr(&c->spawnattr, c->path, c->path, worker->mode,
+		    SpawnAttr(&c->spawnattr, c->path, c->path, c->mode == TEST ? "test": "repair",
 			      NULL);
 	} else {
 		c->ret =
-		    SpawnAttr(&c->spawnattr, c->path, c->path, worker->mode, worker->retString,
+		    SpawnAttr(&c->spawnattr, c->path, c->path, c->mode == TEST ? "test": "repair", c->retString,
 			      NULL);
 	}
 
-	free(worker->mode);
-	free(worker->retString);
-
-	if (worker->last == true) {
-		pthread_barrier_wait(&worker->barrier);
-	}
-
-	free(worker);
+	c->retString[0] = '\0';
 
 	container->workerThreadCount -= 1;
 
@@ -375,10 +360,10 @@ static void *__ExecuteRepairScriptsLegacy(void *a)
 	struct cfgoptions *s = arg->config;
 
 	Container container = { 0 };
+	container.config = s;
 
 	repaircmd_t *c = NULL;
 	repaircmd_t *next = NULL;
-	unsigned count = 0;
 
 	list_for_each_entry(c, next, &p->head, entry) {
 		if (c->legacy == false) {
@@ -387,23 +372,10 @@ static void *__ExecuteRepairScriptsLegacy(void *a)
 
 		pthread_barrier_init(&container.membarrier, NULL, 2);
 
-		container.targ =
-		    (__ExecWorker *) calloc(1, sizeof(__ExecWorker));
-		if (container.targ == NULL) {
-			Logmsg(LOG_ERR, "unable to allocate memory: %s",
-			       MyStrerror(errno));
-			abort();
-		}
-		container.targ->command = c;
-		container.targ->config = s;
-		container.targ->mode = strdup("test");
-		if (container.targ->mode == NULL) {
-			Logmsg(LOG_ERR, "unable to allocate memory: %s",
-			       MyStrerror(errno));
-			abort();
-		}
-		container.targ->last = false;
-		container.targ->retString = NULL;
+		container.config = s;
+		container.cmd = c;
+		container.cmd->mode = TEST;
+		c->retString[0] = '\0';
 
 		int ret =
 		    CreateDetachedThread(__ExecScriptWorkerThreadLegacy,
@@ -425,6 +397,7 @@ static void *__ExecuteRepairScriptsLegacy(void *a)
 	__WaitForWorkers(s, &container);
 
 	memset(&container, 0, sizeof(container));
+	container.config = s;
 
 	list_for_each_entry(c, next, &p->head, entry) {
 		if (c->legacy == false) {
@@ -435,33 +408,12 @@ static void *__ExecuteRepairScriptsLegacy(void *a)
 			continue;
 		}
 
-		container.targ =
-		    (__ExecWorker *) calloc(1, sizeof(__ExecWorker));
-		if (container.targ == NULL) {
-			Logmsg(LOG_ERR, "unable to allocate memory: %s",
-			       MyStrerror(errno));
-			abort();
-		}
-		container.targ->command = c;
-		container.targ->config = s;
-		Wasprintf(&container.targ->retString, "%i", c->ret);
-		if (container.targ->retString == NULL) {
-			Logmsg(LOG_ERR, "unable to allocate memory: %s", MyStrerror(errno));	//tell user then crash
-			abort();
-		}
-		container.targ->mode = strdup("repair");
-		if (container.targ->mode == NULL) {
-			Logmsg(LOG_ERR, "unable to allocate memory: %s",
-			       MyStrerror(errno));
-			abort();
-		}
+		container.cmd = c;
+		Mysnprintf_ss(container.cmd->retString, sizeof(container.cmd->retString), "%i", c->ret);
+
+		container.cmd->mode = REPAIR;
 
 		pthread_barrier_init(&container.membarrier, NULL, 2);
-
-		if (next == NULL && s->repairBinTimeout <= 0) {
-			container.targ->last = true;
-			pthread_barrier_init(&container.targ->barrier, NULL, 2);
-		}
 
 		int ret =
 		    CreateDetachedThread(__ExecScriptWorkerThreadLegacy, &container);
@@ -474,11 +426,6 @@ static void *__ExecuteRepairScriptsLegacy(void *a)
 
 		pthread_barrier_wait(&container.membarrier);
 		pthread_barrier_destroy(&container.membarrier);
-
-		if (next == NULL) {
-			pthread_barrier_wait(&container.targ->barrier);
-			pthread_barrier_destroy(&container.targ->barrier);
-		}
 	}
 
 	__WaitForWorkers(s, &container);
@@ -505,7 +452,7 @@ static void *__ExecuteRepairScripts(void *a)
 	struct cfgoptions *s = arg->config;
 
 	Container container = { 0 };
-
+	container.config = s;
 	repaircmd_t *c = NULL;
 	repaircmd_t *next = NULL;
 
@@ -513,22 +460,11 @@ static void *__ExecuteRepairScripts(void *a)
 		if (c->legacy == true) {
 			continue;
 		}
-		container.targ =
-		    (__ExecWorker *) calloc(1, sizeof(__ExecWorker));
-		if (container.targ == NULL) {
-			Logmsg(LOG_ERR, "unable to allocate memory: %s",
-			       MyStrerror(errno));
-			abort();
-		}
-		container.targ->command = c;
-		container.targ->config = s;
-		container.targ->mode = strdup("test");
-		if (container.targ->mode == NULL) {
-			Logmsg(LOG_ERR, "unable to allocate memory: %s",
-			       MyStrerror(errno));
-		}
-		container.targ->last = false;
-		container.targ->retString = NULL;
+
+		container.cmd = c;
+		container.cmd->mode = TEST;
+
+		c->retString[0] = '\0';
 
 		pthread_barrier_init(&container.membarrier, NULL, 2);
 
@@ -553,6 +489,7 @@ static void *__ExecuteRepairScripts(void *a)
 	__WaitForWorkers(s, &container);
 
 	memset(&container, 0, sizeof(container));
+	container.config = s;
 
 	list_for_each_entry(c, next, &p->head, entry) {
 		if (c->legacy == true) {
@@ -563,31 +500,10 @@ static void *__ExecuteRepairScripts(void *a)
 			continue;
 		}
 
-		container.targ =
-		    (__ExecWorker *) calloc(1, sizeof(__ExecWorker));
-		if (container.targ == NULL) {
-			Logmsg(LOG_ERR, "unable to allocate memory: %s",
-			       MyStrerror(errno));
-			abort();
-		}
-		container.targ->command = c;
-		container.targ->config = s;
-		Wasprintf(&container.targ->retString, "%i", c->ret);
-		if (container.targ->retString == NULL) {
-			Logmsg(LOG_ERR, "unable to allocate memory: %s", MyStrerror(errno));
-			abort();
-		}
-		container.targ->mode = strdup("repair");
-		if (container.targ->mode == NULL) {
-			Logmsg(LOG_ERR, "unable to allocate memory: %s",
-			       MyStrerror(errno));
-			abort();
-		}
+		container.cmd = c;
+		Mysnprintf_ss(container.cmd->retString, sizeof(container.cmd->retString), "%i", c->ret);
 
-		if (next == NULL && s->repairBinTimeout <= 0) {
-			container.targ->last = true;
-			pthread_barrier_init(&container.targ->barrier, NULL, 2);
-		}
+		container.cmd->mode = REPAIR;
 
 		pthread_barrier_init(&container.membarrier, NULL, 2);
 
@@ -602,11 +518,6 @@ static void *__ExecuteRepairScripts(void *a)
 
 		pthread_barrier_wait(&container.membarrier);
 		pthread_barrier_destroy(&container.membarrier);
-
-		if (next == NULL) {
-			pthread_barrier_wait(&container.targ->barrier);
-			pthread_barrier_destroy(&container.targ->barrier);
-		}
 	}
 
 	__WaitForWorkers(s, &container);

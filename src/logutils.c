@@ -45,6 +45,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #define KMAG  "\x1B[35m"
 #define KCYN  "\x1B[36m"
 #define KWHT  "\x1B[37m"
+#define KRESET "\x1B[0m"
 
 static sig_atomic_t logTarget = INVALID_LOG_TARGET;
 static FILE *logFile = NULL;
@@ -104,7 +105,7 @@ static void ResetTextColor(void)
 		return;
 	}
 
-	fprintf(stderr, "%s", "\x1B[0m");
+	write(STDERR_FILENO, KRESET, strlen(KRESET));
 }
 
 static void SetTextColor(int priority)
@@ -117,19 +118,19 @@ static void SetTextColor(int priority)
 
 	switch (priority) {
 	case LOG_EMERG:
-		fprintf(stderr, "%s", KRED);
+		write(STDERR_FILENO, KRED, strlen(KRED));
 		break;
 	case LOG_ALERT:
-		fprintf(stderr, "%s", KRED);
+		write(STDERR_FILENO, KRED, strlen(KRED));
 		break;
 	case LOG_CRIT:
-		fprintf(stderr, "%s", KRED);
+		write(STDERR_FILENO, KRED, strlen(KRED));
 		break;
 	case LOG_ERR:
-		fprintf(stderr, "%s", KRED);
+		write(STDERR_FILENO, KRED, strlen(KRED));
 		break;
 	case LOG_WARNING:
-		fprintf(stderr, "%s", KMAG);
+		write(STDERR_FILENO, KRED, strlen(KRED));
 		break;
 	case LOG_NOTICE:
 		;
@@ -370,7 +371,7 @@ void Logmsg(int priority, const char *const fmt, ...)
 	va_start(args, fmt);
 
 	int len =
-	    vsnprintf(NULL, 0, fmt,
+	    MyVsnprintf_ss(NULL, 0, fmt,
 		      args) + strlen((applesquePriority ==
 				      0) ? "<0>" : " #System #Attention") + 2;
 
@@ -391,41 +392,41 @@ void Logmsg(int priority, const char *const fmt, ...)
 
 		switch (priority) {
 		case LOG_EMERG:
-			snprintf(buf, sizeof(buf), "<0>");
+			strncpy(buf, "<0>", sizeof(buf) - strlen(buf));
 			break;
 		case LOG_ALERT:
-			snprintf(buf, sizeof(buf), "<1>");
+			strncpy(buf, "<1>", sizeof(buf) - strlen(buf));
 			break;
 		case LOG_CRIT:
-			snprintf(buf, sizeof(buf), "<2>");
+			strncpy(buf, "<2>", sizeof(buf) - strlen(buf));
 			break;
 		case LOG_ERR:
-			snprintf(buf, sizeof(buf), "<3>");
+			strncpy(buf, "<3>", sizeof(buf) - strlen(buf));
 			break;
 		case LOG_WARNING:
-			snprintf(buf, sizeof(buf), "<4>");
+			strncpy(buf, "<4>", sizeof(buf) - strlen(buf));
 			break;
 		case LOG_NOTICE:
-			snprintf(buf, sizeof(buf), "<5>");
+			strncpy(buf, "<5>", sizeof(buf) - strlen(buf));
 			break;
 		case LOG_INFO:
-			snprintf(buf, sizeof(buf), "<6>");
+			strncpy(buf, "<6>", sizeof(buf) - strlen(buf));
 			break;
 		case LOG_DEBUG:
-			snprintf(buf, sizeof(buf), "<7>");
+			strncpy(buf, "<7>", sizeof(buf) - strlen(buf));
 			break;
 		default:
 			assert(false);
 		}
 
-		vsnprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), fmt,
+		MyVsnprintf_ss(buf + strlen(buf), sizeof(buf) - strlen(buf), fmt,
 			  args);
 		va_end(args);
 
 		assert(buf[sizeof(buf) - 1] == '\0');
 	} else if (logTarget != SYSTEM_LOG && applesquePriority == 1) {
 
-		vsnprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), fmt,
+		MyVsnprintf_ss(buf + strlen(buf), sizeof(buf) - strlen(buf), fmt,
 			  args);
 		va_end(args);
 
@@ -488,21 +489,20 @@ void Logmsg(int priority, const char *const fmt, ...)
 			if (applesquePriority == 0) {
 				SetTextColor(priority);
 			}
-			fprintf(stderr, format, buf);
+			int len = Mysnprintf_ss(NULL, 0, format, buf) + 1;
+			char t[len];
+			Mysnprintf_ss(t, sizeof(t), format, buf);
+			write(STDERR_FILENO, t, strlen(t));
 			ResetTextColor();
 		} else {
-
 			if (logFile != NULL) {
-				fsync(fileno(logFile));
 				fprintf(logFile, format, buf);
-			} else {
-				fprintf(stderr, format, buf);
 			}
 		}
 	}
 
 	if (logTarget == SYSTEM_LOG) {
-		vsnprintf(buf, sizeof(buf) - 1, fmt, args);
+		MyVsnprintf_ss(buf, sizeof(buf) - 1, fmt, args);
 
 		va_end(args);
 

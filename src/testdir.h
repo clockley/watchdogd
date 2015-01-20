@@ -5,36 +5,22 @@ struct executeScriptsStruct
 	ProcessList *list;
 	struct cfgoptions *config;
 	pthread_barrier_t barrier;
-#ifndef __cplusplus
 	volatile _Atomic(int) ret;
-#else
-	std::atomic<volatile int> ret;
-#endif
-};
-
-struct __ExecScriptWorkerThread
-{
-	repaircmd_t *command;
-	struct cfgoptions *config;
-	char * mode;
-	char * retString;
-	pthread_barrier_t barrier;
-	bool last;
 };
 
 typedef struct __ExecScriptWorkerThread __ExecWorker;
 
 struct container {
-#ifndef __cplusplus
 	volatile _Atomic(unsigned long long) workerThreadCount;
-#else
-	std::atomic<volatile unsigned long long> workerThreadCount;
-#endif
-	__ExecWorker *targ;
+	struct cfgoptions *config;
+	repaircmd_t *cmd;
 	pthread_barrier_t membarrier;
 };
 
 typedef struct container Container;
+
+#define TEST true
+#define REPAIR false
 
 int CreateLinkedListOfExes(const char *repairScriptFolder, ProcessList * p, struct cfgoptions *const);
 int ExecuteRepairScripts(void);

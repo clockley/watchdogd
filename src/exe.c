@@ -20,18 +20,23 @@
 #include "exe.h"
 #include "user.h"
 
-static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
-static pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
+struct WaitThreadArg {
+	pthread_mutex_t *lock;
+	pthread_cond_t *cond;
+	int *ret;
+};
 
 static void *WaitThread(void *arg)
 {
-	int *ret = (int *)arg;
+	struct WaitThreadArg * wobj = arg;
+
+	int *ret = (int *)wobj->ret;
 
 	wait(ret);
 
-	pthread_mutex_lock(&lock);
-	pthread_cond_signal(&cond);
-	pthread_mutex_unlock(&lock);
+	pthread_mutex_lock(wobj->lock);
+	pthread_cond_signal(wobj->cond);
+	pthread_mutex_unlock(wobj->lock);
 
 	return NULL;
 }
@@ -147,9 +152,16 @@ int Spawn(int timeout, struct cfgoptions *const config, const char *file,
 			if (timeout > 0) {
 				int ret = 0;
 
-				pthread_mutex_lock(&lock);
+				pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+				pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
+				struct WaitThreadArg w;
+				w.lock = &lock;
+				w.cond = &cond;
+				w.ret = &ret;
 
-				if (CreateDetachedThread(WaitThread, &ret) < 0) {
+				pthread_mutex_lock(w.lock);
+
+				if (CreateDetachedThread(WaitThread, &w) < 0) {
 					Logmsg(LOG_ERR, "%s", MyStrerror(errno));
 					return -1;
 				}
@@ -167,11 +179,11 @@ int Spawn(int timeout, struct cfgoptions *const config, const char *file,
 				errno = 0;
 				do {
 					returnValue =
-					    pthread_cond_timedwait(&cond, &lock,
+					    pthread_cond_timedwait(w.cond, w.lock,
 								   &rqtp);
 					if (once == false) {
 						int ret =
-						    pthread_mutex_unlock(&lock);
+						    pthread_mutex_unlock(w.lock);
 
 						if (ret == 1) {
 							Logmsg(LOG_ERR, "%s",
@@ -184,6 +196,9 @@ int Spawn(int timeout, struct cfgoptions *const config, const char *file,
 					}
 				} while (returnValue != ETIMEDOUT
 					 && kill(worker, 0) == 0 && errno == 0);
+
+				pthread_mutex_destroy(w.lock);
+				pthread_cond_destroy(w.cond);
 
 				if (returnValue == ETIMEDOUT) {
 					kill(worker, SIGKILL);
@@ -370,10 +385,16 @@ int SpawnAttr(spawnattr_t *spawnattr, const char *file, const char *args, ...)
 
 			if (spawnattr->timeout > 0) {
 				int ret = 0;
+				pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+				pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
+				struct WaitThreadArg w;
+				w.lock = &lock;
+				w.cond = &cond;
+				w.ret = &ret;
 
-				pthread_mutex_lock(&lock);
+				pthread_mutex_lock(w.lock);
 
-				if (CreateDetachedThread(WaitThread, &ret) < 0) {
+				if (CreateDetachedThread(WaitThread, &w) < 0) {
 					Logmsg(LOG_ERR, "%s", MyStrerror(errno));
 					return -1;
 				}
@@ -391,11 +412,11 @@ int SpawnAttr(spawnattr_t *spawnattr, const char *file, const char *args, ...)
 				errno = 0;
 				do {
 					returnValue =
-					    pthread_cond_timedwait(&cond, &lock,
+					    pthread_cond_timedwait(w.cond, w.lock,
 								   &rqtp);
 					if (once == false) {
 						int ret =
-						    pthread_mutex_unlock(&lock);
+						    pthread_mutex_unlock(w.lock);
 
 						if (ret == 1) {
 							Logmsg(LOG_ERR, "%s",
@@ -408,6 +429,9 @@ int SpawnAttr(spawnattr_t *spawnattr, const char *file, const char *args, ...)
 					}
 				} while (returnValue != ETIMEDOUT
 					 && kill(worker, 0) == 0 && errno == 0);
+
+				pthread_mutex_destroy(w.lock);
+				pthread_cond_destroy(w.cond);
 
 				if (returnValue == ETIMEDOUT) {
 					kill(worker, SIGKILL);
