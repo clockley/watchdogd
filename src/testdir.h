@@ -8,8 +8,6 @@ struct executeScriptsStruct
 	volatile _Atomic(int) ret;
 };
 
-typedef struct __ExecScriptWorkerThread __ExecWorker;
-
 struct container {
 	volatile _Atomic(unsigned long long) workerThreadCount;
 	struct cfgoptions *config;
