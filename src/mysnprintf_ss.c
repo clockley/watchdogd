@@ -37,6 +37,7 @@
 #include <errno.h>
 #include <stdarg.h>
 #include <stdio.h>
+#include "myvsnprintf_ss.h"
 
 int Mysnprintf_ss(char *str, size_t n, char const *fmt, ...)
 {
