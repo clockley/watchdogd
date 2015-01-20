@@ -153,7 +153,7 @@ typedef struct spawnattr spawnattr_t;
 struct repaircmd_t {
 	struct list entry;
 	bool mode;
-	char retString[64];
+	char retString[32];
 	const char *path;
 	spawnattr_t spawnattr;
 	int ret;
