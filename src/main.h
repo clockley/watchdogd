@@ -16,6 +16,7 @@
 
 #if !defined(MAIN_H)
 #define MAIN_H
+#include "testdir.h"
 int SetupSignalHandlers(int isDaemon);
 static void SignalHandler(int signum);
 static void PrintConfiguration(struct cfgoptions *s);
