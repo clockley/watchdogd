@@ -210,7 +210,7 @@ static int PrintHelp(void)
 		{"  -V, --version", "print version info"}
 	};
 
-	for (int i = 0; i < ARRAY_SIZE(help); i += 1) {
+	for (size_t i = 0; i < ARRAY_SIZE(help); i += 1) {
 		long col = GetConsoleColumns();
 		if (col >= 80) { //KLUGE
 			col += col / 2;
