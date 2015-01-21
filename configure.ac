@@ -15,7 +15,7 @@ AC_PROG_CC_STDC
 #AS_IF([test "x$M4" = "xno"], AC_MSG_ERROR([m4 missing]))
 
 # Checks for libraries.
-
+AM_PROG_LIBTOOL
 PKG_CHECK_MODULES([MOUNT], [mount >= 2.22.0])
 
 PKG_CHECK_MODULES([DEPS], [libconfig >= 1.4.8])
@@ -57,6 +57,7 @@ AC_CHECK_FUNCS([clock_gettime strerror strerror_r strtol fpathconf dirfd open op
 
 AC_CONFIG_FILES([Makefile
                  src/Makefile
+		 src/threadpool/Makefile
 		 conf/Makefile
 		 contrib/Makefile
 		 contrib/systemd/Makefile

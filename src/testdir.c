@@ -20,10 +20,11 @@
 #include "testdir.h"
 #include "exe.h"
 #include "repair.h"
+#include "threadpool.h"
 
 const int MAX_WORKER_THREADS = 16;
 static int * ret = NULL;
-
+static struct threadpool * threadpool;
 //The dirent_buf_size function was written by Ben Hutchings and released under the following license.
 
 //Permission is hereby granted, free of charge, to any person obtaining a copy of this
@@ -250,32 +251,7 @@ void FreeExeList(ProcessList * p)
 	}
 }
 
-static void ThrottleWorkerThreadCreation(struct cfgoptions *const config,
-					 Container * const container)
-{
-	sched_yield();
-
-	int numberOfCpus = GetCpuCount();
-
-	double loadavg;
-
-	if (getloadavg(&loadavg, 1) != -1) {
-		if (loadavg < numberOfCpus && container->workerThreadCount < MAX_WORKER_THREADS) {
-			return;
-		}
-	}
-
-	if (numberOfCpus > MAX_WORKER_THREADS) {
-		numberOfCpus = MAX_WORKER_THREADS;
-	}
-
-	while (container->workerThreadCount > numberOfCpus * 2) {
-		sleep((config->repairBinTimeout / 2 ==
-		       0) ? 1 : (config->repairBinTimeout / 2));
-	}
-}
-
-static void *__ExecScriptWorkerThreadLegacy(void *a)
+static void __ExecScriptWorkerThreadLegacy(void *a)
 {
 	assert(a != NULL);
 
@@ -300,11 +276,9 @@ static void *__ExecScriptWorkerThreadLegacy(void *a)
 	c->retString[0] = '\0';
 
 	container->workerThreadCount -= 1;
-
-	return NULL;
 }
 
-static void *__ExecScriptWorkerThread(void *a)
+static void __ExecScriptWorkerThread(void *a)
 {
 	assert(a != NULL);
 
@@ -329,8 +303,6 @@ static void *__ExecScriptWorkerThread(void *a)
 	c->retString[0] = '\0';
 
 	container->workerThreadCount -= 1;
-
-	return NULL;
 }
 
 static void __WaitForWorkers(struct cfgoptions *s, Container const *container)
@@ -377,18 +349,10 @@ static void *__ExecuteRepairScriptsLegacy(void *a)
 		container.cmd->mode = TEST;
 		c->retString[0] = '\0';
 
-		int ret =
-		    CreateDetachedThread(__ExecScriptWorkerThreadLegacy,
-					 &container);
-		if (ret != 0) {
-			Logmsg(LOG_ERR, "Unable to create thread %s",
-			       MyStrerror(-ret));
-			abort();
-		}
+		threadpool_add_task(threadpool, __ExecScriptWorkerThreadLegacy, &container, 1);
+
 		pthread_barrier_wait(&container.membarrier);
 		pthread_barrier_destroy(&container.membarrier);
-
-		ThrottleWorkerThreadCreation(s, &container);
 	}
 
 	c = NULL;
@@ -415,14 +379,7 @@ static void *__ExecuteRepairScriptsLegacy(void *a)
 
 		pthread_barrier_init(&container.membarrier, NULL, 2);
 
-		int ret =
-		    CreateDetachedThread(__ExecScriptWorkerThreadLegacy, &container);
-
-		if (ret != 0) {
-			Logmsg(LOG_ERR, "Unable to create thread %s",
-			       MyStrerror(-ret));
-			abort();
-		}
+		threadpool_add_task(threadpool, __ExecScriptWorkerThreadLegacy, &container, 1);
 
 		pthread_barrier_wait(&container.membarrier);
 		pthread_barrier_destroy(&container.membarrier);
@@ -437,7 +394,6 @@ static void *__ExecuteRepairScriptsLegacy(void *a)
 		if (c->ret != 0) {
 			Logmsg(LOG_ERR, "repair %s script failed", c->path);
 			arg->ret = 1;
-			break;
 		}
 	}
 
@@ -468,19 +424,10 @@ static void *__ExecuteRepairScripts(void *a)
 
 		pthread_barrier_init(&container.membarrier, NULL, 2);
 
-		int ret =
-		    CreateDetachedThread(__ExecScriptWorkerThread,
-					 &container);
-		if (ret != 0) {
-			Logmsg(LOG_ERR, "Unable to create thread %s",
-			       MyStrerror(-ret));
-			abort();
-		}
+		threadpool_add_task(threadpool, __ExecScriptWorkerThread, &container, 1);
 
 		pthread_barrier_wait(&container.membarrier);
 		pthread_barrier_destroy(&container.membarrier);
-
-		ThrottleWorkerThreadCreation(s, &container);
 	}
 
 	c = NULL;
@@ -507,14 +454,7 @@ static void *__ExecuteRepairScripts(void *a)
 
 		pthread_barrier_init(&container.membarrier, NULL, 2);
 
-		int ret =
-		    CreateDetachedThread(__ExecScriptWorkerThread, &container);
-
-		if (ret != 0) {
-			Logmsg(LOG_ERR, "Unable to create thread %s",
-			       MyStrerror(-ret));
-			abort();
-		}
+		threadpool_add_task(threadpool, __ExecScriptWorkerThread, &container, 1);
 
 		pthread_barrier_wait(&container.membarrier);
 		pthread_barrier_destroy(&container.membarrier);
@@ -529,7 +469,6 @@ static void *__ExecuteRepairScripts(void *a)
 		if (c->ret != 0) {
 			Logmsg(LOG_ERR, "repair %s script failed", c->spawnattr.repairFilePathname);
 			arg->ret = 1;
-			break;
 		}
 	}
 
@@ -580,6 +519,8 @@ bool ExecuteRepairScriptsPreFork(ProcessList * p, struct cfgoptions *s)
 		close(fd2[0]);
 
 		char b[1];
+
+		threadpool = threadpool_init(MAX_WORKER_THREADS);
 
 		while (read(fd[0], b, sizeof(b)) != 0) {
 			struct executeScriptsStruct ess;
