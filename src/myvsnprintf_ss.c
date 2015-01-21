@@ -263,6 +263,7 @@ reswitch:	switch (ch) {
 			base = DEC;
 			goto number;
 		case 'n':
+#if 0
 			if (flags & MAXINT)
 				*va_arg(ap, intmax_t *) = ret;
 			else if (flags & PTRINT)
@@ -277,6 +278,7 @@ reswitch:	switch (ch) {
 				*va_arg(ap, short *) = ret;
 			else
 				*va_arg(ap, int *) = ret;
+#endif
 			continue;	/* no output */
 		case 'O':
 			flags |= LONGINT;
@@ -303,7 +305,7 @@ reswitch:	switch (ch) {
 		case 's':
 			if ((cp = va_arg(ap, char *)) == NULL)
 				/*XXXUNCONST*/
-				cp = __UNCONST("(null)");
+				//cp = __UNCONST("(null)");
 			if (prec >= 0) {
 				/*
 				 * can't use strlen; can only look for the
@@ -393,7 +395,7 @@ number:			if ((dprec = prec) >= 0)
 
 				default:
 					/*XXXUNCONST*/
-					cp = __UNCONST("bug bad base");
+					//cp = __UNCONST("bug bad base");
 					len = strlen(cp);
 					size = (int)len;
 					goto skipsize;
