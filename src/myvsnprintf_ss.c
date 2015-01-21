@@ -32,8 +32,6 @@
  * SUCH DAMAGE.
  */
 
-#define __UNCONST(a)   ((void *)(unsigned long)(const void *)(a))
-
 #include <sys/types.h>
 #include <inttypes.h>
 #include <limits.h>
@@ -303,9 +301,9 @@ reswitch:	switch (ch) {
 			ch = 'x';
 			goto nosign;
 		case 's':
-			if ((cp = va_arg(ap, char *)) == NULL)
-				/*XXXUNCONST*/
-				//cp = __UNCONST("(null)");
+			if ((cp = va_arg(ap, char *)) == NULL) {
+				break;
+			}
 			if (prec >= 0) {
 				/*
 				 * can't use strlen; can only look for the
@@ -394,10 +392,6 @@ number:			if ((dprec = prec) >= 0)
 					break;
 
 				default:
-					/*XXXUNCONST*/
-					//cp = __UNCONST("bug bad base");
-					len = strlen(cp);
-					size = (int)len;
 					goto skipsize;
 				}
 			}
