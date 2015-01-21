@@ -48,7 +48,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #define KRESET "\x1B[0m"
 
 static sig_atomic_t logTarget = INVALID_LOG_TARGET;
-static FILE *logFile = NULL;
+static int logFile = -1;
 static pthread_mutex_t mutex;
 static sig_atomic_t applesquePriority = 0;
 static sig_atomic_t autoUpperCase = 0;
@@ -163,10 +163,9 @@ static void CloseOldTarget(sig_atomic_t oldTarget)
 	}
 
 	if (oldTarget == FILE_NEW || oldTarget == FILE_APPEND) {
-		if (logFile != NULL) {
-			fflush(logFile);
-			fclose(logFile);
-			logFile = NULL;
+		if (logFile != -1) {
+			close(logFile);
+			logFile = -1;
 			return;
 		} else {
 			return;
@@ -244,26 +243,26 @@ void SetLogTarget(sig_atomic_t target, ...)
 		assert(fileName != NULL);
 
 		if (target == FILE_NEW) {
-			logFile = fopen(fileName, "w");
-			if (logFile == NULL) {
+			logFile = open(fileName, O_WRONLY|O_CREAT);
+			if (logFile == -1) {
 				if (logTarget == SYSTEM_LOG) {
 					syslog(LOG_ALERT, "%m");
 				} else {
 					fprintf(stderr, "%s\n",
-						strerror(errno));
+						MyStrerror(errno));
 				}
 			} else {
 				CloseOldTarget(logTarget);
 				logTarget = FILE_NEW;
 			}
 		} else if (target == FILE_APPEND) {
-			logFile = fopen(fileName, "a");
-			if (logFile == NULL) {
+			logFile = open(fileName, O_WRONLY|O_APPEND|O_CREAT);
+			if (logFile == -1) {
 				if (logTarget == SYSTEM_LOG) {
 					syslog(LOG_ALERT, "%m");
 				} else {
 					fprintf(stderr, "%s\n",
-						strerror(errno));
+						MyStrerror(errno));
 				}
 			} else {
 				CloseOldTarget(logTarget);
@@ -495,9 +494,10 @@ void Logmsg(int priority, const char *const fmt, ...)
 			write(STDERR_FILENO, t, strlen(t));
 			ResetTextColor();
 		} else {
-			if (logFile != NULL) {
-				fprintf(logFile, format, buf);
-			}
+			int len = Mysnprintf_ss(NULL, 0, format, buf) + 1;
+			char t[len];
+			Mysnprintf_ss(t, sizeof(t), format, buf);
+			write(STDERR_FILENO, t, strlen(t));
 		}
 	}
 
@@ -508,7 +508,7 @@ void Logmsg(int priority, const char *const fmt, ...)
 
 		assert(buf[sizeof(buf) - 1] == '\0');
 
-		syslog(priority, "%s", buf);
+		syslog(priority, "%s", buf); //XXX: not signal safe
 	}
 }
 
