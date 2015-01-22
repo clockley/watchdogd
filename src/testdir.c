@@ -308,15 +308,10 @@ static void __ExecScriptWorkerThread(void *a)
 static void __WaitForWorkers(struct cfgoptions *s, Container const *container)
 {
 	if (s->repairBinTimeout > 0) {	//Just sleep
-		struct timespec rqtp = { 0 };
-		clock_gettime(CLOCK_MONOTONIC, &rqtp);
-		rqtp.tv_sec += s->repairBinTimeout;
-		NormalizeTimespec(&rqtp);
-		while (clock_nanosleep
-		       (CLOCK_MONOTONIC, TIMER_ABSTIME, &rqtp, NULL) != 0
-		       && errno == EINTR) {
-			;
-		}
+		unsigned tmp = s->repairBinTimeout;
+		do {
+			tmp = sleep((unsigned)tmp);
+		} while(tmp);
 	} else {		//if not given a timeout value busy wait
 		sched_yield();
 		while (container->workerThreadCount != 0) {
