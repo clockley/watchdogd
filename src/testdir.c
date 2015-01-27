@@ -290,7 +290,7 @@ static void __ExecScriptWorkerThread(void *a)
 
 	container->workerThreadCount += 1;
 
-	if (c->retString == '\0') {
+	if (c->retString[0] == '\0') {
 		c->ret =
 		    SpawnAttr(&c->spawnattr, c->path, c->path, c->mode == TEST ? "test": "repair",
 			      NULL);
