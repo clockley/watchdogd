@@ -19,6 +19,7 @@
 #include "sub.h"
 #include "exe.h"
 #include "user.h"
+#include "killtree.h"
 
 struct WaitThreadArg {
 	pthread_mutex_t *lock;
@@ -201,7 +202,7 @@ int Spawn(int timeout, struct cfgoptions *const config, const char *file,
 				pthread_cond_destroy(w.cond);
 
 				if (returnValue == ETIMEDOUT) {
-					kill(worker, SIGKILL);
+					QueueKill(worker);
 					Logmsg(LOG_ERR,
 					       "binary %s exceeded time limit %ld",
 					       file, timeout);
@@ -434,7 +435,7 @@ int SpawnAttr(spawnattr_t *spawnattr, const char *file, const char *args, ...)
 				pthread_cond_destroy(w.cond);
 
 				if (returnValue == ETIMEDOUT) {
-					kill(worker, SIGKILL);
+					QueueKill(worker);
 					Logmsg(LOG_ERR,
 					       "binary %s exceeded time limit %ld",
 					       file, spawnattr->timeout);
