@@ -74,18 +74,15 @@ static void killtree(pid_t process)
 }
 
 static int fd[2];
-static int fd2[2];
 
 bool InitKillProcess(void)
 {
 	pipe(fd);
-	pipe(fd2);
 
 	pid_t pid = fork();
 
 	if (pid != -1) {
 		//close(fd[0]);
-		//close(fd2[1]);
 		wait(NULL);
 	} else if (pid == -1) {
 		Logmsg(LOG_ERR, "%s\n", MyStrerror(errno));
@@ -106,13 +103,11 @@ bool InitKillProcess(void)
 		}
 
 		close(fd[1]);
-		close(fd2[0]);
 
 		pid_t p[1];
 
 		while (read(fd[0], p, sizeof(pid_t)) != 0) {
 			killtree(p[0]);
-			write(fd2[1], "", strlen(""));
 		}
 
 		exit(0);
@@ -126,9 +121,6 @@ int QueueKill(pid_t pid)
 	pid_t a[1];
 	a[0] = pid;
 	write(fd[1], a, sizeof (pid_t));
-	char b[1];
-
-	while (read(fd2[0], b, sizeof(b)) != 0);
 
 	return 0;
 }
