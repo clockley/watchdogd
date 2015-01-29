@@ -23,15 +23,33 @@ static void killtree(pid_t process)
 	struct dirent *ent = NULL;
 	struct dirent *direntbuf = NULL;
 	int fd = open("/proc", O_DIRECTORY | O_RDONLY);
+	if (fd < 0) {
+		return;
+	}
 	DIR * procFolder =  fdopendir(fd);
+
+	if (procFolder == NULL) {
+		close(fd);
+		return;
+	}
+
 	size_t size = DirentBufSize(procFolder);
 	direntbuf = (struct dirent *)calloc(1, size);
+
+	if (direntbuf == NULL) {
+		close(fd);
+		closedir(procFolder);
+	}
+
 	char *buf = NULL;
 	size_t len = 0;
 	char *saveptr;
 	int error = 0;
 
 	if (kill(process, SIGSTOP) != 0) {
+		free(direntbuf);
+		close(fd);
+		closedir(procFolder);
 		return;
 	}
 
