@@ -20,7 +20,7 @@ typedef struct container Container;
 #define TEST true
 #define REPAIR false
 
-int CreateLinkedListOfExes(const char *repairScriptFolder, ProcessList * p, struct cfgoptions *const);
+int CreateLinkedListOfExes(char *repairScriptFolder, ProcessList * p, struct cfgoptions *const);
 int ExecuteRepairScripts(void);
 void FreeExeList(ProcessList * p);
 size_t DirentBufSize(DIR * dirp);

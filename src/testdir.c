@@ -71,7 +71,7 @@ size_t DirentBufSize(DIR * dirp)
 		? name_end : sizeof(struct dirent));
 }
 
-int CreateLinkedListOfExes(const char *repairScriptFolder, ProcessList * p,
+int CreateLinkedListOfExes(char *repairScriptFolder, ProcessList * p,
 			   struct cfgoptions *const config)
 {
 	assert(p != NULL);
@@ -154,6 +154,14 @@ int CreateLinkedListOfExes(const char *repairScriptFolder, ProcessList * p,
 		if (cmd == NULL) {
 			goto error;
 		}
+
+		for (size_t i = 0; i < strlen(repairScriptFolder); i += 1) {
+			if (repairScriptFolder[i] == '/' && i < strlen(repairScriptFolder)
+			    && repairScriptFolder[i+1] == '\0') {
+				repairScriptFolder[i] = '\0';
+			}
+		}
+
 
 		Wasprintf((char **)&cmd->path, "%s/%s", repairScriptFolder, ent->d_name);	//Will have to free this memeory to use v3 repair script config
 
