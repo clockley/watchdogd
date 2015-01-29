@@ -99,8 +99,8 @@ bool InitKillProcess(void)
 
 	pid_t pid = fork();
 
-	if (pid != -1) {
-		//close(fd[0]);
+	if (pid > 0) {
+		close(fd[0]);
 		wait(NULL);
 	} else if (pid == -1) {
 		Logmsg(LOG_ERR, "%s\n", MyStrerror(errno));
