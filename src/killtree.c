@@ -39,6 +39,7 @@ static void killtree(pid_t process)
 	if (direntbuf == NULL) {
 		close(fd);
 		closedir(procFolder);
+		return;
 	}
 
 	char *buf = NULL;
@@ -110,10 +111,11 @@ bool InitKillProcess(void)
 	if (pid == 0) {
 		pid_t pid = fork();
 
+		signal(SIGCHLD, SIG_IGN);
+
 		if (pid > 0) {
 			_Exit(0);
 		}
-
 
 		if (pid < 0 ) {
 			Logmsg(LOG_ERR, "fork failed: %s", MyStrerror(errno));
@@ -125,7 +127,15 @@ bool InitKillProcess(void)
 		pid_t p[1];
 
 		while (read(fd[0], p, sizeof(pid_t)) != 0) {
-			killtree(p[0]);
+			pid_t ret = fork();
+			if (ret == 0) {
+				killtree(p[0]);
+				_Exit(0);
+			}
+
+			if (ret == -1) {
+				killtree(p[0]);
+			}
 		}
 
 		exit(0);
