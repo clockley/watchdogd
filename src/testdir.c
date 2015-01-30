@@ -292,7 +292,6 @@ static void __ExecScriptWorkerThread(void *a)
 
 	Container *container = (Container *) a;
 	repaircmd_t *c = container->cmd;
-	struct cfgoptions *s = container->config;
 
 	pthread_barrier_wait(&container->membarrier);
 
