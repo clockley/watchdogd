@@ -93,3 +93,8 @@ To fix this type ./configure --prefix=/usr
 	* Add group .repair option
 	* Add allocatable-memory option.
 	* Many more bug fixes
+
+2015-01-30 [0.4-rc1] <Christian Lockley>
+	* Enable parallel execution repair scripts.
+	* Fix segfault on exit.
+	* Tons of fixes.
