@@ -79,7 +79,6 @@ static void killtree(pid_t process)
 			kill(ConvertStringToInt(ent->d_name), SIGSTOP);
 			kill(ConvertStringToInt(ent->d_name), SIGKILL);
 			kill(ConvertStringToInt(ent->d_name), SIGCONT);
-			waitpid(ConvertStringToInt(ent->d_name), NULL, WNOHANG);
 		}
 	}
 
