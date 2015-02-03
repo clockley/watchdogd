@@ -62,17 +62,13 @@ int Spawn(int timeout, struct cfgoptions *const config, const char *file,
 			ResetSignalHandlers(NSIG);
 #endif
 
-			if (OnParentDeathSend(SIGKILL) == false) {
-				CreateDetachedThread(ExitIfParentDied, NULL);
-			}
+			OnParentDeathSend(SIGKILL);
 
 
 			pid_t worker = fork();
 
 			if (worker == 0) {
-				if (OnParentDeathSend(SIGKILL) == false) {
-					CreateDetachedThread(ExitIfParentDied, NULL);
-				}
+				OnParentDeathSend(SIGKILL);
 
 				struct sched_param param;
 				param.sched_priority = 0;
@@ -260,16 +256,12 @@ int SpawnAttr(spawnattr_t *spawnattr, const char *file, const char *args, ...)
 			ResetSignalHandlers(NSIG);
 #endif
 
-			if (OnParentDeathSend(SIGKILL) == false) {
-				CreateDetachedThread(ExitIfParentDied, NULL);
-			}
+			OnParentDeathSend(SIGKILL);
 
 			pid_t worker = fork();
 
 			if (worker == 0) {
-				if (OnParentDeathSend(SIGKILL) == false) {
-					CreateDetachedThread(ExitIfParentDied, NULL);
-				}
+				OnParentDeathSend(SIGKILL);
 				struct sched_param param;
 				param.sched_priority = 0;
 
