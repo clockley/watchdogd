@@ -38,11 +38,8 @@ static bool SetGroup(const char *restrict const group)
 	struct group grp = {0};
 	struct group *result = NULL;
 
-	char *buf = (char*)calloc(1, len);
-
-	if (buf == NULL) {
-		goto error;
-	}
+	char[len];
+	memset(len, 0, sizeof(len));
 
 	if (strtoll(group, NULL, 10) != 0) {
 		gid_t gid = (gid_t)strtoll(group, NULL, 10);
@@ -54,8 +51,6 @@ static bool SetGroup(const char *restrict const group)
 		if (setgid(grp.gr_gid) != 0) {
 			goto error;
 		}
-
-		free(buf);
 
 		return true;
 	}
@@ -70,17 +65,9 @@ static bool SetGroup(const char *restrict const group)
 		goto error;
 	}
 
-	free(buf);
-
 	return true;
 
  error:
-	{
-		int serrno = errno;
-		free(buf);
-		errno = serrno;
-	}
-
 	return false;
 }
 
@@ -98,11 +85,8 @@ int RunAsUser(const char *restrict const user, const char *restrict const group)
 		len = (size_t) initlen;
 	}
 
-	char *buf = (char*)calloc(1, len);
-
-	if (buf == NULL) {
-		return -1;
-	}
+	char[len];
+	memset(len, 0, sizeof(len));
 
 	if (user != NULL) {
 		if (strtoll(user, NULL, 10) != 0) {
@@ -170,13 +154,7 @@ int RunAsUser(const char *restrict const user, const char *restrict const group)
 		}
 	}
 
-	free(buf);
 	return 0;
  error:
-	{
-		int serrno = errno;
-		free(buf);
-		errno = serrno;
-	}
 		return -1;
 }
