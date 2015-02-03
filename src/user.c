@@ -38,8 +38,8 @@ static bool SetGroup(const char *restrict const group)
 	struct group grp = {0};
 	struct group *result = NULL;
 
-	char[len];
-	memset(len, 0, sizeof(len));
+	char buf [len];
+	memset(buf, 0, sizeof(len));
 
 	if (strtoll(group, NULL, 10) != 0) {
 		gid_t gid = (gid_t)strtoll(group, NULL, 10);
@@ -85,8 +85,8 @@ int RunAsUser(const char *restrict const user, const char *restrict const group)
 		len = (size_t) initlen;
 	}
 
-	char[len];
-	memset(len, 0, sizeof(len));
+	char buf [len];
+	memset(buf, 0, sizeof(len));
 
 	if (user != NULL) {
 		if (strtoll(user, NULL, 10) != 0) {
