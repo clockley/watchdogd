@@ -100,8 +100,6 @@ int RunAsUser(const char *restrict const user, const char *restrict const group)
 				goto error;
 			}
 
-			free(buf);
-
 			return 0;
 		}
 
