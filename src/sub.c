@@ -189,7 +189,7 @@ void ResetSignalHandlers(int maxsigno)
 	sa.sa_flags = 0;
 	sigfillset(&sa.sa_mask);
 
-	for (int i = 1; i < maxsigno; sigaction(i, &sa, NULL), i++) ;
+	for (size_t i = 1; i < maxsigno; sigaction(i, &sa, NULL), i++) ;
 }
 
 void NormalizeTimespec(struct timespec *const tp)
