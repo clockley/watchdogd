@@ -21,25 +21,15 @@
 #include "user.h"
 #include "killtree.h"
 
-struct WaitThreadArg {
-	pthread_mutex_t *lock;
-	pthread_cond_t *cond;
-	int *ret;
-};
-
-static void *WaitThread(void *arg)
-{
-	struct WaitThreadArg * wobj = arg;
-
-	int *ret = (int *)wobj->ret;
-
-	wait(ret);
-
-	pthread_mutex_lock(wobj->lock);
-	pthread_cond_signal(wobj->cond);
-	pthread_mutex_unlock(wobj->lock);
-
-	return NULL;
+static bool waitpidTimeout(pid_t pid, int *status, int timeout) {
+	for (; timeout >= 0; timeout -= 1) {
+		pid_t ret = waitpid(pid, status, WNOHANG);
+		if (ret == pid) {
+			return true;
+		}
+		sleep(1);
+	}
+	return false;
 }
 
 int Spawn(int timeout, struct cfgoptions *const config, const char *file,
@@ -198,60 +188,11 @@ int SpawnAttr(spawnattr_t *spawnattr, const char *file, const char *args, ...)
 
 			if (spawnattr->timeout > 0) {
 				int ret = 0;
-				pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
-				pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
-				struct WaitThreadArg w;
-				w.lock = &lock;
-				w.cond = &cond;
-				w.ret = &ret;
-
-				pthread_mutex_lock(w.lock);
-
-				if (CreateDetachedThread(WaitThread, &w) < 0) {
-					Logmsg(LOG_ERR, "%s", MyStrerror(errno));
-					return -1;
-				}
-
-				struct timespec rqtp;
-
-				clock_gettime(CLOCK_REALTIME, &rqtp);
-
-				rqtp.tv_sec += (time_t) spawnattr->timeout;
-				NormalizeTimespec(&rqtp);
-
-				bool once = false;
-				int returnValue = 0;
-
-				errno = 0;
-				do {
-					returnValue =
-					    pthread_cond_timedwait(w.cond, w.lock,
-								   &rqtp);
-					if (once == false) {
-						int ret =
-						    pthread_mutex_unlock(w.lock);
-
-						if (ret == 1) {
-							Logmsg(LOG_ERR, "%s",
-							       MyStrerror(errno));
-							assert(ret != 0);
-							abort();
-						}
-
-						once = true;
-					}
-				} while (returnValue != ETIMEDOUT
-					 && kill(worker, 0) == 0 && errno == 0);
-
-				pthread_mutex_destroy(w.lock);
-				pthread_cond_destroy(w.cond);
-
-				if (returnValue == ETIMEDOUT) {
+				if (waitpidTimeout(worker, &ret, spawnattr->timeout) == false) {
 					QueueKill(worker);
 					Logmsg(LOG_ERR,
 					       "binary %s exceeded time limit %ld",
 					       file, spawnattr->timeout);
-					//assert(ret != EXIT_SUCCESS); //Can't count on that.
 					if (ret == EXIT_SUCCESS) {
 						_Exit(EXIT_FAILURE);
 					} else {
@@ -259,9 +200,6 @@ int SpawnAttr(spawnattr_t *spawnattr, const char *file, const char *args, ...)
 						       EXIT_SUCCESS);
 						_Exit(WEXITSTATUS(ret));
 					}
-				} else if (returnValue != 0) {
-					Logmsg(LOG_ERR,
-					       "unknown error in timeout code");
 				}
 
 				_Exit(WEXITSTATUS(ret));
