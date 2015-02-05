@@ -4,7 +4,6 @@ struct executeScriptsStruct
 {
 	ProcessList *list;
 	struct cfgoptions *config;
-	pthread_barrier_t barrier;
 	volatile _Atomic(int) ret;
 };
 

@@ -259,33 +259,6 @@ void FreeExeList(ProcessList * p)
 	}
 }
 
-static void __ExecScriptWorkerThreadLegacy(void *a)
-{
-	assert(a != NULL);
-
-	Container *container = (Container *) a;
-	repaircmd_t *c = container->cmd;
-	struct cfgoptions *s = container->config;
-
-	pthread_barrier_wait(&container->membarrier);
-
-	container->workerThreadCount += 1;
-
-	if (c->retString[0] == '\0') {
-		c->ret =
-		    Spawn(s->repairBinTimeout, s, c->path, c->path,
-			  c->mode == TEST ? "test": "repair", NULL);
-	} else {
-		c->ret =
-		    Spawn(s->repairBinTimeout, s, c->path, c->path,
-			  c->mode == TEST ? "test": "repair", c->retString, NULL);
-	}
-
-	c->retString[0] = '\0';
-
-	container->workerThreadCount -= 1;
-}
-
 static void __ExecScriptWorkerThread(void *a)
 {
 	assert(a != NULL);
@@ -296,15 +269,34 @@ static void __ExecScriptWorkerThread(void *a)
 	pthread_barrier_wait(&container->membarrier);
 
 	container->workerThreadCount += 1;
-
-	if (c->retString[0] == '\0') {
-		c->ret =
-		    SpawnAttr(&c->spawnattr, c->path, c->path, c->mode == TEST ? "test": "repair",
-			      NULL);
+	if (c->legacy == false) {
+		if (c->retString[0] == '\0') {
+			c->ret =
+			    SpawnAttr(&c->spawnattr, c->path, c->path, c->mode == TEST ? "test": "repair",
+				      NULL);
+		} else {
+			c->ret =
+			    SpawnAttr(&c->spawnattr, c->path, c->path, c->mode == TEST ? "test": "repair", c->retString,
+				      NULL);
+		}
 	} else {
-		c->ret =
-		    SpawnAttr(&c->spawnattr, c->path, c->path, c->mode == TEST ? "test": "repair", c->retString,
-			      NULL);
+		spawnattr_t attr = {
+				.workingDirectory = NULL, .repairFilePathname = NULL,
+	        		.execStart = NULL, .logDirectory = container->config->logdir,
+				.user = NULL, .group = NULL, .umask = NULL,
+				.timeout = container->config->repairBinTimeout, .nice = 0,
+				.noNewPrivileges = false
+		};
+
+		if (c->retString[0] == '\0') {
+			c->ret =
+			    SpawnAttr(&attr, c->path, c->path, c->mode == TEST ? "test": "repair",
+				      NULL);
+		} else {
+			c->ret =
+			    SpawnAttr(&attr, c->path, c->path, c->mode == TEST ? "test": "repair", c->retString,
+				      NULL);
+		}
 	}
 
 	c->retString[0] = '\0';
@@ -327,82 +319,6 @@ static void __WaitForWorkers(struct cfgoptions *s, Container const *container)
 	}
 }
 
-static void *__ExecuteRepairScriptsLegacy(void *a)
-{
-	struct executeScriptsStruct *arg = (struct executeScriptsStruct *)a;
-	ProcessList *p = arg->list;
-	struct cfgoptions *s = arg->config;
-
-	Container container = { 0 };
-	container.config = s;
-
-	repaircmd_t *c = NULL;
-	repaircmd_t *next = NULL;
-
-	list_for_each_entry(c, next, &p->head, entry) {
-		if (c->legacy == false) {
-			continue;
-		}
-
-		pthread_barrier_init(&container.membarrier, NULL, 2);
-
-		container.config = s;
-		container.cmd = c;
-		container.cmd->mode = TEST;
-		c->retString[0] = '\0';
-
-		threadpool_add_task(threadpool, __ExecScriptWorkerThreadLegacy, &container, 1);
-
-		pthread_barrier_wait(&container.membarrier);
-		pthread_barrier_destroy(&container.membarrier);
-	}
-
-	c = NULL;
-	next = NULL;
-
-	__WaitForWorkers(s, &container);
-
-	memset(&container, 0, sizeof(container));
-	container.config = s;
-
-	list_for_each_entry(c, next, &p->head, entry) {
-		if (c->legacy == false) {
-			continue;
-		}
-
-		if (c->ret == 0) {
-			continue;
-		}
-
-		container.cmd = c;
-		Mysnprintf_ss(container.cmd->retString, sizeof(container.cmd->retString), "%i", c->ret);
-
-		container.cmd->mode = REPAIR;
-
-		pthread_barrier_init(&container.membarrier, NULL, 2);
-
-		threadpool_add_task(threadpool, __ExecScriptWorkerThreadLegacy, &container, 1);
-
-		pthread_barrier_wait(&container.membarrier);
-		pthread_barrier_destroy(&container.membarrier);
-	}
-
-	__WaitForWorkers(s, &container);
-
-	list_for_each_entry(c, next, &p->head, entry) {
-		if (c->legacy == false) {
-			continue;
-		}
-		if (c->ret != 0) {
-			Logmsg(LOG_ERR, "repair %s script failed", c->path);
-			arg->ret = 1;
-		}
-	}
-
-	pthread_barrier_wait(&arg->barrier);
-	return NULL;
-}
-
 static void *__ExecuteRepairScripts(void *a)
 {
 	struct executeScriptsStruct *arg = (struct executeScriptsStruct *)a;
@@ -415,10 +331,6 @@ static void *__ExecuteRepairScripts(void *a)
 	repaircmd_t *next = NULL;
 
 	list_for_each_entry(c, next, &p->head, entry) {
-		if (c->legacy == true) {
-			continue;
-		}
-
 		container.cmd = c;
 		container.cmd->mode = TEST;
 
@@ -441,10 +353,6 @@ static void *__ExecuteRepairScripts(void *a)
 	container.config = s;
 
 	list_for_each_entry(c, next, &p->head, entry) {
-		if (c->legacy == true) {
-			continue;
-		}
-
 		if (c->ret == 0) {
 			continue;
 		}
@@ -465,16 +373,12 @@ static void *__ExecuteRepairScripts(void *a)
 	__WaitForWorkers(s, &container);
 
 	list_for_each_entry(c, next, &p->head, entry) {
-		if (c->legacy == true) {
-			continue;
-		}
 		if (c->ret != 0) {
 			Logmsg(LOG_ERR, "repair %s script failed", c->spawnattr.repairFilePathname);
 			arg->ret = 1;
 		}
 	}
 
-	pthread_barrier_wait(&arg->barrier);
 	return NULL;
 }
 
@@ -530,13 +434,8 @@ bool ExecuteRepairScriptsPreFork(ProcessList * p, struct cfgoptions *s)
 			ess.config = s;
 			ess.ret = 0;
 
-			pthread_barrier_init(&ess.barrier, NULL, 3);
+			__ExecuteRepairScripts(&ess);
 
-			CreateDetachedThread(__ExecuteRepairScriptsLegacy, &ess);
-			CreateDetachedThread(__ExecuteRepairScripts, &ess);
-
-			pthread_barrier_wait(&ess.barrier);
-			pthread_barrier_destroy(&ess.barrier);
 			*ret = ess.ret;
 			write(fd2[1], "", strlen(""));
 		}
