@@ -36,8 +36,10 @@ int Spawn(int timeout, struct cfgoptions *const config, const char *file,
 	  const char *args, ...)
 {
 	spawnattr_t attr = {.workingDirectory = NULL, .repairFilePathname = NULL,
-				      .execStart = NULL, .logDirectory = config->logdir, .user = NULL,
-				      .group = NULL, .umask = NULL, .timeout = timeout, .nice = 0, .noNewPrivileges = false};
+				      .execStart = NULL, .logDirectory = config->logdir, .user = 0,
+				      .group = NULL, .umask = 0, .timeout = timeout, .nice = 0, .noNewPrivileges = false,
+				      .hasUmask = false
+			   };
 	va_list a;
 	va_start(a, args);
 	return SpawnAttr(&attr, file, a);
@@ -143,16 +145,8 @@ int SpawnAttr(spawnattr_t *spawnattr, const char *file, const char *args, ...)
 
 				}
 
-				if (spawnattr->umask != NULL) {
-					long long ret = strtoll(spawnattr->umask, (char **)NULL, 10);
-
-					if (ret < 0) {
-						Logmsg(LOG_ERR, "error parsing configfile option \"Umask\": %s", MyStrerror(errno));
-					}
-
-					mode_t mode = (mode_t)ret;
-
-					umask(mode);
+				if (spawnattr->hasUmask == true) {
+					umask(spawnattr->umask);
 				}
 
 				if (dup2(fd, STDOUT_FILENO) < 0) {
@@ -168,11 +162,7 @@ int SpawnAttr(spawnattr_t *spawnattr, const char *file, const char *args, ...)
 					       MyStrerror(errno));
 					return -1;
 				}
-#if defined(__linux__)
-				if (LinuxRunningSystemd() == 1) {
-					unsetenv("NOTIFY_SOCKET");
-				}
-#endif
+
 				execv(file, (char *const *)array);
 
 				Logmsg(LOG_CRIT, "execv failed %s",

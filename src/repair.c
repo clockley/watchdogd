@@ -45,11 +45,18 @@ static bool ParseConfigfile(char *name, char *value, spawnattr_t * obj)
 	}
 
 	if (strcasecmp(name, "Umask") == 0) {
-		obj->umask = strdup(value);
-		if (obj->umask == NULL) {
+		char *tmp = strdup(value);
+		if (tmp == NULL) {
 			fprintf(stderr, "watchdogd: out of memory: %s", MyStrerror(errno));
 			return false;
 		}
+		errno = 0;
+		obj->umask = ConvertStringToInt(tmp);
+		if (errno != 0) {
+			Logmsg(LOG_ERR, "error parsing configfile option \"Umask\": %s", MyStrerror(errno));
+			return false;
+		}
+		obj->hasUmask = true;
 	}
 
 	if (strcasecmp(name, "NoNewPrivileges") == 0) {

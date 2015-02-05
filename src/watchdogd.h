@@ -142,10 +142,11 @@ struct spawnattr {
 	const char *logDirectory;
 	char *user;
 	char *group;
-	char *umask;
+	mode_t umask;
 	int timeout;
 	int nice;
 	bool noNewPrivileges;
+	bool hasUmask;
 };
 
 typedef struct spawnattr spawnattr_t;

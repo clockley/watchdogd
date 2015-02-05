@@ -283,9 +283,9 @@ static void __ExecScriptWorkerThread(void *a)
 		spawnattr_t attr = {
 				.workingDirectory = NULL, .repairFilePathname = NULL,
 	        		.execStart = NULL, .logDirectory = container->config->logdir,
-				.user = NULL, .group = NULL, .umask = NULL,
+				.user = NULL, .group = NULL, .umask = 0,
 				.timeout = container->config->repairBinTimeout, .nice = 0,
-				.noNewPrivileges = false
+				.noNewPrivileges = false, .hasUmask = true
 		};
 
 		if (c->retString[0] == '\0') {
@@ -411,6 +411,12 @@ bool ExecuteRepairScriptsPreFork(ProcessList * p, struct cfgoptions *s)
 
 	if (pid == 0) {
 		pid_t pid = fork();
+
+#if defined(__linux__)
+		if (LinuxRunningSystemd() == 1) {
+			unsetenv("NOTIFY_SOCKET");
+		}
+#endif
 
 		if (pid > 0) {
 			_Exit(0);
