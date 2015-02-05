@@ -374,7 +374,8 @@ static void *__ExecuteRepairScripts(void *a)
 
 	list_for_each_entry(c, next, &p->head, entry) {
 		if (c->ret != 0) {
-			Logmsg(LOG_ERR, "repair %s script failed", c->spawnattr.repairFilePathname);
+			Logmsg(LOG_ERR, "repair %s script failed",
+				c->legacy == false ? c->spawnattr.repairFilePathname : c->path);
 			arg->ret = 1;
 		}
 	}
