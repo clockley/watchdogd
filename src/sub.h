@@ -11,7 +11,7 @@ int Shutdown(int errorcode, struct cfgoptions *arg);
 
 int UnmountAll(void);
 int Wasprintf(char **ret, const char *format, ...);
-void ResetSignalHandlers(int maxsigno);
+void ResetSignalHandlers(size_t maxsigno);
 int IsExe(const char *pathname, bool returnfildes);
 void NormalizeTimespec(struct timespec *const tp);
 int CreateDetachedThread(void *(*startFunction) (void *), void *const arg);

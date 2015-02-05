@@ -179,7 +179,7 @@ int EndDaemon(struct cfgoptions *s, int keepalive)
 	return 0;
 }
 
-void ResetSignalHandlers(int maxsigno)
+void ResetSignalHandlers(size_t maxsigno)
 {
 	if (maxsigno < 1)
 		return;
