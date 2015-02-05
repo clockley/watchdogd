@@ -193,13 +193,8 @@ int SpawnAttr(spawnattr_t *spawnattr, const char *file, const char *args, ...)
 					Logmsg(LOG_ERR,
 					       "binary %s exceeded time limit %ld",
 					       file, spawnattr->timeout);
-					if (ret == EXIT_SUCCESS) {
-						_Exit(EXIT_FAILURE);
-					} else {
-						assert(WEXITSTATUS(ret) !=
-						       EXIT_SUCCESS);
-						_Exit(WEXITSTATUS(ret));
-					}
+					waitpid(worker, &ret, 0);
+					_Exit(EXIT_FAILURE);
 				}
 
 				_Exit(WEXITSTATUS(ret));
