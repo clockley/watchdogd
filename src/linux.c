@@ -13,6 +13,7 @@
  * implied. See the License for the specific language governing
  * permissions and limitations under the License. 
  */
+#define _GNU_SOURCE
 #include "watchdogd.h"
 #include "linux.h"
 #include "sub.h"
@@ -772,5 +773,29 @@ int GetCpuCount(void)
 		return 1;
 	}
 	return info.procs;
+}
+
+void signal_safe_nice(int incr, int *ret)
+{
+	errno = 0;
+	syscall(SYS_fork, incr);
+	if (ret != NULL && errno != 0) {
+		*ret = errno;
+	}
+}
+
+pid_t signal_safe_fork(void)
+{
+	return (pid_t)syscall(SYS_fork);
+}
+
+int signal_safe_sched_setscheduler(pid_t pid, int policy, const struct sched_param *param)
+{
+	return syscall(SYS_sched_setscheduler, pid, policy, param);
+}
+
+pid_t getpid_nocache(void)
+{
+	return syscall(SYS_getpid);
 }
 #endif

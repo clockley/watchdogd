@@ -57,7 +57,7 @@ int SpawnAttr(spawnattr_t *spawnattr, const char *file, const char *args, ...)
 		return -1;
 	}
 
-	pid_t pid = fork();
+	pid_t pid = signal_safe_fork(); //default fork is not signal safe on linux
 
 	switch (pid) {
 	case -1:
@@ -70,17 +70,22 @@ int SpawnAttr(spawnattr_t *spawnattr, const char *file, const char *args, ...)
 
 			OnParentDeathSend(SIGKILL);
 
-			pid_t worker = fork();
+			pid_t worker = signal_safe_fork();
 
 			if (worker == 0) {
 				OnParentDeathSend(SIGKILL);
+
 				struct sched_param param;
 				param.sched_priority = 0;
+				if (signal_safe_sched_setscheduler(getpid_nocache(), SCHED_OTHER, &param) < 0) {
+					Logmsg(LOG_ERR, "signal_safe_sched_setscheduler failed: %s", MyStrerror(errno));
+				}
 
-				sched_setscheduler(getpid(), SCHED_OTHER,
-						   &param);
+				int ret = 0;
 
-				if (nice(spawnattr->nice) == -1) {
+				signal_safe_nice(spawnattr->nice, &ret);
+
+				if (ret != 0) {
 					Logmsg(LOG_ERR, "nice failed: %s", MyStrerror(errno));
 				}
 

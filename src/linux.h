@@ -22,6 +22,7 @@
 #include <sys/prctl.h>
 #include <linux/watchdog.h>
 #include <sys/reboot.h>
+#include <sys/syscall.h>
 #include <sys/sysinfo.h>
 #include <linux/reboot.h>
 #include <utmpx.h>
@@ -30,6 +31,7 @@
 #include <sys/types.h>
 #include <ifaddrs.h>
 #include <linux/if.h>
+#include <sys/syscall.h>
 #include "errorlist.h"
 
 #ifdef HAVE_SD_NOTIFY
@@ -56,4 +58,8 @@ int SystemdWatchdogEnabled(const int, long long int *const);
 bool OnParentDeathSend(int);
 int NoNewProvileges(void);
 int GetCpuCount(void);
+void signal_safe_nice(int, int *);
+pid_t signal_safe_fork(void);
+int signal_safe_sched_setscheduler(pid_t, int, const struct sched_param *);
+pid_t getpid_nocache(void);
 #endif
