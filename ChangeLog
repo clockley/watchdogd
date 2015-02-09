@@ -98,3 +98,7 @@ To fix this type ./configure --prefix=/usr
 	* Enable parallel execution repair scripts.
 	* Fix segfault on exit.
 	* Tons of fixes.
+
+2015-01-30 [0.4] <Christian Lockley>
+	* Mostly bug fixes
+	* Add native SystemD journal support
