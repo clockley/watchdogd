@@ -36,6 +36,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "watchdogd.h"
 #include "sub.h"
 #include "logutils.h"
+#include "myvsnprintf_ss.h"
 
 #define KNRM  "\x1B[0m"
 #define KRED  "\x1B[31m"
@@ -86,6 +87,29 @@ static const char * const spri[][2] = {
 		{"LOG_INFO", ""},
 		{"LOG_DEBUG", ""}
 };
+
+#ifdef HAVE_SD_JOURNAL
+static int SystemdSyslog(int priority, const char *format, va_list ap)
+{
+	static __thread char buf[2048] = { 0 };
+	static __thread char p[64] = { 0 };
+
+	struct iovec iov[2] = { 0 };
+
+	Mysnprintf_ss(p, sizeof(p) - 1, "PRIORITY=%i", priority);
+	memmove(buf, "MESSAGE=", sizeof(p));
+
+	MyVsnprintf_ss(buf, sizeof(buf) - strlen(buf), format, ap);
+
+	iov[0].iov_base = buf;
+	iov[0].iov_len = sizeof(buf);
+
+	iov[1].iov_base = p;
+	iov[1].iov_len = sizeof(p);
+
+	return sd_journal_sendv(iov, 2);
+}
+#endif
 
 static bool IsTty(void)
 {
@@ -502,6 +526,11 @@ void Logmsg(int priority, const char *const fmt, ...)
 	}
 
 	if (logTarget == SYSTEM_LOG) {
+#ifdef HAVE_SD_JOURNAL
+		SystemdSyslog(priority, fmt, args); //async-signal safe
+		va_end(args);
+		return;
+#else
 		MyVsnprintf_ss(buf, sizeof(buf) - 1, fmt, args);
 
 		va_end(args);
@@ -509,6 +538,7 @@ void Logmsg(int priority, const char *const fmt, ...)
 		assert(buf[sizeof(buf) - 1] == '\0');
 
 		syslog(priority, "%s", buf); //XXX: not signal safe
+#endif
 	}
 }
 

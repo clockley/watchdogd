@@ -36,6 +36,11 @@
 #include <systemd/sd-daemon.h>
 #endif
 
+#ifdef HAVE_SD_JOURNAL
+#define SD_JOURNAL_SUPPRESS_LOCATION
+#include <systemd/sd-journal.h>
+#endif
+
 int DisablePageFiles(void);
 int RemountRootReadOnly(void);
 int CloseWatchdog(watchdog_t *const);
