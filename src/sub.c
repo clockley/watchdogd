@@ -381,12 +381,3 @@ void FatalError(struct cfgoptions *s)
 
 	abort();
 }
-
-void *ExitIfParentDied(void *arg)
-{
-	while (getppid() != 1) {
-		sleep(1);
-	}
-
-	exit(0);
-}
