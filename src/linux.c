@@ -636,6 +636,7 @@ int LinuxRunningSystemd(void)
 	}
 
 	if (errno != 0) {
+		close(fd);
 		return -1;
 	}
 
