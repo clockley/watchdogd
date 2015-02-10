@@ -94,7 +94,7 @@ static int SystemdSyslog(int priority, const char *format, va_list ap)
 	static __thread char buf[2048] = {"MESSAGE="};
 	static __thread char p[64] = { '\0' };
 
-	struct iovec iov[2] = { 0 };
+	struct iovec iov[3] = { 0 };
 
 	Mysnprintf_ss(p, sizeof(p) - 1, "PRIORITY=%i", priority);
 
@@ -106,7 +106,10 @@ static int SystemdSyslog(int priority, const char *format, va_list ap)
 	iov[1].iov_base = p;
 	iov[1].iov_len = strlen(p);
 
-	return sd_journal_sendv(iov, 2);
+	iov[2].iov_base = "SYSLOG_IDENTIFIER=watchdogd";
+	iov[2].iov_len = strlen("SYSLOG_IDENTIFIER=watchdogd");
+
+	return sd_journal_sendv(iov, 3);
 }
 #endif
 
@@ -177,9 +180,7 @@ static void CloseOldTarget(sig_atomic_t oldTarget)
 	}
 
 	if (oldTarget == SYSTEM_LOG) {
-#ifndef HAVE_SD_JOURNAL
 		closelog();
-#endif
 		return;
 	}
 
@@ -250,9 +251,11 @@ void SetLogTarget(sig_atomic_t target, ...)
 	if (target == SYSTEM_LOG) {
 
 		if (logTarget != SYSTEM_LOG) {
-#ifndef HAVE_SD_JOURNAL
-			openlog("watchdogd", LOG_PID | LOG_NOWAIT | LOG_CONS,
-				LOG_DAEMON);
+#ifdef HAVE_SD_JOURNAL
+			if (LinuxRunningSystemd() != 1) {
+				openlog("watchdogd", LOG_PID | LOG_NOWAIT | LOG_CONS,
+					LOG_DAEMON);
+			}
 #endif
 		}
 
@@ -261,9 +264,7 @@ void SetLogTarget(sig_atomic_t target, ...)
 	}
 
 	if (target == FILE_NEW || target == FILE_APPEND) {
-#ifndef HAVE_SD_JOURNAL
 		closelog();
-#endif
 		va_list ap;
 		va_start(ap, target);
 
@@ -532,9 +533,11 @@ void Logmsg(int priority, const char *const fmt, ...)
 
 	if (logTarget == SYSTEM_LOG) {
 #ifdef HAVE_SD_JOURNAL
-		SystemdSyslog(priority, fmt, args); //async-signal safe
-		va_end(args);
-		return;
+		if (LinuxRunningSystemd() == 1) {
+			SystemdSyslog(priority, fmt, args); //async-signal safe
+			va_end(args);
+			return;
+		}
 #endif
 		MyVsnprintf_ss(buf, sizeof(buf) - 1, fmt, args);
 
