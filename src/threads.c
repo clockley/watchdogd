@@ -25,6 +25,7 @@
 #include "threads.h"
 #include "testdir.h"
 #include "exe.h"
+#include "network_tester.h"
 
 extern volatile sig_atomic_t stop;
 static pthread_mutex_t managerlock = PTHREAD_MUTEX_INITIALIZER;
@@ -63,6 +64,33 @@ static void *ServiceManagerKeepAliveNotification(void * arg)
 	}
 #endif
 	return NULL;
+}
+
+static void * CheckNetworkInterfacesThread(void *arg)
+{
+	struct cfgoptions *s = (struct cfgoptions *)arg;
+	int retries = 0;
+	while (true) {
+		pthread_mutex_lock(&managerlock);
+
+		char *ifname;
+
+		if (NetMonCheckNetworkInterfaces(&ifname) == false) {
+			retries += 1;
+			if (retries > 12) {
+				Logmsg(LOG_ERR, "network interface: %s is disconected", ifname);
+				s->error |= NETWORKDOWN;
+			}
+		} else {
+			if (s->error & NETWORKDOWN) {
+				s->error &= !NETWORKDOWN;
+			}
+			retries = 0;
+		}
+
+		pthread_cond_wait(&workerupdate, &managerlock);
+		pthread_mutex_unlock(&managerlock);
+	}
 }
 
 static void *Sync(void *arg)
@@ -574,6 +602,15 @@ static void *ManagerThread(void *arg)
 			}
 		}
 
+		if (s->error & NETWORKDOWN) {
+			Logmsg(LOG_ERR, "network down... rebooting system");
+			if (Shutdown(PINGFAILED, s) < 0) {
+				Logmsg(LOG_ERR,
+				       "watchdogd: Unable to shutdown system");
+				exit(EXIT_FAILURE);
+			}
+		}
+
 		pthread_mutex_unlock(&managerlock);
 		nanosleep(&rqtp, NULL);
 
@@ -635,6 +672,10 @@ int StartHelperThreads(struct cfgoptions *options)
 
 	if (SetupTestMemoryAllocationThread(options) < 0) {
 		return -1;
+	}
+
+	if (options->networkInterfaces != NULL) {
+		StartCheckNetworkInterfacesThread(options);
 	}
 
 	return 0;
@@ -780,5 +821,15 @@ int StartServiceManagerKeepAliveNotification(void *arg)
 
 	return 0;
 #endif
+	return 0;
+}
+
+int StartCheckNetworkInterfacesThread(void *arg)
+{
+	assert(arg != NULL);
+
+	if (CreateDetachedThread(CheckNetworkInterfacesThread, arg) < 0)
+		return -1;
+
 	return 0;
 }

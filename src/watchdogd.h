@@ -80,6 +80,7 @@ struct cfgoptions {
 	double maxLoadFive;
 	double retryLimit;
 	const config_setting_t *ipAddresses;
+	const config_setting_t *networkInterfaces;
 	pingobj_t *pingObj;
 	const config_setting_t *pidFiles;
 	const char *devicepath;
@@ -127,6 +128,7 @@ struct cfgoptions {
 #define UNKNOWNPIDFILERROR 0x10
 #define PIDFILERROR 0x20
 #define PINGFAILED 0x40
+#define NETWORKDOWN 0x80
 };
 
 struct ProcessList {

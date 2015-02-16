@@ -19,6 +19,7 @@
 #include "testdir.h"
 #include "daemon.h"
 #include "configfile.h"
+#include "network_tester.h"
 
 static const char *LibconfigWraperConfigSettingSourceFile(const config_setting_t *
 						   setting)
@@ -514,6 +515,30 @@ int ReadConfigurationFile(struct cfgoptions *const cfg)
 
 		if (config_setting_length(cfg->pidFiles) > 0) {
 			cfg->options |= ENABLEPIDCHECKER;
+		}
+	}
+
+	cfg->networkInterfaces = config_lookup(&cfg->cfg, "network-interfaces");
+
+	if (cfg->networkInterfaces != NULL) {
+		if (config_setting_is_array(cfg->networkInterfaces) == CONFIG_FALSE) {
+			fprintf(stderr,
+				"watchdogd: %s:%i: illegal type for configuration file entry"
+				" \"network-interfaces\" expected array\n",
+				LibconfigWraperConfigSettingSourceFile
+				(cfg->networkInterfaces),
+				config_setting_source_line(cfg->networkInterfaces));
+			return -1;
+		}
+
+		if (config_setting_length(cfg->networkInterfaces) > 0) {
+			NetMonInit();
+			for (int cnt = 0; cnt < config_setting_length(cfg->networkInterfaces); cnt++) {
+				if (NetMonAdd(config_setting_get_string_elem(cfg->networkInterfaces, cnt)) == false) {
+					Logmsg(LOG_ALERT, "Unable to add network interface: %s",
+							config_setting_get_string_elem(cfg->networkInterfaces, cnt));
+				}
+			}
 		}
 	}
 
