@@ -203,6 +203,6 @@ int SpawnAttr(spawnattr_t *spawnattr, const char *file, const char *args, ...)
 			return 0;
 		}
 
-		return WEXITSTATUS(status);
+		_Exit(WEXITSTATUS(status));
 	}
 }
