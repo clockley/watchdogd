@@ -50,7 +50,7 @@ static bool NetMonIsValidNetworkInterface(const char *name)
 
 	freeifaddrs(ifaddr);
 
-	return true;
+	return false;
 }
 
 bool NetMonCheckNetworkInterfaces(char **name)
