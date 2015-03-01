@@ -273,7 +273,7 @@ void SetLogTarget(sig_atomic_t target, ...)
 		assert(fileName != NULL);
 
 		if (target == FILE_NEW) {
-			logFile = open(fileName, O_WRONLY|O_CREAT);
+			logFile = open(fileName, O_WRONLY|O_CREAT, S_IRUSR|S_IWUSR);
 			if (logFile == -1) {
 				if (logTarget == SYSTEM_LOG) {
 					syslog(LOG_ALERT, "%m");
@@ -286,7 +286,7 @@ void SetLogTarget(sig_atomic_t target, ...)
 				logTarget = FILE_NEW;
 			}
 		} else if (target == FILE_APPEND) {
-			logFile = open(fileName, O_WRONLY|O_APPEND|O_CREAT);
+			logFile = open(fileName, O_WRONLY|O_APPEND|O_CREAT, S_IRUSR|S_IWUSR);
 			if (logFile == -1) {
 				if (logTarget == SYSTEM_LOG) {
 					syslog(LOG_ALERT, "%m");
