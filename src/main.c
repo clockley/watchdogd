@@ -88,6 +88,16 @@ int main(int argc, char **argv)
 
 	if (!(options.options & NOACTION)) {
 		watchdog = OpenWatchdog(options.devicepath);
+
+		if (watchdog == NULL) {
+			MakeDeviceFile(options.devicepath);
+			watchdog = OpenWatchdog(options.devicepath);
+			if (watchdog == NULL) {
+				LoadKernelModule();
+				watchdog = OpenWatchdog(options.devicepath);
+			}
+		}
+
 		if (watchdog == NULL) {
 			FatalError(&options);
 		}

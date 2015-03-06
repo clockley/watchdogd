@@ -13,6 +13,7 @@
  * implied. See the License for the specific language governing
  * permissions and limitations under the License. 
  */
+#define _GNU_SOURCE
 #include "watchdogd.h"
 #include "linux.h"
 #include "sub.h"
@@ -773,5 +774,47 @@ int GetCpuCount(void)
 		return 1;
 	}
 	return info.procs;
+}
+
+bool LoadKernelModule(void)
+{
+	struct utsname name;
+
+	if (uname(&name) == -1) {
+		return false;
+	}
+	char* path = NULL;
+	Wasprintf(&path, "/lib/modules/%s/kernel/drivers/watchdog/softdog.ko", name.release);
+
+	if (path == NULL) {
+		return false;
+	}
+
+	int fd = open(path, O_RDONLY);
+
+	if (fd < 0) {
+		free(path);
+		return false;
+	}
+
+	int ret = syscall(SYS_finit_module, fd, "", 0);
+
+	if (ret == -1) {
+		close(fd);
+		free(path);
+		return false;
+	}
+
+	close(fd);
+	free(path);
+
+	Logmsg(LOG_DEBUG, "falling back to software watchdog");
+
+	return true;
+}
+
+bool MakeDeviceFile(const char *file)
+{
+	return true;
 }
 #endif

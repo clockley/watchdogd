@@ -27,6 +27,8 @@
 #include <utmpx.h>
 #include <utmp.h>
 #include <sys/swap.h>
+#include <sys/syscall.h>
+#include <sys/utsname.h>
 #include <sys/types.h>
 #include <ifaddrs.h>
 #include <linux/if.h>
@@ -61,4 +63,6 @@ int SystemdWatchdogEnabled(const int, long long int *const);
 bool OnParentDeathSend(int);
 int NoNewProvileges(void);
 int GetCpuCount(void);
+bool LoadKernelModule(void);
+bool MakeDeviceFile(const char *);
 #endif
