@@ -101,25 +101,25 @@
 int
 MyVsnprintf_ss(char *sbuf, size_t slen, const char *fmt0, va_list ap)
 {
-	const char *fmt;	/* format string */
-	int ch;			/* character from fmt */
-	int n;			/* handy integer (short term usage) */
-	char *cp;		/* handy char pointer (short term usage) */
-	int flags;		/* flags as above */
-	int ret;		/* return value accumulator */
-	int width;		/* width from format (%8d), or 0 */
-	int prec;		/* precision from format (%.3d), or -1 */
-	char sign;		/* sign prefix (' ', '+', '-', or \0) */
+	const char *fmt = "";	/* format string */
+	int ch = 0;			/* character from fmt */
+	int n = 0;			/* handy integer (short term usage) */
+	char *cp = NULL;		/* handy char pointer (short term usage) */
+	int flags = 0;		/* flags as above */
+	int ret = 0;		/* return value accumulator */
+	int width = 0;		/* width from format (%8d), or 0 */
+	int prec = 0;		/* precision from format (%.3d), or -1 */
+	char sign = '0';		/* sign prefix (' ', '+', '-', or \0) */
 
-	u_quad_t _uquad;	/* integer arguments %[diouxX] */
+	u_quad_t _uquad = 0;	/* integer arguments %[diouxX] */
 	enum { OCT, DEC, HEX } base;/* base for [diouxX] conversion */
 	int dprec;		/* a copy of prec if [diouxX], 0 otherwise */
 	int realsz;		/* field size expanded by dprec */
 	int size;		/* size of converted field or string */
 	const char *xdigs;	/* digits for [xX] conversion */
-	char bf[128]; 		/* space for %c, %[diouxX] */
-	char *tailp;		/* tail pointer for snprintf */
-	size_t len;
+	char bf[128] = {'\0'}; 		/* space for %c, %[diouxX] */
+	char *tailp = NULL;		/* tail pointer for snprintf */
+	size_t len = 0;
 
 	static const char xdigs_lower[16] = "0123456789abcdef";
 	static const char xdigs_upper[16] = "0123456789ABCDEF";
@@ -128,16 +128,6 @@ MyVsnprintf_ss(char *sbuf, size_t slen, const char *fmt0, va_list ap)
 		errno = EOVERFLOW;
 		return -1;
 	}
-
-	tailp = sbuf + slen;
-
-	cp = NULL;	/* XXX: shutup gcc */
-	size = 0;	/* XXX: shutup gcc */
-
-	fmt = fmt0;
-	ret = 0;
-
-	xdigs = NULL;		/* XXX: shut up gcc warning */
 
 	/*
 	 * Scan the format for conversions (`%' character).
