@@ -14,7 +14,7 @@
  * permissions and limitations under the License. 
  */
 
-#define _BSD_SOURCE
+#define _DEFAULT_SOURCE
 #include "watchdogd.h"
 #include <pthread.h>
 #include <netdb.h>
@@ -91,6 +91,8 @@ static void * CheckNetworkInterfacesThread(void *arg)
 		pthread_cond_wait(&workerupdate, &managerlock);
 		pthread_mutex_unlock(&managerlock);
 	}
+	
+	return NULL;
 }
 
 static void *Sync(void *arg)

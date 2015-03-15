@@ -14,7 +14,7 @@
  * permissions and limitations under the License. 
  */
 
-#define _BSD_SOURCE
+#define _DEFAULT_SOURCE
 #include "watchdogd.h"
 #include "sub.h"
 #include "exe.h"
