@@ -16,6 +16,7 @@ AC_PROG_CC_STDC
 
 # Checks for libraries.
 AM_PROG_LIBTOOL
+PKG_PROG_PKG_CONFIG
 
 AC_CANONICAL_HOST
 AM_CONDITIONAL([IS_FREEBSD],false)
@@ -25,18 +26,17 @@ case $host in
      ;;
      *linux*)
          AC_DEFINE([IS_LINUX],[1],[Linux])
-         PKG_CHECK_MODULES([DEPS], [libconfig >= 1.4.8])
+         PKG_CHECK_MODULES([MOUNT], [mount >= 2.22.0])
          break;
      ;;
 esac
 
-AC_CHECK_LIB([oping],[ping_construct])
-AC_CHECK_HEADERS([oping.h])
+PKG_CHECK_MODULES([DEPS], [libconfig >= 1.4.8])
+PKG_CHECK_MODULES([oping], [liboping >= 1.6.2])
 
 AC_SEARCH_LIBS(clock_gettime, rt, [CLOCK_GETTIME_LIBS=$LIBS])
 AC_SUBST(CLOCK_GETTIME_LIBS)
 
-PKG_PROG_PKG_CONFIG
 AC_ARG_WITH([systemdsystemunitdir],
      AS_HELP_STRING([--with-systemdsystemunitdir=DIR], [Directory for systemd service files]),,
      [with_systemdsystemunitdir=auto])
