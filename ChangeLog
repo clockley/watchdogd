@@ -102,3 +102,11 @@ To fix this type ./configure --prefix=/usr
 2015-01-30 [0.4] <Christian Lockley>
 	* Mostly bug fixes
 	* Add native SystemD journal support
+	
+2015-03-19 [0.5] <Christian Lockley>
+	* Fix crash on 64-bit linux
+	* Fix build on ubuntu
+	* Remove deprecated feature test macros
+	* Add network interface montering
+	* Fix invalid free()
+	* Fallback to softdog if kernel does not load watchdog kernel module
