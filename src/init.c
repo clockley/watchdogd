@@ -65,7 +65,7 @@ int ParseCommandLine(int *argc, char **argv, struct cfgoptions *cfg)
 
 	int tmp = 0;
 	while ((opt =
-		getopt_long(*argc, argv, "hqsfFbVvc:", longOptions,
+		getopt_long(*argc, argv, "hqsfFbVvnc:", longOptions,
 			    &tmp)) != -1) {
 
 		switch (opt) {
@@ -78,6 +78,7 @@ int ParseCommandLine(int *argc, char **argv, struct cfgoptions *cfg)
 		case 's':
 			cfg->options |= SYNC;
 			break;
+		case 'n':
 		case 'q':
 			cfg->options |= NOACTION;
 			break;
