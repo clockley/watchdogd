@@ -16,20 +16,9 @@ AC_PROG_CC_STDC
 
 # Checks for libraries.
 AM_PROG_LIBTOOL
+PKG_CHECK_MODULES([MOUNT], [mount >= 2.22.0])
 
-AC_CANONICAL_HOST
-AM_CONDITIONAL([IS_FREEBSD],false)
-case $host in
-    *free*)    
-        AC_DEFINE([IS_FREEBSD],[1],[FreeBSD Host])
-     ;;
-     *linux*)
-         AC_DEFINE([IS_LINUX],[1],[Linux])
-         PKG_CHECK_MODULES([DEPS], [libconfig >= 1.4.8])
-         break;
-     ;;
-esac
-
+PKG_CHECK_MODULES([DEPS], [libconfig >= 1.4.8])
 AC_CHECK_LIB([oping],[ping_construct])
 AC_CHECK_HEADERS([oping.h])
 
@@ -75,4 +64,3 @@ AC_CONFIG_FILES([Makefile
 		 contrib/systemd/Makefile
                  man/Makefile])
 AC_OUTPUT
-
