@@ -53,6 +53,7 @@ int ParseCommandLine(int *argc, char **argv, struct cfgoptions *cfg)
 	const struct option longOptions[] = {
 		{"no-action", no_argument, 0, 'q'},
 		{"foreground", no_argument, 0, 'F'},
+		{"debug", no_argument, 0, 'd'},
 		{"force", no_argument, 0, 'f'},
 		{"sync", no_argument, 0, 's'},
 		{"softboot", no_argument, 0, 'b'},
@@ -65,10 +66,11 @@ int ParseCommandLine(int *argc, char **argv, struct cfgoptions *cfg)
 
 	int tmp = 0;
 	while ((opt =
-		getopt_long(*argc, argv, "hqsfFbVvnc:", longOptions,
+		getopt_long(*argc, argv, "hqsfFbVvndc:", longOptions,
 			    &tmp)) != -1) {
 
 		switch (opt) {
+		case 'd':
 		case 'F':
 			cfg->options &= !DAEMONIZE;
 			break;
