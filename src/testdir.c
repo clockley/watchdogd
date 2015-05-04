@@ -417,12 +417,14 @@ bool ExecuteRepairScriptsPreFork(ProcessList * p, struct cfgoptions *s)
 		}
 #endif
 
+		unsetenv("LD_PRELOAD");
+
 		if (pid > 0) {
 			_Exit(0);
 		}
 
 
-		if (pid < 0 ) {
+		if (pid < 0) {
 			Logmsg(LOG_ERR, "fork failed: %s", MyStrerror(errno));
 			abort();
 		}
