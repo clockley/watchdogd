@@ -126,7 +126,7 @@ int CreateLinkedListOfExes(char *repairScriptFolder, ProcessList * p,
 			goto error;
 		}
 
-		if (strchr(".", ent->d_name[0]) != NULL) {
+		if (strchr(".", ent->d_name[0]) != NULL && !(config->options & FORCE)) {
 			continue;
 		}
 
