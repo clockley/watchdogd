@@ -284,7 +284,7 @@ static void __ExecScriptWorkerThread(void *a)
 	        		.execStart = NULL, .logDirectory = container->config->logdir,
 				.user = NULL, .group = NULL, .umask = 0,
 				.timeout = container->config->repairBinTimeout, .nice = 0,
-				.noNewPrivileges = false, .hasUmask = true
+				.noNewPrivileges = false, .hasUmask = false
 		};
 
 		if (c->retString[0] == '\0') {
