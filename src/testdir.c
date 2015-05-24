@@ -22,7 +22,8 @@
 #include "repair.h"
 #include "threadpool.h"
 
-const int MAX_WORKER_THREADS = 16;
+const int MAX_WORKER_THREADS = 24;
+int NUMBER_OF_REPAIR_SCRIPTS = 0;
 static int * ret = NULL;
 static struct threadpool * threadpool;
 //The dirent_buf_size function was written by Ben Hutchings and released under the following license.
@@ -216,9 +217,10 @@ int CreateLinkedListOfExes(char *repairScriptFolder, ProcessList * p,
 			cmd->legacy = false;
 		}
 
+		NUMBER_OF_REPAIR_SCRIPTS += 1;
 		list_add(&cmd->entry, &p->head);
 	}
-
+	
 	assert(fd != -1);
 
 	close(fd);
@@ -434,7 +436,12 @@ bool ExecuteRepairScriptsPreFork(ProcessList * p, struct cfgoptions *s)
 
 		char b[1];
 
-		threadpool = threadpool_init(MAX_WORKER_THREADS);
+		if (NUMBER_OF_REPAIR_SCRIPTS == 0) {
+			NUMBER_OF_REPAIR_SCRIPTS = MAX_WORKER_THREADS;
+		}
+
+		threadpool = threadpool_init(NUMBER_OF_REPAIR_SCRIPTS < MAX_WORKER_THREADS ?
+						NUMBER_OF_REPAIR_SCRIPTS:MAX_WORKER_THREADS);
 
 		while (read(fd[0], b, sizeof(b)) != 0) {
 			struct executeScriptsStruct ess;
