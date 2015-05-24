@@ -437,7 +437,7 @@ bool ExecuteRepairScriptsPreFork(ProcessList * p, struct cfgoptions *s)
 		char b[1];
 
 		if (NUMBER_OF_REPAIR_SCRIPTS == 0) {
-			NUMBER_OF_REPAIR_SCRIPTS = MAX_WORKER_THREADS;
+			NUMBER_OF_REPAIR_SCRIPTS = 2;
 		}
 
 		threadpool = threadpool_init(NUMBER_OF_REPAIR_SCRIPTS < MAX_WORKER_THREADS ?
