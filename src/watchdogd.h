@@ -42,6 +42,7 @@
 #include <time.h>
 #include <unistd.h>
 #include <dirent.h>
+#include <zlib.h>
 #include "myvsnprintf_ss.h"
 #include "mysnprintf_ss.h"
 

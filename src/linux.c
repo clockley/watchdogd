@@ -17,7 +17,6 @@
 #include "watchdogd.h"
 #include "linux.h"
 #include "sub.h"
-#include <zlib.h>
 
 #ifdef __linux__
 int PingWatchdog(watchdog_t * const watchdog)
