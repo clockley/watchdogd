@@ -17,6 +17,7 @@
 #include "watchdogd.h"
 #include "linux.h"
 #include "sub.h"
+#include <zlib.h>
 
 #ifdef __linux__
 int PingWatchdog(watchdog_t * const watchdog)
@@ -121,7 +122,8 @@ watchdog_t *OpenWatchdog(const char *const path)
 	}
 
 	if (CanMagicClose(watchdog) == false) {
-		Logmsg(LOG_ALERT, "watchdog device does not support magic close char");
+		Logmsg(LOG_ALERT,
+		       "watchdog device does not support magic close char");
 	}
 
 	PrintWdtInfo(watchdog);
@@ -243,9 +245,9 @@ int ConfigureWatchdogTimeout(watchdog_t * const watchdog, int timeout)
 
 static int LegacyOutOfMemoryKillerConfig(void)
 {
-	int fd = open("/proc/self/om_adj",O_WRONLY);
-	
-	if (fd < 0)  {
+	int fd = open("/proc/self/om_adj", O_WRONLY);
+
+	if (fd < 0) {
 		Logmsg(LOG_ERR, "open failed: %s", MyStrerror(errno));
 		return -1;
 	}
@@ -336,7 +338,7 @@ int SaveRandomSeed(const char *filename)
 		return -1;
 	}
 
-	char buf[512] = {0};
+	char buf[512] = { 0 };
 
 	int ret = read(fd, buf, sizeof(buf));
 
@@ -346,7 +348,7 @@ int SaveRandomSeed(const char *filename)
 
 	close(fd);
 
-	fd = open(filename, O_TRUNC|O_CREAT, 0600);
+	fd = open(filename, O_TRUNC | O_CREAT, 0600);
 
 	if (fd < 1) {
 		goto error;
@@ -513,7 +515,7 @@ int StopNetwork(void)
 		return -1;
 	}
 
-	for (struct ifaddrs *ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) {
+	for (struct ifaddrs * ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) {
 		if (ifa->ifa_addr == NULL)
 			continue;
 
@@ -542,12 +544,12 @@ int StopNetwork(void)
 static bool IsRootStorageDaemon(pid_t pid)
 {
 //http://www.freedesktop.org/wiki/Software/systemd/RootStorageDaemons/
-	char path[512] = {"\0"};
+	char path[512] = { "\0" };
 	snprintf(path, sizeof(path) - 1, "/proc/%ld/cmdline", (long)pid);
 
-	int fd = open(path, O_RDONLY|O_CLOEXEC);
+	int fd = open(path, O_RDONLY | O_CLOEXEC);
 
-	char buf[32] =  {"\0"};
+	char buf[32] = { "\0" };
 
 	if (fd < 0) {
 		goto error;
@@ -557,7 +559,7 @@ static bool IsRootStorageDaemon(pid_t pid)
 		goto error;
 	}
 
-	if (strstr(buf, "@") == NULL) { //kernel null terminates arguments so we only read the first arg.
+	if (strstr(buf, "@") == NULL) {	//kernel null terminates arguments so we only read the first arg.
 		goto error;
 	}
 
@@ -627,7 +629,7 @@ int LinuxRunningSystemd(void)
 		return -1;
 	}
 
-	char buf[256] =  {"\0"};
+	char buf[256] = { "\0" };
 
 	errno = 0;
 
@@ -654,7 +656,7 @@ int LinuxRunningSystemd(void)
 bool PlatformInit(void)
 {
 #ifdef HAVE_SD_NOTIFY
-	sd_notifyf(0, "READY=1\n" "MAINPID=%lu", (unsigned long) getpid());
+	sd_notifyf(0, "READY=1\n" "MAINPID=%lu", (unsigned long)getpid());
 #endif
 	if (ConfigureKernelOutOfMemoryKiller() < 0) {
 		Logmsg(LOG_ERR, "unable to configure out of memory killer");
@@ -673,7 +675,7 @@ int NativeShutdown(int errorcode, int kexec)
 
 	if (LinuxRunningSystemd() == 1) {
 		if (kexec == 1) {
-			kill(1, SIGRTMIN+6);
+			kill(1, SIGRTMIN + 6);
 		}
 
 		if (errorcode == WECMDREBOOT) {
@@ -681,11 +683,11 @@ int NativeShutdown(int errorcode, int kexec)
 		}
 
 		if (errorcode == WETEMP) {
-			kill(1, SIGRTMIN+4);
+			kill(1, SIGRTMIN + 4);
 		}
 
 		if (errorcode == WECMDRESET) {
-			kill(1, SIGRTMIN+15);
+			kill(1, SIGRTMIN + 15);
 		}
 	}
 
@@ -702,7 +704,7 @@ int GetConsoleColumns(void)
 	return w.ws_col;
 }
 
-int SystemdWatchdogEnabled(const int unset, long long int * const interval)
+int SystemdWatchdogEnabled(const int unset, long long int *const interval)
 {
 	if (LinuxRunningSystemd() == 0) {
 		return 0;
@@ -715,11 +717,12 @@ int SystemdWatchdogEnabled(const int unset, long long int * const interval)
 
 	const char *watchdogPid = getenv("WATCHDOG_PID");
 	if (watchdogPid != NULL) {
-		if (getpid() != (pid_t)strtoll(watchdogPid, NULL, 10)) {
+		if (getpid() != (pid_t) strtoll(watchdogPid, NULL, 10)) {
 			return -1;
 		}
 	} else {
-		Logmsg(LOG_WARNING, "Your version of systemd is out of date. Upgrade for better integration with watchdogd");
+		Logmsg(LOG_WARNING,
+		       "Your version of systemd is out of date. Upgrade for better integration with watchdogd");
 	}
 
 	if (interval != NULL) {
@@ -736,7 +739,9 @@ int SystemdWatchdogEnabled(const int unset, long long int * const interval)
 
 	if (unset != 0) {
 		if (unsetenv("WATCHDOG_PID") < 0) {
-			Logmsg(LOG_WARNING, "Unable to delete WATCHDOG_PID environment variable:%s", MyStrerror(errno));
+			Logmsg(LOG_WARNING,
+			       "Unable to delete WATCHDOG_PID environment variable:%s",
+			       MyStrerror(errno));
 		} else if (unsetenv("WATCHDOG_USEC") < 0) {
 			return -1;
 		}
@@ -747,7 +752,7 @@ int SystemdWatchdogEnabled(const int unset, long long int * const interval)
 
 bool OnParentDeathSend(int sig)
 {
-	if (prctl(PR_SET_PDEATHSIG, (int *) sig) == -1) {
+	if (prctl(PR_SET_PDEATHSIG, (int *)sig) == -1) {
 		return false;
 	}
 
@@ -783,8 +788,9 @@ bool LoadKernelModule(void)
 	if (uname(&name) == -1) {
 		return false;
 	}
-	char* path = NULL;
-	Wasprintf(&path, "/lib/modules/%s/kernel/drivers/watchdog/softdog.ko", name.release);
+	char *path = NULL;
+	Wasprintf(&path, "/lib/modules/%s/kernel/drivers/watchdog/softdog.ko",
+		  name.release);
 
 	if (path == NULL) {
 		return false;
@@ -817,4 +823,59 @@ bool MakeDeviceFile(const char *file)
 {
 	return true;
 }
+
+int ConfigWatchdogNowayoutIsSet(void)
+{
+	bool found = false;
+	char *buf = NULL;
+	gzFile *config = gzopen("/proc/config.gz", "r");
+
+	if (config == NULL) {
+		return -1;
+	}
+
+	gzbuffer(config, 8192);
+
+	while (true) {
+		char buf[4096] = {'\0'};
+		int bytesRead = gzread(config, buf, sizeof(buf) - 1);
+		if (strstr(buf, "# CONFIG_WATCHDOG_NOWAYOUT is not set") != NULL) {
+			found = true;
+			break;
+		}
+
+		if (bytesRead < sizeof(buf) - 1) {
+			if (gzeof(config)) {
+				break;
+			} else {
+				break;
+			}
+		}
+	}
+
+	gzclose(config);
+
+	buf = calloc(1, 4096);
+
+	readlink("/sys/dev/char/10:130/device/driver", buf, 4096 - 1);
+	Wasprintf(&buf, "/sys/module/%s/parameters/nowayout", basename(buf));
+
+	FILE *fp = fopen(buf, "r");
+
+	if (fp != NULL) {
+		if (fgetc(fp) == '1') {
+			found = false;
+		}
+		fclose(fp);
+	}
+
+	free(buf);
+
+	if (found) {
+		return 0;
+	}
+
+	return 1;
+}
+
 #endif

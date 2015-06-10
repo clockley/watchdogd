@@ -79,6 +79,7 @@ struct cfgoptions {
 	double maxLoadOne;
 	double maxLoadFive;
 	double retryLimit;
+	long loopExit;
 	const config_setting_t *ipAddresses;
 	const config_setting_t *networkInterfaces;
 	pingobj_t *pingObj;

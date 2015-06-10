@@ -173,6 +173,12 @@ int main(int argc, char **argv)
 
 		rqtp.tv_sec += options.sleeptime;
 		NormalizeTimespec(&rqtp);
+		if (options.loopExit > 0) {
+			options.loopExit -= 1;
+		} else if (options.loopExit == 0) {
+			//raise(SIGTERM);
+			quit = 1;
+		}
 	}
 
 	if (stop == 1) {

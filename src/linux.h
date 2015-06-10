@@ -65,4 +65,5 @@ int NoNewProvileges(void);
 int GetCpuCount(void);
 bool LoadKernelModule(void);
 bool MakeDeviceFile(const char *);
+int ConfigWatchdogNowayoutIsSet(void);
 #endif

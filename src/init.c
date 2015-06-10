@@ -61,12 +61,13 @@ int ParseCommandLine(int *argc, char **argv, struct cfgoptions *cfg)
 		{"verbose", no_argument, 0, 'v'},
 		{"version", no_argument, 0, 'V'},
 		{"config-file", required_argument, 0, 'c'},
+		{"loop-exit", required_argument, 0, 'X'},
 		{0, 0, 0, 0}
 	};
 
 	int tmp = 0;
 	while ((opt =
-		getopt_long(*argc, argv, "hqsfFbVvndc:", longOptions,
+		getopt_long(*argc, argv, "hqsfFbVvndc:X:", longOptions,
 			    &tmp)) != -1) {
 
 		switch (opt) {
@@ -92,6 +93,13 @@ int ParseCommandLine(int *argc, char **argv, struct cfgoptions *cfg)
 			break;
 		case 'v':
 			cfg->options |= VERBOSE;
+			break;
+		case 'X':
+			cfg->loopExit = ConvertStringToInt(optarg);
+			if (cfg->loopExit <= 0) {
+				Logmsg(LOG_ERR, "optarg must be greater than 0 for X option");
+				return -1;
+			}
 			break;
 		case 'V':
 			PrintVersionString();
@@ -182,6 +190,7 @@ bool SetDefaultConfig(struct cfgoptions *const options)
 	options->repairBinTimeout = 60;
 	options->testBinTimeout = 60;
 	options->options |= DAEMONIZE | USEPIDFILE;
+	options->loopExit = -1;
 
 	return true;
 }
@@ -199,7 +208,7 @@ int PrintVersionString(void)
 static int PrintHelp(void)
 {
 //Emulate the gnu --help output.
-	static const char *const help[][2] = {
+	const char *const help[][2] = {
 		{"Usage: " PACKAGE_NAME " [OPTION]", ""},
 		{"A watchdog daemon for linux.", ""},
 		{"", ""},
@@ -210,7 +219,9 @@ static int PrintHelp(void)
 		{"  -F, --foreground", "run in foreground mode"},
 		{"  -s, --sync", "sync file-systems regularly"},
 		{"  -h, --help", "this help"},
-		{"  -V, --version", "print version info"}
+		{"  -V, --version", "print version info"},
+		{isatty(STDOUT_FILENO) == 1 ? "  -X, --loop-exit \033[4mnum\033[0m ":
+		"  -X, --loop-exit num", " Run  for  'num'  loops  then  exit"}
 	};
 
 	for (size_t i = 0; i < ARRAY_SIZE(help); i += 1) {
@@ -219,7 +230,7 @@ static int PrintHelp(void)
 			col += col / 2;
 		}
 		long len = 0;
-		len += printf("%-20s", help[i][0]);
+		len += printf("%-22s", help[i][0]);
 
 		char *ptr = strdup(help[i][1]);
 

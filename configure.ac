@@ -17,7 +17,7 @@ AC_PROG_CC_STDC
 # Checks for libraries.
 AM_PROG_LIBTOOL
 PKG_CHECK_MODULES([MOUNT], [mount >= 2.22.0])
-
+PKG_CHECK_MODULES([ZLIB], [zlib])
 PKG_CHECK_MODULES([DEPS], [libconfig >= 1.4.8])
 AC_CHECK_LIB([oping],[ping_construct])
 AC_CHECK_HEADERS([oping.h])
