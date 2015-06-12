@@ -16,7 +16,7 @@
 #include "watchdogd.h"
 #include "sub.h"
 #include "logutils.h"
-#include "myvsnprintf_ss.h"
+
 
 #define KNRM  "\x1B[0m"
 #define KRED  "\x1B[31m"
@@ -76,9 +76,9 @@ static int SystemdSyslog(int priority, const char *format, va_list ap)
 
 	struct iovec iov[3] = { 0 };
 
-	Mysnprintf_ss(p, sizeof(p) - 1, "PRIORITY=%i", priority);
+	portable_snprintf(p, sizeof(p) - 1, "PRIORITY=%i", priority);
 
-	MyVsnprintf_ss(buf + strlen(buf), sizeof(buf) - strlen(buf), format, ap);
+	portable_vsnprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), format, ap);
 
 	iov[0].iov_base = buf;
 	iov[0].iov_len = strlen(buf);
@@ -212,9 +212,7 @@ static void SetLogMask(unsigned int mask)
 	pthread_once(&initMutex, MutexInit);
 	pthread_mutex_lock(&mutex);
 	setlogmask(mask);
-	if (mask != 0) {
-		logMask = mask;
-	}
+	logMask = mask;
 	pthread_mutex_unlock(&mutex);
 }
 
@@ -372,7 +370,7 @@ void Logmsg(int priority, const char *const fmt, ...)
 {
 	assert(fmt != NULL);
 
-	if ((LOG_MASK(LOG_PRI(priority)) & logMask) == 0) {
+	if ((LOG_MASK(LOG_PRI(priority))) == 0) {
 		return;
 	}
 
@@ -380,9 +378,10 @@ void Logmsg(int priority, const char *const fmt, ...)
 	va_start(args, fmt);
 
 	int len =
-	    MyVsnprintf_ss(NULL, 0, fmt,
+	    portable_vsnprintf(NULL, 0, fmt,
 		      args) + strlen((applesquePriority ==
 				      0) ? "<0>" : " #System #Attention") + 2;
+	va_end(args);
 
 	if (len <= 0) {
 		len = 2048;
@@ -427,15 +426,15 @@ void Logmsg(int priority, const char *const fmt, ...)
 		default:
 			assert(false);
 		}
-
-		MyVsnprintf_ss(buf + strlen(buf), sizeof(buf) - strlen(buf), fmt,
+		va_start(args, fmt);
+		portable_vsnprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), fmt,
 			  args);
 		va_end(args);
 
 		assert(buf[sizeof(buf) - 1] == '\0');
 	} else if (logTarget != SYSTEM_LOG && applesquePriority == 1) {
-
-		MyVsnprintf_ss(buf + strlen(buf), sizeof(buf) - strlen(buf), fmt,
+		va_start(args, fmt);
+		portable_vsnprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), fmt,
 			  args);
 		va_end(args);
 
@@ -498,15 +497,15 @@ void Logmsg(int priority, const char *const fmt, ...)
 			if (applesquePriority == 0) {
 				SetTextColor(priority);
 			}
-			int len = Mysnprintf_ss(NULL, 0, format, buf) + 1;
+			int len = portable_snprintf(NULL, 0, format, buf) + 1;
 			char t[len];
-			Mysnprintf_ss(t, sizeof(t), format, buf);
+			portable_snprintf(t, sizeof(t), format, buf);
 			write(STDERR_FILENO, t, strlen(t));
 			ResetTextColor();
 		} else {
-			int len = Mysnprintf_ss(NULL, 0, format, buf) + 1;
+			int len = portable_snprintf(NULL, 0, format, buf) + 1;
 			char t[len];
-			Mysnprintf_ss(t, sizeof(t), format, buf);
+			portable_snprintf(t, sizeof(t), format, buf);
 			write(STDERR_FILENO, t, strlen(t));
 		}
 	}
@@ -519,7 +518,8 @@ void Logmsg(int priority, const char *const fmt, ...)
 			return;
 		}
 #endif
-		MyVsnprintf_ss(buf, sizeof(buf) - 1, fmt, args);
+		va_start(args, fmt);
+		portable_vsnprintf(buf, sizeof(buf) - 1, fmt, args);
 
 		va_end(args);
 

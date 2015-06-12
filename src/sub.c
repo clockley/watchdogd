@@ -83,7 +83,7 @@ int Wasprintf(char **ret, const char *format, ...)
 	*ret = NULL;
 
 	va_start(ap, format);
-	int count = vsnprintf(NULL, 0, format, ap);
+	int count = portable_vsnprintf(NULL, 0, format, ap);
 	va_end(ap);
 
 	if (count >= 0) {
@@ -93,7 +93,7 @@ int Wasprintf(char **ret, const char *format, ...)
 			return -1;
 
 		va_start(ap, format);
-		count = vsnprintf(buffer, (size_t) count + 1, format, ap);
+		count = portable_vsnprintf(buffer, (size_t) count + 1, format, ap);
 		va_end(ap);
 
 		if (count < 0) {

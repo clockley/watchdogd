@@ -359,7 +359,7 @@ static void *__ExecuteRepairScripts(void *a)
 		}
 
 		container.cmd = c;
-		Mysnprintf_ss(container.cmd->retString, sizeof(container.cmd->retString), "%i", c->ret);
+		portable_snprintf(container.cmd->retString, sizeof(container.cmd->retString), "%i", c->ret);
 
 		container.cmd->mode = REPAIR;
 

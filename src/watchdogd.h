@@ -45,7 +45,7 @@
 #include <zlib.h>
 #include "myvsnprintf_ss.h"
 #include "mysnprintf_ss.h"
-
+#include "snprintf.h"
 #ifndef NSIG
 #if defined(_NSIG)
 #define NSIG _NSIG		/* For BSD/SysV */
