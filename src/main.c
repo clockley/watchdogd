@@ -24,6 +24,7 @@
 #include "pidfile.h"
 #include "daemon.h"
 #include "killtree.h"
+#include "identify.h"
 
 #define DISARM_WATCHDOG_BEFORE_REBOOT true
 
