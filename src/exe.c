@@ -42,7 +42,7 @@ int Spawn(int timeout, struct cfgoptions *const config, const char *file,
 			   };
 	va_list a;
 	va_start(a, args);
-	int ret =  SpawnAttr(&attr, file, a);
+	int ret =  SpawnAttr(&attr, file, args, a);
 	va_end(a);
 	return ret;
 }
