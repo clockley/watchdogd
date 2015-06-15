@@ -110,3 +110,8 @@ To fix this type ./configure --prefix=/usr
 	* Add network interface montering
 	* Fix invalid free()
 	* Fallback to softdog if kernel does not load watchdog kernel module
+	
+2015-06-15 [0.6] <Christian Lockley>
+	* Fixed a number of bugs
+	* Add identify watchdog command
+	* Reduce memory usage.
