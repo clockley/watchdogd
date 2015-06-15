@@ -43,8 +43,6 @@
 #include <unistd.h>
 #include <dirent.h>
 #include <zlib.h>
-#include "myvsnprintf_ss.h"
-#include "mysnprintf_ss.h"
 #include "snprintf.h"
 #ifndef NSIG
 #if defined(_NSIG)
@@ -111,6 +109,7 @@ struct cfgoptions {
 #define NOACTION 0x100
 #define REALTIME 0x200
 #define VERBOSE 0x400
+#define IDENTIFY 0x800
 
 	int priority;
 	int watchdogTimeout;
