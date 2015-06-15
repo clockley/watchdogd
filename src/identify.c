@@ -15,6 +15,8 @@
  */
 
 #include "watchdogd.h"
+#include "logutils.h"
+#include "sub.h"
 
 int Identify(watchdog_t * const wdt)
 {
