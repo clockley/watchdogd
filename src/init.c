@@ -221,7 +221,7 @@ static int PrintHelp(void)
 		{"  -f, --force",
 		 "force a ping interval or timeout even if the ping interval is less than the timeout"},
 		{"  -F, --foreground", "run in foreground mode"},
-		{"  -i, --identify", "identify hardware watchdog "},
+		{"  -i, --identify", "identify hardware watchdog"},
 		{"  -s, --sync", "sync file-systems regularly"},
 		{"  -h, --help", "this help"},
 		{"  -V, --version", "print version info"},
