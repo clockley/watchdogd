@@ -80,7 +80,7 @@ static bool CanMagicClose(watchdog_t * const wdt)
 	return WDIOF_MAGICCLOSE & watchDogInfo.options;
 }
 
-static bool PrintWdtInfo(watchdog_t * const wdt)
+bool PrintWdtInfo(watchdog_t * const wdt)
 {
 	struct watchdog_info watchDogInfo;
 

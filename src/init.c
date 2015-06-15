@@ -62,12 +62,13 @@ int ParseCommandLine(int *argc, char **argv, struct cfgoptions *cfg)
 		{"version", no_argument, 0, 'V'},
 		{"config-file", required_argument, 0, 'c'},
 		{"loop-exit", required_argument, 0, 'X'},
+		{"identify", no_argument, 0, 'i'},
 		{0, 0, 0, 0}
 	};
 
 	int tmp = 0;
 	while ((opt =
-		getopt_long(*argc, argv, "hqsfFbVvndc:X:", longOptions,
+		getopt_long(*argc, argv, "ihqsfFbVvndc:X:", longOptions,
 			    &tmp)) != -1) {
 
 		switch (opt) {
@@ -100,6 +101,9 @@ int ParseCommandLine(int *argc, char **argv, struct cfgoptions *cfg)
 				Logmsg(LOG_ERR, "optarg must be greater than 0 for X option");
 				return -1;
 			}
+			break;
+		case 'i':
+			cfg->options |= IDENTIFY;
 			break;
 		case 'V':
 			PrintVersionString();
@@ -217,6 +221,7 @@ static int PrintHelp(void)
 		{"  -f, --force",
 		 "force a ping interval or timeout even if the ping interval is less than the timeout"},
 		{"  -F, --foreground", "run in foreground mode"},
+		{"  -i, --identify", "identify hardware watchdog "},
 		{"  -s, --sync", "sync file-systems regularly"},
 		{"  -h, --help", "this help"},
 		{"  -V, --version", "print version info"},

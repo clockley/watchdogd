@@ -59,6 +59,10 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 
+	if (options.options & IDENTIFY) {
+		return Identify(OpenWatchdog(options.devicepath));
+	}
+
 	if (Daemonize(&options) < 0) {
 		FatalError(&options);
 	}
