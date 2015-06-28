@@ -513,6 +513,7 @@ void Logmsg(int priority, const char *const fmt, ...)
 	if (logTarget == SYSTEM_LOG) {
 #ifdef HAVE_SD_JOURNAL
 		if (LinuxRunningSystemd() == 1) {
+			va_start(args, fmt);
 			SystemdSyslog(priority, fmt, args); //async-signal safe
 			va_end(args);
 			return;
