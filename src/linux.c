@@ -290,8 +290,8 @@ static int ConfigureKernelOutOfMemoryKiller(void)
 
 	if (write(fd, "-1000", strlen("-1000")) < 0) {
 		Logmsg(LOG_ERR, "write failed: %s", MyStrerror(errno));
-		CloseWraper(&fd);
-		CloseWraper(&dfd);
+		close(fd);
+		close(dfd);
 		return -1;
 	}
 
