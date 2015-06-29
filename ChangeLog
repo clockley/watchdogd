@@ -115,3 +115,6 @@ To fix this type ./configure --prefix=/usr
 	* Fixed a number of bugs
 	* Add identify watchdog command
 	* Reduce memory usage.
+
+2015-06-29 [0.7] <Christian Lockley>
+	* Fix crash.
