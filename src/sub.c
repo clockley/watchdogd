@@ -24,24 +24,11 @@
 
 int CloseWraper(const int *pfd)
 {
-	int ret = 0;
-	int count = 0;
-
-	if (pfd == NULL)
-		return -1;
-
-	do {
-		ret = close(*pfd);
-		count = count + 1;
-
-	}
-	while (ret != 0 && errno == EINTR && count <= 8);
-
-	if (ret != 0) {
+	if (pfd == NULL) {
 		return -1;
 	}
 
-	return 0;
+	return close(*pfd);
 }
 
 int IsDaemon(struct cfgoptions *const s)
