@@ -251,7 +251,6 @@ static int PrintHelp(void)
 			len += strlen(tmp);
 			if (len > col) {
 				len = 0;
-				printf("%s", "\n");
 				len = printf("                      ");
 				len += printf("%s", tmp);
 				tmp = strtok_r(NULL, " ", &save);
