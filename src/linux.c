@@ -773,11 +773,7 @@ int NoNewProvileges(void)
 
 int GetCpuCount(void)
 {
-	struct sysinfo info;
-	if (sysinfo(&info) < 0) {
-		return 1;
-	}
-	return info.procs;
+	return get_nprocs();
 }
 
 bool LoadKernelModule(void)
