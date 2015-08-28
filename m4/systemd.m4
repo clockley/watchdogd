@@ -39,14 +39,3 @@ AC_DEFUN([RRA_WITH_SYSTEMD_UNITDIR],
  AM_CONDITIONAL([HAVE_SYSTEMD],
     [test -n "$with_systemdsystemunitdir" -a x"$with_systemdsystemunitdir" != xno])])
 
-dnl Check for libsystemd-daemon and define SYSTEMD_DAEMON_{CFLAGS,LIBS} if it
-dnl is available.
-AC_DEFUN([RRA_LIB_SYSTEMD_DAEMON_OPTIONAL],
-[PKG_CHECK_EXISTS([libsystemd-daemon],
-    [PKG_CHECK_MODULES([SYSTEMD_DAEMON], [libsystemd-daemon])
-     AC_DEFINE([HAVE_SD_NOTIFY], 1, [Define if sd_notify is available.])])])
-
-AC_DEFUN([RRA_LIB_SYSTEMD_JOURNAL_OPTIONAL],
-[PKG_CHECK_EXISTS([libsystemd-daemon],
-    [PKG_CHECK_MODULES([SYSTEMD_JOURNAL], [libsystemd-journal])
-     AC_DEFINE([HAVE_SD_JOURNAL], 1, [Define if sd_journal_sendv is available.])])])
