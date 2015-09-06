@@ -274,6 +274,8 @@ void SetLogTarget(sig_atomic_t target, ...)
 			if (LinuxRunningSystemd() != 1) {
 				StartLogger();
 			}
+#else
+		StartLogger();
 #endif
 		}
 
