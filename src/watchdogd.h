@@ -130,6 +130,7 @@ struct cfgoptions {
 #define PIDFILERROR 0x20
 #define PINGFAILED 0x40
 #define NETWORKDOWN 0x80
+	bool haveConfigFile;
 };
 
 struct ProcessList {

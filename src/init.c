@@ -195,6 +195,7 @@ bool SetDefaultConfig(struct cfgoptions *const options)
 	options->testBinTimeout = 60;
 	options->options |= DAEMONIZE | USEPIDFILE;
 	options->loopExit = -1;
+	options->haveConfigFile = true;
 
 	return true;
 }

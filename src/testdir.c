@@ -93,7 +93,7 @@ int CreateLinkedListOfExes(char *repairScriptFolder, ProcessList * p,
 		fprintf(stderr, "watchdogd: %s: %s\n", repairScriptFolder,
 			MyStrerror(errno));
 
-		if (config->options & FORCE || config->options & SOFTBOOT) {
+		if (config->options & FORCE || config->options & SOFTBOOT || config->haveConfigFile == false) {
 			return 0;
 		}
 

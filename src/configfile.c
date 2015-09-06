@@ -162,7 +162,7 @@ static bool SetDefaultLogTarget(struct cfgoptions *const cfg)
 	return false;
 }
 
-static bool LoadConfigurationFile(config_t *const config, const char *const fileName)
+static bool LoadConfigurationFile(config_t *const config, const char *const fileName, struct cfgoptions *const cfg)
 {
 	assert(config != NULL);
 	assert(fileName != NULL);
@@ -179,6 +179,7 @@ static bool LoadConfigurationFile(config_t *const config, const char *const file
 			"watchdogd: unable to open configuration file: %s\n",
 			fileName);
 		fprintf(stderr, "Using default values\n");
+		cfg->haveConfigFile = false;
 	} else if (!config_read_file(config, fileName)) {
 		fprintf(stderr, "watchdogd: %s:%d: %s\n",
 			config_error_file(config),
@@ -197,7 +198,7 @@ int ReadConfigurationFile(struct cfgoptions *const cfg)
 
 	int tmp = 0;
 
-	if (LoadConfigurationFile(&cfg->cfg, cfg->confile) == false) {
+	if (LoadConfigurationFile(&cfg->cfg, cfg->confile, cfg) == false) {
 		return -1;
 	}
 
