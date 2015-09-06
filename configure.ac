@@ -2,10 +2,9 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_CONFIG_MACRO_DIR([m4])
 AC_INIT([watchdogd],[0.7.1],[clockley1@gmail.com])
 AM_INIT_AUTOMAKE([1.7] [foreign dist-xz dist-zip])
-
+AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR([Makefile.am])
 AC_CONFIG_HEADERS([config.h])
 
@@ -20,16 +19,11 @@ AM_PROG_LIBTOOL
 PKG_CHECK_MODULES([MOUNT], [mount >= 2.22.0])
 PKG_CHECK_MODULES([ZLIB], [zlib])
 PKG_CHECK_MODULES([DEPS], [libconfig >= 1.4.8])
-PKG_CHECK_MODULES([SYSTEMD], [libsystemd])
-AC_DEFINE([HAVE_SD_JOURNAL], 1, [Define if sd_journal_sendv is available.])
-AC_DEFINE([HAVE_SD_NOTIFY], 1, [Define if sd_notify is available.])
 AC_CHECK_LIB([oping],[ping_construct])
 AC_CHECK_HEADERS([oping.h])
 
 AC_SEARCH_LIBS(clock_gettime, rt, [CLOCK_GETTIME_LIBS=$LIBS])
 AC_SUBST(CLOCK_GETTIME_LIBS)
-
-RRA_WITH_SYSTEMD_UNITDIR
 
 PKG_PROG_PKG_CONFIG
 AC_ARG_WITH([systemdsystemunitdir],
@@ -46,6 +40,9 @@ AS_IF([test "x$with_systemdsystemunitdir" = "xyes" -o "x$with_systemdsystemunitd
 AS_IF([test "x$with_systemdsystemunitdir" != "xno"],
       [AC_SUBST([systemdsystemunitdir], [$with_systemdsystemunitdir])])
 AM_CONDITIONAL(HAVE_SYSTEMD, [test "x$with_systemdsystemunitdir" != "xno"])
+
+RRA_LIB_SYSTEMD_DAEMON_OPTIONAL
+RRA_LIB_SYSTEMD_JOURNAL_OPTIONAL
 AX_PTHREAD
 
 # Checks for header files.

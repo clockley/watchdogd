@@ -519,7 +519,6 @@ void Logmsg(int priority, const char *const fmt, ...)
 			return;
 		}
 #endif
-#if 0
 		va_start(args, fmt);
 		portable_vsnprintf(buf, sizeof(buf) - 1, fmt, args);
 
@@ -528,7 +527,6 @@ void Logmsg(int priority, const char *const fmt, ...)
 		assert(buf[sizeof(buf) - 1] == '\0');
 
 		syslog(priority, "%s", buf); //XXX: not signal safe
-#endif
 	}
 }
 
