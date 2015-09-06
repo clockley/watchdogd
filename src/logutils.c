@@ -124,7 +124,9 @@ pid_t StartLogger(void)
 		}
 		_Exit(0);
 	}
-	
+
+	fcntl(fd[WRITE], F_SETFD, FD_CLOEXEC);
+
 	close(fd[READ]);
 	return pid;
 }
