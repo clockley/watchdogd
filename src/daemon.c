@@ -202,8 +202,11 @@ int Daemonize(struct cfgoptions *const s)
 
 	umask(0);
 
-	if (CloseStandardFileDescriptors() < 0)
+	if (CloseStandardFileDescriptors() < 0) {
 		return -1;
+	}
+
+	StartLogger();
 
 	return 0;
 }

@@ -25,4 +25,5 @@ bool LogUpTo(const char *const);
 bool LogUpToInt(long pri);
 bool MyStrerrorInit(void);
 char * MyStrerror(int);
+pid_t StartLogger(void);
 #endif

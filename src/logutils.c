@@ -28,6 +28,9 @@
 #define KWHT  "\x1B[37m"
 #define KRESET "\x1B[0m"
 
+#define READ 0
+#define WRITE 1
+
 static sig_atomic_t logTarget = INVALID_LOG_TARGET;
 static int logFile = -1;
 static pthread_mutex_t mutex;
@@ -36,6 +39,7 @@ static sig_atomic_t autoUpperCase = 0;
 static sig_atomic_t autoPeriod = 1;
 static unsigned int logMask = 0xff;
 static 	locale_t locale;
+static int fd[2] = {-1, -1};
 
 static int ipri[] = { LOG_EMERG, LOG_ALERT, LOG_CRIT, LOG_ERR, LOG_WARNING,
 	LOG_NOTICE, LOG_INFO, LOG_DEBUG
@@ -68,6 +72,11 @@ static const char * const spri[][2] = {
 		{"LOG_DEBUG", ""}
 };
 
+struct message {
+	char message[2048];
+	int pri;
+};
+
 #ifdef HAVE_SD_JOURNAL
 static int SystemdSyslog(int priority, const char *format, va_list ap)
 {
@@ -92,6 +101,37 @@ static int SystemdSyslog(int priority, const char *format, va_list ap)
 	return sd_journal_sendv(iov, 3);
 }
 #endif
+
+ssize_t Syslog(int p, char *m)
+{
+	struct message buf = {0};
+	strcpy(buf.message, m);
+	buf.pri = p;
+	return write(fd[WRITE], &buf, sizeof(struct message));
+}
+
+pid_t StartLogger(void)
+{
+	pipe(fd);
+	pid_t pid = fork();
+	
+	if (pid == 0) {
+		close(fd[WRITE]);
+		struct message buf = {0};
+		while (read(fd[READ], &buf, sizeof(struct message)) != 0) {
+			syslog(buf.pri, "%s", buf.message);
+		}
+		_Exit(0);
+	}
+	
+	close(fd[READ]);
+	return pid;
+}
+
+void StopLogger(void)
+{
+	close(fd[WRITE]);
+}
 
 static bool IsTty(void)
 {
@@ -233,6 +273,7 @@ void SetLogTarget(sig_atomic_t target, ...)
 			if (LinuxRunningSystemd() != 1) {
 				openlog("watchdogd", LOG_PID | LOG_NOWAIT | LOG_CONS,
 					LOG_DAEMON);
+				StartLogger();
 			}
 #endif
 		}
@@ -526,7 +567,7 @@ void Logmsg(int priority, const char *const fmt, ...)
 
 		assert(buf[sizeof(buf) - 1] == '\0');
 
-		syslog(priority, "%s", buf); //XXX: not signal safe
+		Syslog(priority, buf); //Made syslog() signal safe :)
 	}
 }
 
