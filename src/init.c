@@ -210,7 +210,7 @@ int PrintVersionString(void)
 	return 0;
 }
 
-static int PrintHelp(void)
+static void PrintHelp(void)
 {
 //Emulate the gnu --help output.
 	const char *const help[][2] = {
@@ -270,12 +270,10 @@ static int PrintHelp(void)
 		free(ptr);
 		printf("\n");
 	}
-
-	return 0;
 }
 
 int Usage(void)
 {
-	assert(PrintHelp() == 0);
+	PrintHelp();
 	return 0;
 }
