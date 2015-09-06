@@ -102,7 +102,7 @@ static int SystemdSyslog(int priority, const char *format, va_list ap)
 }
 #endif
 
-ssize_t Syslog(int p, char *m)
+static ssize_t Syslog(int p, char *m)
 {
 	struct message buf = {0};
 	strcpy(buf.message, m);
