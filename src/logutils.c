@@ -117,6 +117,7 @@ pid_t StartLogger(void)
 	
 	if (pid == 0) {
 		close(fd[WRITE]);
+		openlog("watchdogd", LOG_NDELAY | LOG_NOWAIT | LOG_CONS, LOG_DAEMON);
 		struct message buf = {0};
 		while (read(fd[READ], &buf, sizeof(struct message)) != 0) {
 			syslog(buf.pri, "%s", buf.message);
@@ -271,8 +272,6 @@ void SetLogTarget(sig_atomic_t target, ...)
 		if (logTarget != SYSTEM_LOG) {
 #ifdef HAVE_SD_JOURNAL
 			if (LinuxRunningSystemd() != 1) {
-				openlog("watchdogd", LOG_PID | LOG_NOWAIT | LOG_CONS,
-					LOG_DAEMON);
 				StartLogger();
 			}
 #endif
