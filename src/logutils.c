@@ -539,7 +539,7 @@ void Logmsg(int priority, const char *const fmt, ...)
 			int len = portable_snprintf(NULL, 0, format, buf) + 1;
 			char t[len];
 			portable_snprintf(t, sizeof(t), format, buf);
-			write(STDERR_FILENO, t, strlen(t));
+			write(logFile, t, strlen(t));
 		}
 	}
 
