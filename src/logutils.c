@@ -150,51 +150,41 @@ static bool IsTty(void)
 	return true;
 }
 
-static void ResetTextColor(void)
+static char * SetTextColor(int priority)
 {
 	if (IsTty() == false) {
-		return;
+		return "";
 	}
-
-	write(STDERR_FILENO, KRESET, strlen(KRESET));
-}
-
-static void SetTextColor(int priority)
-{
-	if (IsTty() == false) {
-		return;
-	}
-
-	ResetTextColor();
 
 	switch (priority) {
 	case LOG_EMERG:
-		write(STDERR_FILENO, KRED, strlen(KRED));
+		return KRED;
 		break;
 	case LOG_ALERT:
-		write(STDERR_FILENO, KRED, strlen(KRED));
+		return KRED;
 		break;
 	case LOG_CRIT:
-		write(STDERR_FILENO, KRED, strlen(KRED));
+		return KRED;
 		break;
 	case LOG_ERR:
-		write(STDERR_FILENO, KRED, strlen(KRED));
+		return KRED;
 		break;
 	case LOG_WARNING:
-		write(STDERR_FILENO, KRED, strlen(KRED));
+		return KRED;
 		break;
 	case LOG_NOTICE:
-		;
+		return "";
 		break;
 	case LOG_INFO:
-		;
+		return "";
 		break;
 	case LOG_DEBUG:
-		;
+		return "";
 		break;
 	default:
 		assert(false);
 	}
+	return "";
 
 }
 
@@ -426,7 +416,7 @@ void Logmsg(int priority, const char *const fmt, ...)
 	int len =
 	    portable_vsnprintf(NULL, 0, fmt,
 		      args) + strlen((applesquePriority ==
-				      0) ? "<0>" : " #System #Attention") + 2;
+				      0) ? "<0>": " #System #Attention") + 10;
 	va_end(args);
 
 	if (len <= 0) {
@@ -443,31 +433,31 @@ void Logmsg(int priority, const char *const fmt, ...)
 
 	if ((logTarget == STANDARD_ERROR || logTarget == FILE_APPEND
 	     || logTarget == FILE_NEW) && applesquePriority == 0) {
-
+		strcat(buf, SetTextColor(priority));
 		switch (priority) {
 		case LOG_EMERG:
-			strncpy(buf, "<0>", sizeof(buf) - strlen(buf));
+			strncpy(buf+strlen(SetTextColor(priority)), "<0>", sizeof(buf) - strlen(buf));
 			break;
 		case LOG_ALERT:
-			strncpy(buf, "<1>", sizeof(buf) - strlen(buf));
+			strncpy(buf+strlen(SetTextColor(priority)), "<1>", sizeof(buf) - strlen(buf));
 			break;
 		case LOG_CRIT:
-			strncpy(buf, "<2>", sizeof(buf) - strlen(buf));
+			strncpy(buf+strlen(SetTextColor(priority)), "<2>", sizeof(buf) - strlen(buf));
 			break;
 		case LOG_ERR:
-			strncpy(buf, "<3>", sizeof(buf) - strlen(buf));
+			strncpy(buf+strlen(SetTextColor(priority)), "<3>", sizeof(buf) - strlen(buf));
 			break;
 		case LOG_WARNING:
-			strncpy(buf, "<4>", sizeof(buf) - strlen(buf));
+			strncpy(buf+strlen(SetTextColor(priority)), "<4>", sizeof(buf) - strlen(buf));
 			break;
 		case LOG_NOTICE:
-			strncpy(buf, "<5>", sizeof(buf) - strlen(buf));
+			strncpy(buf+strlen(SetTextColor(priority)), "<5>", sizeof(buf) - strlen(buf));
 			break;
 		case LOG_INFO:
-			strncpy(buf, "<6>", sizeof(buf) - strlen(buf));
+			strncpy(buf+strlen(SetTextColor(priority)), "<6>", sizeof(buf) - strlen(buf));
 			break;
 		case LOG_DEBUG:
-			strncpy(buf, "<7>", sizeof(buf) - strlen(buf));
+			strncpy(buf+strlen(SetTextColor(priority)), "<7>", sizeof(buf) - strlen(buf));
 			break;
 		default:
 			assert(false);
@@ -540,14 +530,11 @@ void Logmsg(int priority, const char *const fmt, ...)
 		}
 
 		if (logTarget == STANDARD_ERROR) {
-			if (applesquePriority == 0) {
-				SetTextColor(priority);
-			}
 			int len = portable_snprintf(NULL, 0, format, buf) + 1;
-			char t[len];
+			char t[len+strlen(KRESET)];
 			portable_snprintf(t, sizeof(t), format, buf);
+			strncat(t, KRESET, sizeof(t) - strlen(t) - 1);
 			write(STDERR_FILENO, t, strlen(t));
-			ResetTextColor();
 		} else {
 			int len = portable_snprintf(NULL, 0, format, buf) + 1;
 			char t[len];
