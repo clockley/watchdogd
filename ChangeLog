@@ -121,3 +121,8 @@ To fix this type ./configure --prefix=/usr
 	
 2015-08-20 [0.7.1] <Christian Lockley>
 	* Fix critical bug in cpu core detection code.
+
+2015-09-11 [0.7.2] <Christian Lockley>
+	* Fix potential race condition in logging code
+	* Log to legacy syslog in a signal safe way.(Due to watchdogd designed all code in the critical section must be signal safe)
+	* Don't require user to install configuration for daemon to work.
