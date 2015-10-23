@@ -77,7 +77,7 @@ struct message {
 	int pri;
 };
 
-_Static_assert(PIPE_BUF >= sizeof(struct message), "message struct cannot be witten atomically on this platform");
+_Static_assert(PIPE_BUF > sizeof(struct message), "message struct cannot be witten atomically on this platform");
 
 #ifdef HAVE_SD_JOURNAL
 static int SystemdSyslog(int priority, const char *format, va_list ap)
