@@ -271,10 +271,10 @@ static void __ExecScriptWorkerThread(void *a)
 
 	Container *container = (Container *) a;
 	repaircmd_t *c = container->cmd;
-
+	container->workerThreadCount += 1;
+	
 	pthread_barrier_wait(&container->membarrier);
 
-	container->workerThreadCount += 1;
 	if (c->legacy == false) {
 		if (c->retString[0] == '\0') {
 			c->ret =
