@@ -276,7 +276,7 @@ int ReadConfigurationFile(struct cfgoptions *const cfg)
 
 	if (config_lookup_string(&cfg->cfg, "pid-pathname", &cfg->pidfile.name)
 	    == CONFIG_FALSE) {
-		cfg->pidfile.name = "/var/run/watchdogd.pid";
+		cfg->pidfile.name = "/run/watchdogd.pid";
 	}
 
 	if (config_lookup_string(&cfg->cfg, "log-dir", &cfg->logdir) ==
