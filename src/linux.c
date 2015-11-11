@@ -242,6 +242,29 @@ int ConfigureWatchdogTimeout(watchdog_t * const watchdog, int timeout)
 	return PingWatchdog(watchdog);
 }
 
+int GetWatchdogBootStatus(watchdog_t * const wdt)
+{
+	if (wdt == NULL) {
+		return -1;
+	}
+
+	int status = 0;
+
+	ioctl(GetFd(wdt), WDIOC_GETBOOTSTATUS, &status);
+
+	return status;
+}
+
+int GetRawTimeout(watchdog_t * const wdt)
+{
+	if (wdt != NULL) {
+		return;
+	}
+	int timeout = 0;
+	ioctl(GetFd(wdt), WDIOC_GETTIMEOUT, &timeout);
+	return timeout;
+}
+
 static int LegacyOutOfMemoryKillerConfig(void)
 {
 	int fd = open("/proc/self/om_adj", O_WRONLY);

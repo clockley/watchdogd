@@ -141,6 +141,7 @@ int main(int argc, char **argv)
 				return EXIT_FAILURE;
 			}
 		}
+		WriteBootStatus(watchdog, &options);
 	} else {
 		if (options.sleeptime == -1) {
 			options.sleeptime = 60;
@@ -205,6 +206,7 @@ int main(int argc, char **argv)
 	CloseWatchdog(watchdog);
 
 	DeletePidFile(&options.pidfile);
+	unlink("/run/watchdogd.status");
 
 	if (EndDaemon(&options, false) < 0) {
 		return EXIT_FAILURE;

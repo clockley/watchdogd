@@ -67,4 +67,6 @@ bool LoadKernelModule(void);
 bool MakeDeviceFile(const char *);
 int ConfigWatchdogNowayoutIsSet(void);
 bool PrintWdtInfo(watchdog_t * const);
+int GetWatchdogBootStatus(watchdog_t * const);
+int GetRawTimeout(watchdog_t * const wdt);
 #endif
