@@ -242,7 +242,7 @@ static void PrintHelp(void)
 
 		if (ptr == NULL) {
 			perror(PACKAGE_NAME);
-			return -1;
+			return;
 		}
 
 		char *save = NULL;
