@@ -48,6 +48,8 @@ AX_PTHREAD
 # Checks for header files.
 AC_CHECK_HEADERS([fcntl.h inttypes.h limits.h stddef.h stdint.h stdlib.h string.h sys/ioctl.h sys/time.h syslog.h unistd.h])
 
+AC_CHECK_HEADER(systemd/sd-bus.h, AC_DEFINE([HAVE_SD_BUS], 1, [Define if sd_bus is available.]), [AC_MSG_WARN([The d-bus api can not be compiled because the necessary libraries are not installed on this system])])
+
 # Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_PID_T
 
