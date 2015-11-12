@@ -257,8 +257,8 @@ int GetWatchdogBootStatus(watchdog_t * const wdt)
 
 int GetRawTimeout(watchdog_t * const wdt)
 {
-	if (wdt != NULL) {
-		return;
+	if (wdt == NULL) {
+		return -1;
 	}
 	int timeout = 0;
 	ioctl(GetFd(wdt), WDIOC_GETTIMEOUT, &timeout);
