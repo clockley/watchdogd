@@ -846,7 +846,7 @@ int ConfigWatchdogNowayoutIsSet(void)
 {
 	bool found = false;
 	char *buf = NULL;
-	gzFile *config = gzopen("/proc/config.gz", "r");
+	gzFile config = gzopen("/proc/config.gz", "r");
 
 	if (config == NULL) {
 		return -1;
@@ -863,7 +863,7 @@ int ConfigWatchdogNowayoutIsSet(void)
 		}
 
 		if (bytesRead < sizeof(buf) - 1) {
-			if (gzeof(*config)) {
+			if (gzeof(config)) {
 				break;
 			} else {
 				break;
@@ -871,7 +871,7 @@ int ConfigWatchdogNowayoutIsSet(void)
 		}
 	}
 
-	gzclose(*config);
+	gzclose(config);
 
 	buf = calloc(1, 4096);
 
