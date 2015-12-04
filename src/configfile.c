@@ -175,10 +175,12 @@ static bool LoadConfigurationFile(config_t *const config, const char *const file
 
 	if (!config_read_file(config, fileName)
 	    && config_error_file(config) == NULL) {
-		fprintf(stderr,
-			"watchdogd: unable to open configuration file: %s\n",
-			fileName);
-		fprintf(stderr, "Using default values\n");
+	    	if (!(IDENTIFY & cfg->options)) {
+			fprintf(stderr,
+				"watchdogd: unable to open configuration file: %s\n",
+				fileName);
+			fprintf(stderr, "Using default values\n");
+		}
 		cfg->haveConfigFile = false;
 	} else if (!config_read_file(config, fileName)) {
 		fprintf(stderr, "watchdogd: %s:%d: %s\n",
