@@ -178,22 +178,32 @@ int Daemonize(struct cfgoptions *const s)
 	}
 
 	if (s->options & USEPIDFILE) {
+		int pidcret = 0;
 		s->pidfile.fd = OpenPidFile(s->pidfile.name);
 
 		if (s->pidfile.fd < 0) {
-			return -1;
+			pidcret = -1;
 		}
 
 		if (LockFile(s->pidfile.fd, getpid()) < 0) {
 			fprintf(stderr, "watchdogd: LockFile failed: %s\n",
 				MyStrerror(errno));
-			return -1;
+			pidcret = -1;
 		}
 
 		if (WritePidFile(&s->pidfile, getpid()) < 0) {
-			return -1;
+			pidcret = -1;
+		}
+		if (pidcret != 0) {
+			if (s->options & FORCE) {
+				goto skipPidFile;
+			} else {
+				return pidcret;
+			}
 		}
 	}
+
+skipPidFile:
 
 	if (chdir("/") < 0) {
 		fprintf(stderr, "watchdogd: %s\n", MyStrerror(errno));
