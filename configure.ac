@@ -64,5 +64,6 @@ AC_CONFIG_FILES([Makefile
 		 conf/Makefile
 		 contrib/Makefile
 		 contrib/systemd/Makefile
+		 contrib/systemd/watchdogd.service
                  man/Makefile])
 AC_OUTPUT
