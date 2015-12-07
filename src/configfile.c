@@ -206,6 +206,15 @@ int ReadConfigurationFile(struct cfgoptions *const cfg)
 
 	config_set_auto_convert(&cfg->cfg, true);
 
+	if (config_lookup_string(&cfg->cfg, "watchdog-device", &cfg->devicepath)
+	    == CONFIG_FALSE) {
+		cfg->devicepath = "/dev/watchdog";
+	}
+	
+	if (cfg->options & IDENTIFY) {
+		return 0;
+	}
+
 	if (config_lookup_string(&cfg->cfg, "repair-binary", &cfg->exepathname)
 	    == CONFIG_FALSE) {
 		cfg->exepathname = NULL;
@@ -239,11 +248,6 @@ int ReadConfigurationFile(struct cfgoptions *const cfg)
 	if (config_lookup_string(&cfg->cfg, "random-seed", &cfg->randomSeedPath)
 	    == CONFIG_FALSE) {
 		cfg->randomSeedPath = GetDefaultRandomSeedPathName();
-	}
-
-	if (config_lookup_string(&cfg->cfg, "watchdog-device", &cfg->devicepath)
-	    == CONFIG_FALSE) {
-		cfg->devicepath = "/dev/watchdog";
 	}
 
 	if (config_lookup_string(&cfg->cfg, "log-target", &cfg->logTarget) == CONFIG_FALSE) {
