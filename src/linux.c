@@ -97,6 +97,22 @@ bool PrintWdtInfo(watchdog_t * const wdt)
 	return false;
 }
 
+char * GetWatchdogIdentity(watchdog_t * const wdt)
+{
+	static struct watchdog_info watchDogInfo;
+
+	assert(wdt != NULL);
+
+	PingWatchdog(wdt);
+
+	if (ioctl(GetFd(wdt), WDIOC_GETSUPPORT, &watchDogInfo) < 0) {
+		Logmsg(LOG_ERR, "%s", MyStrerror(errno));
+		return NULL;
+	}
+
+	return watchDogInfo.identity;
+}
+
 watchdog_t *OpenWatchdog(const char *const path)
 {
 	if (path == NULL) {

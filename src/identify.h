@@ -15,5 +15,5 @@
  */
 #if !defined(IDENTIFY_H)
 #define IDENTIFY_H
-int Identify(watchdog_t * const);
+int Identify(watchdog_t * const, bool verbose);
 #endif

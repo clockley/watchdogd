@@ -62,7 +62,7 @@ int main(int argc, char **argv)
 	}
 
 	if (options.options & IDENTIFY) {
-		return Identify(OpenWatchdog(options.devicepath));
+		return Identify(OpenWatchdog(options.devicepath), options.options & VERBOSE);
 	}
 
 	if (Daemonize(&options) < 0) {
@@ -143,6 +143,10 @@ int main(int argc, char **argv)
 			}
 		}
 		WriteBootStatus(watchdog, &options);
+		static struct identinfo i;
+		strncpy(i.name, GetWatchdogIdentity(watchdog), sizeof(i.name) - 1);
+		i.timeout = GetRawTimeout(watchdog);
+		CreateDetachedThread(IdentityThread, &i);
 	} else {
 		if (options.sleeptime == -1) {
 			options.sleeptime = 60;

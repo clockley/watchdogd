@@ -517,6 +517,38 @@ static void *TestPidfileThread(void *arg)
 	return NULL;
 }
 
+void *IdentityThread(void *arg)
+{
+	struct identinfo *i = (struct identinfo*)arg;
+	struct sockaddr_un address = {0};
+	address.sun_family = AF_UNIX;
+	strncpy(address.sun_path, "\0watchdogd.wdt.identity", sizeof(address.sun_path)-1);
+	int fd = socket(AF_UNIX, SOCK_STREAM, 0);
+
+	if (fd < 0) {
+		return NULL;
+	}
+
+	if (bind(fd, (struct sockaddr*)&address, sizeof(address)) == -1) {
+		close(fd);
+		return NULL;
+	}
+
+	if (listen(fd, 2) == -1) {
+		close(fd);
+		return NULL;
+	}
+
+	while (true) {
+		int conection = accept(fd, NULL, NULL);
+		write(conection, i, sizeof(*i));
+
+		close(conection);
+	}
+
+	return NULL;
+}
+
 static void *ManagerThread(void *arg)
 {
 	/*This thread gets data from the non main threads and

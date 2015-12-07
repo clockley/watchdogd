@@ -18,7 +18,7 @@
 #include "logutils.h"
 #include "sub.h"
 
-int Identify(watchdog_t * const wdt)
+int Identify(watchdog_t * const wdt, bool verbose)
 {
 	SetLogTarget(STANDARD_ERROR);
 	struct watchdog_info watchDogInfo;
@@ -26,8 +26,45 @@ int Identify(watchdog_t * const wdt)
 	int ret = 1;
 
 	if (wdt == NULL) {
-		printf("Unable to open watchdog\n");
-		return ret;
+		struct sockaddr_un address = {0};
+		struct identinfo buf;
+		int fd = -1;
+
+		address.sun_family = AF_UNIX;
+		strncpy(address.sun_path, "\0watchdogd.wdt.identity", sizeof(address.sun_path)-1);
+
+		fd = socket(AF_UNIX, SOCK_STREAM, 0);
+
+		if (fd < 0) {
+			goto error;
+		}
+
+		if (connect(fd, (struct sockaddr*)&address, sizeof(address)) < 0) {
+			goto error;
+		}
+		read(fd, &buf, sizeof(buf));
+		close(fd);
+
+		if (verbose) {
+			printf("watchdog was set to %d seconds\n", buf.timeout);
+		}
+
+		printf("%s\n", buf.name);
+
+		return 0;
+	error:
+		printf("%s\n", "Unable to open watchdog device");
+		
+
+		if (fd >= 0) {
+			close(fd);
+		}
+		return 1;
+
+	}
+
+	if (verbose) {
+		printf("watchdog was set to %d seconds\n", GetRawTimeout(wdt));
 	}
 
 	if (ioctl(GetFd(wdt), WDIOC_GETSUPPORT, &watchDogInfo) < 0) {

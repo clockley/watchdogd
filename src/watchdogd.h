@@ -43,6 +43,8 @@
 #include <unistd.h>
 #include <dirent.h>
 #include <zlib.h>
+#include <sys/socket.h>
+#include <sys/un.h>
 #include "snprintf.h"
 #ifndef NSIG
 #if defined(_NSIG)
@@ -171,6 +173,11 @@ struct watchdogDevice {
 	const char *path;
 	int fd;
 	int timeout;
+};
+
+struct identinfo {
+	char name[128];
+	long timeout;
 };
 
 typedef struct watchdogDevice watchdog_t;

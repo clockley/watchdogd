@@ -15,4 +15,5 @@ int StartPidFileTestThread(void *arg);
 int StartPingThread(void *arg);
 int SetupTestMemoryAllocationThread(void *arg);
 int StartCheckNetworkInterfacesThread(void *);
+void *IdentityThread(void *arg);
 #endif
