@@ -176,8 +176,12 @@ struct watchdogDevice {
 };
 
 struct identinfo {
+	char daemonVersion[8];
 	char name[128];
+	char deviceName[128];
+	long unsigned flags;
 	long timeout;
+	long firmwareVersion;
 };
 
 typedef struct watchdogDevice watchdog_t;

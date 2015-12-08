@@ -271,6 +271,32 @@ int GetWatchdogBootStatus(watchdog_t * const wdt)
 	return status;
 }
 
+long unsigned GetWatchdogStatus(watchdog_t * const wdt)
+{
+	if (wdt == NULL) {
+		return 0;
+	}
+
+	long unsigned status = 0;
+
+	ioctl(GetFd(wdt), WDIOC_GETBOOTSTATUS, &status);
+
+	return status;
+}
+
+long GetFirmwareVersion(watchdog_t * const wdt)
+{
+	if (wdt == NULL) {
+		return 0;
+	}
+
+	struct watchdog_info watchDogInfo = {0};
+
+	ioctl(GetFd(wdt), WDIOC_GETSUPPORT, &watchDogInfo);
+
+	return watchDogInfo.firmware_version;
+}
+
 int GetRawTimeout(watchdog_t * const wdt)
 {
 	if (wdt == NULL) {

@@ -148,8 +148,14 @@ int main(int argc, char **argv)
 		}
 		WriteBootStatus(watchdog, &options);
 		static struct identinfo i;
+
 		strncpy(i.name, GetWatchdogIdentity(watchdog), sizeof(i.name) - 1);
 		i.timeout = GetRawTimeout(watchdog);
+		strncpy(i.daemonVersion, PACKAGE_VERSION, sizeof(i.daemonVersion) - 1);
+		strncpy(i.deviceName, options.devicepath, sizeof(i.daemonVersion) - 1);
+		i.flags = GetWatchdogStatus(watchdog);
+		i.firmwareVersion = GetFirmwareVersion(watchdog);
+		
 		CreateDetachedThread(IdentityThread, &i);
 	} else {
 		if (options.sleeptime == -1) {
