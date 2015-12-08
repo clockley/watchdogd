@@ -61,6 +61,7 @@ AC_CHECK_FUNCS([clock_gettime strerror strerror_r strtol fpathconf dirfd open op
 AC_CONFIG_FILES([Makefile
                  src/Makefile
 		 src/threadpool/Makefile
+		 src/wd_identify
 		 conf/Makefile
 		 contrib/Makefile
 		 contrib/systemd/Makefile
