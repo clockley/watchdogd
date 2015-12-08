@@ -19,6 +19,7 @@
 #include "init.h"
 #include "sub.h"
 #include "testdir.h"
+#include "multicall.h"
 
 int SetSchedulerPolicy(int priority)
 {
@@ -210,7 +211,71 @@ int PrintVersionString(void)
 	return 0;
 }
 
-static void PrintHelp(void)
+static void PrintHelpIdentify(void)
+{
+	char *buf = NULL;
+	Wasprintf(&buf, "Usage: %s [OPTION]", GetExeName());
+
+	assert(buf != NULL);
+
+	if (buf == NULL) {
+		abort();
+	}
+
+	char *help[][2] = {
+		{buf, ""},
+		{"Get watchdog device status.", ""},
+		{"", ""},
+		{"  -c, --config-file ", "path to configuration file"},
+		{"  -i, --identify", "identify hardware watchdog"},
+		{"  -h, --help", "this help"},
+		{"  -V, --version", "print version info"},
+	};
+
+	for (size_t i = 0; i < ARRAY_SIZE(help); i += 1) {
+		long col = GetConsoleColumns();
+		if (col >= 80) { //KLUGE
+			col += col / 2;
+		}
+		long len = 0;
+		len += printf("%-22s", help[i][0]);
+
+		char *ptr = strdup(help[i][1]);
+
+		if (ptr == NULL) {
+			perror(PACKAGE_NAME);
+			return;
+		}
+
+		char *save = NULL;
+		char *tmp = strtok_r(ptr, " ", &save);
+
+		while (tmp != NULL) {
+			len += strlen(tmp);
+			if (len > col) {
+				len = 0;
+				len = printf("                      ");
+				len += printf("%s", tmp);
+				tmp = strtok_r(NULL, " ", &save);
+				if (tmp != NULL) {
+					len += printf(" ");
+				}
+			} else {
+				len += printf("%s", tmp);
+				tmp = strtok_r(NULL, " ", &save);
+				if (tmp != NULL) {
+					len += printf(" ");
+				}
+			}
+		}
+
+		free(ptr);
+		printf("\n");
+	}
+	free(buf);
+}
+
+static void PrintHelpMain(void)
 {
 //Emulate the gnu --help output.
 	const char *const help[][2] = {
@@ -274,6 +339,12 @@ static void PrintHelp(void)
 
 int Usage(void)
 {
-	PrintHelp();
+	if (strcasecmp(GetExeName(), "wd_identify") == 0 ||
+		strcasecmp(GetExeName(), "wd_identify.sh") == 0) {
+		PrintHelpIdentify();
+	} else {
+		PrintHelpMain();
+	}
+
 	return 0;
 }
