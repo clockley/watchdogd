@@ -26,7 +26,7 @@
 #include "killtree.h"
 #include "identify.h"
 #include "bootstatus.h"
-
+#include "multicall.h"
 #define DISARM_WATCHDOG_BEFORE_REBOOT true
 
 static volatile sig_atomic_t quit = 0;
@@ -55,6 +55,10 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	} else if (ret != 0) {
 		return EXIT_SUCCESS;
+	}
+
+	if (strcasecmp(GetExeName(), "wd_identify") == 0 || strcasecmp(GetExeName(), "wd_identify.sh") == 0) {
+		options.options |= IDENTIFY;
 	}
 
 	if (ReadConfigurationFile(&options) < 0) {
