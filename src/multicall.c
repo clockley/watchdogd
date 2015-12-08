@@ -21,6 +21,11 @@
 char * GetExeName(void)
 {
 	static char buf[1024] = {'\0'};
+
+	if (buf[0] != '\0') {
+		return buf;
+	}
+
 	FILE* fp = fopen("/proc/self/cmdline", "r");
 
 	if (fp == NULL) {
@@ -37,5 +42,5 @@ char * GetExeName(void)
 		return buf;
 	}
 
-	return basename(buf);
+	return memmove(buf, basename(buf), sizeof(buf) - 1);
 }
