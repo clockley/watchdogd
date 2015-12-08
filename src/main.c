@@ -152,7 +152,7 @@ int main(int argc, char **argv)
 		strncpy(i.name, GetWatchdogIdentity(watchdog), sizeof(i.name) - 1);
 		i.timeout = GetRawTimeout(watchdog);
 		strncpy(i.daemonVersion, PACKAGE_VERSION, sizeof(i.daemonVersion) - 1);
-		strncpy(i.deviceName, options.devicepath, sizeof(i.daemonVersion) - 1);
+		strncpy(i.deviceName, options.devicepath, sizeof(i.deviceName) - 1);
 		i.flags = GetWatchdogStatus(watchdog);
 		i.firmwareVersion = GetFirmwareVersion(watchdog);
 		
