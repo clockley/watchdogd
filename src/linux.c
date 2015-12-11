@@ -938,4 +938,19 @@ int ConfigWatchdogNowayoutIsSet(void)
 	return 1;
 }
 
+bool IsClientAdmin(int sock)
+{
+	struct ucred peercred;
+	socklen_t len = sizeof(struct ucred);
+
+	if (getsockopt(sock, SOL_SOCKET, SO_PEERCRED, &peercred, &len) != 0) {
+		return false;
+	}
+
+	if (peercred.uid == 0) {
+		return true;
+	}
+	return false;
+}
+
 #endif

@@ -541,6 +541,16 @@ void *IdentityThread(void *arg)
 
 	while (true) {
 		int conection = accept(fd, NULL, NULL);
+
+		if (IsClientAdmin(conection) == false) {
+			struct identinfo tmp = *i;
+			tmp.flags = 0;
+			tmp.firmwareVersion = 0;
+			write(conection, &tmp, sizeof(tmp));
+			close(conection);
+			continue;
+		}
+
 		write(conection, i, sizeof(*i));
 
 		close(conection);
