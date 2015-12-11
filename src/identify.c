@@ -33,7 +33,7 @@ int Identify(watchdog_t * const wdt, bool verbose)
 		address.sun_family = AF_UNIX;
 		strncpy(address.sun_path, "\0watchdogd.wdt.identity", sizeof(address.sun_path)-1);
 
-		fd = socket(AF_UNIX, SOCK_STREAM, 0);
+		fd = socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC, 0);
 
 		if (fd < 0) {
 			goto error;

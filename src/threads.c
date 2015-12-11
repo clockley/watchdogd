@@ -523,7 +523,7 @@ void *IdentityThread(void *arg)
 	struct sockaddr_un address = {0};
 	address.sun_family = AF_UNIX;
 	strncpy(address.sun_path, "\0watchdogd.wdt.identity", sizeof(address.sun_path)-1);
-	int fd = socket(AF_UNIX, SOCK_STREAM, 0);
+	int fd = socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC, 0);
 
 	if (fd < 0) {
 		return NULL;
