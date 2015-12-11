@@ -546,6 +546,7 @@ void *IdentityThread(void *arg)
 			struct identinfo tmp = *i;
 			tmp.flags = 0;
 			tmp.firmwareVersion = 0;
+			memset(tmp.deviceName, 7, sizeof(tmp.deviceName));
 			write(conection, &tmp, sizeof(tmp));
 			close(conection);
 			continue;
