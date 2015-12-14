@@ -103,6 +103,11 @@ int main(int argc, char **argv)
 			MakeDeviceFile(options.devicepath);
 			watchdog = OpenWatchdog(options.devicepath);
 			if (watchdog == NULL) {
+				struct stat buf = {0};
+				int status = stat(options.devicepath, &buf);
+				if (status == 0) {
+					FatalError(&options);
+				}
 				LoadKernelModule();
 				watchdog = OpenWatchdog(options.devicepath);
 			}
