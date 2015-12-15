@@ -94,6 +94,50 @@ int Wasprintf(char **ret, const char *format, ...)
 	return count;
 }
 
+int Wasnprintf(size_t *len, char **ret, const char *format, ...)
+{
+	va_list ap;
+
+	if (*len == 0) {
+		*ret = NULL;
+	}
+
+	va_start(ap, format);
+	int count = portable_vsnprintf(NULL, 0, format, ap);
+	va_end(ap);
+
+	if (count+1 < *len) {
+		va_start(ap, format);
+		count = portable_vsnprintf(*ret, (size_t) count + 1, format, ap);
+		va_end(ap);
+		return count;
+	} else {
+		free(*ret);
+	}
+
+	if (count >= 0) {
+		char *buffer = (char *)malloc((size_t) count + 1);
+
+		if (buffer == NULL)
+			return -1;
+
+		va_start(ap, format);
+		count = portable_vsnprintf(buffer, (size_t) count + 1, format, ap);
+		va_end(ap);
+
+		if (count < 0) {
+			free(buffer);
+			*ret = NULL;
+			*len = 0;
+			return count;
+		}
+		*ret = buffer;
+		*len = count;
+	}
+
+	return count;
+}
+
 int EndDaemon(struct cfgoptions *s, int keepalive)
 {
 	if (s == NULL)

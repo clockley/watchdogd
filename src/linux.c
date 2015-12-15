@@ -17,7 +17,7 @@
 #include "watchdogd.h"
 #include "linux.h"
 #include "sub.h"
-
+#include "repair.h"
 #ifdef __linux__
 int PingWatchdog(watchdog_t * const watchdog)
 {
@@ -884,7 +884,79 @@ bool MakeDeviceFile(const char *file)
 	return true;
 }
 
-int ConfigWatchdogNowayoutIsSet(void)
+static bool GetDeviceMajorMinor(struct dev *m, char *name)
+{
+	if (name == NULL || m == NULL) {
+		return false;
+	}
+
+	char *tmp = basename(name);
+	char *lineptr = NULL;
+	size_t len = 0;
+	char *buf = NULL;
+	struct dev tmpdev = {0};
+
+	DIR *dir = opendir("/sys/dev/char");
+
+	if (dir == NULL) {
+		return false;
+	}
+
+	for (struct dirent *node = readdir(dir); node != NULL; node = readdir(dir)) {
+		if (node->d_name[0] == '.') {
+			continue;
+		}
+		Wasnprintf(&len, &buf, "/sys/dev/char/%s/uevent", node->d_name);
+
+		if (buf == NULL) {
+			abort();
+		}
+
+		FILE *fp = fopen(buf, "r");
+
+		if (fp == NULL) {
+			abort();
+		}
+
+		int x = 1;
+		while (getline(&buf, &len, fp) != -1) {		
+			char *const name = strtok(buf, "=");
+			char *const value = strtok(NULL, "=");
+		
+			if (Validate(name, value) == false) {
+				continue;
+			}
+			if (x == 1) {
+				tmpdev.major = strtoul(value, NULL, 0);
+				x++;
+			} else if (x == 2) {
+				tmpdev.minor = strtoul(value, NULL, 0);
+				x++;
+			} else if (x == 3) {
+				strcpy(tmpdev.name, value);
+				x = 1;
+			}
+		}
+
+		if (strcmp(tmpdev.name, tmp) == 0) {
+			closedir(dir);
+			free(buf);
+			fclose(fp);
+			strcpy(m->name, tmpdev.name);
+			m->major = tmpdev.major;
+			m->minor = tmpdev.minor;
+			return true;
+		}
+
+
+		fclose(fp);
+	}
+	closedir(dir);
+	free(buf);
+	return false;
+}
+
+int ConfigWatchdogNowayoutIsSet(char *name)
 {
 	bool found = false;
 	char *buf = NULL;
@@ -914,12 +986,19 @@ int ConfigWatchdogNowayoutIsSet(void)
 	}
 
 	gzclose(config);
+	
+	struct dev ad = {0};
 
+	GetDeviceMajorMinor(&ad, name);
+	char * devicePath = NULL;
+	Wasprintf(&devicePath, "/sys/dev/char/%lu:%lu/device/driver", ad.major, ad.minor);
 	buf = calloc(1, 4096);
-
-	readlink("/sys/dev/char/10:130/device/driver", buf, 4096 - 1);
+	if (devicePath == NULL) {
+		abort();
+	}
+	readlink(devicePath, buf, 4096 - 1);
 	Wasprintf(&buf, "/sys/module/%s/parameters/nowayout", basename(buf));
-
+	free(devicePath);
 	FILE *fp = fopen(buf, "r");
 
 	if (fp != NULL) {

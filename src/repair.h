@@ -19,4 +19,6 @@
 #define REPAIR_H
 bool LoadRepairScriptLink(spawnattr_t *, char * const);
 int IsRepairScriptConfig(const char *);
+void StripNewline(char *);
+bool Validate(char *, char *);
 #endif

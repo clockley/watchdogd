@@ -45,6 +45,7 @@
 #include <zlib.h>
 #include <sys/socket.h>
 #include <sys/un.h>
+#include <libgen.h>
 #include "snprintf.h"
 #ifndef NSIG
 #if defined(_NSIG)
@@ -182,6 +183,12 @@ struct identinfo {
 	long unsigned flags;
 	long timeout;
 	long firmwareVersion;
+};
+
+struct dev {
+	char name[64];
+	unsigned long minor;
+	unsigned long major;
 };
 
 typedef struct watchdogDevice watchdog_t;

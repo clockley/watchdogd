@@ -65,7 +65,7 @@ int NoNewProvileges(void);
 int GetCpuCount(void);
 bool LoadKernelModule(void);
 bool MakeDeviceFile(const char *);
-int ConfigWatchdogNowayoutIsSet(void);
+int ConfigWatchdogNowayoutIsSet(char *);
 bool PrintWdtInfo(watchdog_t * const);
 int GetWatchdogBootStatus(watchdog_t * const);
 int GetRawTimeout(watchdog_t * const wdt);

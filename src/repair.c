@@ -90,7 +90,7 @@ static bool ParseConfigfile(char *name, char *value, spawnattr_t * obj)
 	return true;
 }
 
-static void StripNewline(char *str)
+void StripNewline(char *str)
 {
 	if (str == NULL) {
 		return;
@@ -99,7 +99,7 @@ static void StripNewline(char *str)
 	strtok(str, "\n");
 }
 
-static bool Validate(char *name, char *value)
+bool Validate(char *name, char *value)
 {
 	if (name == NULL) {
 		return false;
