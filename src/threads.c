@@ -360,8 +360,6 @@ static void *TestFork(void *arg)
 	pid_t pid = 0;
 
 	for (;;) {
-		pthread_mutex_lock(&managerlock);
-
 		pid = fork();
 
 		if (pid == 0) {
@@ -377,9 +375,7 @@ static void *TestFork(void *arg)
 				Logmsg(LOG_ERR, "watchdogd: waitpid failed");
 			}
 		}
-
-		pthread_cond_wait(&workerupdate, &managerlock);
-		pthread_mutex_unlock(&managerlock);
+		sleep(60);
 	}
 
 	return NULL;
