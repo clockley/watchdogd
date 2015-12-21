@@ -201,6 +201,7 @@ int ReadConfigurationFile(struct cfgoptions *const cfg)
 	int tmp = 0;
 
 	if (LoadConfigurationFile(&cfg->cfg, cfg->confile, cfg) == false) {
+		CreateLinkedListOfExes(cfg->testexepath, &processes, cfg);
 		return -1;
 	}
 
