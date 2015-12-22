@@ -17,6 +17,7 @@
 #include <libgen.h>
 #include <stdio.h>
 #include <errno.h>
+#include <stdlib.h>
 
 char * GetExeName(void)
 {
@@ -42,5 +43,15 @@ char * GetExeName(void)
 		return buf;
 	}
 
-	return memmove(buf, basename(buf), sizeof(buf) - 1);
+	char * cpy = strdup(basename(buf));
+
+	if (cpy == NULL) {
+		perror("watchdogd: ");
+		abort();
+	}
+
+	strncpy(buf, cpy, sizeof(buf)-1);
+	free(cpy);
+
+	return buf;
 }
