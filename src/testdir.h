@@ -11,7 +11,6 @@ struct container {
 	volatile _Atomic(unsigned long long) workerThreadCount;
 	struct cfgoptions *config;
 	repaircmd_t *cmd;
-	pthread_barrier_t membarrier;
 };
 
 typedef struct container Container;

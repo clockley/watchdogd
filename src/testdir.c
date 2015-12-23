@@ -17,6 +17,7 @@
 #include "watchdogd.h"
 #include "sub.h"
 #include <dirent.h>
+#include <semaphore.h>
 #include "testdir.h"
 #include "exe.h"
 #include "repair.h"
@@ -26,6 +27,7 @@ const int MAX_WORKER_THREADS = 24;
 int NUMBER_OF_REPAIR_SCRIPTS = 0;
 static int * ret = NULL;
 static struct threadpool * threadpool;
+static sem_t sem;
 //The dirent_buf_size function was written by Ben Hutchings and released under the following license.
 
 //Permission is hereby granted, free of charge, to any person obtaining a copy of this
@@ -86,6 +88,7 @@ int CreateLinkedListOfExes(char *repairScriptFolder, ProcessList * p,
 	int fd = 0;
 
 	list_init(&p->head);
+	sem_init(&sem, 0, 0);
 
 	fd = open(repairScriptFolder, O_DIRECTORY | O_RDONLY);
 
@@ -275,7 +278,7 @@ static void __ExecScriptWorkerThread(void *a)
 	repaircmd_t *c = container->cmd;
 	container->workerThreadCount += 1;
 
-	pthread_barrier_wait(&container->membarrier);
+	sem_post(&sem);
 
 	if (c->legacy == false) {
 		if (c->retString[0] == '\0') {
@@ -343,13 +346,9 @@ static void *__ExecuteRepairScripts(void *a)
 		container.cmd->mode = TEST;
 
 		c->retString[0] = '\0';
-
-		pthread_barrier_init(&container.membarrier, NULL, 2);
-
 		threadpool_add_task(threadpool, __ExecScriptWorkerThread, &container, 1);
 
-		pthread_barrier_wait(&container.membarrier);
-		pthread_barrier_destroy(&container.membarrier);
+		sem_wait(&sem);
 	}
 
 	c = NULL;
@@ -370,12 +369,9 @@ static void *__ExecuteRepairScripts(void *a)
 
 		container.cmd->mode = REPAIR;
 
-		pthread_barrier_init(&container.membarrier, NULL, 2);
-
 		threadpool_add_task(threadpool, __ExecScriptWorkerThread, &container, 1);
 
-		pthread_barrier_wait(&container.membarrier);
-		pthread_barrier_destroy(&container.membarrier);
+		sem_wait(&sem);
 	}
 
 	__WaitForWorkers(s, &container);
