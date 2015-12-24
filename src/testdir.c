@@ -268,7 +268,7 @@ void FreeExeList(ProcessList * p)
 	}
 }
 
-static void __ExecScriptWorkerThread(void *a)
+static void * __ExecScriptWorkerThread(void *a)
 {
 	assert(a != NULL);
 
