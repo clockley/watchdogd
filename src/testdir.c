@@ -26,8 +26,7 @@
 const int MAX_WORKER_THREADS = 24;
 int NUMBER_OF_REPAIR_SCRIPTS = 0;
 static int * ret = NULL;
-static struct threadpool * threadpool;
-static sem_t sem;
+
 //The dirent_buf_size function was written by Ben Hutchings and released under the following license.
 
 //Permission is hereby granted, free of charge, to any person obtaining a copy of this
@@ -88,7 +87,6 @@ int CreateLinkedListOfExes(char *repairScriptFolder, ProcessList * p,
 	int fd = 0;
 
 	list_init(&p->head);
-	sem_init(&sem, 0, 0);
 
 	fd = open(repairScriptFolder, O_DIRECTORY | O_RDONLY);
 
@@ -274,11 +272,13 @@ static void __ExecScriptWorkerThread(void *a)
 {
 	assert(a != NULL);
 
+	__sync_synchronize();
+
 	Container *container = (Container *) a;
 	repaircmd_t *c = container->cmd;
 	container->workerThreadCount += 1;
 
-	sem_post(&sem);
+	__sync_synchronize();
 
 	if (c->legacy == false) {
 		if (c->retString[0] == '\0') {
@@ -313,20 +313,14 @@ static void __ExecScriptWorkerThread(void *a)
 	c->retString[0] = '\0';
 
 	container->workerThreadCount -= 1;
+
+	__sync_synchronize();
 }
 
 static void __WaitForWorkers(struct cfgoptions *s, Container const *container)
 {
-	if (s->repairBinTimeout > 0) {	//Just sleep
-		unsigned tmp = s->repairBinTimeout;
-		do {
-			tmp = sleep((unsigned)tmp);
-		} while(tmp);
-	} else {		//if not given a timeout value busy wait
-		sched_yield();
-		while (container->workerThreadCount != 0) {
-			sleep(1);
-		}
+	while (container->workerThreadCount != 0) {
+		sleep(1);
 	}
 }
 
@@ -346,9 +340,8 @@ static void *__ExecuteRepairScripts(void *a)
 		container.cmd->mode = TEST;
 
 		c->retString[0] = '\0';
-		threadpool_add_task(threadpool, __ExecScriptWorkerThread, &container, 1);
-
-		sem_wait(&sem);
+		ThreadPoolAddTask(__ExecScriptWorkerThread, &container, true);
+		__sync_synchronize();
 	}
 
 	c = NULL;
@@ -369,9 +362,8 @@ static void *__ExecuteRepairScripts(void *a)
 
 		container.cmd->mode = REPAIR;
 
-		threadpool_add_task(threadpool, __ExecScriptWorkerThread, &container, 1);
-
-		sem_wait(&sem);
+		ThreadPoolAddTask(__ExecScriptWorkerThread, &container, true);
+		__sync_synchronize();
 	}
 
 	__WaitForWorkers(s, &container);
@@ -439,12 +431,7 @@ bool ExecuteRepairScriptsPreFork(ProcessList * p, struct cfgoptions *s)
 
 		char b[1];
 
-		if (NUMBER_OF_REPAIR_SCRIPTS == 0) {
-			NUMBER_OF_REPAIR_SCRIPTS = 2;
-		}
-
-		threadpool = threadpool_init(NUMBER_OF_REPAIR_SCRIPTS < MAX_WORKER_THREADS ?
-						NUMBER_OF_REPAIR_SCRIPTS:MAX_WORKER_THREADS);
+		ThreadPoolNew();
 
 		while (read(fd[0], b, sizeof(b)) != 0) {
 			struct executeScriptsStruct ess;
