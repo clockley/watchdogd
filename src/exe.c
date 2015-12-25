@@ -40,17 +40,16 @@ int Spawn(int timeout, struct cfgoptions *const config, const char *file,
 int SpawnAttr(spawnattr_t * spawnattr, const char *file, const char *args, ...)
 {
 	pid_t intermediate = fork();
-
+	pid_t mpid = getppid();
 	if (intermediate == 0) {
+
 		OnParentDeathSend(SIGKILL);
 		pid_t worker = fork();
 		if (worker == 0) {
 #if defined(NSIG)
 			ResetSignalHandlers(NSIG);
 #endif
-			OnParentDeathSend(SIGKILL);
-
-			setpgid(0, 0);
+			setpgid(0, mpid);
 			if (nice(spawnattr->nice) == -1) {
 				Logmsg(LOG_ERR, "nice failed: %s",
 				       MyStrerror(errno));
@@ -153,7 +152,7 @@ int SpawnAttr(spawnattr_t * spawnattr, const char *file, const char *args, ...)
 		pid_t timer = fork();
 
 		if (timer == 0) {
-				OnParentDeathSend(SIGKILL);
+			setpgid(0, mpid);
 			int t = spawnattr->timeout;
 			while (t > 0) {
 				sleep(1);
@@ -162,16 +161,15 @@ int SpawnAttr(spawnattr_t * spawnattr, const char *file, const char *args, ...)
 			_Exit(0);
 		}
 		int ret = 0;
-
 		pid_t first = wait(&ret);
 		if (first == timer) {
 			Logmsg(LOG_ERR, "binary %s exceeded time limit %ld",
 			       file, spawnattr->timeout);
-			kill(-worker, SIGTERM);
+			kill(worker, SIGKILL);
 			wait(NULL);
 			_Exit(EXIT_FAILURE);
 		} else {
-			kill(timer, SIGTERM);
+			kill(timer, SIGKILL);
 			wait(NULL);
 			_Exit(WEXITSTATUS(ret));
 		}
