@@ -894,7 +894,6 @@ static bool GetDeviceMajorMinor(struct dev *m, char *name)
 	}
 
 	char *tmp = basename(name);
-	char *lineptr = NULL;
 	size_t len = 0;
 	char *buf = NULL;
 	struct dev tmpdev = {0};

@@ -46,7 +46,7 @@ int Identify(watchdog_t * const wdt, bool verbose)
 		close(fd);
 
 		if (verbose) {
-			printf("watchdog was set to %d seconds\n", buf.timeout);
+			printf("watchdog was set to %li seconds\n", buf.timeout);
 		}
 
 		printf("%s\n", buf.name);
@@ -64,7 +64,7 @@ int Identify(watchdog_t * const wdt, bool verbose)
 	}
 
 	if (verbose) {
-		printf("watchdog was set to %d seconds\n", GetRawTimeout(wdt));
+		printf("watchdog was set to %i seconds\n", GetRawTimeout(wdt));
 	}
 
 	if (ioctl(GetFd(wdt), WDIOC_GETSUPPORT, &watchDogInfo) < 0) {

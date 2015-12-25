@@ -43,6 +43,7 @@ static void *Worker(void *arg)
 		t->active = 0;
 		__sync_synchronize();
 	}
+	return NULL;
 }
 
 bool ThreadPoolNew(void)
@@ -60,6 +61,7 @@ bool ThreadPoolCancel(void)
 	for (size_t i = 0; i < MAX_WORKERS; i++) {
 		pthread_cancel(threads[i].thread);
 	}
+	return true;
 }
 
 bool ThreadPoolAddTask(void *(*entry)(void*), void * arg, bool retry)

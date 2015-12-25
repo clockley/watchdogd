@@ -314,6 +314,7 @@ static void * __ExecScriptWorkerThread(void *a)
 	container->workerThreadCount -= 1;
 
 	__sync_synchronize();
+	return NULL;
 }
 
 static void __WaitForWorkers(struct cfgoptions *s, Container const *container)
