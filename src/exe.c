@@ -44,6 +44,10 @@ int SpawnAttr(spawnattr_t * spawnattr, const char *file, const char *args, ...)
 	if (intermediate == 0) {
 		pid_t worker = fork();
 		if (worker == 0) {
+#if defined(NSIG)
+			ResetSignalHandlers(NSIG);
+#endif
+
 			if (nice(spawnattr->nice) == -1) {
 				Logmsg(LOG_ERR, "nice failed: %s",
 				       MyStrerror(errno));
