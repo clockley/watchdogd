@@ -22,6 +22,7 @@
 #include "exe.h"
 #include "repair.h"
 #include "threadpool.h"
+#include "futex.h"
 
 static int * ret = NULL;
 int sem = 0;
