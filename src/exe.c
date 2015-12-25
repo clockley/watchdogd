@@ -163,7 +163,7 @@ int SpawnAttr(spawnattr_t * spawnattr, const char *file, const char *args, ...)
 		if (first == timer) {
 			Logmsg(LOG_ERR, "binary %s exceeded time limit %ld",
 			       file, spawnattr->timeout);
-			kill(worker, SIGKILL);
+			QueueKill(worker);
 			int status = 0;
 			wait(&status);
 			_Exit(EXIT_FAILURE);
