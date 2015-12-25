@@ -134,3 +134,8 @@ To fix this type ./configure --prefix=/usr
 2015-09-12 [0.8] <Christian Lockley>
 	* Automatically set ExecPath in systemd service file
 	* Make wd_identify work even if watchdog daemon is running
+	
+2015-25-12 [0.8.Xmas] <Christian Lockley>
+	* Fix deadlock
+	* Hide watchdog driver info from non-root users
+	* Rewrite threadpool and spawn code
