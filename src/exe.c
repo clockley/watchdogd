@@ -42,6 +42,7 @@ int SpawnAttr(spawnattr_t * spawnattr, const char *file, const char *args, ...)
 	pid_t intermediate = fork();
 
 	if (intermediate == 0) {
+		OnParentDeathSend(SIGKILL);
 		pid_t worker = fork();
 		if (worker == 0) {
 #if defined(NSIG)
