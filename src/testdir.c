@@ -26,7 +26,7 @@
 const int MAX_WORKER_THREADS = 24;
 int NUMBER_OF_REPAIR_SCRIPTS = 0;
 static int * ret = NULL;
-
+int sem = 0;
 //The dirent_buf_size function was written by Ben Hutchings and released under the following license.
 
 //Permission is hereby granted, free of charge, to any person obtaining a copy of this
@@ -277,7 +277,8 @@ static void * __ExecScriptWorkerThread(void *a)
 	Container *container = (Container *) a;
 	repaircmd_t *c = container->cmd;
 	container->workerThreadCount += 1;
-
+	sem = 1;
+	FutexWake(&sem);
 	__sync_synchronize();
 
 	if (c->legacy == false) {
@@ -342,6 +343,8 @@ static void *__ExecuteRepairScripts(void *a)
 		c->retString[0] = '\0';
 		ThreadPoolAddTask(__ExecScriptWorkerThread, &container, true);
 		__sync_synchronize();
+		FutexWait(&sem, 0);
+		sem = 0;
 	}
 
 	c = NULL;
@@ -364,9 +367,14 @@ static void *__ExecuteRepairScripts(void *a)
 
 		ThreadPoolAddTask(__ExecScriptWorkerThread, &container, true);
 		__sync_synchronize();
+		FutexWait(&sem, 0);
+		sem = 0;
 	}
 
 	__WaitForWorkers(s, &container);
+
+	c = NULL;
+	next = NULL;
 
 	list_for_each_entry(c, next, &p->head, entry) {
 		if (c->ret != 0) {
