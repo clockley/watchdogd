@@ -14,7 +14,6 @@
  * permissions and limitations under the License. 
  */
  
-#include <futex.h>
 #include <linux/futex.h>
 #include <unistd.h>
 #include <sys/syscall.h>
