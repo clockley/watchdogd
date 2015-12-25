@@ -166,7 +166,7 @@ int SpawnAttr(spawnattr_t * spawnattr, const char *file, const char *args, ...)
 			kill(worker, SIGKILL);
 			int status = 0;
 			wait(&status);
-			_Exit(WEXITSTATUS(status));
+			_Exit(EXIT_FAILURE);
 		} else {
 			kill(timer, SIGKILL);
 			wait(NULL);
