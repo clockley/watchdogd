@@ -23,8 +23,6 @@
 #include "repair.h"
 #include "threadpool.h"
 
-const int MAX_WORKER_THREADS = 24;
-int NUMBER_OF_REPAIR_SCRIPTS = 0;
 static int * ret = NULL;
 int sem = 0;
 //The dirent_buf_size function was written by Ben Hutchings and released under the following license.
@@ -225,7 +223,6 @@ int CreateLinkedListOfExes(char *repairScriptFolder, ProcessList * p,
 			cmd->legacy = false;
 		}
 
-		NUMBER_OF_REPAIR_SCRIPTS += 1;
 		list_add(&cmd->entry, &p->head);
 	}
 	
