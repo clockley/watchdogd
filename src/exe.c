@@ -170,7 +170,7 @@ int SpawnAttr(spawnattr_t * spawnattr, const char *file, const char *args, ...)
 		} else {
 			kill(timer, SIGKILL);
 			wait(NULL);
-			_Exit(0);
+			_Exit(WEXITSTATUS(first));
 		}
 	} else {
 		int status = 0;
