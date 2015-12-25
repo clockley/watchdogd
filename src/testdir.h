@@ -4,7 +4,6 @@ struct executeScriptsStruct
 {
 	ProcessList *list;
 	struct cfgoptions *config;
-	volatile _Atomic(int) ret;
 };
 
 struct container {

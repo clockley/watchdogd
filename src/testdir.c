@@ -324,7 +324,7 @@ static void __WaitForWorkers(struct cfgoptions *s, Container const *container)
 	}
 }
 
-static void *__ExecuteRepairScripts(void *a)
+static int __ExecuteRepairScripts(void *a)
 {
 	struct executeScriptsStruct *arg = (struct executeScriptsStruct *)a;
 	ProcessList *p = arg->list;
@@ -379,11 +379,11 @@ static void *__ExecuteRepairScripts(void *a)
 		if (c->ret != 0) {
 			Logmsg(LOG_ERR, "repair %s script failed",
 				c->legacy == false ? c->spawnattr.repairFilePathname : c->path);
-			arg->ret = 1;
+			return 1;
 		}
 	}
 
-	return NULL;
+	return 0;
 }
 
 static int fd[2];
@@ -444,11 +444,9 @@ bool ExecuteRepairScriptsPreFork(ProcessList * p, struct cfgoptions *s)
 			struct executeScriptsStruct ess;
 			ess.list = p;
 			ess.config = s;
-			ess.ret = 0;
 
-			__ExecuteRepairScripts(&ess);
+			*ret = __ExecuteRepairScripts(&ess);
 
-			*ret = ess.ret;
 			write(fd2[1], "", strlen(""));
 		}
 
