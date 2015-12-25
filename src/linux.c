@@ -727,6 +727,9 @@ bool PlatformInit(void)
 		return false;
 	}
 
+	struct sched_param param = {0};
+	sched_setscheduler(getpid(), SCHED_FIFO|SCHED_RESET_ON_FORK, &param);
+
 	return true;
 }
 
