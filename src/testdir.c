@@ -25,7 +25,7 @@
 #include "futex.h"
 
 static int * ret = NULL;
-int sem = 0;
+static _Atomic(int) sem = 0;
 //The dirent_buf_size function was written by Ben Hutchings and released under the following license.
 
 //Permission is hereby granted, free of charge, to any person obtaining a copy of this
