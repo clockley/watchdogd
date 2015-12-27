@@ -1,5 +1,5 @@
 #ifndef FUTEX_H
 #define FUTEX_H
-long FutexWait(int *, int);
-long FutexWake(int *);
+long FutexWait(_Atomic int *, int);
+long FutexWake(_Atomic int *);
 #endif

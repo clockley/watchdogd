@@ -18,12 +18,12 @@
 #include <unistd.h>
 #include <sys/syscall.h>
 
-long FutexWait(int *addr, int val)
+long FutexWait(_Atomic int *addr, int val)
 {
 	return syscall(SYS_futex, addr, FUTEX_WAIT, val, NULL, NULL, 0);
 }
 
-long FutexWake(int *addr)
+long FutexWake(_Atomic int *addr)
 {
 	return syscall(SYS_futex, addr, FUTEX_WAKE, 1, NULL, NULL, 0);
 }
