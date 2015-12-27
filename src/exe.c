@@ -82,12 +82,12 @@ int SpawnAttr(spawnattr_t * spawnattr, const char *file, const char *args, ...)
 			fsync(fd);
 
 			va_list ap;
-			const char *array[33] = { "\0" };
+			const char *array[64] = { "\0" };
 			int argno = 0;
 
 			va_start(ap, args);
 
-			while (args != NULL && argno < 32) {
+			while (args != NULL && argno < 63) {
 				array[argno++] = args;
 				args = va_arg(ap, const char *);
 			}
