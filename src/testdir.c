@@ -351,9 +351,6 @@ static int __ExecuteRepairScripts(void *a)
 
 	__WaitForWorkers(s, &container);
 
-	memset(&container, 0, sizeof(container));
-	container.config = s;
-
 	list_for_each_entry(c, next, &p->head, entry) {
 		if (c->ret == 0) {
 			continue;
