@@ -178,7 +178,6 @@ int SpawnAttr(spawnattr_t * spawnattr, const char *file, const char *args, ...)
 			wait(&ret);
 			_Exit(WEXITSTATUS(ret));
 		}
-		}
 	} else {
 		int status = 0;
 		while (waitpid(intermediate, &status, 0) != intermediate) ;
