@@ -139,3 +139,6 @@ To fix this type ./configure --prefix=/usr
 	* Fix deadlock
 	* Hide watchdog driver info from non-root users
 	* Rewrite threadpool and spawn code
+	
+2015-28-12 [0.8.2] <Christian Lockley>
+	* Fixed a few bugs, no new features. (See git log for more info)
