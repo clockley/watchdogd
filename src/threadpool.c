@@ -35,7 +35,7 @@ static struct threadpool threads[MAX_WORKERS] = {0};
 static void *Worker(void *arg)
 {
 	struct threadpool * t = (struct threadpool *)arg;
-	pthread_detach(pthread_self());
+
 	while (true) {
 		sem_wait(&t->sem);
 		__sync_synchronize();
@@ -51,6 +51,7 @@ bool ThreadPoolNew(void)
 	pthread_attr_t attr;
 	pthread_attr_init(&attr);
 	pthread_attr_setguardsize(&attr, 0);
+	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
 	for (size_t i = 0; i < MAX_WORKERS; i++) {
 		sem_init(&threads[i].sem, 0, 0);
 		pthread_create(&threads[i].thread, &attr, Worker, &threads[i]);
