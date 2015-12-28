@@ -148,30 +148,36 @@ int SpawnAttr(spawnattr_t * spawnattr, const char *file, const char *args, ...)
 			close(fd);
 			return -1;
 		}
+		if (spawnattr->timeout > 0) {
+			pid_t timer = fork();
 
-		pid_t timer = fork();
-
-		if (timer == 0) {
-			setpgid(0, mpid);
-			int t = spawnattr->timeout;
-			while (t > 0) {
-				sleep(1);
-				t -= 1;
+			if (timer == 0) {
+				setpgid(0, mpid);
+				int t = spawnattr->timeout;
+				while (t > 0) {
+					sleep(1);
+					t -= 1;
+				}
+				_Exit(0);
 			}
-			_Exit(0);
-		}
-		int ret = 0;
-		pid_t first = wait(&ret);
-		if (first == timer) {
-			Logmsg(LOG_ERR, "binary %s exceeded time limit %ld",
-			       file, spawnattr->timeout);
-			kill(worker, SIGKILL);
-			wait(NULL);
-			_Exit(EXIT_FAILURE);
+			int ret = 0;
+			pid_t first = wait(&ret);
+			if (first == timer) {
+				Logmsg(LOG_ERR, "binary %s exceeded time limit %ld",
+				       file, spawnattr->timeout);
+				kill(worker, SIGKILL);
+				wait(NULL);
+				_Exit(EXIT_FAILURE);
+			} else {
+				kill(timer, SIGKILL);
+				wait(NULL);
+				_Exit(WEXITSTATUS(ret));
+			}
 		} else {
-			kill(timer, SIGKILL);
-			wait(NULL);
+			int ret = 0;
+			wait(&ret);
 			_Exit(WEXITSTATUS(ret));
+		}
 		}
 	} else {
 		int status = 0;
