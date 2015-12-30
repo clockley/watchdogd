@@ -843,40 +843,26 @@ int GetCpuCount(void)
 
 bool LoadKernelModule(void)
 {
-	struct utsname name;
-
-	if (uname(&name) == -1) {
-		return false;
-	}
-	char *path = NULL;
-	Wasprintf(&path, "/lib/modules/%s/kernel/drivers/watchdog/softdog.ko",
-		  name.release);
-
-	if (path == NULL) {
-		return false;
+	pid_t pid = fork();
+	if (pid == 0) {
+		if (execl("/sbin/modprobe", "modprobe", "softdog") == -1) {
+			_Exit(1);
+		}
 	}
 
-	int fd = open(path, O_RDONLY);
-
-	if (fd < 0) {
-		free(path);
-		return false;
+	if (pid == -1) {
+		abort();
 	}
 
-	int ret = syscall(SYS_finit_module, fd, "", 0);
+	int ret = 0;
 
-	if (ret == -1) {
-		close(fd);
-		free(path);
-		return false;
+	waitpid(pid, &ret, 0);
+
+	if (WEXITSTATUS(ret) == 0) {
+		return true;
 	}
 
-	close(fd);
-	free(path);
-
-	Logmsg(LOG_DEBUG, "falling back to software watchdog");
-
-	return true;
+	return false;
 }
 
 bool MakeDeviceFile(const char *file)
