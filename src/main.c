@@ -102,6 +102,10 @@ int main(int argc, char **argv)
 		if (watchdog == NULL) {
 			MakeDeviceFile(options.devicepath);
 			watchdog = OpenWatchdog(options.devicepath);
+			if (errno == EBUSY) {
+				Logmsg(LOG_ERR, "Unable to open watchdog device");
+				return EXIT_FAILURE;
+			}
 			if (watchdog == NULL) {
 				struct stat buf = {0};
 				int status = stat(options.devicepath, &buf);
