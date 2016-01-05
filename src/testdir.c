@@ -299,13 +299,13 @@ static void * __ExecScriptWorkerThread(void *a)
 		};
 
 		if (c->retString[0] == '\0') {
-			if (c->mode == test) {
+			if (c->mode == TEST) {
 				c->ret = SpawnAttr(&attr, c->path, c->path, "test", NULL);
 			} else {
 				c->ret = SpawnAttr(&attr, c->path, c->path, "repair", c->path, NULL);
 			}
 		} else {
-			if (c->mode == test) {
+			if (c->mode == TEST) {
 				c->ret = SpawnAttr(&attr, c->path, c->path, "test", NULL);
 			} else {
 				c->ret = SpawnAttr(&attr, c->path, c->path, "repair", c->retString, c->path, NULL);
