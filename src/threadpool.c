@@ -71,6 +71,11 @@ bool ThreadPoolCancel(void)
 
 bool ThreadPoolAddTask(void *(*entry)(void*), void * arg, bool retry)
 {
+
+	if (entry == NULL) {
+		return false;
+	}
+
 	if (canceled == true) {
 		return false;
 	}
