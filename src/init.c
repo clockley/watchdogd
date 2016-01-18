@@ -51,6 +51,8 @@ int InitializePosixMemlock(void)
 	return 0;
 }
 
+static void PrintHelpIdentify(void);
+
 int ParseCommandLine(int *argc, char **argv, struct cfgoptions *cfg)
 {
 	int opt = 0;
@@ -114,10 +116,18 @@ int ParseCommandLine(int *argc, char **argv, struct cfgoptions *cfg)
 			PrintVersionString();
 			return 1;
 		case 'h':
-			Usage();
+			if (cfg->options & IDENTIFY) {
+				PrintHelpIdentify();
+			} else {
+				Usage();
+			}
 			return 1;
 		default:
-			Usage();
+			if (cfg->options & IDENTIFY) {
+				PrintHelpIdentify();
+			} else {
+				Usage();
+			}
 			return -1;
 		}
 	}
