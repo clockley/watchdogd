@@ -10,7 +10,7 @@ systemdsystemunit_DATA =  contrib/systemd/watchdogd.service
 endif
 watchdogddir = $(sysconfdir)
 dist_watchdogd_DATA = conf/watchdogd.conf
-
+sysconf_DATA = conf/watchdogd.conf
 ACLOCAL_AMFLAGS = -I m4
 dist_doc_DATA = README LICENSE INSTALL MAN.TXT
 
