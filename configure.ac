@@ -3,7 +3,7 @@
 
 AC_PREREQ([2.69])
 AC_INIT([watchdogd],[0.8.2],[clockley1@gmail.com])
-AM_INIT_AUTOMAKE([1.7] [foreign dist-xz dist-zip])
+AM_INIT_AUTOMAKE([1.7] [foreign dist-xz dist-zip subdir-objects])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR([Makefile.am])
 AC_CONFIG_HEADERS([config.h])
@@ -59,11 +59,6 @@ AC_FUNC_FORK
 AC_CHECK_FUNCS([clock_gettime strerror strerror_r strtol fpathconf dirfd open openat fstatat vsnprintf snprintf sprintf getopt_long])
 
 AC_CONFIG_FILES([Makefile
-                 src/Makefile
 		 src/wd_identify
-		 conf/Makefile
-		 contrib/Makefile
-		 contrib/systemd/Makefile
-		 contrib/systemd/watchdogd.service
-                 man/Makefile])
+		 contrib/systemd/watchdogd.service])
 AC_OUTPUT
