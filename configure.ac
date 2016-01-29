@@ -53,9 +53,6 @@ AC_CHECK_HEADER(systemd/sd-bus.h, AC_DEFINE([HAVE_SD_BUS], 1, [Define if sd_bus 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_PID_T
 
-# Checks for library functions.
-AC_FUNC_FORK
-
 AC_CHECK_FUNCS([clock_gettime strerror strerror_r strtol fpathconf dirfd open openat fstatat vsnprintf snprintf sprintf getopt_long])
 
 AC_CONFIG_FILES([Makefile
