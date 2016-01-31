@@ -4,6 +4,7 @@
 AC_PREREQ([2.69])
 AC_INIT([watchdogd],[0.8.2],[clockley1@gmail.com])
 AM_INIT_AUTOMAKE([1.7] [foreign dist-xz dist-zip subdir-objects])
+AM_SILENT_RULES([yes])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR([Makefile.am])
 AC_CONFIG_HEADERS([config.h])
