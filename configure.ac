@@ -16,7 +16,6 @@ AC_PROG_CC_STDC
 #AS_IF([test "x$M4" = "xno"], AC_MSG_ERROR([m4 missing]))
 
 # Checks for libraries.
-AM_PROG_LIBTOOL
 PKG_CHECK_MODULES([MOUNT], [mount >= 2.22.0])
 PKG_CHECK_MODULES([ZLIB], [zlib])
 PKG_CHECK_MODULES([DEPS], [libconfig >= 1.4.8])
