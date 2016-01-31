@@ -56,6 +56,6 @@ AC_TYPE_PID_T
 AC_CHECK_FUNCS([clock_gettime strerror strerror_r strtol fpathconf dirfd open openat fstatat vsnprintf snprintf sprintf getopt_long])
 
 AC_CONFIG_FILES([Makefile
-		 src/wd_identify
+		 wd_identify
 		 contrib/systemd/watchdogd.service])
 AC_OUTPUT
