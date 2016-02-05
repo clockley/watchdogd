@@ -24,7 +24,7 @@ int WriteBootStatus(watchdog_t * const watchdog, struct cfgoptions * const confi
 		return -1;
 	}
 
-	int fd = open("/run/watchdogd.status", O_WRONLY|O_CLOEXEC|O_CREAT);
+	int fd = open("/run/watchdogd.status", O_WRONLY|O_CLOEXEC|O_CREAT, 0644);
 
 	if (fd < 0) {
 		return fd;
