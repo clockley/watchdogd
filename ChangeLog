@@ -142,3 +142,8 @@ To fix this type ./configure --prefix=/usr
 	
 2015-28-12 [0.8.2] <Christian Lockley>
 	* Fixed a few bugs, no new features. (See git log for more info)
+
+2016-12-02 [0.9.0] <Christian Lockley>
+	* Fix build in Ubuntu.
+	* Download amd install dependencies.
+	* This will probably the last release on sourceforge
