@@ -278,6 +278,9 @@ static void PrintHelpIdentify(void)
 			len += strlen(tmp);
 			if (len > col) {
 				len = 0;
+				if (col < 80) {
+					printf("\n");
+				}
 				len = printf("                      ");
 				len += printf("%s", tmp);
 				tmp = strtok_r(NULL, " ", &save);
@@ -354,6 +357,9 @@ static void PrintHelpMain(void)
 			len += strlen(tmp);
 			if (len > col) {
 				len = 0;
+				if (col < 80) {
+					printf("\n");
+				}
 				len = printf("                      ");
 				len += printf("%s", tmp);
 				tmp = strtok_r(NULL, " ", &save);
