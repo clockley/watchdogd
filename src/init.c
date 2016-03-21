@@ -247,13 +247,21 @@ static void PrintHelpIdentify(void)
 	};
 
 	for (size_t i = 0; i < ARRAY_SIZE(help); i += 1) {
+		bool isterm = isatty(STDOUT_FILENO) == 1;
 		long col = GetConsoleColumns();
 		if (col >= 80) { //KLUGE
 			col += col / 2;
 		}
 		long len = 0;
+		if (isterm && i > 2) {
+			printf("\x1B[1m");
+		}
 		len += printf("%-22s", help[i][0]);
 
+		if (isterm && i > 2) {
+			printf("\x1B[22m");
+		}
+		
 		char *ptr = strdup(help[i][1]);
 
 		if (ptr == NULL) {
@@ -263,7 +271,9 @@ static void PrintHelpIdentify(void)
 
 		char *save = NULL;
 		char *tmp = strtok_r(ptr, " ", &save);
-
+		if (isterm) {
+			printf("\e[1;34m");
+		}
 		while (tmp != NULL) {
 			len += strlen(tmp);
 			if (len > col) {
@@ -282,7 +292,9 @@ static void PrintHelpIdentify(void)
 				}
 			}
 		}
-
+		if (isterm) {
+			printf("\x1B[39m\x1B[22m");
+		}
 		free(ptr);
 		printf("\n");
 	}
@@ -310,12 +322,21 @@ static void PrintHelpMain(void)
 	};
 
 	for (size_t i = 0; i < ARRAY_SIZE(help); i += 1) {
+		bool isterm = isatty(STDOUT_FILENO) == 1;
 		long col = GetConsoleColumns();
 		if (col >= 80) { //KLUGE
 			col += col / 2;
 		}
 		long len = 0;
+		if (isterm && i > 2) {
+			printf("\x1B[1m");
+		}
+
 		len += printf("%-22s", help[i][0]);
+
+		if (isterm && i > 2) {
+			printf("\x1B[22m");
+		}
 
 		char *ptr = strdup(help[i][1]);
 
@@ -326,7 +347,9 @@ static void PrintHelpMain(void)
 
 		char *save = NULL;
 		char *tmp = strtok_r(ptr, " ", &save);
-
+		if (isterm) {
+			printf("\e[1;34m");
+		}
 		while (tmp != NULL) {
 			len += strlen(tmp);
 			if (len > col) {
@@ -345,7 +368,9 @@ static void PrintHelpMain(void)
 				}
 			}
 		}
-
+		if (isterm) {
+			printf("\x1B[39m\x1B[22m");
+		}
 		free(ptr);
 		printf("\n");
 	}
