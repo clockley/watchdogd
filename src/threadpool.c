@@ -27,7 +27,7 @@ struct threadpool
 	sem_t sem;
 	void *(*func)(void*);
 	void * arg;
-	_Atomic(int) active;
+	int active;
 };
 
 static struct threadpool threads[MAX_WORKERS] = {0};
@@ -40,7 +40,9 @@ static void *Worker(void *arg)
 		sem_wait(&t->sem);
 		__sync_synchronize();
 		t->func(t->arg);
-		t->active = 0;
+
+		__atomic_store_n(&t->active, 0, __ATOMIC_SEQ_CST);
+
 		__sync_synchronize();
 	}
 	return NULL;
