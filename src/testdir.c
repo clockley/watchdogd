@@ -392,6 +392,10 @@ static int fd2[2];
 
 bool ExecuteRepairScriptsPreFork(ProcessList * p, struct cfgoptions *s)
 {
+	if (list_is_empty(&p->head)) {
+		return true;
+	}
+
 	pipe(fd);
 	pipe(fd2);
 

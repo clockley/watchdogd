@@ -211,7 +211,7 @@ bool SetDefaultConfig(struct cfgoptions *const options)
 	options->options |= DAEMONIZE | USEPIDFILE;
 	options->loopExit = -1;
 	options->haveConfigFile = true;
-
+	options->testexepath = "/etc/watchdog.d";
 	return true;
 }
 
