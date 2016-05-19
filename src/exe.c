@@ -19,7 +19,6 @@
 #include "sub.h"
 #include "exe.h"
 #include "user.h"
-#include "killtree.h"
 
 int Spawn(int timeout, struct cfgoptions *const config, const char *file,
 	  const char *args, ...)

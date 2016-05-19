@@ -23,7 +23,6 @@
 #include "threads.h"
 #include "pidfile.h"
 #include "daemon.h"
-#include "killtree.h"
 #include "identify.h"
 #include "bootstatus.h"
 #include "multicall.h"
@@ -84,8 +83,6 @@ int main(int argc, char **argv)
 	Logmsg(LOG_INFO, "starting daemon (%s)", PACKAGE_VERSION);
 
 	PrintConfiguration(&options);
-
-	InitKillProcess();
 
 	if (ExecuteRepairScriptsPreFork(&processes, &options) == false) {
 		Logmsg(LOG_ERR, "ExecuteRepairScriptsPreFork failed");
