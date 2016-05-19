@@ -749,6 +749,8 @@ bool PlatformInit(void)
 		return false;
 	}
 
+	prctl(PR_SET_DUMPABLE, 0, 0, 0, 0); //prevent children from ptrace() ing main process and helpers
+
 	return true;
 }
 
