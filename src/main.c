@@ -26,6 +26,7 @@
 #include "identify.h"
 #include "bootstatus.h"
 #include "multicall.h"
+#include "dbusapi.h"
 #define DISARM_WATCHDOG_BEFORE_REBOOT true
 
 static volatile sig_atomic_t quit = 0;
@@ -163,6 +164,7 @@ int main(int argc, char **argv)
 		i.firmwareVersion = GetFirmwareVersion(watchdog);
 		
 		CreateDetachedThread(IdentityThread, &i);
+		DbusApiInit(watchdog, &options);
 	} else {
 		if (options.sleeptime == -1) {
 			options.sleeptime = 60;
