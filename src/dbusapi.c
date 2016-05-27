@@ -15,14 +15,22 @@
  */
 
 #include "dbusapi.h"
+#include <semaphore.h>
+
 static watchdog_t * watchdog = NULL;
 static struct cfgoptions *config  = NULL;
 static sd_event_source *eventSource = NULL;
 static sd_event *event = NULL;
 static sd_bus_slot *slot = NULL;
 static sd_bus *bus = NULL;
+static sd_event_source *clients[4096] = {NULL};
+static _Atomic(int) lastAllocatedId = 0;
+static _Atomic(int) openSlots = 4096;
+static _Atomic(int) lastFreedSlot = -1;
+static short freeIds[4096] = {-1};
 
 typedef uint64_t usec_t;
+
 
 static const sd_bus_vtable watchdogPmon[] = {
         SD_BUS_VTABLE_START(0),
@@ -31,8 +39,88 @@ static const sd_bus_vtable watchdogPmon[] = {
         SD_BUS_METHOD("Version", "", "x", Version, 0),
         SD_BUS_METHOD("GetTimeout", "", "x", GetTimeoutDbus, 0),
         SD_BUS_METHOD("GetTimeleft", "", "x", GetTimeleftDbus, 0),
+        SD_BUS_METHOD("PmonInit", "t", "u", PmonInit, 0),
+        SD_BUS_METHOD("PmonPing", "u", "b", PmonPing, 0),
+        SD_BUS_METHOD("PmonRemove", "u", "b", PmonRemove, 0),
         SD_BUS_VTABLE_END
 };
+
+static int Timeout(sd_event_source *source, usec_t usec, void *userdata) 
+{
+	//TODO: Tell main thread to reboot
+	return -1;
+}
+
+static int PmonRemove(sd_bus_message *m, void *userdata, sd_bus_error *retError)
+{
+
+	int id = 0;
+	uint64_t time = 0;
+	sd_bus_message_read(m, "u", &id);
+
+	char *sid = sd_event_source_get_userdata(clients[id]);
+	if (sid == NULL) {
+		return sd_bus_reply_method_return(m, "b", false);
+	}
+
+	if (strcmp(sd_event_source_get_userdata(clients[id]), sd_bus_message_get_sender(m)) != 0) {
+		return sd_bus_reply_method_return(m, "b", false);
+	}
+
+	sd_event_source_unref(clients[id]); //systemd will gc object after unrefing it.
+	clients[id] = NULL;
+	lastFreedSlot += 1;
+	freeIds[lastFreedSlot] = id;
+	return sd_bus_reply_method_return(m, "b", true);
+}
+
+static int PmonPing(sd_bus_message *m, void *userdata, sd_bus_error *retError)
+{
+	int id = 0;
+	uint64_t time = 0;
+
+	sd_bus_message_read(m, "u", &id);
+
+	char *sid = sd_event_source_get_userdata(clients[id]);
+	if (sid == NULL) {
+		return sd_bus_reply_method_return(m, "b", false);
+	}
+
+	if (strcmp(sd_event_source_get_userdata(clients[id]), sd_bus_message_get_sender(m)) != 0) {
+		return sd_bus_reply_method_return(m, "b", false);
+	}
+
+	sd_event_source_get_time(clients[id], &time);
+	sd_event_source_set_time(clients[id], time);
+	return sd_bus_reply_method_return(m, "b", true);
+}
+
+static int PmonInit(sd_bus_message *m, void *userdata, sd_bus_error *retError)
+{
+	usec_t time = 0;
+	sd_bus_message_read(m, "t", &time);
+	int id = 0;
+	if (openSlots == 0) {
+		return sd_bus_reply_method_return(m, "u", -1);
+	}
+
+	if (clients[lastAllocatedId] == NULL) {
+		id = lastAllocatedId;
+		sd_event_add_time(event, &clients[lastAllocatedId], CLOCK_MONOTONIC, time, 1000,
+					Timeout, (void *)sd_bus_message_get_sender(m));
+		lastAllocatedId += 1;
+		openSlots -= 1;
+		return sd_bus_reply_method_return(m, "u", id);
+	}
+
+	id = freeIds[lastFreedSlot];
+	sd_event_add_time(event, &clients[freeIds[lastFreedSlot]], CLOCK_MONOTONIC, time, 1000,
+				Timeout, (void *)sd_bus_message_get_sender(m));
+
+	lastFreedSlot -= 1;
+
+	return sd_bus_reply_method_return(m, "u", id);
+}
 
 static int DevicePath(sd_bus_message *m, void *userdata, sd_bus_error *retError)
 {
@@ -69,38 +157,40 @@ static int GetTimeleftDbus(sd_bus_message *m, void *userdata, sd_bus_error *retE
 	return sd_bus_reply_method_return(m, "x", GetTimeleft(watchdog));
 }
 
-static void * ReceivingThread(void *arg)
-{
-	while (true) {
-		sd_bus_process(bus, NULL);
-		sd_bus_wait(bus, (uint64_t) -1);
-	}
-}
 
 static int PhakeEvent(sd_event_source *source, usec_t usec, void *userdata) 
 {
+//	Logmsg(LOG_ERR, "Timeout");
 	return 19960922;
 }
 
-void DbusApiInit(watchdog_t * const wdt, struct cfgoptions *const cfg)
+static int BusHandler(sd_event_source *es, int fd, uint32_t revents, void *userdata)
 {
-	watchdog = wdt;
-	config = cfg;
+	sd_bus_process(bus, NULL);
+	return 1;
+}
+
+void * DbusApiInit(void * arg)
+{
+	struct dbusinfo *t = arg;
+	watchdog = t->watchdog;
+	config = t->config;
 	int ret = sd_event_default(&event);
 
-	sd_event_add_time(event, &eventSource, CLOCK_MONOTONIC, 0, 0, PhakeEvent, NULL);
-
-	CreateDetachedThread(sd_event_loop, event);
+	sd_event_add_time(event, &eventSource, CLOCK_MONOTONIC, 1, 0, PhakeEvent, NULL);
 
 	int r = sd_bus_open_system(&bus);
 
 	r = sd_bus_add_object_vtable(bus, &slot, "/org/watchdogd",
 				"org.watchdogd", watchdogPmon, NULL);
-
 	r = sd_bus_request_name(bus, "org.watchdogd", 0);
 
 
 	short change = 0;
-	CreateDetachedThread(ReceivingThread, &change);
+	sd_event_add_io(event, &eventSource, sd_bus_get_fd(bus), EPOLLIN, BusHandler, NULL);
+
+	sd_event_loop(event);
+
+	return NULL;
 
 }

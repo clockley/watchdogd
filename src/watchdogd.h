@@ -176,6 +176,12 @@ struct watchdogDevice {
 	int timeout;
 };
 
+struct dbusinfo
+{
+	struct cfgoptions *config;
+	struct watchdogDevice *watchdog;
+};
+
 struct identinfo {
 	char daemonVersion[8];
 	char name[128];

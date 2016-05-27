@@ -93,7 +93,7 @@ int main(int argc, char **argv)
 	if (StartHelperThreads(&options) != 0) {
 		FatalError(&options);
 	}
-
+	struct dbusinfo temp = {.watchdog = watchdog, .config = &options};
 	if (!(options.options & NOACTION)) {
 		watchdog = OpenWatchdog(options.devicepath);
 
@@ -164,7 +164,8 @@ int main(int argc, char **argv)
 		i.firmwareVersion = GetFirmwareVersion(watchdog);
 		
 		CreateDetachedThread(IdentityThread, &i);
-		DbusApiInit(watchdog, &options);
+
+		CreateDetachedThread(DbusApiInit, &temp);
 	} else {
 		if (options.sleeptime == -1) {
 			options.sleeptime = 60;

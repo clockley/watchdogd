@@ -23,10 +23,13 @@
 #include <systemd/sd-bus.h>
 #include <systemd/sd-event.h>
 
-void DbusApiInit(watchdog_t * const watchdog, struct cfgoptions *const cfg);
+void *DbusApiInit(void *);
 static int DevicePath(sd_bus_message *, void *, sd_bus_error *);
 static int Identity(sd_bus_message *, void *, sd_bus_error *);
 static int Version(sd_bus_message *, void *, sd_bus_error *);
 static int GetTimeoutDbus(sd_bus_message *, void *, sd_bus_error *);
 static int GetTimeleftDbus(sd_bus_message *, void *, sd_bus_error *);
+static int PmonInit(sd_bus_message *, void *, sd_bus_error *);
+static int PmonPing(sd_bus_message *, void *, sd_bus_error *);
+static int PmonRemove(sd_bus_message *, void *, sd_bus_error *);
 #endif
