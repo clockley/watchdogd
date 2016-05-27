@@ -24,5 +24,9 @@
 #include <systemd/sd-event.h>
 
 void DbusApiInit(watchdog_t * const watchdog, struct cfgoptions *const cfg);
-
+static int DevicePath(sd_bus_message *, void *, sd_bus_error *);
+static int Identity(sd_bus_message *, void *, sd_bus_error *);
+static int Version(sd_bus_message *, void *, sd_bus_error *);
+static int GetTimeoutDbus(sd_bus_message *, void *, sd_bus_error *);
+static int GetTimeleftDbus(sd_bus_message *, void *, sd_bus_error *);
 #endif

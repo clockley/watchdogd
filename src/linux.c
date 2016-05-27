@@ -163,6 +163,8 @@ watchdog_t *OpenWatchdog(const char *const path)
 		       "watchdog device does not support magic close char");
 	}
 
+	strcpy(watchdog->path, path);
+
 	PrintWdtInfo(watchdog);
 	return watchdog;
 }
@@ -317,6 +319,22 @@ long GetFirmwareVersion(watchdog_t * const wdt)
 	ioctl(GetFd(wdt), WDIOC_GETSUPPORT, &watchDogInfo);
 
 	return watchDogInfo.firmware_version;
+}
+
+long GetTimeleft(watchdog_t *const wdt)
+{
+//This function is only used by the dbus api
+	if (wdt == NULL) {
+		return -1;
+	}
+
+	int timeleft = 0;
+
+	if (ioctl(GetFd(wdt), WDIOC_GETTIMELEFT, &timeleft) < 0) {
+		return -1;
+	}
+
+	return timeleft;
 }
 
 int GetRawTimeout(watchdog_t * const wdt)

@@ -71,6 +71,7 @@ int GetWatchdogBootStatus(watchdog_t * const);
 int GetRawTimeout(watchdog_t * const wdt);
 char *GetWatchdogIdentity(watchdog_t * const wdt);
 long unsigned GetWatchdogStatus(watchdog_t * const);
+long GetTimeleft(watchdog_t *const);
 long GetFirmwareVersion(watchdog_t * const);
 bool IsClientAdmin(int);
 #endif

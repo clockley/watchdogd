@@ -171,7 +171,7 @@ struct repaircmd_t {
 typedef struct repaircmd_t repaircmd_t;
 
 struct watchdogDevice {
-	const char *path;
+	const char path[64];
 	int fd;
 	int timeout;
 };
