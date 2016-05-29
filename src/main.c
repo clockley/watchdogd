@@ -38,8 +38,9 @@ ProcessList processes;
 int main(int argc, char **argv)
 {
 	struct cfgoptions options;
+	struct cfgoptions *tmp = &options;
 	watchdog_t *watchdog = NULL;
-	struct dbusinfo temp = {.watchdog = &watchdog, .config = &options};
+	struct dbusinfo temp = {.watchdog = &watchdog, .config = &tmp};
 	if (SetDefaultConfig(&options) == false) {
 		return EXIT_FAILURE;
 	}
