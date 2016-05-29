@@ -123,7 +123,7 @@ static int PmonInit(sd_bus_message *m, void *userdata, sd_bus_error *retError)
 
 	id = freeIds[lastFreedSlot];
 
-	sd_event_add_time(event, &clients[freeIds[lastFreedSlot]], CLOCK_MONOTONIC, time, 1000,
+	sd_event_add_time(event, &clients[freeIds[lastFreedSlot]], CLOCK_MONOTONIC, usec, 1000,
 				Timeout, (void *)sd_bus_message_get_sender(m));
 
 	lastFreedSlot -= 1;
