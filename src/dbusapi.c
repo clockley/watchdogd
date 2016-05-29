@@ -154,7 +154,7 @@ static int Version(sd_bus_message *m, void *userdata, sd_bus_error *retError)
 {
 	char coal = '0';
 	sd_bus_message_read(m, "", &coal);
-	return sd_bus_reply_method_return(m, "x", GetWatchdogIdentity(watchdog));
+	return sd_bus_reply_method_return(m, "x", GetFirmwareVersion(watchdog));
 }
 
 static int GetTimeoutDbus(sd_bus_message *m, void *userdata, sd_bus_error *retError)
