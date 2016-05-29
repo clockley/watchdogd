@@ -15,8 +15,8 @@
  */
 
 #include "dbusapi.h"
-#include <semaphore.h>
 #define MAX_CLIENT_ID 4096
+typedef uint64_t usec_t;
 
 static watchdog_t * watchdog = NULL;
 static struct cfgoptions *config  = NULL;
@@ -25,13 +25,11 @@ static sd_bus *bus = NULL;
 
 static sd_event_source *clients[MAX_CLIENT_ID] = {NULL};
 static short freeIds[MAX_CLIENT_ID] = {-1};
+static usec_t clientTimeout[MAX_CLIENT_ID];
 
 static _Atomic(int) lastAllocatedId = 0;
 static _Atomic(int) openSlots = MAX_CLIENT_ID;
 static _Atomic(int) lastFreedSlot = -1;
-
-typedef uint64_t usec_t;
-
 
 static const sd_bus_vtable watchdogPmon[] = {
         SD_BUS_VTABLE_START(0),
@@ -48,7 +46,7 @@ static const sd_bus_vtable watchdogPmon[] = {
 
 static int Timeout(sd_event_source *source, usec_t usec, void *userdata) 
 {
-	//TODO: Tell main thread to reboot
+	//Logmsg(LOG_ERR, "Timeout");
 	return -1;
 }
 
@@ -92,8 +90,11 @@ static int PmonPing(sd_bus_message *m, void *userdata, sd_bus_error *retError)
 		return sd_bus_reply_method_return(m, "b", false);
 	}
 
-	sd_event_source_get_time(clients[id], &time);
-	sd_event_source_set_time(clients[id], time);
+
+	uint64_t usec = 0;
+	sd_event_now(event, CLOCK_MONOTONIC, &usec);
+	sd_event_source_set_time(clients[id], clientTimeout[id]+usec);
+
 	return sd_bus_reply_method_return(m, "b", true);
 }
 
@@ -106,22 +107,28 @@ static int PmonInit(sd_bus_message *m, void *userdata, sd_bus_error *retError)
 		return sd_bus_reply_method_return(m, "u", -1);
 	}
 
+	uint64_t usec = 0;
+	sd_event_now(event, CLOCK_MONOTONIC, &usec);
+	usec += time;
 	if (clients[lastAllocatedId] == NULL) {
 		id = lastAllocatedId;
-		sd_event_add_time(event, &clients[lastAllocatedId], CLOCK_MONOTONIC, time, 1000,
+		sd_event_source_set_enabled(clients[lastAllocatedId], SD_EVENT_ON);
+		sd_event_add_time(event, &clients[lastAllocatedId], CLOCK_MONOTONIC, usec, 1000,
 					Timeout, (void *)sd_bus_message_get_sender(m));
 		lastAllocatedId += 1;
 		openSlots -= 1;
+		clientTimeout[id] = time;
 		return sd_bus_reply_method_return(m, "u", id);
 	}
 
 	id = freeIds[lastFreedSlot];
+	sd_event_source_set_enabled(clients[lastAllocatedId], SD_EVENT_ON);
 	sd_event_add_time(event, &clients[freeIds[lastFreedSlot]], CLOCK_MONOTONIC, time, 1000,
 				Timeout, (void *)sd_bus_message_get_sender(m));
 
 	lastFreedSlot -= 1;
 	openSlots -= 1;
-
+	clientTimeout[id] = time;
 	return sd_bus_reply_method_return(m, "u", id);
 }
 
