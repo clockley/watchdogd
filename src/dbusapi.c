@@ -38,6 +38,7 @@ static const sd_bus_vtable watchdogPmon[] = {
         SD_BUS_METHOD("Version", "", "x", Version, 0),
         SD_BUS_METHOD("GetTimeout", "", "x", GetTimeoutDbus, 0),
         SD_BUS_METHOD("GetTimeleft", "", "x", GetTimeleftDbus, 0),
+        SD_BUS_METHOD("GetFlags", "", "t", GetFlags, 0),
         SD_BUS_METHOD("PmonInit", "t", "u", PmonInit, 0),
         SD_BUS_METHOD("PmonPing", "u", "b", PmonPing, 0),
         SD_BUS_METHOD("PmonRemove", "u", "b", PmonRemove, 0),
@@ -162,6 +163,13 @@ static int GetTimeoutDbus(sd_bus_message *m, void *userdata, sd_bus_error *retEr
 	char coal = '0';
 	sd_bus_message_read(m, "", &coal);
 	return sd_bus_reply_method_return(m, "x", GetRawTimeout(watchdog));
+}
+
+static int GetFlags(sd_bus_message *m, void *userdata, sd_bus_error *retError)
+{
+	char coal = '0';
+	sd_bus_message_read(m, "", &coal);
+	return sd_bus_reply_method_return(m, "t", GetWatchdogStatus(watchdog));
 }
 
 static int GetTimeleftDbus(sd_bus_message *m, void *userdata, sd_bus_error *retError)

@@ -32,4 +32,5 @@ static int GetTimeleftDbus(sd_bus_message *, void *, sd_bus_error *);
 static int PmonInit(sd_bus_message *, void *, sd_bus_error *);
 static int PmonPing(sd_bus_message *, void *, sd_bus_error *);
 static int PmonRemove(sd_bus_message *, void *, sd_bus_error *);
+static int GetFlags(sd_bus_message *, void *, sd_bus_error *);
 #endif
