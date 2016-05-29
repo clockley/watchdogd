@@ -39,7 +39,7 @@ int main(int argc, char **argv)
 {
 	struct cfgoptions options;
 	watchdog_t *watchdog = NULL;
-
+	struct dbusinfo temp = {.watchdog = &watchdog, .config = &options};
 	if (SetDefaultConfig(&options) == false) {
 		return EXIT_FAILURE;
 	}
@@ -93,7 +93,7 @@ int main(int argc, char **argv)
 	if (StartHelperThreads(&options) != 0) {
 		FatalError(&options);
 	}
-	struct dbusinfo temp = {.watchdog = watchdog, .config = &options};
+
 	if (!(options.options & NOACTION)) {
 		watchdog = OpenWatchdog(options.devicepath);
 

@@ -178,8 +178,8 @@ struct watchdogDevice {
 
 struct dbusinfo
 {
-	struct cfgoptions *config;
-	struct watchdogDevice *watchdog;
+	struct cfgoptions **config;
+	struct watchdogDevice **watchdog;
 };
 
 struct identinfo {

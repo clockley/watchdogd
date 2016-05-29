@@ -173,8 +173,8 @@ static int BusHandler(sd_event_source *es, int fd, uint32_t revents, void *userd
 void * DbusApiInit(void * arg)
 {
 	struct dbusinfo *t = arg;
-	watchdog = t->watchdog;
-	config = t->config;
+	watchdog = *t->watchdog;
+	config = *t->config;
 	int ret = sd_event_default(&event);
 
 	sd_event_add_time(event, &eventSource, CLOCK_MONOTONIC, 1, 0, PhakeEvent, NULL);
