@@ -22,8 +22,10 @@ static watchdog_t * watchdog = NULL;
 static struct cfgoptions *config  = NULL;
 static sd_event *event = NULL;
 static sd_bus *bus = NULL;
+
 static sd_event_source *clients[MAX_CLIENT_ID] = {NULL};
 static short freeIds[MAX_CLIENT_ID] = {-1};
+
 static _Atomic(int) lastAllocatedId = 0;
 static _Atomic(int) openSlots = MAX_CLIENT_ID;
 static _Atomic(int) lastFreedSlot = -1;
@@ -69,6 +71,7 @@ static int PmonRemove(sd_bus_message *m, void *userdata, sd_bus_error *retError)
 	sd_event_source_unref(clients[id]); //systemd will gc object after unrefing it.
 	clients[id] = NULL;
 	lastFreedSlot += 1;
+	openSlots += 1;
 	freeIds[lastFreedSlot] = id;
 	return sd_bus_reply_method_return(m, "b", true);
 }
@@ -117,6 +120,7 @@ static int PmonInit(sd_bus_message *m, void *userdata, sd_bus_error *retError)
 				Timeout, (void *)sd_bus_message_get_sender(m));
 
 	lastFreedSlot -= 1;
+	openSlots -= 1;
 
 	return sd_bus_reply_method_return(m, "u", id);
 }
