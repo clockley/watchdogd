@@ -66,6 +66,10 @@ static int PmonRemove(sd_bus_message *m, void *userdata, sd_bus_error *retError)
 		return sd_bus_reply_method_return(m, "b", false);
 	}
 
+	uint64_t usec = 0;
+	sd_event_now(event, CLOCK_MONOTONIC, &usec);
+	sd_event_source_set_time(clients[id], clientTimeout[id]+usec);
+
 	sd_event_source_unref(clients[id]); //systemd will gc object after unrefing it.
 	clients[id] = NULL;
 	lastFreedSlot += 1;
