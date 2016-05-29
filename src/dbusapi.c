@@ -16,18 +16,17 @@
 
 #include "dbusapi.h"
 #include <semaphore.h>
+#define MAX_CLIENT_ID 4096
 
 static watchdog_t * watchdog = NULL;
 static struct cfgoptions *config  = NULL;
-static sd_event_source *eventSource = NULL;
 static sd_event *event = NULL;
-static sd_bus_slot *slot = NULL;
 static sd_bus *bus = NULL;
-static sd_event_source *clients[4096] = {NULL};
+static sd_event_source *clients[MAX_CLIENT_ID] = {NULL};
+static short freeIds[MAX_CLIENT_ID] = {-1};
 static _Atomic(int) lastAllocatedId = 0;
-static _Atomic(int) openSlots = 4096;
+static _Atomic(int) openSlots = MAX_CLIENT_ID;
 static _Atomic(int) lastFreedSlot = -1;
-static short freeIds[4096] = {-1};
 
 typedef uint64_t usec_t;
 
@@ -157,7 +156,6 @@ static int GetTimeleftDbus(sd_bus_message *m, void *userdata, sd_bus_error *retE
 	return sd_bus_reply_method_return(m, "x", GetTimeleft(watchdog));
 }
 
-
 static int BusHandler(sd_event_source *es, int fd, uint32_t revents, void *userdata)
 {
 	sd_bus_process(bus, NULL);
@@ -167,6 +165,8 @@ static int BusHandler(sd_event_source *es, int fd, uint32_t revents, void *userd
 void * DbusApiInit(void * arg)
 {
 	struct dbusinfo *t = arg;
+	sd_event_source *busSource = NULL;
+	sd_bus_slot *slot = NULL;
 	watchdog = *t->watchdog;
 	config = *t->config;
 	int ret = sd_event_default(&event);
@@ -177,7 +177,7 @@ void * DbusApiInit(void * arg)
 				"org.watchdogd", watchdogPmon, NULL);
 	r = sd_bus_request_name(bus, "org.watchdogd", 0);
 
-	sd_event_add_io(event, &eventSource, sd_bus_get_fd(bus), EPOLLIN, BusHandler, NULL);
+	sd_event_add_io(event, &busSource, sd_bus_get_fd(bus), EPOLLIN, BusHandler, NULL);
 
 	sd_event_loop(event);
 
