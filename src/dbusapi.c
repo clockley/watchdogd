@@ -112,7 +112,7 @@ static int PmonInit(sd_bus_message *m, void *userdata, sd_bus_error *retError)
 	usec += time;
 	if (clients[lastAllocatedId] == NULL) {
 		id = lastAllocatedId;
-		sd_event_source_set_enabled(clients[lastAllocatedId], SD_EVENT_ON);
+
 		sd_event_add_time(event, &clients[lastAllocatedId], CLOCK_MONOTONIC, usec, 1000,
 					Timeout, (void *)sd_bus_message_get_sender(m));
 		lastAllocatedId += 1;
@@ -122,7 +122,7 @@ static int PmonInit(sd_bus_message *m, void *userdata, sd_bus_error *retError)
 	}
 
 	id = freeIds[lastFreedSlot];
-	sd_event_source_set_enabled(clients[lastAllocatedId], SD_EVENT_ON);
+
 	sd_event_add_time(event, &clients[freeIds[lastFreedSlot]], CLOCK_MONOTONIC, time, 1000,
 				Timeout, (void *)sd_bus_message_get_sender(m));
 
