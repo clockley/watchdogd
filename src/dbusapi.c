@@ -158,12 +158,6 @@ static int GetTimeleftDbus(sd_bus_message *m, void *userdata, sd_bus_error *retE
 }
 
 
-static int PhakeEvent(sd_event_source *source, usec_t usec, void *userdata) 
-{
-//	Logmsg(LOG_ERR, "Timeout");
-	return 19960922;
-}
-
 static int BusHandler(sd_event_source *es, int fd, uint32_t revents, void *userdata)
 {
 	sd_bus_process(bus, NULL);
@@ -177,16 +171,12 @@ void * DbusApiInit(void * arg)
 	config = *t->config;
 	int ret = sd_event_default(&event);
 
-	sd_event_add_time(event, &eventSource, CLOCK_MONOTONIC, 1, 0, PhakeEvent, NULL);
-
 	int r = sd_bus_open_system(&bus);
 
 	r = sd_bus_add_object_vtable(bus, &slot, "/org/watchdogd",
 				"org.watchdogd", watchdogPmon, NULL);
 	r = sd_bus_request_name(bus, "org.watchdogd", 0);
 
-
-	short change = 0;
 	sd_event_add_io(event, &eventSource, sd_bus_get_fd(bus), EPOLLIN, BusHandler, NULL);
 
 	sd_event_loop(event);
