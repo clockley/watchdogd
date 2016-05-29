@@ -46,7 +46,7 @@ static const sd_bus_vtable watchdogPmon[] = {
 
 static int Timeout(sd_event_source *source, usec_t usec, void *userdata) 
 {
-	//Logmsg(LOG_ERR, "Timeout");
+	Shutdown(9221996, config);
 	return -1;
 }
 
@@ -186,16 +186,15 @@ void * DbusApiInit(void * arg)
 	config = *t->config;
 	int ret = sd_event_default(&event);
 
-	int r = sd_bus_open_system(&bus);
+	ret = sd_bus_open_system(&bus);
 
-	r = sd_bus_add_object_vtable(bus, &slot, "/org/watchdogd",
+	ret = sd_bus_add_object_vtable(bus, &slot, "/org/watchdogd",
 				"org.watchdogd", watchdogPmon, NULL);
-	r = sd_bus_request_name(bus, "org.watchdogd", 0);
+	ret = sd_bus_request_name(bus, "org.watchdogd", 0);
 
 	sd_event_add_io(event, &busSource, sd_bus_get_fd(bus), EPOLLIN, BusHandler, NULL);
 
 	sd_event_loop(event);
 
 	return NULL;
-
 }
