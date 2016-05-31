@@ -15,6 +15,7 @@
  */
 
 #include "dbusapi.h"
+#if defined(__linux__) && defined(HAVE_SD_NOTIFY)
 #define MAX_CLIENT_ID 4096
 typedef uint64_t usec_t;
 
@@ -184,9 +185,10 @@ static int BusHandler(sd_event_source *es, int fd, uint32_t revents, void *userd
 	sd_bus_process(bus, NULL);
 	return 1;
 }
-
+#endif
 void * DbusApiInit(void * arg)
 {
+#ifdef __linux__ && defined(HAVE_SD_NOTIFY)
 	struct dbusinfo *t = arg;
 	sd_event_source *busSource = NULL;
 	sd_bus_slot *slot = NULL;
@@ -203,6 +205,6 @@ void * DbusApiInit(void * arg)
 	sd_event_add_io(event, &busSource, sd_bus_get_fd(bus), EPOLLIN, BusHandler, NULL);
 
 	sd_event_loop(event);
-
+#endif
 	return NULL;
 }
