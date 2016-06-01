@@ -188,7 +188,7 @@ static int BusHandler(sd_event_source *es, int fd, uint32_t revents, void *userd
 #endif
 void * DbusApiInit(void * arg)
 {
-#ifdef __linux__ && defined(HAVE_SD_NOTIFY)
+#if defined(__linux__) && defined(HAVE_SD_NOTIFY)
 	struct dbusinfo *t = arg;
 	sd_event_source *busSource = NULL;
 	sd_bus_slot *slot = NULL;
