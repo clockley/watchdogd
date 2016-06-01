@@ -195,7 +195,7 @@ void * DbusApiInit(void * arg)
 	sd_bus_slot *slot = NULL;
 	watchdog = *t->watchdog;
 	config = *t->config;
-	long firmwareVersion = GetFirmwareVersion(watchdog);
+	firmwareVersion = GetFirmwareVersion(watchdog);
 	identity = GetWatchdogIdentity(watchdog);
 	int ret = sd_event_default(&event);
 
