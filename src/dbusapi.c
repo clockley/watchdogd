@@ -32,6 +32,7 @@ static _Atomic(int) openSlots = MAX_CLIENT_ID;
 static _Atomic(int) lastFreedSlot = -1;
 
 static long firmwareVersion = 0;
+static long watchdogTimeout = 0;
 static char * identity  = NULL;
 
 static const sd_bus_vtable watchdogPmon[] = {
@@ -165,7 +166,7 @@ static int GetTimeoutDbus(sd_bus_message *m, void *userdata, sd_bus_error *retEr
 {
 	char coal = '0';
 	sd_bus_message_read(m, "", &coal);
-	return sd_bus_reply_method_return(m, "x", GetRawTimeout(watchdog));
+	return sd_bus_reply_method_return(m, "x", watchdogTimeout);
 }
 
 static int GetFlags(sd_bus_message *m, void *userdata, sd_bus_error *retError)
@@ -197,6 +198,7 @@ void * DbusApiInit(void * arg)
 	config = *t->config;
 	firmwareVersion = GetFirmwareVersion(watchdog);
 	identity = GetWatchdogIdentity(watchdog);
+	watchdogTimeout = GetRawTimeout(watchdog);
 	int ret = sd_event_default(&event);
 
 	ret = sd_bus_open_system(&bus);
