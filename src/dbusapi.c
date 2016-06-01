@@ -15,7 +15,6 @@
  */
 
 #include "dbusapi.h"
-#if defined(__linux__) && defined(HAVE_SD_NOTIFY)
 #define MAX_CLIENT_ID 4096
 typedef uint64_t usec_t;
 
@@ -31,6 +30,9 @@ static usec_t clientTimeout[MAX_CLIENT_ID];
 static _Atomic(int) lastAllocatedId = 0;
 static _Atomic(int) openSlots = MAX_CLIENT_ID;
 static _Atomic(int) lastFreedSlot = -1;
+
+static long firmwareVersion = 0;
+static char * identity  = NULL;
 
 static const sd_bus_vtable watchdogPmon[] = {
         SD_BUS_VTABLE_START(0),
@@ -149,14 +151,14 @@ static int Identity(sd_bus_message *m, void *userdata, sd_bus_error *retError)
 {
 	char coal = '0';
 	sd_bus_message_read(m, "", &coal);
-	return sd_bus_reply_method_return(m, "s", GetWatchdogIdentity(watchdog));
+	return sd_bus_reply_method_return(m, "s", identity);
 }
 
 static int Version(sd_bus_message *m, void *userdata, sd_bus_error *retError)
 {
 	char coal = '0';
 	sd_bus_message_read(m, "", &coal);
-	return sd_bus_reply_method_return(m, "x", GetFirmwareVersion(watchdog));
+	return sd_bus_reply_method_return(m, "x", firmwareVersion);
 }
 
 static int GetTimeoutDbus(sd_bus_message *m, void *userdata, sd_bus_error *retError)
@@ -185,15 +187,16 @@ static int BusHandler(sd_event_source *es, int fd, uint32_t revents, void *userd
 	sd_bus_process(bus, NULL);
 	return 1;
 }
-#endif
+
 void * DbusApiInit(void * arg)
 {
-#if defined(__linux__) && defined(HAVE_SD_NOTIFY)
 	struct dbusinfo *t = arg;
 	sd_event_source *busSource = NULL;
 	sd_bus_slot *slot = NULL;
 	watchdog = *t->watchdog;
 	config = *t->config;
+	long firmwareVersion = GetFirmwareVersion(watchdog);
+	identity = GetWatchdogIdentity(watchdog);
 	int ret = sd_event_default(&event);
 
 	ret = sd_bus_open_system(&bus);
@@ -205,6 +208,6 @@ void * DbusApiInit(void * arg)
 	sd_event_add_io(event, &busSource, sd_bus_get_fd(bus), EPOLLIN, BusHandler, NULL);
 
 	sd_event_loop(event);
-#endif
+
 	return NULL;
 }

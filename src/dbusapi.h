@@ -20,11 +20,8 @@
 #include "linux.h"
 #include "sub.h"
 #include "logutils.h"
-
-#ifdef HAVE_SD_NOTIFY
 #include <systemd/sd-bus.h>
 #include <systemd/sd-event.h>
-#endif
 
 void *DbusApiInit(void *);
 static int DevicePath(sd_bus_message *, void *, sd_bus_error *);
