@@ -858,7 +858,7 @@ int SystemdWatchdogEnabled(const int unset, long long int *const interval)
 
 bool OnParentDeathSend(uintptr_t sig)
 {
-	if (prctl(PR_SET_PDEATHSIG, sig) == -1) {
+	if (prctl(PR_SET_PDEATHSIG, (uintptr_t  *)sig) == -1) {
 		return false;
 	}
 
