@@ -60,7 +60,7 @@ bool DontKillProcess(pid_t);
 bool PlatformInit(void);
 int GetConsoleColumns(void);
 int SystemdWatchdogEnabled(const int, long long int *const);
-bool OnParentDeathSend(int);
+bool OnParentDeathSend(uintptr_t);
 int NoNewProvileges(void);
 int GetCpuCount(void);
 bool LoadKernelModule(void);

@@ -14,6 +14,7 @@
  * permissions and limitations under the License. 
  */
 
+#define DBUSAPI_PROTOTYPES
 #include "dbusapi.h"
 #define MAX_CLIENT_ID 4096
 typedef uint64_t usec_t;
@@ -82,7 +83,6 @@ static int PmonRemove(sd_bus_message *m, void *userdata, sd_bus_error *retError)
 static int PmonPing(sd_bus_message *m, void *userdata, sd_bus_error *retError)
 {
 	int id = 0;
-	uint64_t time = 0;
 
 	sd_bus_message_read(m, "u", &id);
 

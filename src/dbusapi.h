@@ -24,6 +24,7 @@
 #include <systemd/sd-event.h>
 
 void *DbusApiInit(void *);
+#ifdef DBUSAPI_PROTOTYPES
 static int DevicePath(sd_bus_message *, void *, sd_bus_error *);
 static int Identity(sd_bus_message *, void *, sd_bus_error *);
 static int Version(sd_bus_message *, void *, sd_bus_error *);
@@ -33,4 +34,5 @@ static int PmonInit(sd_bus_message *, void *, sd_bus_error *);
 static int PmonPing(sd_bus_message *, void *, sd_bus_error *);
 static int PmonRemove(sd_bus_message *, void *, sd_bus_error *);
 static int GetFlags(sd_bus_message *, void *, sd_bus_error *);
+#endif
 #endif
