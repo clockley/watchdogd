@@ -19,6 +19,7 @@ AC_PROG_CC_STDC
 PKG_CHECK_MODULES([MOUNT], [mount >= 2.22.0])
 PKG_CHECK_MODULES([ZLIB], [zlib])
 PKG_CHECK_MODULES([DEPS], [libconfig >= 1.4.8])
+PKG_CHECK_MODULES([SYSTEMD], [libsystemd >= 222])
 AC_CHECK_LIB([oping],[ping_construct])
 AC_CHECK_HEADERS([oping.h])
 
@@ -41,8 +42,6 @@ AS_IF([test "x$with_systemdsystemunitdir" != "xno"],
       [AC_SUBST([systemdsystemunitdir], [$with_systemdsystemunitdir])])
 AM_CONDITIONAL(HAVE_SYSTEMD, [test "x$with_systemdsystemunitdir" != "xno"])
 
-RRA_LIB_SYSTEMD_DAEMON_OPTIONAL
-RRA_LIB_SYSTEMD_JOURNAL_OPTIONAL
 AX_PTHREAD
 
 # Checks for header files.

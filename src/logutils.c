@@ -79,7 +79,6 @@ struct message {
 
 _Static_assert(PIPE_BUF > sizeof(struct message), "message struct cannot be witten atomically on this platform");
 
-#ifdef HAVE_SD_JOURNAL
 static int SystemdSyslog(int priority, const char *format, va_list ap)
 {
 	static __thread char buf[2048] = {"MESSAGE="};
@@ -102,7 +101,6 @@ static int SystemdSyslog(int priority, const char *format, va_list ap)
 
 	return sd_journal_sendv(iov, 3);
 }
-#endif
 
 static ssize_t Syslog(int p, char *m)
 {
@@ -264,13 +262,10 @@ void SetLogTarget(sig_atomic_t target, ...)
 	if (target == SYSTEM_LOG) {
 
 		if (logTarget != SYSTEM_LOG) {
-#ifdef HAVE_SD_JOURNAL
 			if (LinuxRunningSystemd() != 1) {
 				StartLogger();
 			}
-#else
-		StartLogger();
-#endif
+
 		}
 
 		CloseOldTarget(logTarget);
@@ -544,14 +539,13 @@ void Logmsg(int priority, const char *const fmt, ...)
 	}
 
 	if (logTarget == SYSTEM_LOG) {
-#ifdef HAVE_SD_JOURNAL
 		if (LinuxRunningSystemd() == 1) {
 			va_start(args, fmt);
 			SystemdSyslog(priority, fmt, args); //async-signal safe
 			va_end(args);
 			return;
 		}
-#endif
+
 		va_start(args, fmt);
 		portable_vsnprintf(buf, sizeof(buf) - 1, fmt, args);
 

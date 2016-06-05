@@ -40,7 +40,6 @@ static void GetPageSize(void)
 
 static void *ServiceManagerKeepAliveNotification(void * arg)
 {
-#if defined(HAVE_SD_NOTIFY)
 	assert(arg != NULL);
 
 	struct timespec *tp = (struct timespec*)arg;
@@ -62,7 +61,7 @@ static void *ServiceManagerKeepAliveNotification(void * arg)
 		}
 		nanosleep(&ts, NULL);
 	}
-#endif
+
 	return NULL;
 }
 

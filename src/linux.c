@@ -724,44 +724,13 @@ int _Shutdown(int errorcode, bool kexec)
 
 int LinuxRunningSystemd(void)
 {
-#ifdef HAVE_SD_NOTIFY
 	return sd_booted();
-#endif
-	int fd = open("/proc/1/cmdline", O_RDONLY);
-
-	if (fd < 0) {
-		return -1;
-	}
-
-	char buf[256] = { "\0" };
-
-	errno = 0;
-
-	if (read(fd, (void *)buf, 254) < 0) {
-		close(fd);
-		return -1;
-	}
-
-	if (errno != 0) {
-		close(fd);
-		return -1;
-	}
-
-	if (strstr(buf, "systemd") == NULL) {
-		close(fd);
-		return -1;
-	}
-
-	close(fd);
-
-	return 1;
 }
 
 bool PlatformInit(void)
 {
-#ifdef HAVE_SD_NOTIFY
 	sd_notifyf(0, "READY=1\n" "MAINPID=%lu", (unsigned long)getpid());
-#endif
+
 	if (ConfigureKernelOutOfMemoryKiller() < 0) {
 		Logmsg(LOG_ERR, "unable to configure out of memory killer");
 		return false;
