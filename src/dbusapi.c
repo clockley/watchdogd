@@ -139,43 +139,31 @@ static int PmonInit(sd_bus_message *m, void *userdata, sd_bus_error *retError)
 
 static int DevicePath(sd_bus_message *m, void *userdata, sd_bus_error *retError)
 {
-	char coal = '0';
-	sd_bus_message_read(m, "", &coal);
 	return sd_bus_reply_method_return(m, "s", watchdog->path);
 }
 
 static int Identity(sd_bus_message *m, void *userdata, sd_bus_error *retError)
 {
-	char coal = '0';
-	sd_bus_message_read(m, "", &coal);
 	return sd_bus_reply_method_return(m, "s", identity);
 }
 
 static int Version(sd_bus_message *m, void *userdata, sd_bus_error *retError)
 {
-	char coal = '0';
-	sd_bus_message_read(m, "", &coal);
 	return sd_bus_reply_method_return(m, "x", firmwareVersion);
 }
 
 static int GetTimeoutDbus(sd_bus_message *m, void *userdata, sd_bus_error *retError)
 {
-	char coal = '0';
-	sd_bus_message_read(m, "", &coal);
 	return sd_bus_reply_method_return(m, "x", watchdogTimeout);
 }
 
 static int GetFlags(sd_bus_message *m, void *userdata, sd_bus_error *retError)
 {
-	char coal = '0';
-	sd_bus_message_read(m, "", &coal);
 	return sd_bus_reply_method_return(m, "t", GetWatchdogStatus(watchdog));
 }
 
 static int GetTimeleftDbus(sd_bus_message *m, void *userdata, sd_bus_error *retError)
 {
-	char coal = '0';
-	sd_bus_message_read(m, "", &coal);
 	return sd_bus_reply_method_return(m, "x", GetTimeleft(watchdog));
 }
 
