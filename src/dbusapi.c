@@ -199,9 +199,9 @@ void * DbusApiInit(void * arg)
 
 	ret = sd_bus_open_system(&bus);
 
-	ret = sd_bus_add_object_vtable(bus, &slot, "/org/watchdogd",
-				"org.watchdogd", watchdogPmon, NULL);
-	ret = sd_bus_request_name(bus, "org.watchdogd", 0);
+	ret = sd_bus_add_object_vtable(bus, &slot, "/org/watchdogd1",
+				"org.watchdogd1", watchdogPmon, NULL);
+	ret = sd_bus_request_name(bus, "org.watchdogd1", 0);
 
 	sd_event_add_io(event, &busSource, sd_bus_get_fd(bus), EPOLLIN, BusHandler, NULL);
 
