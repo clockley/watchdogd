@@ -44,12 +44,12 @@ AM_CONDITIONAL(HAVE_SYSTEMD, [test "x$with_systemdsystemunitdir" != "xno"])
 AX_PTHREAD
 
 # Checks for header files.
-AC_CHECK_HEADERS([fcntl.h inttypes.h limits.h stddef.h stdlib.h string.h sys/ioctl.h sys/time.h syslog.h unistd.h])
+AC_CHECK_HEADERS([fcntl.h inttypes.h limits.h stddef.h string.h sys/ioctl.h sys/time.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_PID_T
 
-AC_CHECK_FUNCS([clock_gettime strerror strerror_r strtol fpathconf dirfd open openat fstatat vsnprintf snprintf sprintf getopt_long])
+AC_CHECK_FUNCS([strerror_l fpathconf dirfd openat fstatat snprintf getopt_long])
 
 AC_CONFIG_FILES([Makefile
 		 wd_identify
