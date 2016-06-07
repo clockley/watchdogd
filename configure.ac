@@ -22,9 +22,6 @@ PKG_CHECK_MODULES([DEPS], [libconfig >= 1.4.8])
 PKG_CHECK_MODULES([SYSTEMD], [libsystemd >= 222])
 PKG_CHECK_MODULES([OPING], [liboping >= 1.8.0])
 
-AC_SEARCH_LIBS(clock_gettime, rt, [CLOCK_GETTIME_LIBS=$LIBS])
-AC_SUBST(CLOCK_GETTIME_LIBS)
-
 PKG_PROG_PKG_CONFIG
 AC_ARG_WITH([systemdsystemunitdir],
      AS_HELP_STRING([--with-systemdsystemunitdir=DIR], [Directory for systemd service files]),,
