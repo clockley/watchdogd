@@ -14,7 +14,7 @@ AC_PROG_CC_STDC
 
 #AC_CHECK_PROGS([M4], gm4 m4, no)
 #AS_IF([test "x$M4" = "xno"], AC_MSG_ERROR([m4 missing]))
-
+AX_NOT_ENABLE_FRAME_POINTER
 # Checks for libraries.
 PKG_CHECK_MODULES([MOUNT], [mount >= 2.22.0])
 PKG_CHECK_MODULES([ZLIB], [zlib])
