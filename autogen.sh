@@ -15,3 +15,6 @@ spinner()
 }
 
 (autoreconf -fi; rm -rf autom4te.cache) & spinner
+printf "\n\tCompleted installing autoconf files into project.\n"
+printf "\tTo install watchdogd into your system type the following command:\n"
+printf "\t./install_dependencies.sh;./configure;make;sudo make install\n\n"
