@@ -1,4 +1,10 @@
 #!/bin/bash
+cpu=1
+cpu=$(cat /proc/cpuinfo | awk '/^processor/{print $3}'| wc -l)
+if [ $? != 0 ]
+then
+cpu=1
+fi
 spinner()
 {
     local pid=$!
@@ -17,4 +23,4 @@ spinner()
 (autoreconf -fi; rm -rf autom4te.cache) & spinner
 printf "\n\tCompleted installing autoconf files into project.\n"
 printf "\tTo install watchdogd into your system type the following command:\n"
-printf "\t./install_dependencies.sh;./configure;make;sudo make install\n\n"
+printf "\t./install_dependencies.sh;./configure;make -j $cpu;sudo make install\n\n"
