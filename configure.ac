@@ -11,6 +11,17 @@ AC_CONFIG_HEADERS([config.h])
 
 # Checks for programs.
 AC_PROG_CC_STDC
+AX_PTHREAD
+
+# Checks for header files.
+AC_CHECK_HEADERS([fcntl.h inttypes.h limits.h stddef.h string.h sys/ioctl.h sys/time.h])
+
+# Checks for typedefs, structures, and compiler characteristics.
+AC_TYPE_PID_T
+
+AC_CHECK_FUNCS([strerror_l fpathconf dirfd openat fstatat snprintf getopt_long])
+
+AC_CACHE_SAVE
 
 #AC_CHECK_PROGS([M4], gm4 m4, no)
 #AS_IF([test "x$M4" = "xno"], AC_MSG_ERROR([m4 missing]))
@@ -37,16 +48,6 @@ AS_IF([test "x$with_systemdsystemunitdir" = "xyes" -o "x$with_systemdsystemunitd
 AS_IF([test "x$with_systemdsystemunitdir" != "xno"],
       [AC_SUBST([systemdsystemunitdir], [$with_systemdsystemunitdir])])
 AM_CONDITIONAL(HAVE_SYSTEMD, [test "x$with_systemdsystemunitdir" != "xno"])
-
-AX_PTHREAD
-
-# Checks for header files.
-AC_CHECK_HEADERS([fcntl.h inttypes.h limits.h stddef.h string.h sys/ioctl.h sys/time.h])
-
-# Checks for typedefs, structures, and compiler characteristics.
-AC_TYPE_PID_T
-
-AC_CHECK_FUNCS([strerror_l fpathconf dirfd openat fstatat snprintf getopt_long])
 
 AC_CONFIG_FILES([Makefile
 		 wd_identify
