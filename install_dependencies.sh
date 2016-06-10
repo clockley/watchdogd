@@ -20,6 +20,13 @@ then
 	exit
 fi
 
+if [ $distro == "openSUSE" ]
+then
+	$SUDO zypper install -yl libconfig-devel zlib-devel automake autoconf libmount-devel gcc make liboping-devel systemd-devel
+	exit
+fi
+
+
 echo "Your version of linux is not supported"
 echo "If your are able to install this program on the version of linux you are"
 echo "running please email the commands used. clockley1@gmail.com"
