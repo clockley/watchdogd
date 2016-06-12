@@ -40,7 +40,7 @@ fi
 
 if [[ -v ID_LIKE ]]
 then
-	if [ $ID_LIKE == "debian"]
+	if [ $ID_LIKE == "debian" ]
 	then
 		$SUDO apt-get -y install libconfig-dev liboping-dev zlib1g-dev automake autoconf libsystemd-dev libmount-dev gcc make
 		exit
