@@ -68,22 +68,6 @@ int CloseWatchdog(watchdog_t * const watchdog)
 	return 0;
 }
 
-static bool IsAMTDevice(watchdog_t * const wdt)
-{
-#ifdef WDIOF_ALARMONLY
-	struct watchdog_info watchDogInfo;
-
-	if (ioctl(GetFd(wdt), WDIOC_GETSUPPORT, &watchDogInfo) < 0) {
-		Logmsg(LOG_ERR, "IsAMTDevice: %s", MyStrerror(errno));
-		return false;
-	}
-
-	return WDIOF_ALARMONLY & watchDogInfo.options;
-#else
-	return false;
-#endif
-}
-
 static bool CanMagicClose(watchdog_t * const wdt)
 {
 	struct watchdog_info watchDogInfo;
@@ -149,12 +133,6 @@ watchdog_t *OpenWatchdog(const char *const path)
 
 	if (PingWatchdog(watchdog) != 0) {
 		WatchdogDestroy(watchdog);
-		return NULL;
-	}
-
-	if (IsAMTDevice(watchdog) == true) {
-		Logmsg(LOG_ALERT, "watchdogd: does not support AMT devices");
-		CloseWatchdog(watchdog);
 		return NULL;
 	}
 
