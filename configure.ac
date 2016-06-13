@@ -49,6 +49,43 @@ AS_IF([test "x$with_systemdsystemunitdir" != "xno"],
       [AC_SUBST([systemdsystemunitdir], [$with_systemdsystemunitdir])])
 AM_CONDITIONAL(HAVE_SYSTEMD, [test "x$with_systemdsystemunitdir" != "xno"])
 
+AC_ARG_WITH(dbusconfdir,
+	AC_HELP_STRING([--with-dbusconfdir=PATH], [path to D-Bus config directory]),
+	[path_dbusconf=${withval}],
+	[
+		if test "$prefix" = "`$PKG_CONFIG --variable=prefix dbus-1`"
+		then path_dbusconf="`$PKG_CONFIG --variable=sysconfdir dbus-1`"
+		fi
+	]
+)
+if (test -z "${path_dbusconf}"); then
+	if test "${prefix}" = "/usr/local" && test "${sysconfdir}" = '${prefix}/etc' && test -d /etc/dbus-1/system.d
+	then DBUS_CONFDIR='/etc/dbus-1/system.d'
+	else DBUS_CONFDIR='${sysconfdir}/dbus-1/system.d'
+	fi
+else
+	[path_dbusconf="$(echo ${path_dbusconf} | sed 's:^'"${prefix}"':${prefix}:')" ; ]
+	[path_dbusconf="$(echo ${path_dbusconf} | sed 's:^'"${sysconfdir}"':${sysconfdir}:')" ; ]
+	DBUS_CONFDIR="${path_dbusconf}/dbus-1/system.d"
+fi
+AC_SUBST(DBUS_CONFDIR)
+AC_ARG_WITH(dbusdatadir, AC_HELP_STRING([--with-dbusdatadir=PATH],
+	[path to D-Bus data directory]), [path_dbusdata=${withval}],
+	[
+		if test "$prefix" = "`$PKG_CONFIG --variable=prefix dbus-1`"
+		then path_dbusdata="`$PKG_CONFIG --variable=datadir dbus-1`"
+		fi
+	]
+)
+if (test -z "${path_dbusdata}"); then
+	DBUS_DATADIR='${datadir}/dbus-1/system-services'
+else
+	[path_dbusconf="$(echo ${path_dbusdata} | sed 's:^'"${prefix}"':${prefix}:')" ; ]
+	[path_dbusconf="$(echo ${path_dbusdata} | sed 's:^'"${datadir}"':${datadir}:')" ; ]
+	DBUS_DATADIR="${path_dbusdata}/dbus-1/system-services"
+fi
+AC_SUBST(DBUS_DATADIR)
+
 AC_CONFIG_FILES([Makefile
 		 wd_identify
 		 contrib/systemd/watchdogd.service])
