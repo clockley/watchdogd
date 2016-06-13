@@ -21,8 +21,6 @@ AC_TYPE_PID_T
 
 AC_CHECK_FUNCS([strerror_l fpathconf dirfd openat fstatat snprintf getopt_long])
 
-AC_CACHE_SAVE
-
 #AC_CHECK_PROGS([M4], gm4 m4, no)
 #AS_IF([test "x$M4" = "xno"], AC_MSG_ERROR([m4 missing]))
 AX_NOT_ENABLE_FRAME_POINTER
