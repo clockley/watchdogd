@@ -29,14 +29,6 @@
 #     CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
 #     CC="$PTHREAD_CC"
 #
-#   In addition, if the PTHREAD_CREATE_JOINABLE thread-attribute constant
-#   has a nonstandard name, defines PTHREAD_CREATE_JOINABLE to that name
-#   (e.g. PTHREAD_CREATE_UNDETACHED on AIX).
-#
-#   Also HAVE_PTHREAD_PRIO_INHERIT is defined if pthread is found and the
-#   PTHREAD_PRIO_INHERIT symbol is defined when compiling with
-#   PTHREAD_CFLAGS.
-#
 #   ACTION-IF-FOUND is a list of shell commands to run if a threads library
 #   is found, and ACTION-IF-NOT-FOUND is a list of commands to run it if it
 #   is not found. If ACTION-IF-FOUND is not specified, the default action
@@ -123,7 +115,7 @@ fi
 # which indicates that we try without any flags at all, and "pthread-config"
 # which is a program returning the flags for the Pth emulation library.
 
-ax_pthread_flags="pthreads none -Kthread -kthread lthread -pthread -pthreads -mthreads pthread --thread-safe -mt pthread-config"
+ax_pthread_flags="pthreads none -kthread -pthread -pthreads -mthreads pthread"
 
 # The ordering *is* (sometimes) important.  Some notes on the
 # individual items follow:
@@ -131,38 +123,11 @@ ax_pthread_flags="pthreads none -Kthread -kthread lthread -pthread -pthreads -mt
 # pthreads: AIX (must check this before -lpthread)
 # none: in case threads are in libc; should be tried before -Kthread and
 #       other compiler flags to prevent continual compiler warnings
-# -Kthread: Sequent (threads in libc, but -Kthread needed for pthread.h)
 # -kthread: FreeBSD kernel threads (preferred to -pthread since SMP-able)
 # lthread: LinuxThreads port on FreeBSD (also preferred to -pthread)
 # -pthread: Linux/gcc (kernel threads), BSD/gcc (userland threads)
 # -pthreads: Solaris/gcc
-# -mthreads: Mingw32/gcc, Lynx/gcc
-# -mt: Sun Workshop C (may only link SunOS threads [-lthread], but it
-#      doesn't hurt to check since this sometimes defines pthreads too;
-#      also defines -D_REENTRANT)
-#      ... -mt is also the pthreads flag for HP/aCC
 # pthread: Linux, etcetera
-# --thread-safe: KAI C++
-# pthread-config: use pthread-config program (for GNU Pth library)
-
-case ${host_os} in
-        solaris*)
-
-        # On Solaris (at least, for some versions), libc contains stubbed
-        # (non-functional) versions of the pthreads routines, so link-based
-        # tests will erroneously succeed.  (We need to link with -pthreads/-mt/
-        # -lpthread.)  (The stubs are missing pthread_cleanup_push, or rather
-        # a function called by this macro, so we could check for that, but
-        # who knows whether they'll stub that too in a future libc.)  So,
-        # we'll just look for -pthreads and -lpthread first:
-
-        ax_pthread_flags="-pthreads pthread -mt -pthread $ax_pthread_flags"
-        ;;
-
-        darwin*)
-        ax_pthread_flags="-pthread $ax_pthread_flags"
-        ;;
-esac
 
 if test x"$ax_pthread_ok" = xno; then
 for flag in $ax_pthread_flags; do
@@ -175,13 +140,6 @@ for flag in $ax_pthread_flags; do
                 -*)
                 AC_MSG_CHECKING([whether pthreads work with $flag])
                 PTHREAD_CFLAGS="$flag"
-                ;;
-
-                pthread-config)
-                AC_CHECK_PROG(ax_pthread_config, pthread-config, yes, no)
-                if test x"$ax_pthread_config" = xno; then continue; fi
-                PTHREAD_CFLAGS="`pthread-config --cflags`"
-                PTHREAD_LIBS="`pthread-config --ldflags` `pthread-config --libs`"
                 ;;
 
                 *)
@@ -236,27 +194,10 @@ if test "x$ax_pthread_ok" = xyes; then
         save_CFLAGS="$CFLAGS"
         CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
 
-        # Detect AIX lossage: JOINABLE attribute is called UNDETACHED.
-        AC_MSG_CHECKING([for joinable pthread attribute])
-        attr_name=unknown
-        for attr in PTHREAD_CREATE_JOINABLE PTHREAD_CREATE_UNDETACHED; do
-            AC_LINK_IFELSE([AC_LANG_PROGRAM([#include <pthread.h>],
-                           [int attr = $attr; return attr /* ; */])],
-                [attr_name=$attr; break],
-                [])
-        done
-        AC_MSG_RESULT($attr_name)
-        if test "$attr_name" != PTHREAD_CREATE_JOINABLE; then
-            AC_DEFINE_UNQUOTED(PTHREAD_CREATE_JOINABLE, $attr_name,
-                               [Define to necessary symbol if this constant
-                                uses a non-standard name on your system.])
-        fi
-
         AC_MSG_CHECKING([if more special flags are required for pthreads])
         flag=no
         case ${host_os} in
             aix* | freebsd* | darwin*) flag="-D_THREAD_SAFE";;
-            osf* | hpux*) flag="-D_REENTRANT";;
             solaris*)
             if test "$GCC" = "yes"; then
                 flag="-D_REENTRANT"
@@ -270,33 +211,9 @@ if test "x$ax_pthread_ok" = xyes; then
             PTHREAD_CFLAGS="$flag $PTHREAD_CFLAGS"
         fi
 
-        AC_CACHE_CHECK([for PTHREAD_PRIO_INHERIT],
-            ax_cv_PTHREAD_PRIO_INHERIT, [
-                AC_LINK_IFELSE([
-                    AC_LANG_PROGRAM([[#include <pthread.h>]], [[int i = PTHREAD_PRIO_INHERIT;]])],
-                    [ax_cv_PTHREAD_PRIO_INHERIT=yes],
-                    [ax_cv_PTHREAD_PRIO_INHERIT=no])
-            ])
-        AS_IF([test "x$ax_cv_PTHREAD_PRIO_INHERIT" = "xyes"],
-            AC_DEFINE([HAVE_PTHREAD_PRIO_INHERIT], 1, [Have PTHREAD_PRIO_INHERIT.]))
-
         LIBS="$save_LIBS"
         CFLAGS="$save_CFLAGS"
 
-        # More AIX lossage: compile with *_r variant
-        if test "x$GCC" != xyes; then
-            case $host_os in
-                aix*)
-                AS_CASE(["x/$CC"],
-                  [x*/c89|x*/c89_128|x*/c99|x*/c99_128|x*/cc|x*/cc128|x*/xlc|x*/xlc_v6|x*/xlc128|x*/xlc128_v6],
-                  [#handle absolute path differently from PATH based program lookup
-                   AS_CASE(["x$CC"],
-                     [x/*],
-                     [AS_IF([AS_EXECUTABLE_P([${CC}_r])],[PTHREAD_CC="${CC}_r"])],
-                     [AC_CHECK_PROGS([PTHREAD_CC],[${CC}_r],[$CC])])])
-                ;;
-            esac
-        fi
 fi
 
 test -n "$PTHREAD_CC" || PTHREAD_CC="$CC"
