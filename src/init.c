@@ -21,6 +21,10 @@
 #include "testdir.h"
 #include "multicall.h"
 
+#ifndef SCHED_RESET_ON_FORK
+	#define SCHED_RESET_ON_FORK 0x40000000
+#endif
+
 int SetSchedulerPolicy(int priority)
 {
 	struct sched_param param;
