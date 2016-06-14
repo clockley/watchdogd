@@ -26,10 +26,6 @@ int SetSchedulerPolicy(int priority)
 	struct sched_param param;
 	param.sched_priority = priority;
 
-#ifndef SCHED_RESET_ON_FORK
-#define SCHED_RESET_ON_FORK 0
-#endif
-
 	if (sched_setscheduler(0, SCHED_RR|SCHED_RESET_ON_FORK, &param) < 0) {
 		assert(errno != ESRCH);
 		fprintf(stderr, "watchdogd: sched_setscheduler failed %s\n",
