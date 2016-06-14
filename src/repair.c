@@ -54,8 +54,10 @@ static bool ParseConfigfile(char *name, char *value, spawnattr_t * obj)
 		obj->umask = ConvertStringToInt(tmp);
 		if (errno != 0) {
 			Logmsg(LOG_ERR, "error parsing configfile option \"Umask\": %s", MyStrerror(errno));
+			free(tmp);
 			return false;
 		}
+		free(tmp);
 		obj->hasUmask = true;
 	}
 
