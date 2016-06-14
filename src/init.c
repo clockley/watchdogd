@@ -277,7 +277,6 @@ static void PrintHelpIdentify(void)
 		while (tmp != NULL) {
 			len += strlen(tmp);
 			if (len > col) {
-				len = 0;
 				if (col < 80) {
 					printf("\n");
 				}
@@ -356,7 +355,6 @@ static void PrintHelpMain(void)
 		while (tmp != NULL) {
 			len += strlen(tmp);
 			if (len > col) {
-				len = 0;
 				if (col < 80) {
 					printf("\n");
 				}
