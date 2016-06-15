@@ -10,8 +10,6 @@
 #else
 extern int snprintf(char *, size_t, const char *, /*args*/ ...);
 extern int vsnprintf(char *, size_t, const char *, va_list);
-extern int portable_snprintf(char *str, size_t str_m, const char *fmt, /*args*/ ...);
-extern int portable_vsnprintf(char *str, size_t str_m, const char *fmt, va_list ap);
 #endif
 
 #if defined(HAVE_SNPRINTF) && defined(PREFER_PORTABLE_SNPRINTF)

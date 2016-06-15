@@ -19,6 +19,8 @@
 #define MAX_CLIENT_ID 4096
 typedef uint64_t usec_t;
 
+static watchdog_t * watchdog = NULL;
+static struct cfgoptions *config  = NULL;
 static sd_event *event = NULL;
 static sd_bus *bus = NULL;
 
@@ -30,7 +32,6 @@ static _Atomic(int) lastAllocatedId = 0;
 static _Atomic(int) openSlots = MAX_CLIENT_ID;
 static _Atomic(int) lastFreedSlot = -1;
 
-static int socketHnd = 0;
 static long firmwareVersion = 0;
 static long watchdogTimeout = 0;
 static char * identity  = NULL;
@@ -42,6 +43,7 @@ static const sd_bus_vtable watchdogPmon[] = {
         SD_BUS_METHOD("Version", "", "x", Version, 0),
         SD_BUS_METHOD("GetTimeout", "", "x", GetTimeoutDbus, 0),
         SD_BUS_METHOD("GetTimeleft", "", "x", GetTimeleftDbus, 0),
+        SD_BUS_METHOD("GetFlags", "", "t", GetFlags, 0),
         SD_BUS_METHOD("PmonInit", "t", "u", PmonInit, 0),
         SD_BUS_METHOD("PmonPing", "u", "b", PmonPing, 0),
         SD_BUS_METHOD("PmonRemove", "u", "b", PmonRemove, 0),
@@ -50,6 +52,7 @@ static const sd_bus_vtable watchdogPmon[] = {
 
 static int Timeout(sd_event_source *source, usec_t usec, void *userdata) 
 {
+	Shutdown(9221996, config);
 	return -1;
 }
 
@@ -136,27 +139,32 @@ static int PmonInit(sd_bus_message *m, void *userdata, sd_bus_error *retError)
 
 static int DevicePath(sd_bus_message *m, void *userdata, sd_bus_error *retError)
 {
-	return sd_bus_reply_method_return(m, "s", "44");
+	return sd_bus_reply_method_return(m, "s", watchdog->path);
 }
 
 static int Identity(sd_bus_message *m, void *userdata, sd_bus_error *retError)
 {
-	return sd_bus_reply_method_return(m, "s", "44");
+	return sd_bus_reply_method_return(m, "s", identity);
 }
 
 static int Version(sd_bus_message *m, void *userdata, sd_bus_error *retError)
 {
-	return sd_bus_reply_method_return(m, "x", 44);
+	return sd_bus_reply_method_return(m, "x", firmwareVersion);
 }
 
 static int GetTimeoutDbus(sd_bus_message *m, void *userdata, sd_bus_error *retError)
 {
-	return sd_bus_reply_method_return(m, "x", 44);
+	return sd_bus_reply_method_return(m, "x", watchdogTimeout);
+}
+
+static int GetFlags(sd_bus_message *m, void *userdata, sd_bus_error *retError)
+{
+	return sd_bus_reply_method_return(m, "t", GetWatchdogStatus(watchdog));
 }
 
 static int GetTimeleftDbus(sd_bus_message *m, void *userdata, sd_bus_error *retError)
 {
-	return sd_bus_reply_method_return(m, "x", 44);
+	return sd_bus_reply_method_return(m, "x", GetTimeleft(watchdog));
 }
 
 static int BusHandler(sd_event_source *es, int fd, uint32_t revents, void *userdata)
@@ -165,13 +173,16 @@ static int BusHandler(sd_event_source *es, int fd, uint32_t revents, void *userd
 	return 1;
 }
 
-void DbusApiInit(int fd)
+void * DbusApiInit(void * arg)
 {
-	socketHnd = fd;
-
+	struct dbusinfo *t = arg;
 	sd_event_source *busSource = NULL;
 	sd_bus_slot *slot = NULL;
-
+	watchdog = *t->watchdog;
+	config = *t->config;
+	firmwareVersion = GetFirmwareVersion(watchdog);
+	identity = GetWatchdogIdentity(watchdog);
+	watchdogTimeout = GetRawTimeout(watchdog);
 	int ret = sd_event_default(&event);
 
 	ret = sd_bus_open_system(&bus);
@@ -183,4 +194,6 @@ void DbusApiInit(int fd)
 	sd_event_add_io(event, &busSource, sd_bus_get_fd(bus), EPOLLIN, BusHandler, NULL);
 
 	sd_event_loop(event);
+
+	return NULL;
 }

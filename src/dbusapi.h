@@ -23,7 +23,7 @@
 #include <systemd/sd-bus.h>
 #include <systemd/sd-event.h>
 
-void DbusApiInit(int);
+void *DbusApiInit(void *);
 #ifdef DBUSAPI_PROTOTYPES
 static int DevicePath(sd_bus_message *, void *, sd_bus_error *);
 static int Identity(sd_bus_message *, void *, sd_bus_error *);

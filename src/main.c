@@ -40,7 +40,7 @@ int main(int argc, char **argv)
 	struct cfgoptions options;
 	struct cfgoptions *tmp = &options;
 	watchdog_t *watchdog = NULL;
-	struct dbusinfo temp = {.watchdog = &watchdog, .config = &tmp,. socket = -1};
+	struct dbusinfo temp = {.watchdog = &watchdog, .config = &tmp};
 	if (SetDefaultConfig(&options) == false) {
 		return EXIT_FAILURE;
 	}
@@ -163,21 +163,10 @@ int main(int argc, char **argv)
 		strncpy(i.deviceName, options.devicepath, sizeof(i.deviceName) - 1);
 		i.flags = GetWatchdogStatus(watchdog);
 		i.firmwareVersion = GetFirmwareVersion(watchdog);
+		
 		CreateDetachedThread(IdentityThread, &i);
 
-		int dbusApiSocket[2] = {-1};
-		socketpair(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC, 0, dbusApiSocket);
-
-		pid_t pid = fork();
-
-		if (pid == 0) {
-			close(dbusApiSocket[1]);
-			DbusApiInit(dbusApiSocket[0]);
-			_Exit(0);
-		}
-
-		close(dbusApiSocket[0]);
-
+		CreateDetachedThread(DbusApiInit, &temp);
 	} else {
 		if (options.sleeptime == -1) {
 			options.sleeptime = 60;
