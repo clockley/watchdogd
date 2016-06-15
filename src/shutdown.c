@@ -123,8 +123,10 @@ static void WriteUtmpx(int reboot)
 	strncpy(utmpxStruct.ut_id, "~~", sizeof(utmpxStruct.ut_id) - 1);
 	utmpxStruct.ut_pid = 0;
 	utmpxStruct.ut_type = RUN_LVL;
-	gettimeofday(&utmpxStruct.ut_tv, NULL);
-
+	struct timeval tv = {0};
+	gettimeofday(&tv, NULL);
+	utmpxStruct.ut_tv.tv_sec = tv.tv_sec;
+	utmpxStruct.ut_tv.tv_usec = tv.tv_usec;
 	setutxent();
 
 	pututxline(&utmpxStruct);
