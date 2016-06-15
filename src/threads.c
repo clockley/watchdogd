@@ -26,6 +26,7 @@
 #include "testdir.h"
 #include "exe.h"
 #include "network_tester.h"
+#include "dbusapi.h"
 
 extern volatile sig_atomic_t stop;
 static pthread_mutex_t managerlock = PTHREAD_MUTEX_INITIALIZER;
@@ -36,6 +37,56 @@ static pthread_once_t getPageSize = PTHREAD_ONCE_INIT;
 static void GetPageSize(void)
 {
 	pageSize = sysconf(_SC_PAGESIZE);
+}
+
+void *DbusHelper(void * arg)
+{
+	struct dbusinfo * info = arg;
+	unsigned int cmd = 0;
+
+	while (true) {
+		int ret = read(info->fd, &cmd, sizeof(unsigned int));
+		if (ret < 0 && errno != EINTR) {
+			break;
+		}
+		switch (cmd) {
+			case DBUSGETIMOUT:
+				{
+					int timeout = GetRawTimeout(*info->watchdog);
+					write(info->fd, &timeout, sizeof(int));
+				};
+				break;
+			case DBUSTIMELEFT:
+				{
+					int timeleft = GetTimeleft(*info->watchdog);
+					write(info->fd, &timeleft, sizeof(int));
+				};
+				break;
+			case DBUSGETPATH:
+				{
+					watchdog_t * tmp = *info->watchdog;
+					write(info->fd, tmp->path, strlen(tmp->path));
+				};
+				break;
+			case DBUSVERSION:
+				{
+					long tmp = GetFirmwareVersion(*info->watchdog);
+					write(info->fd, &tmp, sizeof(tmp));
+				};
+				break;
+			case DBUSGETNAME:
+				{
+					char *tmp = GetWatchdogIdentity(*info->watchdog);
+					write(info->fd, tmp, strlen(tmp));
+				};
+				break;
+			case DBUSHUTDOWN:
+				{
+					Shutdown(9221996, *info->config);
+				};
+				break;
+		}
+	}
 }
 
 static void *ServiceManagerKeepAliveNotification(void * arg)

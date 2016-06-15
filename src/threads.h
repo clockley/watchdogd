@@ -1,5 +1,6 @@
 #if !defined(THREADS_H)
 #define THREADS_H
+void *DbusHelper(void *);
 int StartHelperThreads(struct cfgoptions *options);
 int StartServiceManagerKeepAliveNotification(void *arg);
 int SetupLogTick(void *arg);

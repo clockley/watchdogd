@@ -180,6 +180,7 @@ struct dbusinfo
 {
 	struct cfgoptions **config;
 	struct watchdogDevice **watchdog;
+	int fd;
 };
 
 struct identinfo {
@@ -208,6 +209,13 @@ enum logTarget_t {
 	FILE_APPEND,
 	FILE_NEW,
 };
+
+#define DBUSGETIMOUT 1
+#define DBUSTIMELEFT 2
+#define DBUSGETPATH  3
+#define DBUSGETNAME  5
+#define DBUSVERSION  6
+#define DBUSHUTDOWN  7
 
 #include "linux.h"
 

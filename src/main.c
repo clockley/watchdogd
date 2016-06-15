@@ -165,8 +165,18 @@ int main(int argc, char **argv)
 		i.firmwareVersion = GetFirmwareVersion(watchdog);
 		
 		CreateDetachedThread(IdentityThread, &i);
+		int sock[2] = {0};
+		socketpair(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC, 0, sock);
+		temp.fd = sock[1];
+		CreateDetachedThread(DbusHelper, &temp);
 
-		CreateDetachedThread(DbusApiInit, &temp);
+		pid_t pid = fork();
+
+		if (pid == 0) {
+			DbusApiInit(sock[0]);
+			_Exit(0);
+		}
+
 	} else {
 		if (options.sleeptime == -1) {
 			options.sleeptime = 60;
