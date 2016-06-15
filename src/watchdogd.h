@@ -123,6 +123,7 @@ struct cfgoptions {
 #ifndef __cplusplus
 	volatile _Atomic(unsigned int) error;
 #else
+#include <atomic>
 	std::atomic<unsigned int> error;
 #endif
 #define SCRIPTFAILED 0x1
@@ -180,6 +181,7 @@ struct dbusinfo
 {
 	struct cfgoptions **config;
 	struct watchdogDevice **watchdog;
+	int socket;
 };
 
 struct identinfo {
