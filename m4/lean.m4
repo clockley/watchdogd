@@ -31,7 +31,6 @@ AC_DEFUN([AM_SANITY_CHECK], [ ])
 
 # Checking for C89 compliance nowadays is just plain silly.
 AC_DEFUN([_AC_PROG_CC_C89], [ true ])
-AC_DEFUN([AC_PROG_INSTALL], [ true ])
 
 # For the same reason, checking for C standard headers is usually stupid.
 # However, we simply avoid checking for them in the most ridiculous cases.
