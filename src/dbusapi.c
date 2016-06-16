@@ -33,7 +33,10 @@ static _Atomic(int) lastFreedSlot = -1;
 static long firmwareVersion = 0;
 static long watchdogTimeout = 0;
 static int fd = 0;
-static char * identity  = NULL;
+static char identity[64] = {'0'};
+static char path[64] = {'0'};
+static long version = 0;
+static long timeout = 0;
 
 static const sd_bus_vtable watchdogPmon[] = {
         SD_BUS_VTABLE_START(0),
@@ -138,48 +141,62 @@ static int PmonInit(sd_bus_message *m, void *userdata, sd_bus_error *retError)
 	return sd_bus_reply_method_return(m, "u", id);
 }
 
-static int DevicePath(sd_bus_message *m, void *userdata, sd_bus_error *retError)
+static void DevicePathInit(void)
 {
 	int cmd = DBUSGETPATH;
-	char buf[64] = {0};
 
 	write(fd, &cmd, sizeof(int));
-	read(fd, buf, sizeof(buf));
+	read(fd, path, sizeof(path));
+}
 
-	return sd_bus_reply_method_return(m, "s", buf);
+static int DevicePath(sd_bus_message *m, void *userdata, sd_bus_error *retError)
+{
+	static pthread_once_t initPath = PTHREAD_ONCE_INIT;
+	pthread_once(&initPath, DevicePathInit);
+	return sd_bus_reply_method_return(m, "s", path);
+}
+
+static void IdentityInit(void)
+{
+	int cmd = DBUSGETNAME;
+	write(fd, &cmd, sizeof(int));
+	read(fd, identity, sizeof(identity));
 }
 
 static int Identity(sd_bus_message *m, void *userdata, sd_bus_error *retError)
 {
-	int cmd = DBUSGETNAME;
-	char buf[64] = {0};
+	static pthread_once_t initIdentity = PTHREAD_ONCE_INIT;
+	pthread_once(&initIdentity, IdentityInit);
+	return sd_bus_reply_method_return(m, "s", identity);
+}
 
-	write(fd, &cmd, sizeof(int));
-	read(fd, buf, sizeof(buf));
-
-	return sd_bus_reply_method_return(m, "s", buf);
+static void VersionInit(void)
+{
+	int cmd = DBUSVERSION;
+	write(fd, &cmd, sizeof(long));
+	read(fd, &version, sizeof(long));
 }
 
 static int Version(sd_bus_message *m, void *userdata, sd_bus_error *retError)
 {
-	int cmd = DBUSVERSION;
-	long buf = 0;
+	static pthread_once_t initVersion = PTHREAD_ONCE_INIT;
+	pthread_once(&initVersion, VersionInit);
+	return sd_bus_reply_method_return(m, "x", version);
+}
+
+static void InitGetTimeoutDbus(void)
+{
+	int cmd = DBUSGETIMOUT;
 
 	write(fd, &cmd, sizeof(long));
-	read(fd, &buf, sizeof(long));
-
-	return sd_bus_reply_method_return(m, "x", buf);
+	read(fd, &timeout, sizeof(long));
 }
 
 static int GetTimeoutDbus(sd_bus_message *m, void *userdata, sd_bus_error *retError)
 {
-	int cmd = DBUSGETIMOUT;
-	long buf = 0;
-
-	write(fd, &cmd, sizeof(long));
-	read(fd, &buf, sizeof(long));
-
-	return sd_bus_reply_method_return(m, "x", buf);
+	static pthread_once_t initTimeout = PTHREAD_ONCE_INIT;
+	pthread_once(&initTimeout, InitGetTimeoutDbus);
+	return sd_bus_reply_method_return(m, "x", timeout);
 }
 
 static int GetTimeleftDbus(sd_bus_message *m, void *userdata, sd_bus_error *retError)
