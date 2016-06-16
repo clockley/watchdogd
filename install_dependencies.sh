@@ -39,7 +39,7 @@ fi
 
 if [ $ID == "opensuse" ]
 then
-	$SUDO zypper install -yl libconfig-devel zlib-devel automake autoconf libmount-devel gcc make liboping-devel systemd-devel
+	su -c ' zypper install -yl libconfig-devel zlib-devel automake autoconf libmount-devel gcc make liboping-devel systemd-devel'
 	exit
 fi
 
