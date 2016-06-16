@@ -173,6 +173,10 @@ int main(int argc, char **argv)
 		pid_t pid = fork();
 
 		if (pid == 0) {
+			if (options.options & REALTIME) {
+				SetSchedulerPolicy(options.priority);
+			}
+
 			DbusApiInit(sock[0]);
 			_Exit(0);
 		}
