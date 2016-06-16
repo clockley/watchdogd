@@ -180,6 +180,7 @@ struct dbusinfo
 {
 	struct cfgoptions **config;
 	struct watchdogDevice **watchdog;
+	pid_t childPid;
 	int fd;
 };
 

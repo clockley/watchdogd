@@ -98,6 +98,7 @@ int main(int argc, char **argv)
 	pid_t pid = fork();
 
 	if (pid == 0) {
+		OnParentDeathSend(SIGKILL);
 		close(sock[1]);
 		if (options.options & REALTIME) {
 			SetSchedulerPolicy(options.priority);
@@ -106,6 +107,8 @@ int main(int argc, char **argv)
 		DbusApiInit(sock[0]);
 		_Exit(0);
 	}
+
+	temp.childPid = pid;
 
 	close(sock[0]);
 
