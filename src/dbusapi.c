@@ -223,6 +223,8 @@ void DbusApiInit(int sock)
 	sd_bus_slot *slot = NULL;
 
 	int ret = sd_event_default(&event);
+	char tmp = '0';
+	read(fd, &tmp, sizeof(char));
 
 	ret = sd_bus_open_system(&bus);
 
