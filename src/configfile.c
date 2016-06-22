@@ -201,7 +201,7 @@ int ReadConfigurationFile(struct cfgoptions *const cfg)
 	int tmp = 0;
 
 	if (LoadConfigurationFile(&cfg->cfg, cfg->confile, cfg) == false) {
-		CreateLinkedListOfExes(cfg->testexepath, &processes, cfg);
+		CreateLinkedListOfExes((char*)cfg->testexepath, &processes, cfg);
 		return -1;
 	}
 
@@ -294,7 +294,7 @@ int ReadConfigurationFile(struct cfgoptions *const cfg)
 	if (MakeLogDir(cfg) < 0)
 		return -1;
 
-	if (CreateLinkedListOfExes(cfg->testexepath, &processes, cfg) < 0) {
+	if (CreateLinkedListOfExes((char*)cfg->testexepath, &processes, cfg) < 0) {
 		fprintf(stderr, "watchdogd: CreateLinkedListOfExes failed\n");
 		return -1;
 	}
