@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([watchdogd],[1.1.1],[clockley1@gmail.com])
+AC_INIT([watchdogd],[1.1.2],[clockley1@gmail.com])
 AM_INIT_AUTOMAKE([1.14.1] [foreign subdir-objects])
 AM_SILENT_RULES([yes])
 AC_CONFIG_MACRO_DIR([m4])
