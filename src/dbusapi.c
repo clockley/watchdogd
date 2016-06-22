@@ -30,8 +30,6 @@ static _Atomic(int) lastAllocatedId = 0;
 static _Atomic(int) openSlots = MAX_CLIENT_ID;
 static _Atomic(int) lastFreedSlot = -1;
 
-static long firmwareVersion = 0;
-static long watchdogTimeout = 0;
 static int fd = 0;
 static char identity[64] = {'0'};
 static char path[64] = {'0'};

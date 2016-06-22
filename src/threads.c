@@ -87,6 +87,8 @@ void *DbusHelper(void * arg)
 				break;
 		}
 	}
+
+	return NULL;
 }
 
 static void *ServiceManagerKeepAliveNotification(void * arg)
