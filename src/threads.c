@@ -76,8 +76,8 @@ void *DbusHelper(void * arg)
 				break;
 			case DBUSGETNAME:
 				{
-					char *tmp = GetWatchdogIdentity(*info->watchdog);
-					write(info->fd, tmp, strlen(tmp));
+					unsigned char *tmp = GetWatchdogIdentity(*info->watchdog);
+					write(info->fd, tmp, strlen((char *)tmp));
 				};
 				break;
 			case DBUSHUTDOWN:

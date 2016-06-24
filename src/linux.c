@@ -97,7 +97,7 @@ bool PrintWdtInfo(watchdog_t * const wdt)
 	return false;
 }
 
-char * GetWatchdogIdentity(watchdog_t * const wdt)
+unsigned char *GetWatchdogIdentity(watchdog_t * const wdt)
 {
 	static struct watchdog_info watchDogInfo;
 
