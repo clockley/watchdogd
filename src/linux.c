@@ -89,8 +89,13 @@ bool PrintWdtInfo(watchdog_t * const wdt)
 	if (ioctl(GetFd(wdt), WDIOC_GETSUPPORT, &watchDogInfo) < 0) {
 		Logmsg(LOG_ERR, "%s", MyStrerror(errno));
 	} else {
-		Logmsg(LOG_DEBUG, "Hardware watchdog '%s', version %lu",
-		       watchDogInfo.identity, watchDogInfo.firmware_version);
+		if (strcasecmp(watchDogInfo.identity, "software watchdog") != 0) {
+			Logmsg(LOG_DEBUG, "Hardware watchdog '%s', version %lu",
+			       watchDogInfo.identity, watchDogInfo.firmware_version);
+		} else {
+			Logmsg(LOG_DEBUG, "%s, version %lu",
+			       watchDogInfo.identity, watchDogInfo.firmware_version);
+		}
 		return true;
 	}
 
