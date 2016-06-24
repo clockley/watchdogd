@@ -141,7 +141,7 @@ watchdog_t *OpenWatchdog(const char *const path)
 		       "watchdog device does not support magic close char");
 	}
 
-	strcpy(watchdog->path, path);
+	strcpy((char *)watchdog->path, path);
 
 	PrintWdtInfo(watchdog);
 	return watchdog;
