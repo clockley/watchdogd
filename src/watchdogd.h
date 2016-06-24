@@ -3,7 +3,8 @@
 #define _XOPEN_SOURCE 700
 #define _ISOC11_SOURCE
 #define _FILE_OFFSET_BITS 64
-
+#define PREFER_PORTABLE_SNPRINTF
+#define HAVE_SNPRINTF
 #include <assert.h>
 #include <config.h>
 #include <ctype.h>
