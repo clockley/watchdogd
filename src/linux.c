@@ -834,7 +834,7 @@ bool LoadKernelModule(void)
 {
 	pid_t pid = fork();
 	if (pid == 0) {
-		if (execl("/sbin/modprobe", "modprobe", "softdog") == -1) {
+		if (execl("/sbin/modprobe", "modprobe", "softdog", NULL) == -1) {
 			_Exit(1);
 		}
 	}
