@@ -321,7 +321,7 @@ static void * __ExecScriptWorkerThread(void *a)
 	return NULL;
 }
 
-static void __WaitForWorkers(struct cfgoptions *s, Container const *container)
+static void __WaitForWorkers(Container const *container)
 {
 	while (container->workerThreadCount != 0) {
 		sleep(1);
@@ -353,7 +353,7 @@ static int __ExecuteRepairScripts(void *a)
 	c = NULL;
 	next = NULL;
 
-	__WaitForWorkers(s, &container);
+	__WaitForWorkers(&container);
 
 	list_for_each_entry(c, next, &p->head, entry) {
 		if (c->ret == 0) {
@@ -371,7 +371,7 @@ static int __ExecuteRepairScripts(void *a)
 		sem = 0;
 	}
 
-	__WaitForWorkers(s, &container);
+	__WaitForWorkers(&container);
 
 	c = NULL;
 	next = NULL;
