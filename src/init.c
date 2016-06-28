@@ -133,6 +133,12 @@ int ParseCommandLine(int *argc, char **argv, struct cfgoptions *cfg)
 	}
 
 	if (optind < *argc) {
+		struct stat buf = {0};
+		stat(argv[optind], &buf);
+		if (!S_ISCHR(buf.st_mode)) {
+			fprintf(stderr, "watchdogd: %s is an invalid device file\n", argv[optind]);
+			return -1;
+		}
 		cfg->devicepath = argv[optind];
 		cfg->options |= BUSYBOXDEVOPTCOMPAT;
 	}
