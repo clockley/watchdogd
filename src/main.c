@@ -210,9 +210,13 @@ int main(int argc, char **argv)
 
 	assert(options.sleeptime >= 1);
 
+	pthread_sigmask(SIG_SETMASK, &set, NULL);
+
 	if (SetupAuxManagerThread(&options) < 0) {
 		FatalError(&options);
 	}
+
+	pthread_sigmask(SIG_SETMASK, &oldSet, NULL);
 
 	if (PlatformInit() != true) {
 		FatalError(&options);
