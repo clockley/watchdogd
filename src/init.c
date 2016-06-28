@@ -79,6 +79,7 @@ int ParseCommandLine(int *argc, char **argv, struct cfgoptions *cfg)
 			    &tmp)) != -1) {
 
 		switch (opt) {
+		case 'n':
 		case 'd':
 		case 'F':
 			cfg->options &= !DAEMONIZE;
@@ -89,7 +90,6 @@ int ParseCommandLine(int *argc, char **argv, struct cfgoptions *cfg)
 		case 's':
 			cfg->options |= SYNC;
 			break;
-		case 'n':
 		case 'q':
 			cfg->options |= NOACTION;
 			break;
@@ -130,6 +130,11 @@ int ParseCommandLine(int *argc, char **argv, struct cfgoptions *cfg)
 			}
 			return -1;
 		}
+	}
+
+	if (optind < *argc) {
+		cfg->devicepath = argv[optind];
+		cfg->options |= BUSYBOXDEVOPTCOMPAT;
 	}
 
 	return 0;

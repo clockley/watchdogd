@@ -207,9 +207,11 @@ int ReadConfigurationFile(struct cfgoptions *const cfg)
 
 	config_set_auto_convert(&cfg->cfg, true);
 
-	if (config_lookup_string(&cfg->cfg, "watchdog-device", &cfg->devicepath)
-	    == CONFIG_FALSE) {
-		cfg->devicepath = "/dev/watchdog";
+	if (!(cfg->options & BUSYBOXDEVOPTCOMPAT)) {
+		if (config_lookup_string(&cfg->cfg, "watchdog-device", &cfg->devicepath)
+		    == CONFIG_FALSE) {
+			cfg->devicepath = "/dev/watchdog";
+		}
 	}
 	
 	if (cfg->options & IDENTIFY) {

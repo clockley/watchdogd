@@ -101,7 +101,7 @@ struct cfgoptions {
 	int sigtermDelay;
 	unsigned long minfreepages;
 
-	unsigned int options;
+	unsigned long options;
 #define SOFTBOOT 0x1
 #define SYNC 0x2
 #define USEPIDFILE 0x4
@@ -114,6 +114,7 @@ struct cfgoptions {
 #define REALTIME 0x200
 #define VERBOSE 0x400
 #define IDENTIFY 0x800
+#define BUSYBOXDEVOPTCOMPAT 0x1000
 
 	int priority;
 	int watchdogTimeout;
