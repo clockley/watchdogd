@@ -330,26 +330,6 @@ int GetRawTimeout(watchdog_t * const wdt)
 	return timeout;
 }
 
-static int LegacyOutOfMemoryKillerConfig(void)
-{
-	int fd = open("/proc/self/om_adj", O_WRONLY);
-
-	if (fd < 0) {
-		Logmsg(LOG_ERR, "open failed: %s", MyStrerror(errno));
-		return -1;
-	}
-
-	if (write(fd, "-17", strlen("-17")) < 0) {
-		Logmsg(LOG_ERR, "write failed: %s", MyStrerror(errno));
-		close(fd);
-		return -1;
-	} else {
-		close(fd);
-	}
-
-	return 0;
-}
-
 static int ConfigureKernelOutOfMemoryKiller(void)
 {
 	int fd = 0;
@@ -368,10 +348,6 @@ static int ConfigureKernelOutOfMemoryKiller(void)
 		Logmsg(LOG_ERR, "open failed: %s", MyStrerror(errno));
 
 		close(dfd);
-
-		if (LegacyOutOfMemoryKillerConfig() == 0) {
-			return 0;
-		}
 
 		return -1;
 	}
