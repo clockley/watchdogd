@@ -112,9 +112,17 @@ int main(int argc, char **argv)
 
 	close(sock[0]);
 
+	sigset_t set = {0};
+	sigset_t oldSet = {0};
+	sigfillset(&set);
+
+	pthread_sigmask(SIG_SETMASK, &set, &oldSet);
+
 	if (StartHelperThreads(&options) != 0) {
 		FatalError(&options);
 	}
+
+	pthread_sigmask(SIG_SETMASK, &oldSet, NULL);
 
 	if (!(options.options & NOACTION)) {
 		watchdog = OpenWatchdog(options.devicepath);
@@ -184,9 +192,14 @@ int main(int argc, char **argv)
 		strncpy(i.deviceName, options.devicepath, sizeof(i.deviceName) - 1);
 		i.flags = GetWatchdogStatus(watchdog);
 		i.firmwareVersion = GetFirmwareVersion(watchdog);
-		
+
+		pthread_sigmask(SIG_SETMASK, &set, NULL);
+
 		CreateDetachedThread(IdentityThread, &i);
 		CreateDetachedThread(DbusHelper, &temp);
+
+		pthread_sigmask(SIG_SETMASK, &oldSet, NULL);
+
 		write(sock[1], "", sizeof(char));
 
 	} else {
