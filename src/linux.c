@@ -256,6 +256,8 @@ int ConfigureWatchdogTimeout(watchdog_t * const watchdog, int timeout)
 			oldTimeout);
 	}
 
+	SetTimeout(watchdog, timeout);
+
 	if (EnableWatchdog(watchdog) < 0) {
 		return -1;
 	}
