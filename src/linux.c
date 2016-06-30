@@ -46,13 +46,6 @@ int CloseWatchdog(watchdog_t * const watchdog)
 		return -1;
 	}
 
-	int options = WDIOS_DISABLECARD;
-
-	if (ioctl(GetFd(watchdog), WDIOC_SETOPTIONS, &options) < 0) {
-		Logmsg(LOG_CRIT, "WDIOS_DISABLECARD ioctl failed: %s",
-		       MyStrerror(errno));
-	}
-
 	if (write(GetFd(watchdog), "V", strlen("V")) < 0) {
 		Logmsg(LOG_CRIT, "write to watchdog device failed: %s",
 		       MyStrerror(errno));
