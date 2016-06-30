@@ -39,7 +39,7 @@ static sig_atomic_t autoPeriod = 1;
 static unsigned int logMask = 0xff;
 static 	locale_t locale;
 static int fd[2] = {-1, -1};
-
+static bool noLog = false;
 static int ipri[] = { LOG_EMERG, LOG_ALERT, LOG_CRIT, LOG_ERR, LOG_WARNING,
 	LOG_NOTICE, LOG_INFO, LOG_DEBUG
 };
@@ -358,6 +358,12 @@ static bool LogUpToString(const char *const str, bool cmdln)
 
 	bool matched = false;
 
+	if (strcasecmp(tmp, "log_none") == 0) {
+		noLog = true;
+		free(tmp);
+		return true;
+	}
+
 	for (size_t i = 0; i < ARRAY_SIZE(spri); i += 1) {
 		if (strcasecmp(tmp, spri[i][SHORT]) == 0) {
 			SetLogMask(LOG_UPTO(ipri[i]));
@@ -406,7 +412,7 @@ void Logmsg(int priority, const char *const fmt, ...)
 {
 	assert(fmt != NULL);
 
-	if ((LOG_MASK(LOG_PRI(priority)) & logMask) == 0) {
+	if ((LOG_MASK(LOG_PRI(priority)) & logMask) == 0 || noLog == true) {
 		return;
 	}
 

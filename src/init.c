@@ -317,7 +317,7 @@ static void PrintHelpMain(void)
 		 "force a ping interval or timeout even if the ping interval is less than the timeout"},
 		{"  -F, --foreground", "run in foreground mode"},
 		{"  -i, --identify", "identify hardware watchdog"},
-		{"  -l, --loglevel", "sets max loglevel  err, info, notice, debug"},
+		{"  -l, --loglevel", "sets max loglevel  none, err, info, notice, debug"},
 		{"  -s, --sync", "sync file-systems regularly"},
 		{"  -h, --help", "this help"},
 		{"  -V, --version", "print version info"},
