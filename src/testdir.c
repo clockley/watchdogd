@@ -24,7 +24,6 @@
 #include "threadpool.h"
 #include "futex.h"
 
-static int * ret = NULL;
 static _Atomic(int) sem = 0;
 //The dirent_buf_size function was written by Ben Hutchings and released under the following license.
 
@@ -399,13 +398,6 @@ bool ExecuteRepairScriptsPreFork(ProcessList * p, struct cfgoptions *s)
 	pipe(fd);
 	pipe(fd2);
 
-	ret = (int*)mmap(NULL, sizeof(int), PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, -1, 0);
-
-	if (ret == MAP_FAILED) {
-		Logmsg(LOG_ALERT, "mmap failed: %s", MyStrerror(errno));
-		exit(1);
-	}
-
 	pid_t pid = fork();
 
 	if (pid != -1) {
@@ -450,9 +442,9 @@ bool ExecuteRepairScriptsPreFork(ProcessList * p, struct cfgoptions *s)
 			ess.list = p;
 			ess.config = s;
 
-			*ret = __ExecuteRepairScripts(&ess);
+			int ret = __ExecuteRepairScripts(&ess);
 
-			write(fd2[1], "", strlen(""));
+			write(fd2[1], &ret, sizeof(ret));
 		}
 
 		exit(0);
@@ -464,11 +456,11 @@ bool ExecuteRepairScriptsPreFork(ProcessList * p, struct cfgoptions *s)
 int ExecuteRepairScripts(void)
 {
 	write(fd[1], "", strlen(""));
-	char b[1];
+	int ret = 0;
 
-	while (read(fd2[0], b, sizeof(b)) != 0);
+	while (read(fd2[0], &ret, sizeof(ret)) != 0);
 
-	if (*ret != 0) {
+	if (ret != 0) {
 		return -1;
 	}
 
