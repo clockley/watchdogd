@@ -69,13 +69,14 @@ int ParseCommandLine(int *argc, char **argv, struct cfgoptions *cfg)
 		{"version", no_argument, 0, 'V'},
 		{"config-file", required_argument, 0, 'c'},
 		{"loop-exit", required_argument, 0, 'X'},
+		{"loglevel", required_argument, 0, 'l'},
 		{"identify", no_argument, 0, 'i'},
 		{0, 0, 0, 0}
 	};
 
 	int tmp = 0;
 	while ((opt =
-		getopt_long(*argc, argv, "ihqsfFbVvndc:X:", longOptions,
+		getopt_long(*argc, argv, "ihqsfFbVvndc:X:l:", longOptions,
 			    &tmp)) != -1) {
 
 		switch (opt) {
@@ -92,6 +93,12 @@ int ParseCommandLine(int *argc, char **argv, struct cfgoptions *cfg)
 			break;
 		case 'q':
 			cfg->options |= NOACTION;
+			break;
+		case 'l':
+			if (LogUpTo(optarg, true) == false) {
+				return -1;
+			}
+			cfg->options |= LOGLVLSETCMDLN;
 			break;
 		case 'f':
 			cfg->options |= FORCE;
@@ -310,6 +317,7 @@ static void PrintHelpMain(void)
 		 "force a ping interval or timeout even if the ping interval is less than the timeout"},
 		{"  -F, --foreground", "run in foreground mode"},
 		{"  -i, --identify", "identify hardware watchdog"},
+		{"  -l, --loglevel", "sets max logleve  err, info, notice, debug"},
 		{"  -s, --sync", "sync file-systems regularly"},
 		{"  -h, --help", "this help"},
 		{"  -V, --version", "print version info"},

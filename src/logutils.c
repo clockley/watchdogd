@@ -17,7 +17,6 @@
 #include "sub.h"
 #include "logutils.h"
 
-
 #define KNRM  "\x1B[0m"
 #define KRED  "\x1B[31m"
 #define KGRN  "\x1B[32m"
@@ -245,7 +244,7 @@ static void SetLogMask(unsigned int mask)
 	pthread_once(&initMutex, MutexInit);
 	pthread_mutex_lock(&mutex);
 	setlogmask(mask);
-	logMask = mask;
+	logMask = setlogmask(mask);;
 	pthread_mutex_unlock(&mutex);
 }
 
@@ -317,9 +316,13 @@ void SetLogTarget(sig_atomic_t target, ...)
 	pthread_mutex_unlock(&mutex);
 }
 
-bool LogUpToInt(long pri)
+bool LogUpToInt(long pri, bool cmdln)
 {
 	if (pri < 0 || pri > 7) {
+		if (cmdln) {
+			fprintf(stderr, "illegal command line option argument for -l/--loglevel\n");
+			return false;
+		}
 		fprintf(stderr,
 			"illegal value for configuration file entry named"
 			" \"log-up-to\": %li\n", pri);
@@ -331,7 +334,7 @@ bool LogUpToInt(long pri)
 	return true;
 }
 
-static bool LogUpToString(const char *const str)
+static bool LogUpToString(const char *const str, bool cmdln)
 {
 	char *tmp = strdup(str);
 
@@ -367,10 +370,12 @@ static bool LogUpToString(const char *const str)
 		}
 	}
 
-	if (matched == false) {
+	if (matched == false && cmdln == false) {
 		fprintf(stderr,
 			"illegal value for configuration file entry named"
 			" \"log-up-to\": %s\n", str);
+	} else if (matched == false) {
+		fprintf(stderr, "illegal command line option argument for [ -l | --loglevel ]\n");
 	}
 
 	free(tmp);
@@ -378,7 +383,7 @@ static bool LogUpToString(const char *const str)
 	return matched;
 }
 
-bool LogUpTo(const char *const str)
+bool LogUpTo(const char *const str, bool cmdln)
 {
 	assert(str != NULL);
 
@@ -391,17 +396,17 @@ bool LogUpTo(const char *const str)
 	long logPri = ConvertStringToInt(str);
 
 	if (errno != 0) {
-		return LogUpToString(str);
+		return LogUpToString(str, cmdln);
 	}
 
-	return LogUpToInt(logPri);
+	return LogUpToInt(logPri, cmdln);
 }
 
 void Logmsg(int priority, const char *const fmt, ...)
 {
 	assert(fmt != NULL);
 
-	if ((LOG_MASK(LOG_PRI(priority))) == 0) {
+	if ((LOG_MASK(LOG_PRI(priority)) & logMask) == 0) {
 		return;
 	}
 

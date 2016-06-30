@@ -114,6 +114,7 @@ struct cfgoptions {
 #define VERBOSE 0x400
 #define IDENTIFY 0x800
 #define BUSYBOXDEVOPTCOMPAT 0x1000
+#define LOGLVLSETCMDLN 0x2000
 
 	int priority;
 	int watchdogTimeout;

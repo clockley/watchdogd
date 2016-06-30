@@ -257,12 +257,15 @@ int ReadConfigurationFile(struct cfgoptions *const cfg)
 		cfg->logTarget = "auto";
 	}
 
-	if (config_lookup_string(&cfg->cfg, "log-up-to", &cfg->logUpto) == CONFIG_TRUE) {
-		LogUpTo(cfg->logUpto);
-	}
 
-	if (config_lookup_int(&cfg->cfg, "log-up-to", &tmp) == CONFIG_TRUE) {
-		LogUpToInt(tmp);
+	if (!(cfg->options & LOGLVLSETCMDLN)) {
+		if (config_lookup_string(&cfg->cfg, "log-up-to", &cfg->logUpto) == CONFIG_TRUE) {
+			LogUpTo(cfg->logUpto, false);
+		}
+
+		if (config_lookup_int(&cfg->cfg, "log-up-to", &tmp) == CONFIG_TRUE) {
+			LogUpToInt(tmp, false);
+		}
 	}
 
 	if (SetDefaultLogTarget(cfg) == false) {
