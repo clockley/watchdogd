@@ -24,9 +24,8 @@ int Spawn(int timeout, struct cfgoptions *const config, const char *file,
 	  const char *args, ...)
 {
 	spawnattr_t attr = {.workingDirectory = NULL,.repairFilePathname = NULL,
-		.execStart = NULL,.logDirectory = config->logdir,.user = 0,
-		.group = NULL,.umask = 0,.timeout = timeout,.nice =
-		    0,.noNewPrivileges = false,
+		.execStart = NULL, .user = 0, .group = NULL,.umask = 0,
+		.timeout = timeout,.nice = 0,.noNewPrivileges = false,
 		.hasUmask = false
 	};
 	va_list a;
@@ -54,31 +53,15 @@ int SpawnAttr(spawnattr_t * spawnattr, const char *file, const char *args, ...)
 				       MyStrerror(errno));
 			}
 
-			int dfd = open(spawnattr->logDirectory,
-				       O_DIRECTORY | O_RDONLY);
+			char buf[512] = {"watchdogd_user_supplied_exe="};
+			strncat(buf, file, sizeof(buf));
+			buf[511] = '\0';
 
-			if (dfd < 0) {
-				Logmsg(LOG_CRIT,
-				       "open failed: %s: %s",
-				       spawnattr->logDirectory,
-				       MyStrerror(errno));
-				return -1;
-			}
-
-			int fd = openat(dfd, "repair.out",
-					O_RDWR | O_APPEND | O_CREAT,
-					S_IWUSR | S_IRUSR);
+			int fd = sd_journal_stream_fd(buf, LOG_INFO, true);
 
 			if (fd < 0) {
-				Logmsg(LOG_CRIT, "open failed: %s",
-				       MyStrerror(errno));
-				close(dfd);
-				return -1;
-			} else {
-				close(dfd);
+				Logmsg(LOG_CRIT, "Unable to open log file for helper executable");
 			}
-
-			fsync(fd);
 
 			va_list ap;
 			const char *array[64] = { "\0" };

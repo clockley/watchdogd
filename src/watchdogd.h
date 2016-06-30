@@ -92,7 +92,6 @@ struct cfgoptions {
 	const char *exepathname;
 	const char *testexepathname;
 	const char *confile;
-	const char *logdir;
 	const char *randomSeedPath;
 	const char *logTarget;
 	const char *logUpto;
@@ -148,7 +147,6 @@ struct spawnattr {
 	char *workingDirectory;
 	const char *repairFilePathname;
 	char *execStart;
-	const char *logDirectory;
 	char *user;
 	char *group;
 	mode_t umask;

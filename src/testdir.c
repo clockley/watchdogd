@@ -194,7 +194,6 @@ int CreateLinkedListOfExes(char *repairScriptFolder, ProcessList * p,
 			cmd->path = NULL;
 
 			cmd->path = cmd->spawnattr.execStart;
-			cmd->spawnattr.logDirectory = config->logdir;
 
 			if (cmd->path == NULL) {
 				fprintf(stderr,
@@ -291,8 +290,7 @@ static void * __ExecScriptWorkerThread(void *a)
 	} else {
 		spawnattr_t attr = {
 				.workingDirectory = NULL, .repairFilePathname = NULL,
-	        		.execStart = NULL, .logDirectory = container->config->logdir,
-				.user = NULL, .group = NULL, .umask = 0,
+	        		.execStart = NULL, .user = NULL, .group = NULL, .umask = 0,
 				.timeout = container->config->repairBinTimeout, .nice = 0,
 				.noNewPrivileges = false, .hasUmask = false
 		};

@@ -288,14 +288,6 @@ int ReadConfigurationFile(struct cfgoptions *const cfg)
 		cfg->pidfile.name = "/run/watchdogd.pid";
 	}
 
-	if (config_lookup_string(&cfg->cfg, "log-dir", &cfg->logdir) ==
-	    CONFIG_FALSE) {
-		cfg->logdir = "/var/log/watchdogd";
-	}
-
-	if (MakeLogDir(cfg) < 0)
-		return -1;
-
 	if (CreateLinkedListOfExes((char*)cfg->testexepath, &processes, cfg) < 0) {
 		fprintf(stderr, "watchdogd: CreateLinkedListOfExes failed\n");
 		return -1;

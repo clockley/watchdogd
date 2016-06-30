@@ -146,23 +146,6 @@ int ParseCommandLine(int *argc, char **argv, struct cfgoptions *cfg)
 	return 0;
 }
 
-int MakeLogDir(struct cfgoptions *const cfg)
-{
-	assert(cfg != NULL);
-
-	errno = 0;
-	if (mkdir(cfg->logdir, 0750) != 0) {
-		if (errno != EEXIST) {
-			Logmsg(LOG_ERR, "watchdog: %s", MyStrerror(errno));
-			return -1;
-		} else {
-			return 0;
-		}
-	}
-
-	return 0;
-}
-
 int GetDefaultPriority(void)
 {
 	int ret = sched_get_priority_min(SCHED_RR);
