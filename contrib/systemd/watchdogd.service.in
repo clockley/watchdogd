@@ -6,7 +6,6 @@ After=syslog.target
 [Service]
 Type=simple
 ExecStart=@prefix@/sbin/watchdogd -F
-ControlGroup=cpu:/
 NotifyAccess=main
 OOMScoreAdjust=-1000
 
