@@ -237,7 +237,7 @@ static void PrintHelpIdentify(void)
 		abort();
 	}
 
-	char *help[][2] = {
+	char const * const help[][2] = {
 		{buf, ""},
 		{"Get watchdog device status.", ""},
 		{"", ""},
