@@ -920,7 +920,7 @@ int ConfigWatchdogNowayoutIsSet(char *name)
 
 	while (true) {
 		char buf[4096] = {'\0'};
-		int bytesRead = gzread(config, buf, sizeof(buf) - 1);
+		size_t bytesRead = gzread(config, buf, sizeof(buf) - 1);
 		if (strstr(buf, "# CONFIG_WATCHDOG_NOWAYOUT is not set") != NULL) {
 			found = true;
 			break;
