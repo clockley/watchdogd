@@ -82,7 +82,7 @@ bool PrintWdtInfo(watchdog_t * const wdt)
 	if (ioctl(GetFd(wdt), WDIOC_GETSUPPORT, &watchDogInfo) < 0) {
 		Logmsg(LOG_ERR, "%s", MyStrerror(errno));
 	} else {
-		if (strcasecmp(watchDogInfo.identity, "software watchdog") != 0) {
+		if (strcasecmp((const char*)watchDogInfo.identity, "software watchdog") != 0) {
 			Logmsg(LOG_DEBUG, "Hardware watchdog '%s', version %lu",
 			       watchDogInfo.identity, watchDogInfo.firmware_version);
 		} else {
@@ -942,7 +942,7 @@ int ConfigWatchdogNowayoutIsSet(char *name)
 	GetDeviceMajorMinor(&ad, name);
 	char * devicePath = NULL;
 	Wasprintf(&devicePath, "/sys/dev/char/%lu:%lu/device/driver", ad.major, ad.minor);
-	buf = calloc(1, 4096);
+	buf = (char *)calloc(1, 4096);
 	if (devicePath == NULL) {
 		abort();
 	}
