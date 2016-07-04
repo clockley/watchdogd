@@ -95,7 +95,7 @@ static int SystemdSyslog(int priority, const char *format, va_list ap)
 	iov[1].iov_base = p;
 	iov[1].iov_len = strlen(p);
 
-	iov[2].iov_base = "SYSLOG_IDENTIFIER=watchdogd";
+	iov[2].iov_base = (void *)"SYSLOG_IDENTIFIER=watchdogd";
 	iov[2].iov_len = strlen("SYSLOG_IDENTIFIER=watchdogd");
 
 	return sd_journal_sendv(iov, 3);
@@ -147,7 +147,7 @@ static bool IsTty(void)
 	return true;
 }
 
-static char * SetTextColor(int priority)
+static char const * SetTextColor(int priority)
 {
 	if (IsTty() == false) {
 		return "";
