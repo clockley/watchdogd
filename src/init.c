@@ -74,6 +74,8 @@ int ParseCommandLine(int *argc, char **argv, struct cfgoptions *cfg)
 		{0, 0, 0, 0}
 	};
 
+	char const * const loglevels[] = { "\x1b[1mnone", "err", "info", "notice", "debug\x1B[0m"};
+
 	int tmp = 0;
 	while ((opt =
 		getopt_long(*argc, argv, "ihqsfFbVvndc:X:l:", longOptions,
@@ -129,6 +131,28 @@ int ParseCommandLine(int *argc, char **argv, struct cfgoptions *cfg)
 				Usage();
 			}
 			return 1;
+		case '?':
+			switch (optopt) {
+				case 'l':
+					fprintf(stderr, "Valid loglevels are:\n");
+					for (size_t i = 0; i < ARRAY_SIZE(loglevels); i++) {
+						if (isatty(STDOUT_FILENO) == 0 && i == 0) {
+							fprintf(stderr, " %s\n", loglevels[i]+4);
+							continue;
+						} else if (isatty(STDOUT_FILENO) == 0 && i + 1 == ARRAY_SIZE(loglevels)) {
+							char const * const tmp = loglevels[i];
+							fprintf(stderr, " ");
+							for (size_t j = 0; tmp[j] != '\x1b'; j++) {
+								fprintf(stderr, "%c", tmp[j]);
+							}
+							fprintf(stderr, "\n");
+						} else {
+							fprintf(stderr, " %s\n", loglevels[i]);
+						}
+					}
+				break;
+			}
+			return -1;
 		default:
 			if (cfg->options & IDENTIFY) {
 				PrintHelpIdentify();
