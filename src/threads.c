@@ -41,7 +41,7 @@ static void GetPageSize(void)
 
 void *DbusHelper(void * arg)
 {
-	struct dbusinfo * info = arg;
+	struct dbusinfo * info = (struct dbusinfo *)arg;
 	unsigned int cmd = 0;
 
 	while (true) {
