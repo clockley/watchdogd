@@ -122,11 +122,8 @@ struct cfgoptions {
 	int testBinTimeout;
 	int repairBinTimeout;
 	int allocatableMemory;
-#ifndef __cplusplus
-	volatile _Atomic(unsigned int) error;
-#else
-	std::atomic<unsigned int> error;
-#endif
+	volatile atomic_uint error;
+
 #define SCRIPTFAILED 0x1
 #define FORKFAILED 0x2
 #define OUTOFMEMORY 0x4
@@ -161,7 +158,7 @@ typedef struct spawnattr spawnattr_t;
 
 struct repaircmd_t {
 	struct list entry;
-	_Atomic(bool) mode;
+	atomic_bool mode;
 	char retString[32];
 	const char *path;
 	spawnattr_t spawnattr;

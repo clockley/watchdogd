@@ -26,9 +26,9 @@ static sd_event_source *clients[MAX_CLIENT_ID] = {NULL};
 static short freeIds[MAX_CLIENT_ID] = {-1};
 static usec_t clientTimeout[MAX_CLIENT_ID];
 
-static _Atomic(int) lastAllocatedId = 0;
-static _Atomic(int) openSlots = MAX_CLIENT_ID;
-static _Atomic(int) lastFreedSlot = -1;
+static int lastAllocatedId = 0;
+static int openSlots = MAX_CLIENT_ID;
+static int lastFreedSlot = -1;
 
 static int fd = 0;
 static char identity[64] = {'0'};

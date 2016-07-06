@@ -19,7 +19,7 @@
 
 #define MAX_WORKERS 16
 
-static 	_Atomic(bool) canceled = false;
+static atomic_bool canceled = false;
 
 struct threadpool
 {

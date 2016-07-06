@@ -14,16 +14,22 @@
  * permissions and limitations under the License. 
  */
  
+#ifndef __cplusplus
+#include <stdatomic.h>
+#else
+#include <atomic>
+#endif
+
 #include <linux/futex.h>
 #include <unistd.h>
 #include <sys/syscall.h>
 
-long FutexWait(_Atomic int *addr, int val)
+long FutexWait(atomic_int *addr, int val)
 {
 	return syscall(SYS_futex, addr, FUTEX_WAIT, val, NULL, NULL, 0);
 }
 
-long FutexWake(_Atomic int *addr)
+long FutexWake(atomic_int *addr)
 {
 	return syscall(SYS_futex, addr, FUTEX_WAKE, 1, NULL, NULL, 0);
 }
