@@ -25,6 +25,7 @@
 #include <stdatomic.h>
 #else
 #include <atomic>
+using namespace std;
 #endif
 #include <stdbool.h>
 #include <stddef.h>

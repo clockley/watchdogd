@@ -70,7 +70,7 @@ bool NetMonCheckNetworkInterfaces(char **name)
 
 			if (strcmp(c->name, ifa->ifa_name) == 0) {
 				assert(ifa->ifa_data != NULL);
-				struct rtnl_link_stats *stats = ifa->ifa_data;
+				struct rtnl_link_stats *stats = (struct rtnl_link_stats*)ifa->ifa_data;
 				if (stats->rx_bytes == c->rx) {
 					*name = c->name;
 					freeifaddrs(ifaddr);

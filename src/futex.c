@@ -18,6 +18,7 @@
 #include <stdatomic.h>
 #else
 #include <atomic>
+using namespace std;
 #endif
 
 #include <linux/futex.h>

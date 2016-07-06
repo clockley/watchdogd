@@ -16,6 +16,7 @@
 
 #define DBUSAPI_PROTOTYPES
 #include "dbusapi.h"
+
 #define MAX_CLIENT_ID 4096
 typedef uint64_t usec_t;
 
@@ -64,12 +65,12 @@ static int PmonRemove(sd_bus_message *m, void *userdata, sd_bus_error *retError)
 	int id = 0;
 	sd_bus_message_read(m, "u", &id);
 
-	char *sid = sd_event_source_get_userdata(clients[id]);
+	char *sid = (char*)sd_event_source_get_userdata(clients[id]);
 	if (sid == NULL) {
 		return sd_bus_reply_method_return(m, "b", false);
 	}
 
-	if (strcmp(sd_event_source_get_userdata(clients[id]), sd_bus_message_get_sender(m)) != 0) {
+	if (strcmp((char*)sd_event_source_get_userdata(clients[id]), sd_bus_message_get_sender(m)) != 0) {
 		return sd_bus_reply_method_return(m, "b", false);
 	}
 
@@ -88,12 +89,12 @@ static int PmonPing(sd_bus_message *m, void *userdata, sd_bus_error *retError)
 
 	sd_bus_message_read(m, "u", &id);
 
-	char *sid = sd_event_source_get_userdata(clients[id]);
+	char *sid = (char*)sd_event_source_get_userdata(clients[id]);
 	if (sid == NULL) {
 		return sd_bus_reply_method_return(m, "b", false);
 	}
 
-	if (strcmp(sd_event_source_get_userdata(clients[id]), sd_bus_message_get_sender(m)) != 0) {
+	if (strcmp((char*)sd_event_source_get_userdata(clients[id]), sd_bus_message_get_sender(m)) != 0) {
 		return sd_bus_reply_method_return(m, "b", false);
 	}
 

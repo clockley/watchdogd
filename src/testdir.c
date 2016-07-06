@@ -331,8 +331,8 @@ static int __ExecuteRepairScripts(void *a)
 	ProcessList *p = arg->list;
 	struct cfgoptions *s = arg->config;
 
-	Container container = { 0 };
-	container.config = s;
+	Container container = {{0}, s, NULL};
+
 	repaircmd_t *c = NULL;
 	repaircmd_t *next = NULL;
 
