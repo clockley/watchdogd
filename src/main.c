@@ -40,7 +40,7 @@ int main(int argc, char **argv)
 	struct cfgoptions options;
 	struct cfgoptions *tmp = &options;
 	watchdog_t *watchdog = NULL;
-	struct dbusinfo temp = {.watchdog = &watchdog, .config = &tmp};
+	struct dbusinfo temp = {.config = &tmp, .watchdog = &watchdog};
 	if (SetDefaultConfig(&options) == false) {
 		return EXIT_FAILURE;
 	}
