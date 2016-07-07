@@ -1,53 +1,46 @@
 #ifndef WATCHDOGD_H
 #define WATCHDOGD_H
+using namespace std;
 #define _XOPEN_SOURCE 700
-#define _ISOC11_SOURCE
 #define _FILE_OFFSET_BITS 64
 #define PREFER_PORTABLE_SNPRINTF
 #define HAVE_SNPRINTF
-#include <assert.h>
+#include <atomic>
+#include <cassert>
+#include <cctype>
+#include <cerrno>
+#include <cinttypes>
+#include <climits>
+#include <clocale>
 #include <config.h>
-#include <ctype.h>
-#include <errno.h>
+#include <csignal>
+#include <cstdarg>
+#include <cstddef>
+#include <cstdint>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
+#include <dirent.h>
 #include <fcntl.h>
 #include <grp.h>
-#include <inttypes.h>
 #include <libconfig.h>
+#include <libgen.h>
 #include <oping.h>
-#include <limits.h>
-#include <locale.h>
 #include <pthread.h>
 #include <pwd.h>
 #include <sched.h>
-#include <signal.h>
-#include <stdarg.h>
-#ifndef __cplusplus
-#include <stdatomic.h>
-#else
-#include <atomic>
-using namespace std;
-#endif
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <strings.h>
 #include <syslog.h>
 #include <sys/mman.h>
+#include <sys/resource.h>
+#include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/types.h>
-#include <sys/resource.h>
-#include <sys/wait.h>
-#include <time.h>
-#include <unistd.h>
-#include <dirent.h>
-#include <zlib.h>
-#include <sys/socket.h>
 #include <sys/un.h>
-#include <libgen.h>
+#include <sys/wait.h>
+#include <unistd.h>
+#include <zlib.h>
 #include "snprintf.h"
 #ifndef NSIG
 #if defined(_NSIG)
