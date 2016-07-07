@@ -62,12 +62,10 @@ using namespace std;
 
 #define ARRAY_SIZE(a) (sizeof(a)/sizeof((a)[0]))
 
-struct pidfile {
+struct pidfile_t {
 	const char *name;
 	int fd;
 };
-
-typedef struct pidfile pidfile_t;
 
 //TODO: Split this struct into an options struct(values read in from config file) and a runtime struct.
 struct cfgoptions {
