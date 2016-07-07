@@ -135,7 +135,7 @@ struct ProcessList {
 
 typedef struct ProcessList ProcessList;
 
-struct spawnattr {
+struct spawnattr_t {
 	char *workingDirectory;
 	const char *repairFilePathname;
 	char *execStart;
@@ -148,8 +148,6 @@ struct spawnattr {
 	bool hasUmask;
 };
 
-typedef struct spawnattr spawnattr_t;
-
 struct repaircmd_t {
 	struct list entry;
 	atomic_bool mode;
@@ -160,9 +158,7 @@ struct repaircmd_t {
 	bool legacy;
 };
 
-typedef struct repaircmd_t repaircmd_t;
-
-struct watchdogDevice {
+struct watchdog_t {
 	const char path[64];
 	int fd;
 	int timeout;
@@ -171,7 +167,7 @@ struct watchdogDevice {
 struct dbusinfo
 {
 	struct cfgoptions **config;
-	struct watchdogDevice **watchdog;
+	watchdog_t **watchdog;
 	pid_t childPid;
 	int fd;
 };
@@ -190,8 +186,6 @@ struct dev {
 	unsigned long minor;
 	unsigned long major;
 };
-
-typedef struct watchdogDevice watchdog_t;
 
 extern ProcessList processes;
 
