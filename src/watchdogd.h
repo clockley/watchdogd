@@ -41,7 +41,11 @@ using namespace std;
 #include <sys/wait.h>
 #include <unistd.h>
 #include <zlib.h>
+
 #include "snprintf.h"
+struct watchdog_t;
+#include "linux.h"
+
 #ifndef NSIG
 #if defined(_NSIG)
 #define NSIG _NSIG		/* For BSD/SysV */
@@ -194,8 +198,5 @@ enum logTarget_t {
 	FILE_APPEND,
 	FILE_NEW,
 };
-
-
-#include "linux.h"
 
 #endif
