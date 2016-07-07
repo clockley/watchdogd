@@ -26,7 +26,9 @@
 #include "identify.h"
 #include "bootstatus.h"
 #include "multicall.h"
+extern "C" {
 #include "dbusapi.h"
+}
 #define DISARM_WATCHDOG_BEFORE_REBOOT true
 
 static volatile sig_atomic_t quit = 0;

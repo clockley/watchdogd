@@ -1,7 +1,8 @@
-AM_CFLAGS = $(DEPENDENCIES_CFLAGS) $(PTHREAD_CFLAGS)
+AM_CXXFLAGS = $(PTHREAD_CFLAGS) $(DEPENDENCIES_CFLAGS)
+AM_CFLAGS = $(DEPENDENCIES_CFLAGS)
 watchdogd_LDADD = $(DEPENDENCIES_LIBS) $(PTHREAD_LIBS)
 sbin_PROGRAMS = watchdogd
-watchdogd_SOURCES = src/main.c src/threads.c src/sub.c src/sub.h src/init.c src/daemon.c src/shutdown.c src/logutils.c src/logutils.h src/linux.c src/linux.h src/exe.c src/testdir.c src/list.h src/errorlist.h src/list.c src/main.h src/init.h src/watchdogd.h src/threads.h src/testdir.h src/exe.h src/pidfile.c src/pidfile.h src/configfile.c src/configfile.h src/daemon.h src/user.c src/user.h src/repair.c src/repair.h src/snprintf.c src/snprintf.h src/network_tester.c src/network_tester.h src/identify.c src/identify.h src/bootstatus.c src/bootstatus.h src/multicall.c src/multicall.h src/threadpool.c src/threadpool.h src/futex.c src/futex.h src/dbusapi.c src/dbusapi.h
+watchdogd_SOURCES = src/main.cpp src/threads.cpp src/sub.cpp src/sub.h src/init.cpp src/daemon.cpp src/shutdown.cpp src/logutils.cpp src/logutils.h src/linux.cpp src/linux.h src/exe.cpp src/testdir.cpp src/list.h src/errorlist.h src/list.cpp src/main.h src/init.h src/watchdogd.h src/threads.h src/testdir.h src/exe.h src/pidfile.cpp src/pidfile.h src/configfile.cpp src/configfile.h src/daemon.h src/user.cpp src/user.h src/repair.cpp src/repair.h src/snprintf.cpp src/snprintf.h src/network_tester.cpp src/network_tester.h src/identify.cpp src/identify.h src/bootstatus.cpp src/bootstatus.h src/multicall.cpp src/multicall.h src/threadpool.cpp src/threadpool.h src/futex.cpp src/futex.h src/dbusapi.c src/dbusapi.h
 dist_sbin_SCRIPTS = wd_identify
 dist_man_MANS = man/watchdogd.8
 EXTRA_DIST		= contrib/systemd/watchdogd.service conf/example.repair install_dependencies.sh contrib/dbus/watchdogd.conf  wd_identify
