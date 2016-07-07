@@ -16,10 +16,17 @@
 
 #ifndef DBUSAPI_H
 #define DBUSAPI_H
-#include "watchdogd.h"
-#include "linux.h"
-#include "sub.h"
-#include "logutils.h"
+
+#define DBUSGETIMOUT 1
+#define DBUSTIMELEFT 2
+#define DBUSGETPATH  3
+#define DBUSGETNAME  5
+#define DBUSVERSION  6
+#define DBUSHUTDOWN  7
+#include <stdio.h>
+#include <stdbool.h>
+#include <unistd.h>
+#include <pthread.h>
 #include <systemd/sd-bus.h>
 #include <systemd/sd-event.h>
 
