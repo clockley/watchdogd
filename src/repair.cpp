@@ -13,8 +13,8 @@
  * implied. See the License for the specific language governing
  * permissions and limitations under the License. 
  */
-#include "sub.h"
-#include "repair.h"
+#include "sub.hpp"
+#include "repair.hpp"
 
 static bool ParseConfigfile(char *name, char *value, spawnattr_t * obj)
 {

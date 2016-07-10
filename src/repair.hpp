@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Christian Lockley
+ * Copyright 2013-2016 Christian Lockley
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may 
  * not use this file except in compliance with the License. You may obtain 
@@ -13,7 +13,12 @@
  * implied. See the License for the specific language governing
  * permissions and limitations under the License. 
  */
-#ifndef BOOTSTATUS_H
-#define BOOTSTATUS_H
-int WriteBootStatus(watchdog_t * const, struct cfgoptions * const);
+
+#include "watchdogd.hpp"
+#ifndef REPAIR_H
+#define REPAIR_H
+bool LoadRepairScriptLink(spawnattr_t *, char * const);
+int IsRepairScriptConfig(const char *);
+void StripNewline(char *);
+bool Validate(char *, char *);
 #endif

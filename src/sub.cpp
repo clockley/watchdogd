@@ -17,10 +17,10 @@
 /*
  * This file contains functions that are used be more than one module.
  */
-#include "watchdogd.h"
-#include "sub.h"
-#include "testdir.h"
-#include "pidfile.h"
+#include "watchdogd.hpp"
+#include "sub.hpp"
+#include "testdir.hpp"
+#include "pidfile.hpp"
 
 int CloseWraper(const int *pfd)
 {
@@ -146,22 +146,6 @@ int EndDaemon(struct cfgoptions *s, int keepalive)
 	extern volatile sig_atomic_t stop;
 
 	stop = 1;
-
-	if (keepalive == false) {
-		struct sigaction dummy;
-		dummy.sa_handler = SIG_IGN;
-		dummy.sa_flags = 0;
-
-		sigemptyset(&dummy.sa_mask);
-
-		sigaddset(&dummy.sa_mask, SIGUSR2);
-
-		sigaction(SIGUSR2, &dummy, NULL);
-
-		if (killpg(getpgrp(), SIGUSR2) == -1) {
-			Logmsg(LOG_ERR, "killpg failed %s", MyStrerror(errno));
-		}
-	}
 
 	if (s->options & ENABLEPING) {
 		for (pingobj_iter_t * iter = ping_iterator_get(s->pingObj);
@@ -345,59 +329,6 @@ int CreateDetachedThread(void *(*startFunction) (void *), void *const arg)
 	pthread_attr_destroy(&attr);
 
 	return 0;
-}
-
-watchdog_t *WatchdogConstruct(void)
-{
-	watchdog_t *dog = (watchdog_t *) calloc(1, sizeof(*dog));
-	return dog;
-}
-
-void WatchdogDestroy(watchdog_t * dog)
-{
-	assert(dog != NULL);
-	free(dog);
-}
-
-bool CheckWatchdogTimeout(watchdog_t * const wdt, int timeout)
-{
-	if (timeout <= wdt->timeout) {
-		return false;
-	}
-	return true;
-}
-
-void SetFd(watchdog_t * const wdt, int fd)
-{
-	assert(wdt != NULL);
-	wdt->fd = fd;
-}
-
-int GetFd(watchdog_t * const wdt)
-{
-	assert(wdt != NULL);
-	return wdt->fd;
-}
-
-void SetTimeout(watchdog_t * const wdt, int timeout)
-{
-	assert(wdt != NULL);
-	wdt->timeout = timeout;
-}
-
-int GetTimeout(watchdog_t * const wdt)
-{
-	assert(wdt != NULL);
-	return wdt->timeout;
-}
-
-int GuessSleeptime(watchdog_t * const watchdog)
-{
-	if (watchdog == NULL) {
-		return 1;
-	}
-
-	return GetOptimalPingInterval(watchdog);
 }
 
 void FatalError(struct cfgoptions *s)

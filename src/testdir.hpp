@@ -7,7 +7,7 @@ struct executeScriptsStruct
 };
 
 struct container {
-	volatile atomic_ullong workerThreadCount;
+	volatile std::atomic_ullong workerThreadCount;
 	struct cfgoptions *config;
 	repaircmd_t *cmd;
 };

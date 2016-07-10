@@ -13,13 +13,13 @@
  * implied. See the License for the specific language governing
  * permissions and limitations under the License. 
  */
-#include "watchdogd.h"
-#include "sub.h"
-#include "init.h"
-#include "testdir.h"
-#include "daemon.h"
-#include "configfile.h"
-#include "network_tester.h"
+#include "watchdogd.hpp"
+#include "sub.hpp"
+#include "init.hpp"
+#include "testdir.hpp"
+#include "daemon.hpp"
+#include "configfile.hpp"
+#include "network_tester.hpp"
 
 static const char *LibconfigWraperConfigSettingSourceFile(const config_setting_t *
 						   setting)

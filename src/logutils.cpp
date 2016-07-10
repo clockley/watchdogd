@@ -13,9 +13,9 @@
  * implied. See the License for the specific language governing
  * permissions and limitations under the License. 
  */
-#include "watchdogd.h"
-#include "sub.h"
-#include "logutils.h"
+#include "watchdogd.hpp"
+#include "sub.hpp"
+#include "logutils.hpp"
 
 #define KNRM  "\x1B[0m"
 #define KRED  "\x1B[31m"

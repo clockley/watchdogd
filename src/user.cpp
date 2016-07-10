@@ -14,9 +14,9 @@
  * permissions and limitations under the License. 
  */
 
-#include "watchdogd.h"
-#include "sub.h"
-#include "user.h"
+#include "watchdogd.hpp"
+#include "sub.hpp"
+#include "user.hpp"
 
 static bool SetGroup(const char *restrict const group)
 {

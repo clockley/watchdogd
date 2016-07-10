@@ -14,13 +14,13 @@
  * permissions and limitations under the License. 
  */
  
-#include "watchdogd.h"
-#include "bootstatus.h"
-#include "sub.h"
+#include "watchdogd.hpp"
+#include "bootstatus.hpp"
+#include "sub.hpp"
 
-int WriteBootStatus(watchdog_t * const watchdog, struct cfgoptions * const config)
+int WriteBootStatus(unsigned long status, const char * const pathName, long long sleeptime, int timeout)
 {
-	if (watchdog == NULL || config == NULL) {
+	if (pathName == NULL) {
 		return -1;
 	}
 
@@ -30,9 +30,9 @@ int WriteBootStatus(watchdog_t * const watchdog, struct cfgoptions * const confi
 		return fd;
 	}
 
-	dprintf(fd, "Reset cause   : 0x%04x\n", GetWatchdogBootStatus(watchdog));
-	dprintf(fd, "Timeout (sec) : %i\n", GetRawTimeout(watchdog));
-	dprintf(fd, "Kick Interval : %lli\n", (long long)config->sleeptime);
+	dprintf(fd, "Reset cause   : 0x%04x\n", status);
+	dprintf(fd, "Timeout (sec) : %i\n", timeout);
+	dprintf(fd, "Kick Interval : %lli\n", sleeptime);
 
 	close(fd);
 

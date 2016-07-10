@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016 Christian Lockley
+ * Copyright 2016 Christian Lockley
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may 
  * not use this file except in compliance with the License. You may obtain 
@@ -14,338 +14,29 @@
  * permissions and limitations under the License. 
  */
 
-#include "watchdogd.h"
+#include "watchdogd.hpp"
 
-#include "sub.h"
-#include "main.h"
-#include "init.h"
-#include "configfile.h"
-#include "threads.h"
-#include "pidfile.h"
-#include "daemon.h"
-#include "identify.h"
-#include "bootstatus.h"
-#include "multicall.h"
+#include "sub.hpp"
+#include "main.hpp"
+#include "init.hpp"
+#include "configfile.hpp"
+#include "threads.hpp"
+#include "pidfile.hpp"
+#include "daemon.hpp"
+#include "identify.hpp"
+#include "bootstatus.hpp"
+#include "multicall.hpp"
 extern "C" {
 #include "dbusapi.h"
 }
-#define DISARM_WATCHDOG_BEFORE_REBOOT true
+#include <systemd/sd-event.h>
 
+const bool DISARM_WATCHDOG_BEFORE_REBOOT = true;
 static volatile sig_atomic_t quit = 0;
 
 volatile sig_atomic_t stop = 0;
 volatile sig_atomic_t stopPing = 0;
 ProcessList processes;
-
-int main(int argc, char **argv)
-{
-	struct cfgoptions options;
-	struct cfgoptions *tmp = &options;
-	watchdog_t *watchdog = NULL;
-	struct dbusinfo temp = {.config = &tmp, .watchdog = &watchdog};
-	if (SetDefaultConfig(&options) == false) {
-		return EXIT_FAILURE;
-	}
-
-	if (MyStrerrorInit() == false) {
-		perror("Unable to create a new locale object");
-		return EXIT_FAILURE;
-	}
-
-	const int ret = ParseCommandLine(&argc, argv, &options);
-
-	if (ret < 0) {
-		return EXIT_FAILURE;
-	} else if (ret != 0) {
-		return EXIT_SUCCESS;
-	}
-
-	if (strcasecmp(GetExeName(), "wd_identify") == 0 || strcasecmp(GetExeName(), "wd_identify.sh") == 0) {
-		options.options |= IDENTIFY;
-	}
-
-	if (ReadConfigurationFile(&options) < 0) {
-		return EXIT_FAILURE;
-	}
-
-	if (options.options & IDENTIFY) {
-		return Identify(OpenWatchdog(options.devicepath), options.options & VERBOSE);
-	}
-
-	if (Daemonize(&options) < 0) {
-		FatalError(&options);
-	}
-
-	if (PingInit(&options) < 0) {
-		return EXIT_FAILURE;
-	}
-
-	if (SetupSignalHandlers(IsDaemon(&options)) < 0) {
-		FatalError(&options);
-	}
-
-	Logmsg(LOG_INFO, "starting daemon (%s)", PACKAGE_VERSION);
-
-	PrintConfiguration(&options);
-
-	if (ExecuteRepairScriptsPreFork(&processes, &options) == false) {
-		Logmsg(LOG_ERR, "ExecuteRepairScriptsPreFork failed");
-		FatalError(&options);
-	}
-
-	int sock[2] = {0};
-	socketpair(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC, 0, sock);
-	temp.fd = sock[1];
-
-	pid_t pid = fork();
-
-	if (pid == 0) {
-		OnParentDeathSend(SIGKILL);
-		close(sock[1]);
-		if (options.options & REALTIME) {
-			SetSchedulerPolicy(options.priority);
-		}
-
-		DbusApiInit(sock[0]);
-		_Exit(0);
-	}
-
-	temp.childPid = pid;
-
-	close(sock[0]);
-
-	sigset_t set = {0};
-	sigset_t oldSet = {0};
-	sigfillset(&set);
-
-	pthread_sigmask(SIG_SETMASK, &set, &oldSet);
-
-	if (StartHelperThreads(&options) != 0) {
-		FatalError(&options);
-	}
-
-	pthread_sigmask(SIG_SETMASK, &oldSet, NULL);
-
-	if (!(options.options & NOACTION)) {
-		watchdog = OpenWatchdog(options.devicepath);
-
-		if (watchdog == NULL) {
-			MakeDeviceFile(options.devicepath);
-			watchdog = OpenWatchdog(options.devicepath);
-			if (errno == EBUSY) {
-				Logmsg(LOG_ERR, "Unable to open watchdog device");
-				return EXIT_FAILURE;
-			}
-			if (watchdog == NULL) {
-				struct stat buf = {0};
-				int status = stat(options.devicepath, &buf);
-				if (status == 0) {
-					FatalError(&options);
-				}
-				LoadKernelModule();
-				watchdog = OpenWatchdog(options.devicepath);
-			}
-		}
-
-		if (watchdog == NULL) {
-			FatalError(&options);
-		}
-
-		if (ConfigureWatchdogTimeout(watchdog, options.watchdogTimeout)
-		    < 0 && options.watchdogTimeout != -1) {
-			Logmsg(LOG_ERR,
-			       "unable to set watchdog device timeout\n");
-			Logmsg(LOG_ERR, "program exiting\n");
-			/*Can't use FatalError() because we need to shut down watchdog device after we open it */
-			EndDaemon(&options, false);
-			CloseWatchdog(watchdog);
-			return EXIT_FAILURE;
-		}
-
-		if (options.sleeptime == -1) {
-			options.sleeptime = GuessSleeptime(watchdog);
-			Logmsg(LOG_INFO, "ping interval autodetect: %i",
-			       options.sleeptime);
-		}
-
-		assert(options.sleeptime >= 1);
-
-		if (options.watchdogTimeout != -1
-		    && CheckWatchdogTimeout(watchdog,
-					    options.sleeptime) == true) {
-			Logmsg(LOG_ERR,
-			       "WDT timeout is less than or equal watchdog daemon ping interval");
-			Logmsg(LOG_ERR,
-			       "Using this interval may result in spurious reboots");
-
-			if (!(options.options & FORCE)) {
-				CloseWatchdog(watchdog);
-				Logmsg(LOG_WARNING,
-				       "use the -f option to force this configuration");
-				return EXIT_FAILURE;
-			}
-		}
-		WriteBootStatus(watchdog, &options);
-		static struct identinfo i;
-
-		strncpy(i.name, (char *)GetWatchdogIdentity(watchdog), sizeof(i.name) - 1);
-		i.timeout = GetRawTimeout(watchdog);
-		strncpy(i.daemonVersion, PACKAGE_VERSION, sizeof(i.daemonVersion) - 1);
-		strncpy(i.deviceName, options.devicepath, sizeof(i.deviceName) - 1);
-		i.flags = GetWatchdogStatus(watchdog);
-		i.firmwareVersion = GetFirmwareVersion(watchdog);
-
-		pthread_sigmask(SIG_SETMASK, &set, NULL);
-
-		CreateDetachedThread(IdentityThread, &i);
-		CreateDetachedThread(DbusHelper, &temp);
-
-		pthread_sigmask(SIG_SETMASK, &oldSet, NULL);
-
-		write(sock[1], "", sizeof(char));
-
-	} else {
-		if (options.sleeptime == -1) {
-			options.sleeptime = 60;
-		}
-	}
-
-	assert(options.sleeptime >= 1);
-
-	pthread_sigmask(SIG_SETMASK, &set, NULL);
-
-	if (SetupAuxManagerThread(&options) < 0) {
-		FatalError(&options);
-	}
-
-	pthread_sigmask(SIG_SETMASK, &oldSet, NULL);
-
-	if (PlatformInit() != true) {
-		FatalError(&options);
-	}
-
-	struct timespec rqtp;
-
-	clock_gettime(CLOCK_MONOTONIC, &rqtp);
-
-	while (quit == 0 && stop == 0) {
-		if (options.options & NOACTION) {
-			assert(watchdog == NULL);
-		} else {
-			PingWatchdog(watchdog);
-		}
-
-		if (clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &rqtp, NULL)
-		    != 0) {
-			if (errno != 0) {
-				Logmsg(LOG_ERR, "clock_nanosleep failed %s",
-				       MyStrerror(errno));
-			}
-		}
-
-		rqtp.tv_sec += options.sleeptime;
-		NormalizeTimespec(&rqtp);
-		if (options.loopExit > 0) {
-			options.loopExit -= 1;
-		} else if (options.loopExit == 0) {
-			//raise(SIGTERM);
-			quit = 1;
-		}
-	}
-
-	if (stop == 1) {
-		while (true) {
-			if (stopPing == 1) {
-				if (DISARM_WATCHDOG_BEFORE_REBOOT) {
-					CloseWatchdog(watchdog);
-				} else {
-					close(GetFd(watchdog));
-				}
-			} else {
-				PingWatchdog(watchdog);
-			}
-
-			sleep(1);
-		}
-	}
-
-	CloseWatchdog(watchdog);
-
-	DeletePidFile(&options.pidfile);
-	unlink("/run/watchdogd.status");
-
-	if (EndDaemon(&options, false) < 0) {
-		return EXIT_FAILURE;
-	}
-
-	return EXIT_SUCCESS;
-}
-
-static int InstallSignalAction(struct sigaction *act, ...)
-{
-	va_list ap;
-	struct sigaction oact;
-	sigemptyset(&oact.sa_mask);
-	va_start(ap, act);
-
-	assert(act != NULL);
-
-	int sig = 0;
-
-	while ((sig = va_arg(ap, int)) != 0) {
-		if (sigaction(sig, NULL, &oact) < 0) {
-			goto error;
-		}
-
-		if (oact.sa_handler != SIG_IGN) {
-			if (sigaction(sig, act, NULL) < 0) {
-				goto error;
-			}
-		}
-	}
-
-	va_end(ap);
-
-	return 0;
- error:
-	va_end(ap);
-	assert(sig != 0);
-	Logmsg(LOG_ERR, "sigaction failed: %s:", MyStrerror(errno));
-	return sig;
-}
-
-int SetupSignalHandlers(int isDaemon)
-{
-	struct sigaction act;
-	memset(&act, 0, sizeof(act));
-	sigemptyset(&act.sa_mask);
-	act.sa_handler = SignalHandler;
-
-	int ret = InstallSignalAction(&act, SIGTERM, SIGINT, 0);
-
-	if (ret != 0) {
-		return -1;
-	}
-
-	if (isDaemon) {
-		struct sigaction IgnoredSignals;
-		IgnoredSignals.sa_handler = SIG_IGN;
-		IgnoredSignals.sa_flags = 0;
-		sigemptyset(&IgnoredSignals.sa_mask);
-
-		ret = InstallSignalAction(&IgnoredSignals, SIGHUP, 0);
-		if (ret != 0) {
-			return -1;
-		}
-	}
-
-	return 0;
-}
-
-static void SignalHandler(int signum)
-{
-	quit = 1;
-}
 
 static void PrintConfiguration(struct cfgoptions *const cfg)
 {
@@ -391,4 +82,255 @@ static void PrintConfiguration(struct cfgoptions *const cfg)
 	       cfg->testBinTimeout,
 	       cfg->exepathname == NULL ? "no" : cfg->exepathname,
 	       cfg->repairBinTimeout, cfg->options & NOACTION ? "yes" : "no");
+}
+
+static void BlockSignals()
+{
+	sigset_t set;
+
+	sigemptyset(&set);
+
+	sigaddset(&set, SIGTERM);
+	sigaddset(&set, SIGUSR2);
+	sigaddset(&set, SIGINT);
+	sigaddset(&set, SIGHUP);
+
+	pthread_sigmask(SIG_BLOCK, &set, NULL);
+}
+
+static int SignalHandler(sd_event_source *s, const signalfd_siginfo *si, void *cxt)
+{
+	switch (sd_event_source_get_signal(s)) {
+		case SIGTERM:
+		case SIGINT:
+			quit = 1;
+			sd_event_exit((sd_event *)cxt, 0);
+			break;
+		case SIGHUP:
+			//reload;
+		break;
+	}
+	return 1;
+}
+
+static void InstallSignalHandlers(sd_event *event)
+{
+	int r1 = sd_event_add_signal(event, NULL, SIGTERM,SignalHandler, event);
+	int r2 = sd_event_add_signal(event, NULL, SIGHUP, SignalHandler, event);
+	int r3 = sd_event_add_signal(event, NULL, SIGINT, SignalHandler, event);
+
+	if (r1 < 0 || r2 < 0 || r3 < 0) {
+		abort();
+	}
+}
+
+static int Pinger(sd_event_source *s, uint64_t usec, void *cxt)
+{
+	Watchdog *watchdog = (Watchdog*)cxt;
+	watchdog->Ping();
+
+	sd_event_now(sd_event_source_get_event(s), CLOCK_REALTIME, &usec);
+	usec += watchdog->GetPingInterval() * 1000000;
+	sd_event_add_time(sd_event_source_get_event(s), &s, CLOCK_REALTIME, usec, 1, Pinger, (void*)cxt);
+}
+
+static bool InstallPinger(sd_event *e, int time, Watchdog *w)
+{
+	sd_event_source *s = NULL;
+	uint64_t usec = 0;
+	w->SetPingInterval(time);
+
+	sd_event_now(e, CLOCK_REALTIME, &usec);
+
+	sd_event_add_time(e, &s, CLOCK_REALTIME, usec, 1, Pinger, (void*)w);
+}
+
+int main(int argc, char **argv)
+{
+	cfgoptions options;
+	Watchdog watchdog;
+	cfgoptions * tmp = &options;
+	Watchdog * tmp2 = &watchdog;
+
+	struct dbusinfo temp = {.config = &tmp, .wdt = &tmp2};;
+
+	if (MyStrerrorInit() == false) {
+		std::perror("Unable to create a new locale object");
+		return EXIT_FAILURE;
+	}
+
+	int ret = ParseCommandLine(&argc, argv, &options);
+
+	if (ret < 0) {
+		return EXIT_FAILURE;
+	} else if (ret != 0) {
+		return EXIT_SUCCESS;
+	}
+
+	if (strcasecmp(GetExeName(), "wd_identify") == 0 || strcasecmp(GetExeName(), "wd_identify.sh") == 0) {
+		options.options |= IDENTIFY;
+	}
+
+	if (ReadConfigurationFile(&options) < 0) {
+		return EXIT_FAILURE;
+	}
+
+	if (options.options & IDENTIFY) {
+		watchdog.Open(options.devicepath);
+
+		ret = Identify(watchdog.GetRawTimeout(), (const char*)watchdog.GetIdentity(),
+				options.devicepath, options.options & VERBOSE);
+
+		watchdog.Close();
+		return ret;
+	}
+
+	if (Daemonize(&options) < 0) {
+		FatalError(&options);
+	}
+
+	if (PingInit(&options) < 0) {
+		return EXIT_FAILURE;
+	}
+
+	Logmsg(LOG_INFO, "starting daemon (%s)", PACKAGE_VERSION);
+
+	PrintConfiguration(&options);
+
+	if (ExecuteRepairScriptsPreFork(&processes, &options) == false) {
+		Logmsg(LOG_ERR, "ExecuteRepairScriptsPreFork failed");
+		FatalError(&options);
+	}
+
+	int sock[2] = {0};
+	socketpair(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC, 0, sock);
+	temp.fd = sock[1];
+
+	pid_t pid = fork();
+
+	if (pid == 0) {
+		OnParentDeathSend(SIGKILL);
+		close(sock[1]);
+		if (options.options & REALTIME) {
+			SetSchedulerPolicy(options.priority);
+		}
+
+		DbusApiInit(sock[0]);
+		_Exit(0);
+	}
+
+	close(sock[0]);
+
+	sd_event_source *event_source = NULL;
+	sd_event *event = NULL;
+	sd_event_default(&event);
+
+	BlockSignals();
+	InstallSignalHandlers(event);
+
+	if (StartHelperThreads(&options) != 0) {
+		FatalError(&options);
+	}
+
+	if (!(options.options & NOACTION)) {
+		errno = 0;
+
+		ret = watchdog.Open(options.devicepath);
+
+		if (errno == EBUSY && ret < 0) {
+			Logmsg(LOG_ERR, "Unable to open watchdog device");
+			return EXIT_FAILURE;
+		} else if (ret <= -1) {
+			LoadKernelModule();
+			ret = watchdog.Open(options.devicepath);
+		}
+
+		if (ret <= -1) {
+			FatalError(&options);
+		}
+
+		if (watchdog.ConfigureWatchdogTimeout(options.watchdogTimeout)
+		    < 0 && options.watchdogTimeout != -1) {
+			Logmsg(LOG_ERR,
+			       "unable to set watchdog device timeout\n");
+			Logmsg(LOG_ERR, "program exiting\n");
+			EndDaemon(&options, false);
+			watchdog.Close();
+			return EXIT_FAILURE;
+		}
+
+		if (options.sleeptime == -1) {
+			options.sleeptime = watchdog.GetOptimalPingInterval();
+			Logmsg(LOG_INFO, "ping interval autodetect: %i",
+			       options.sleeptime);
+		}
+
+		if (options.watchdogTimeout != -1
+		    && watchdog.CheckWatchdogTimeout(options.sleeptime) == true) {
+			Logmsg(LOG_ERR,
+			       "WDT timeout is less than or equal watchdog daemon ping interval");
+			Logmsg(LOG_ERR,
+			       "Using this interval may result in spurious reboots");
+
+			if (!(options.options & FORCE)) {
+				watchdog.Close();
+				Logmsg(LOG_WARNING,
+				       "use the -f option to force this configuration");
+				return EXIT_FAILURE;
+			}
+		}
+
+		WriteBootStatus(watchdog.GetStatus(), "/run/watchdogd.status", options.sleeptime, watchdog.GetRawTimeout());
+
+		static struct identinfo i;
+
+		strncpy(i.name, (char *)watchdog.GetIdentity(), sizeof(i.name) - 1);
+		i.timeout = watchdog.GetRawTimeout();
+		strncpy(i.daemonVersion, PACKAGE_VERSION, sizeof(i.daemonVersion) - 1);
+		strncpy(i.deviceName, options.devicepath, sizeof(i.deviceName) - 1);
+		i.flags = watchdog.GetStatus();
+		i.firmwareVersion = watchdog.GetFirmwareVersion();
+
+		CreateDetachedThread(IdentityThread, &i);
+		CreateDetachedThread(DbusHelper, &temp);
+
+		InstallPinger(event, options.sleeptime, &watchdog);
+
+		write(sock[1], "", sizeof(char));
+	}
+
+	if (SetupAuxManagerThread(&options) < 0) {
+		FatalError(&options);
+	}
+
+	if (PlatformInit() != true) {
+		FatalError(&options);
+	}
+
+	sd_event_loop(event);
+
+	if (stop == 1) {
+		while (true) {
+			if (stopPing == 1) {
+				if (DISARM_WATCHDOG_BEFORE_REBOOT) {
+					watchdog.Close();
+				}
+			} else {
+				watchdog.Ping();
+			}
+
+			sleep(1);
+		}
+	}
+
+	watchdog.Close();
+
+	DeletePidFile(&options.pidfile);
+	unlink("/run/watchdogd.status");
+
+	if (EndDaemon(&options, false) < 0) {
+		return EXIT_FAILURE;
+	}
+
+	return EXIT_SUCCESS;
 }

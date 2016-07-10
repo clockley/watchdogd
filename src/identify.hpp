@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014 Christian Lockley
+ * Copyright 2016 Christian Lockley
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may 
  * not use this file except in compliance with the License. You may obtain 
@@ -13,12 +13,7 @@
  * implied. See the License for the specific language governing
  * permissions and limitations under the License. 
  */
-
-#if !defined(MAIN_H)
-#define MAIN_H
-#include "testdir.h"
-int SetupSignalHandlers(int isDaemon);
-static void SignalHandler(int signum);
-static void PrintConfiguration(struct cfgoptions *s);
-static int InstallSignalAction(struct sigaction *act, ...);
+#if !defined(IDENTIFY_H)
+#define IDENTIFY_H
+int Identify(long, const char *, const char *, bool);
 #endif

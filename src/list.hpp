@@ -23,7 +23,7 @@
  *
  */
 
-#include "watchdogd.h"
+#include "watchdogd.hpp"
 
 #ifndef LIST_H_
 #define LIST_H_

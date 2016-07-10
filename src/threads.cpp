@@ -15,17 +15,17 @@
  */
 
 #define _DEFAULT_SOURCE
-#include "watchdogd.h"
+#include "watchdogd.hpp"
 #include <pthread.h>
 #include <netdb.h>
 #include <sys/wait.h>
 #include <sys/sysinfo.h>
-#include "sub.h"
-#include "errorlist.h"
-#include "threads.h"
-#include "testdir.h"
-#include "exe.h"
-#include "network_tester.h"
+#include "sub.hpp"
+#include "errorlist.hpp"
+#include "threads.hpp"
+#include "testdir.hpp"
+#include "exe.hpp"
+#include "network_tester.hpp"
 #include "dbusapi.h"
 
 extern volatile sig_atomic_t stop;
@@ -42,6 +42,8 @@ static void GetPageSize(void)
 void *DbusHelper(void * arg)
 {
 	struct dbusinfo * info = (struct dbusinfo *)arg;
+	Watchdog * wdt = *info->wdt;
+	cfgoptions * config = *info->config;
 	unsigned int cmd = 0;
 
 	while (true) {
@@ -52,37 +54,36 @@ void *DbusHelper(void * arg)
 		switch (cmd) {
 			case DBUSGETIMOUT:
 				{
-					int timeout = GetRawTimeout(*info->watchdog);
+					int timeout = wdt->GetRawTimeout();
 					write(info->fd, &timeout, sizeof(int));
 				};
 				break;
 			case DBUSTIMELEFT:
 				{
-					int timeleft = GetTimeleft(*info->watchdog);
+					int timeleft = wdt->GetTimeleft();
 					write(info->fd, &timeleft, sizeof(int));
 				};
 				break;
 			case DBUSGETPATH:
 				{
-					watchdog_t * tmp = *info->watchdog;
-					write(info->fd, tmp->path, strlen(tmp->path));
+					write(info->fd, config->devicepath, strlen(config->devicepath));
 				};
 				break;
 			case DBUSVERSION:
 				{
-					long tmp = GetFirmwareVersion(*info->watchdog);
+					long tmp = wdt->GetFirmwareVersion();
 					write(info->fd, &tmp, sizeof(tmp));
 				};
 				break;
 			case DBUSGETNAME:
 				{
-					unsigned char *tmp = GetWatchdogIdentity(*info->watchdog);
+					char *tmp = (char*)wdt->GetIdentity();
 					write(info->fd, tmp, strlen((char *)tmp));
 				};
 				break;
 			case DBUSHUTDOWN:
 				{
-					Shutdown(9221996, *info->config);
+					Shutdown(9221996, config);
 				};
 				break;
 		}
@@ -567,6 +568,7 @@ static void *TestPidfileThread(void *arg)
 
 void *IdentityThread(void *arg)
 {
+
 	struct identinfo *i = (struct identinfo*)arg;
 	struct sockaddr_un address = {0};
 	address.sun_family = AF_UNIX;
@@ -574,6 +576,7 @@ void *IdentityThread(void *arg)
 	int fd = socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC, 0);
 
 	if (fd < 0) {
+
 		return NULL;
 	}
 
@@ -613,7 +616,7 @@ static void *ManagerThread(void *arg)
 	/*This thread gets data from the non main threads and
 	   calls a function to take care of the problem */
 
-	struct cfgoptions *s = (struct cfgoptions *)arg;
+	cfgoptions *s = (cfgoptions *)arg;
 	struct timespec rqtp;
 
 	rqtp.tv_sec = 5;
@@ -717,6 +720,7 @@ static void *ManagerThread(void *arg)
 
 int StartHelperThreads(struct cfgoptions *options)
 {
+
 	if (StartServiceManagerKeepAliveNotification(NULL) < 0) {
 		return -1;
 	}

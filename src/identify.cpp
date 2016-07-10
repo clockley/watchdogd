@@ -14,67 +14,56 @@
  * permissions and limitations under the License. 
  */
 
-#include "watchdogd.h"
-#include "logutils.h"
-#include "sub.h"
+#include "watchdogd.hpp"
+#include "logutils.hpp"
+#include "sub.hpp"
 
-int Identify(watchdog_t * const wdt, bool verbose)
+int Identify(long timeout, const char * identity, const char * deviceName, bool verbose)
 {
-	SetLogTarget(STANDARD_ERROR);
-	struct watchdog_info watchDogInfo;
+	struct sockaddr_un address = {0};
+	struct identinfo buf;
+	int fd = -1;
 
-	int ret = 1;
+	address.sun_family = AF_UNIX;
+	strncpy(address.sun_path, "\0watchdogd.wdt.identity", sizeof(address.sun_path)-1);
 
-	if (wdt == NULL) {
-		struct sockaddr_un address = {0};
-		struct identinfo buf;
-		int fd = -1;
+	fd = socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC, 0);
 
-		address.sun_family = AF_UNIX;
-		strncpy(address.sun_path, "\0watchdogd.wdt.identity", sizeof(address.sun_path)-1);
-
-		fd = socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC, 0);
-
-		if (fd < 0) {
-			goto error;
-		}
-
-		if (connect(fd, (struct sockaddr*)&address, sizeof(address)) < 0) {
-			goto error;
-		}
-		read(fd, &buf, sizeof(buf));
-		close(fd);
-
-		if (verbose) {
-			printf("watchdog was set to %li seconds\n", buf.timeout);
-		}
-
-		printf("%s\n", buf.name);
-
-		return 0;
-	error:
-		printf("%s\n", "Unable to open watchdog device");
-		
-
-		if (fd >= 0) {
-			close(fd);
-		}
-		return 1;
-
+	if (fd < 0) {
+		goto error;
 	}
+
+	if (connect(fd, (struct sockaddr*)&address, sizeof(address)) < 0) {
+		close(fd);
+		goto direct;
+	}
+
+	read(fd, &buf, sizeof(buf));
+	close(fd);
 
 	if (verbose) {
-		printf("watchdog was set to %i seconds\n", GetRawTimeout(wdt));
+		printf("watchdog was set to %li seconds\n", buf.timeout);
 	}
 
-	if (ioctl(GetFd(wdt), WDIOC_GETSUPPORT, &watchDogInfo) < 0) {
-		printf("%s\n", MyStrerror(errno));
-	} else {
-		printf("%s\n", watchDogInfo.identity);
-		ret = 0;
+	printf("%s\n", buf.name);
+
+	return 0;
+
+direct:
+	if (verbose) {
+		printf("watchdog was set to %li seconds\n", timeout);
 	}
 
-	CloseWatchdog(wdt);
+	printf("%s\n", identity);
+	return 0;
 
-	return ret;
+error:
+	printf("%s\n", "Unable to open watchdog device");
+		
+
+	if (fd >= 0) {
+		close(fd);
+	}
+
+	return 0;
 }

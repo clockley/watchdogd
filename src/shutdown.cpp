@@ -15,11 +15,11 @@
  */
 
 #define _DEFAULT_SOURCE
-#include "watchdogd.h"
-#include "sub.h"
-#include "exe.h"
-#include "errorlist.h"
-#include "testdir.h"
+#include "watchdogd.hpp"
+#include "sub.hpp"
+#include "exe.hpp"
+#include "errorlist.hpp"
+#include "testdir.hpp"
 
 static int StopInit(void)
 {

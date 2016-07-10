@@ -32,20 +32,15 @@
 #include <sys/types.h>
 #include <ifaddrs.h>
 #include <linux/if.h>
-#include "errorlist.h"
+#include "errorlist.hpp"
 #include <systemd/sd-daemon.h>
 #define SD_JOURNAL_SUPPRESS_LOCATION
 #include <systemd/sd-journal.h>
 
 int DisablePageFiles(void);
 int RemountRootReadOnly(void);
-int CloseWatchdog(watchdog_t *const);
-int PingWatchdog(watchdog_t *const);
-int GetOptimalPingInterval(watchdog_t * const);
 int SaveRandomSeed(const char *);
 const char *GetDefaultRandomSeedPathName(void);
-watchdog_t *OpenWatchdog(const char *const);
-int ConfigureWatchdogTimeout(watchdog_t *const , int);
 int StopNetwork(void);
 int _Shutdown(int, bool);
 int NativeShutdown(int, int);
@@ -60,12 +55,5 @@ int GetCpuCount(void);
 bool LoadKernelModule(void);
 bool MakeDeviceFile(const char *);
 int ConfigWatchdogNowayoutIsSet(char *);
-bool PrintWdtInfo(watchdog_t * const);
-int GetWatchdogBootStatus(watchdog_t * const);
-int GetRawTimeout(watchdog_t * const wdt);
-unsigned char *GetWatchdogIdentity(watchdog_t * const wdt);
-long unsigned GetWatchdogStatus(watchdog_t * const);
-long GetTimeleft(watchdog_t *const);
-long GetFirmwareVersion(watchdog_t * const);
 bool IsClientAdmin(int);
 #endif

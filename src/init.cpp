@@ -15,11 +15,11 @@
  */
 
 #include <getopt.h>
-#include "watchdogd.h"
-#include "init.h"
-#include "sub.h"
-#include "testdir.h"
-#include "multicall.h"
+#include "watchdogd.hpp"
+#include "init.hpp"
+#include "sub.hpp"
+#include "testdir.hpp"
+#include "multicall.hpp"
 
 #ifndef SCHED_RESET_ON_FORK
 	#define SCHED_RESET_ON_FORK 0x40000000
@@ -217,27 +217,6 @@ int CheckPriority(int priority)
 	}
 
 	return 0;
-}
-
-bool SetDefaultConfig(struct cfgoptions *const options)
-{
-	assert(options != NULL);
-
-	if (options == NULL)
-		return false;
-
-	memset(options, 0, sizeof(*options));
-
-	options->confile = "/etc/watchdogd.conf";
-	options->sleeptime = 1;
-	options->watchdogTimeout = -1;
-	options->repairBinTimeout = 60;
-	options->testBinTimeout = 60;
-	options->options |= DAEMONIZE | USEPIDFILE;
-	options->loopExit = -1;
-	options->haveConfigFile = true;
-	options->testexepath = "/etc/watchdog.d";
-	return true;
 }
 
 int PrintVersionString(void)

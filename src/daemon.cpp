@@ -14,12 +14,12 @@
  * permissions and limitations under the License. 
  */
 
-#include "watchdogd.h"
+#include "watchdogd.hpp"
 #include <sys/wait.h>
-#include "sub.h"
-#include "init.h"
-#include "pidfile.h"
-#include "daemon.h"
+#include "sub.hpp"
+#include "init.hpp"
+#include "pidfile.hpp"
+#include "daemon.hpp"
 
 static int CloseStandardFileDescriptors(void)
 {

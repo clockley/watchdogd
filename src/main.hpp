@@ -14,11 +14,7 @@
  * permissions and limitations under the License. 
  */
 
-#include "watchdogd.h"
-#ifndef REPAIR_H
-#define REPAIR_H
-bool LoadRepairScriptLink(spawnattr_t *, char * const);
-int IsRepairScriptConfig(const char *);
-void StripNewline(char *);
-bool Validate(char *, char *);
+#if !defined(MAIN_H)
+#define MAIN_H
+#include "testdir.hpp"
 #endif

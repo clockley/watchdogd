@@ -14,12 +14,12 @@
  * permissions and limitations under the License. 
  */
  
-#include "watchdogd.h"
+#include "watchdogd.hpp"
 #include <semaphore.h>
 
 #define MAX_WORKERS 16
 
-static atomic_bool canceled = {false};
+static std::atomic_bool canceled = {false};
 
 struct threadpool
 {

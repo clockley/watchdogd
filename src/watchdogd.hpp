@@ -1,6 +1,6 @@
 #ifndef WATCHDOGD_H
 #define WATCHDOGD_H
-using namespace std;
+
 #define _XOPEN_SOURCE 700
 #define _FILE_OFFSET_BITS 64
 #define PREFER_PORTABLE_SNPRINTF
@@ -42,9 +42,10 @@ using namespace std;
 #include <unistd.h>
 #include <zlib.h>
 
-#include "snprintf.h"
-struct watchdog_t;
-#include "linux.h"
+#include "snprintf.hpp"
+#include "watchdog.hpp"
+#include "linux.hpp"
+#include "watchdog.hpp"
 
 #ifndef NSIG
 #if defined(_NSIG)
@@ -58,7 +59,7 @@ struct watchdog_t;
 #endif
 #endif
 
-#include "list.h"
+#include "list.hpp"
 
 #if defined __cplusplus
 #define restrict
@@ -66,37 +67,6 @@ struct watchdog_t;
 
 #define ARRAY_SIZE(a) (sizeof(a)/sizeof((a)[0]))
 
-struct pidfile_t {
-	const char *name;
-	int fd;
-};
-
-//TODO: Split this struct into an options struct(values read in from config file) and a runtime struct.
-struct cfgoptions {
-	config_t cfg;
-	double maxLoadFifteen;
-	double maxLoadOne;
-	double maxLoadFive;
-	double retryLimit;
-	long loopExit;
-	const config_setting_t *ipAddresses;
-	const config_setting_t *networkInterfaces;
-	pingobj_t *pingObj;
-	const config_setting_t *pidFiles;
-	const char *devicepath;
-	const char *testexepath;
-	const char *exepathname;
-	const char *testexepathname;
-	const char *confile;
-	const char *randomSeedPath;
-	const char *logTarget;
-	const char *logUpto;
-	pidfile_t pidfile;
-	time_t sleeptime;
-	int sigtermDelay;
-	unsigned long minfreepages;
-
-	unsigned long options;
 #define SOFTBOOT 0x1
 #define SYNC 0x2
 #define USEPIDFILE 0x4
@@ -112,14 +82,6 @@ struct cfgoptions {
 #define BUSYBOXDEVOPTCOMPAT 0x1000
 #define LOGLVLSETCMDLN 0x2000
 
-	int priority;
-	int watchdogTimeout;
-	int testExeReturnValue;
-	int testBinTimeout;
-	int repairBinTimeout;
-	int allocatableMemory;
-	volatile atomic_uint error;
-
 #define SCRIPTFAILED 0x1
 #define FORKFAILED 0x2
 #define OUTOFMEMORY 0x4
@@ -128,7 +90,48 @@ struct cfgoptions {
 #define PIDFILERROR 0x20
 #define PINGFAILED 0x40
 #define NETWORKDOWN 0x80
-	bool haveConfigFile;
+
+struct pidfile_t {
+	const char *name;
+	int fd;
+};
+
+//TODO: Split this struct into an options struct(values read in from config file) and a runtime struct.
+struct cfgoptions {
+	cfgoptions() {
+		options |= DAEMONIZE | USEPIDFILE;
+	};
+	config_t cfg = {0};
+	double maxLoadFifteen = 0.0;
+	double maxLoadOne = 0.0;
+	double maxLoadFive = 0.0;
+	double retryLimit = 0.0;
+	long loopExit = -1;
+	const config_setting_t *ipAddresses = NULL;
+	const config_setting_t *networkInterfaces = NULL;
+	pingobj_t *pingObj = NULL;
+	const config_setting_t *pidFiles = NULL;
+	const char *devicepath = NULL;
+	const char *testexepath = "/etc/watchdog.d";
+	const char *exepathname = NULL;
+	const char *testexepathname = NULL;
+	const char *confile = "/etc/watchdogd.conf";
+	const char *randomSeedPath = NULL;
+	const char *logTarget = NULL;
+	const char *logUpto = NULL;
+	pidfile_t pidfile = {0};
+	time_t sleeptime = -1;
+	int sigtermDelay = 0;
+	unsigned long minfreepages = 0;
+	unsigned long options = 0;
+	int priority;
+	int watchdogTimeout = -1;
+	int testExeReturnValue = 0;
+	int testBinTimeout = 60;
+	int repairBinTimeout = 60;
+	int allocatableMemory = 0;
+	volatile std::atomic_uint error = {0};
+	bool haveConfigFile = false;
 };
 
 struct ProcessList {
@@ -152,7 +155,7 @@ struct spawnattr_t {
 
 struct repaircmd_t {
 	struct list entry;
-	atomic_bool mode;
+	std::atomic_bool mode;
 	char retString[32];
 	const char *path;
 	spawnattr_t spawnattr;
@@ -160,16 +163,10 @@ struct repaircmd_t {
 	bool legacy;
 };
 
-struct watchdog_t {
-	const char path[64];
-	int fd;
-	int timeout;
-};
-
 struct dbusinfo
 {
-	struct cfgoptions **config;
-	watchdog_t **watchdog;
+	cfgoptions **config;
+	Watchdog **wdt;
 	pid_t childPid;
 	int fd;
 };

@@ -13,7 +13,7 @@
  * implied. See the License for the specific language governing
  * permissions and limitations under the License. 
  */
-#if !defined(IDENTIFY_H)
-#define IDENTIFY_H
-int Identify(watchdog_t * const, bool verbose);
+#ifndef BOOTSTATUS_H
+#define BOOTSTATUS_H
+int WriteBootStatus(unsigned long, const char *const, long long, int timeout);
 #endif

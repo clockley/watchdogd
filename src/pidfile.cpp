@@ -14,8 +14,8 @@
  * permissions and limitations under the License. 
  */
 
-#include "pidfile.h"
-#include "sub.h"
+#include "pidfile.hpp"
+#include "sub.hpp"
 
 int WritePidFile(pidfile_t *const pidfile, pid_t pid)
 {

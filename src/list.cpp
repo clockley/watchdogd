@@ -23,7 +23,7 @@
  *
  */
 
-#include "watchdogd.h"
+#include "watchdogd.hpp"
 
 /**
  * Initialize the list as an empty list.

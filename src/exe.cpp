@@ -14,11 +14,11 @@
  * permissions and limitations under the License. 
  */
 
-#include "watchdogd.h"
+#include "watchdogd.hpp"
 #include <sys/wait.h>
-#include "sub.h"
-#include "exe.h"
-#include "user.h"
+#include "sub.hpp"
+#include "exe.hpp"
+#include "user.hpp"
 
 int Spawn(int timeout, struct cfgoptions *const config, const char *file,
 	  const char *args, ...)

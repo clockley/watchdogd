@@ -14,17 +14,17 @@
  * permissions and limitations under the License. 
  */
 #define _DEFAULT_SOURCE
-#include "watchdogd.h"
-#include "sub.h"
+#include "watchdogd.hpp"
+#include "sub.hpp"
 #include <dirent.h>
 #include <semaphore.h>
-#include "testdir.h"
-#include "exe.h"
-#include "repair.h"
-#include "threadpool.h"
-#include "futex.h"
+#include "testdir.hpp"
+#include "exe.hpp"
+#include "repair.hpp"
+#include "threadpool.hpp"
+#include "futex.hpp"
 
-static atomic_int sem = {0};
+static std::atomic_int sem = {0};
 //The dirent_buf_size function was written by Ben Hutchings and released under the following license.
 
 //Permission is hereby granted, free of charge, to any person obtaining a copy of this

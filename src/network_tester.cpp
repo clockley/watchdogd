@@ -14,8 +14,8 @@
  * permissions and limitations under the License. 
  */
 
-#include "watchdogd.h"
-#include "logutils.h"
+#include "watchdogd.hpp"
+#include "logutils.hpp"
 #include <linux/if_link.h>
 
 struct NetworkDevices {
