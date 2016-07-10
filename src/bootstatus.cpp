@@ -30,7 +30,7 @@ int WriteBootStatus(unsigned long status, const char * const pathName, long long
 		return fd;
 	}
 
-	dprintf(fd, "Reset cause   : 0x%04x\n", status);
+	dprintf(fd, "Reset cause   : 0x%04lx\n", status);
 	dprintf(fd, "Timeout (sec) : %i\n", timeout);
 	dprintf(fd, "Kick Interval : %lli\n", sleeptime);
 

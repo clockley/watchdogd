@@ -132,6 +132,7 @@ static int Pinger(sd_event_source *s, uint64_t usec, void *cxt)
 	sd_event_now(sd_event_source_get_event(s), CLOCK_REALTIME, &usec);
 	usec += watchdog->GetPingInterval() * 1000000;
 	sd_event_add_time(sd_event_source_get_event(s), &s, CLOCK_REALTIME, usec, 1, Pinger, (void*)cxt);
+	return 0;
 }
 
 static bool InstallPinger(sd_event *e, int time, Watchdog *w)
@@ -143,6 +144,7 @@ static bool InstallPinger(sd_event *e, int time, Watchdog *w)
 	sd_event_now(e, CLOCK_REALTIME, &usec);
 
 	sd_event_add_time(e, &s, CLOCK_REALTIME, usec, 1, Pinger, (void*)w);
+	return true;
 }
 
 int main(int argc, char **argv)
