@@ -79,14 +79,10 @@ int CreateLinkedListOfExes(char *repairScriptFolder, ProcessList * p,
 
 	struct stat buffer;
 	struct dirent *ent = NULL;
-	struct dirent *direntbuf = NULL;
-
-	size_t size = 0;
-	int fd = 0;
 
 	list_init(&p->head);
 
-	fd = open(repairScriptFolder, O_DIRECTORY | O_RDONLY);
+	int fd = open(repairScriptFolder, O_DIRECTORY | O_RDONLY);
 
 	if (fd == -1) {
 		if (!(IDENTIFY & config->options)) {
@@ -109,23 +105,9 @@ int CreateLinkedListOfExes(char *repairScriptFolder, ProcessList * p,
 		return -1;
 	}
 
-	size = DirentBufSize(dir);
-
-	int error = 0;
-
-	if (size == ((size_t) (-1))) {
-		goto error;
-	}
-
-	direntbuf = (struct dirent *)calloc(1, size);
-
-	if (direntbuf == NULL) {
-		goto error;
-	}
-
 	errno = 0;
 
-	while ((error = readdir_r(dir, direntbuf, &ent)) == 0 && ent != NULL) {
+	while ((ent = readdir(dir)) != NULL) {
 
 		int statfd = dirfd(dir);
 
@@ -170,7 +152,7 @@ int CreateLinkedListOfExes(char *repairScriptFolder, ProcessList * p,
 		}
 
 
-		Wasprintf((char **)&cmd->path, "%s/%s", repairScriptFolder, ent->d_name);	//Will have to free this memeory to use v3 repair script config
+		Wasprintf((char **)&cmd->path, "%s/%s", repairScriptFolder, ent->d_name);
 
 		if (cmd->path == NULL) {
 			assert(cmd != NULL);
@@ -229,7 +211,6 @@ int CreateLinkedListOfExes(char *repairScriptFolder, ProcessList * p,
 
 	close(fd);
 	closedir(dir);
-	free(direntbuf);
 
 	return 0;
 
@@ -238,7 +219,6 @@ int CreateLinkedListOfExes(char *repairScriptFolder, ProcessList * p,
 	close(fd);
 	Logmsg(LOG_ERR, "watchdogd: %s", MyStrerror(errno));
 	closedir(dir);
-	free(direntbuf);
 
 	return -1;
 }
