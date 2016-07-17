@@ -117,9 +117,10 @@ static void InstallSignalHandlers(sd_event *event)
 {
 	int r1 = sd_event_add_signal(event, NULL, SIGTERM,SignalHandler, event);
 	int r2 = sd_event_add_signal(event, NULL, SIGHUP, SignalHandler, event);
-	int r3 = sd_event_add_signal(event, NULL, SIGINT, SignalHandler, event);
+	int r3 = sd_event_add_signal(event, NULL, SIGUSR2, SignalHandler, event);
+	int r4 = sd_event_add_signal(event, NULL, SIGINT, SignalHandler, event);
 
-	if (r1 < 0 || r2 < 0 || r3 < 0) {
+	if (r1 < 0 || r2 < 0 || r3 < 0 || r4 < 0) {
 		abort();
 	}
 }
