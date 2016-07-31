@@ -21,8 +21,6 @@
 #include "init.hpp"
 #include "configfile.hpp"
 #include "threads.hpp"
-#include "pidfile.hpp"
-#include "daemon.hpp"
 #include "identify.hpp"
 #include "bootstatus.hpp"
 #include "multicall.hpp"
@@ -188,15 +186,11 @@ int main(int argc, char **argv)
 		return ret;
 	}
 
-	if (Daemonize(&options) < 0) {
-		FatalError(&options);
-	}
-
 	if (PingInit(&options) < 0) {
 		return EXIT_FAILURE;
 	}
 
-	Logmsg(LOG_INFO, "starting daemon (%s)", PACKAGE_VERSION);
+	Logmsg(LOG_INFO, "starting service (%s)", PACKAGE_VERSION);
 
 	PrintConfiguration(&options);
 
@@ -328,7 +322,6 @@ int main(int argc, char **argv)
 
 	watchdog.Close();
 
-	DeletePidFile(&options.pidfile);
 	unlink("/run/watchdogd.status");
 
 	if (EndDaemon(&options, false) < 0) {
