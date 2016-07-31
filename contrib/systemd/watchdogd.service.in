@@ -4,7 +4,7 @@ Description=watchdog daemon
 After=syslog.target
 
 [Service]
-Type=simple
+Type=notify
 ExecStart=@prefix@/sbin/watchdogd -F
 NotifyAccess=main
 OOMScoreAdjust=-1000
