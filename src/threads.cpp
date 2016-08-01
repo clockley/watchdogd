@@ -46,6 +46,10 @@ void *DbusHelper(void * arg)
 	cfgoptions * config = *info->config;
 	unsigned int cmd = 0;
 
+	long version = wdt->GetFirmwareVersion();
+	char *identity = (char*)wdt->GetIdentity();
+	int timeout = wdt->GetRawTimeout();
+
 	while (stop == 0) {
 		int ret = read(info->fd, &cmd, sizeof(unsigned int));
 		if (ret < 0 && errno != EINTR) {
@@ -56,7 +60,6 @@ void *DbusHelper(void * arg)
 		switch (cmd) {
 			case DBUSGETIMOUT:
 				{
-					int timeout = wdt->GetRawTimeout();
 					write(info->fd, &timeout, sizeof(int));
 				};
 				break;
@@ -73,14 +76,12 @@ void *DbusHelper(void * arg)
 				break;
 			case DBUSVERSION:
 				{
-					long tmp = wdt->GetFirmwareVersion();
-					write(info->fd, &tmp, sizeof(tmp));
+					write(info->fd, &version, sizeof(version));
 				};
 				break;
 			case DBUSGETNAME:
 				{
-					char *tmp = (char*)wdt->GetIdentity();
-					write(info->fd, tmp, strlen((char *)tmp));
+					write(info->fd, identity, strlen((char *)identity));
 				};
 				break;
 			case DBUSHUTDOWN:
