@@ -140,7 +140,7 @@ static bool InstallPinger(sd_event * e, int time, Watchdog * w)
 	return true;
 }
 
-int ServiceMain(int argc, char **argv, int fd)
+int ServiceMain(int argc, char **argv, int fd, bool restarted)
 {
 	cfgoptions options;
 	Watchdog watchdog;
@@ -185,7 +185,11 @@ int ServiceMain(int argc, char **argv, int fd)
 		return EXIT_FAILURE;
 	}
 
-	Logmsg(LOG_INFO, "starting service (%s)", PACKAGE_VERSION);
+	if (restarted) {
+		Logmsg(LOG_INFO,"restarting service (%s)", PACKAGE_VERSION);
+	} else {
+		Logmsg(LOG_INFO, "starting service (%s)", PACKAGE_VERSION);
+	}
 
 	PrintConfiguration(&options);
 
@@ -339,13 +343,13 @@ int main(int argc, char **argv)
 	sigaction(SIGTERM, &act, NULL);
 	sigaction(SIGINT, &act, NULL);
 	sigaction(SIGHUP, &act, NULL);
-
+	bool restarted = false;
 init:
 	pid = fork();
 	if (pid == 0) {
 		ResetSignalHandlers(64);
 		OnParentDeathSend(SIGTERM);
-		_Exit(ServiceMain(argc, argv, sock[1]));
+		_Exit(ServiceMain(argc, argv, sock[1], restarted));
 	}
 
 	do {
@@ -356,6 +360,7 @@ init:
 			do {
 				waitpid(pid, &ret, 0);
 			} while (!WIFEXITED(ret) && !WIFSIGNALED(ret));
+			restarted = true;
 			goto init;
 			break;
 		case SIGCHLD:
