@@ -46,11 +46,13 @@ void *DbusHelper(void * arg)
 	cfgoptions * config = *info->config;
 	unsigned int cmd = 0;
 
-	while (true) {
+	while (stop == 0) {
 		int ret = read(info->fd, &cmd, sizeof(unsigned int));
 		if (ret < 0 && errno != EINTR) {
 			break;
 		}
+		int x = 0;
+		pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &x);
 		switch (cmd) {
 			case DBUSGETIMOUT:
 				{
@@ -87,9 +89,10 @@ void *DbusHelper(void * arg)
 				};
 				break;
 		}
+		pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, &x);
 	}
 
-	return NULL;
+	pthread_exit(NULL);
 }
 
 static void *ServiceManagerKeepAliveNotification(void * arg)

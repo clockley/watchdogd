@@ -28,7 +28,6 @@ extern "C" {
 #include "dbusapi.h"
 }
 #include <systemd/sd-event.h>
-
 const bool DISARM_WATCHDOG_BEFORE_REBOOT = true;
 static volatile sig_atomic_t quit = 0;
 
@@ -39,19 +38,16 @@ ProcessList processes;
 static void PrintConfiguration(struct cfgoptions *const cfg)
 {
 	Logmsg(LOG_INFO,
-	       "int=%is realtime=%s sync=%s softboot=%s force=%s mla=%.2f mem=%li",
+	       "int=%is realtime=%s sync=%s softboot=%s force=%s mla=%.2f mem=%li pid=%li",
 	       cfg->sleeptime, cfg->options & REALTIME ? "yes" : "no",
 	       cfg->options & SYNC ? "yes" : "no",
 	       cfg->options & SOFTBOOT ? "yes" : "no",
-	       cfg->options & FORCE ? "yes" : "no", cfg->maxLoadOne,
-	       cfg->minfreepages);
+	       cfg->options & FORCE ? "yes" : "no", cfg->maxLoadOne, cfg->minfreepages, getppid());
 
 	if (cfg->options & ENABLEPING) {
-		for (int cnt = 0; cnt < config_setting_length(cfg->ipAddresses);
-		     cnt++) {
-			const char *ipAddress =
-			    config_setting_get_string_elem(cfg->ipAddresses,
-							   cnt);
+		for (int cnt = 0; cnt < config_setting_length(cfg->ipAddresses); cnt++) {
+			const char *ipAddress = config_setting_get_string_elem(cfg->ipAddresses,
+									       cnt);
 
 			assert(ipAddress != NULL);
 
@@ -62,10 +58,8 @@ static void PrintConfiguration(struct cfgoptions *const cfg)
 	}
 
 	if (cfg->options & ENABLEPIDCHECKER) {
-		for (int cnt = 0; cnt < config_setting_length(cfg->pidFiles);
-		     cnt++) {
-			const char *pidFilePathName =
-			    config_setting_get_string_elem(cfg->pidFiles, cnt);
+		for (int cnt = 0; cnt < config_setting_length(cfg->pidFiles); cnt++) {
+			const char *pidFilePathName = config_setting_get_string_elem(cfg->pidFiles, cnt);
 
 			assert(pidFilePathName != NULL);
 
@@ -96,24 +90,24 @@ static void BlockSignals()
 	pthread_sigmask(SIG_BLOCK, &set, NULL);
 }
 
-static int SignalHandler(sd_event_source *s, const signalfd_siginfo *si, void *cxt)
+static int SignalHandler(sd_event_source * s, const signalfd_siginfo * si, void *cxt)
 {
 	switch (sd_event_source_get_signal(s)) {
-		case SIGTERM:
-		case SIGINT:
-			quit = 1;
-			sd_event_exit((sd_event *)cxt, 0);
-			break;
-		case SIGHUP:
-			//reload;
+	case SIGTERM:
+	case SIGINT:
+		quit = 1;
+		sd_event_exit((sd_event *) cxt, 0);
+		break;
+	case SIGHUP:
+		//reload;
 		break;
 	}
 	return 1;
 }
 
-static void InstallSignalHandlers(sd_event *event)
+static void InstallSignalHandlers(sd_event * event)
 {
-	int r1 = sd_event_add_signal(event, NULL, SIGTERM,SignalHandler, event);
+	int r1 = sd_event_add_signal(event, NULL, SIGTERM, SignalHandler, event);
 	int r2 = sd_event_add_signal(event, NULL, SIGHUP, SignalHandler, event);
 	int r3 = sd_event_add_signal(event, NULL, SIGUSR2, SignalHandler, event);
 	int r4 = sd_event_add_signal(event, NULL, SIGINT, SignalHandler, event);
@@ -123,18 +117,18 @@ static void InstallSignalHandlers(sd_event *event)
 	}
 }
 
-static int Pinger(sd_event_source *s, uint64_t usec, void *cxt)
+static int Pinger(sd_event_source * s, uint64_t usec, void *cxt)
 {
-	Watchdog *watchdog = (Watchdog*)cxt;
+	Watchdog *watchdog = (Watchdog *) cxt;
 	watchdog->Ping();
 
 	sd_event_now(sd_event_source_get_event(s), CLOCK_REALTIME, &usec);
 	usec += watchdog->GetPingInterval() * 1000000;
-	sd_event_add_time(sd_event_source_get_event(s), &s, CLOCK_REALTIME, usec, 1, Pinger, (void*)cxt);
+	sd_event_add_time(sd_event_source_get_event(s), &s, CLOCK_REALTIME, usec, 1, Pinger, (void *)cxt);
 	return 0;
 }
 
-static bool InstallPinger(sd_event *e, int time, Watchdog *w)
+static bool InstallPinger(sd_event * e, int time, Watchdog * w)
 {
 	sd_event_source *s = NULL;
 	uint64_t usec = 0;
@@ -142,18 +136,19 @@ static bool InstallPinger(sd_event *e, int time, Watchdog *w)
 
 	sd_event_now(e, CLOCK_REALTIME, &usec);
 
-	sd_event_add_time(e, &s, CLOCK_REALTIME, usec, 1, Pinger, (void*)w);
+	sd_event_add_time(e, &s, CLOCK_REALTIME, usec, 1, Pinger, (void *)w);
 	return true;
 }
 
-int main(int argc, char **argv)
+int ServiceMain(int argc, char **argv, int fd)
 {
 	cfgoptions options;
 	Watchdog watchdog;
-	cfgoptions * tmp = &options;
-	Watchdog * tmp2 = &watchdog;
+	cfgoptions *tmp = &options;
+	Watchdog *tmp2 = &watchdog;
 
-	struct dbusinfo temp = {.config = &tmp, .wdt = &tmp2};;
+	struct dbusinfo temp = {.config = &tmp,.wdt = &tmp2 };;
+	temp.fd = fd;
 
 	if (MyStrerrorInit() == false) {
 		std::perror("Unable to create a new locale object");
@@ -179,8 +174,8 @@ int main(int argc, char **argv)
 	if (options.options & IDENTIFY) {
 		watchdog.Open(options.devicepath);
 
-		ret = Identify(watchdog.GetRawTimeout(), (const char*)watchdog.GetIdentity(),
-				options.devicepath, options.options & VERBOSE);
+		ret = Identify(watchdog.GetRawTimeout(), (const char *)watchdog.GetIdentity(),
+			       options.devicepath, options.options & VERBOSE);
 
 		watchdog.Close();
 		return ret;
@@ -199,25 +194,6 @@ int main(int argc, char **argv)
 		FatalError(&options);
 	}
 
-	int sock[2] = {0};
-	socketpair(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC, 0, sock);
-	temp.fd = sock[1];
-
-	pid_t pid = fork();
-
-	if (pid == 0) {
-		OnParentDeathSend(SIGKILL);
-		close(sock[1]);
-		if (options.options & REALTIME) {
-			SetSchedulerPolicy(options.priority);
-		}
-
-		DbusApiInit(sock[0]);
-		_Exit(0);
-	}
-
-	close(sock[0]);
-
 	sd_event_source *event_source = NULL;
 	sd_event *event = NULL;
 	sd_event_default(&event);
@@ -228,6 +204,8 @@ int main(int argc, char **argv)
 	if (StartHelperThreads(&options) != 0) {
 		FatalError(&options);
 	}
+
+	pthread_t dbusThread;
 
 	if (!(options.options & NOACTION)) {
 		errno = 0;
@@ -248,8 +226,7 @@ int main(int argc, char **argv)
 
 		if (watchdog.ConfigureWatchdogTimeout(options.watchdogTimeout)
 		    < 0 && options.watchdogTimeout != -1) {
-			Logmsg(LOG_ERR,
-			       "unable to set watchdog device timeout\n");
+			Logmsg(LOG_ERR, "unable to set watchdog device timeout\n");
 			Logmsg(LOG_ERR, "program exiting\n");
 			EndDaemon(&options, false);
 			watchdog.Close();
@@ -258,26 +235,22 @@ int main(int argc, char **argv)
 
 		if (options.sleeptime == -1) {
 			options.sleeptime = watchdog.GetOptimalPingInterval();
-			Logmsg(LOG_INFO, "ping interval autodetect: %i",
-			       options.sleeptime);
+			Logmsg(LOG_INFO, "ping interval autodetect: %i", options.sleeptime);
 		}
 
-		if (options.watchdogTimeout != -1
-		    && watchdog.CheckWatchdogTimeout(options.sleeptime) == true) {
-			Logmsg(LOG_ERR,
-			       "WDT timeout is less than or equal watchdog daemon ping interval");
-			Logmsg(LOG_ERR,
-			       "Using this interval may result in spurious reboots");
+		if (options.watchdogTimeout != -1 && watchdog.CheckWatchdogTimeout(options.sleeptime) == true) {
+			Logmsg(LOG_ERR, "WDT timeout is less than or equal watchdog daemon ping interval");
+			Logmsg(LOG_ERR, "Using this interval may result in spurious reboots");
 
 			if (!(options.options & FORCE)) {
 				watchdog.Close();
-				Logmsg(LOG_WARNING,
-				       "use the -f option to force this configuration");
+				Logmsg(LOG_WARNING, "use the -f option to force this configuration");
 				return EXIT_FAILURE;
 			}
 		}
 
-		WriteBootStatus(watchdog.GetStatus(), "/run/watchdogd.status", options.sleeptime, watchdog.GetRawTimeout());
+		WriteBootStatus(watchdog.GetStatus(), "/run/watchdogd.status", options.sleeptime,
+				watchdog.GetRawTimeout());
 
 		static struct identinfo i;
 
@@ -289,11 +262,10 @@ int main(int argc, char **argv)
 		i.firmwareVersion = watchdog.GetFirmwareVersion();
 
 		CreateDetachedThread(IdentityThread, &i);
-		CreateDetachedThread(DbusHelper, &temp);
-
+		pthread_create(&dbusThread, NULL, DbusHelper, &temp);
 		InstallPinger(event, options.sleeptime, &watchdog);
 
-		write(sock[1], "", sizeof(char));
+		write(fd, "", sizeof(char));
 	}
 
 	if (SetupAuxManagerThread(&options) < 0) {
@@ -319,7 +291,8 @@ int main(int argc, char **argv)
 			sleep(1);
 		}
 	}
-
+	pthread_cancel(dbusThread);
+	pthread_join(dbusThread, NULL);
 	watchdog.Close();
 
 	unlink("/run/watchdogd.status");
@@ -329,4 +302,79 @@ int main(int argc, char **argv)
 	}
 
 	return EXIT_SUCCESS;
+}
+
+sig_atomic_t sigValue = -1;
+pid_t pid = 0;
+static int ret = 0;
+
+static void SaHandler(int sig)
+{
+	sigValue = sig;
+}
+
+static int sock[2] = { 0 };
+
+int main(int argc, char **argv)
+{
+	socketpair(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0, sock);
+	pid_t pid = fork();
+
+	if (pid == 0) {
+		OnParentDeathSend(SIGKILL);
+		close(sock[1]);
+		DbusApiInit(sock[0]);
+		_Exit(0);
+	}
+
+	close(sock[0]);
+
+	struct sigaction act = { 0 };
+
+	act.sa_flags = SA_NOCLDSTOP | SA_RESTART;
+	act.sa_handler = SaHandler;
+	sigfillset(&act.sa_mask);
+
+	sigaction(SIGCHLD, &act, NULL);
+	sigaction(SIGTERM, &act, NULL);
+	sigaction(SIGINT, &act, NULL);
+	sigaction(SIGHUP, &act, NULL);
+
+init:
+	pid = fork();
+	if (pid == 0) {
+		ResetSignalHandlers(64);
+		OnParentDeathSend(SIGTERM);
+		_Exit(ServiceMain(argc, argv, sock[1]));
+	}
+
+	do {
+		pause();
+		switch (sigValue) {
+		case SIGHUP:
+			kill(pid, SIGTERM);
+			do {
+				waitpid(pid, &ret, 0);
+			} while (!WIFEXITED(ret) && !WIFSIGNALED(ret));
+			goto init;
+			break;
+		case SIGCHLD:
+			do {
+				waitpid(pid, &ret, 0);
+			} while (!WIFEXITED(ret) && !WIFSIGNALED(ret));
+			break;
+		case SIGINT:
+		case SIGTERM:
+			kill(pid, SIGTERM);
+			do {
+				waitpid(pid, &ret, 0);
+			} while (!WIFEXITED(ret) && !WIFSIGNALED(ret));
+			break;
+		default:
+			sigValue = -1;
+			break;
+		}
+	} while (sigValue == -1);
+
+	_Exit(WEXITSTATUS(ret));
 }

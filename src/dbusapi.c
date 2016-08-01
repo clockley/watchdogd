@@ -16,7 +16,7 @@
 
 #define DBUSAPI_PROTOTYPES
 #include "dbusapi.h"
-
+#include <errno.h>
 #define MAX_CLIENT_ID 4096
 typedef uint64_t usec_t;
 
@@ -25,7 +25,7 @@ static sd_bus *bus = NULL;
 
 static sd_event_source *clients[MAX_CLIENT_ID] = {NULL};
 static short freeIds[MAX_CLIENT_ID] = {-1};
-static usec_t clientTimeout[MAX_CLIENT_ID];
+static usec_t clientTimeout[MAX_CLIENT_ID] = {0};
 
 static int lastAllocatedId = 0;
 static int openSlots = MAX_CLIENT_ID;
@@ -54,7 +54,9 @@ static int Timeout(sd_event_source *source, usec_t usec, void *userdata)
 {
 	int cmd = DBUSHUTDOWN;
 
-	write(fd, &cmd, sizeof(long));
+	do
+		write(fd, &cmd, sizeof(long));
+	while (errno != 0);
 
 	return -1;
 }
@@ -140,61 +142,39 @@ static int PmonInit(sd_bus_message *m, void *userdata, sd_bus_error *retError)
 	return sd_bus_reply_method_return(m, "u", id);
 }
 
-static void DevicePathInit(void)
-{
-	int cmd = DBUSGETPATH;
-
-	write(fd, &cmd, sizeof(int));
-	read(fd, path, sizeof(path));
-}
-
 static int DevicePath(sd_bus_message *m, void *userdata, sd_bus_error *retError)
 {
-	static pthread_once_t initPath = PTHREAD_ONCE_INIT;
-	pthread_once(&initPath, DevicePathInit);
-	return sd_bus_reply_method_return(m, "s", path);
-}
-
-static void IdentityInit(void)
-{
-	int cmd = DBUSGETNAME;
+	int cmd = DBUSGETPATH;
 	write(fd, &cmd, sizeof(int));
-	read(fd, identity, sizeof(identity));
+	read(fd, path, sizeof(path));
+
+	return sd_bus_reply_method_return(m, "s", path);
 }
 
 static int Identity(sd_bus_message *m, void *userdata, sd_bus_error *retError)
 {
-	static pthread_once_t initIdentity = PTHREAD_ONCE_INIT;
-	pthread_once(&initIdentity, IdentityInit);
-	return sd_bus_reply_method_return(m, "s", identity);
-}
+	int cmd = DBUSGETNAME;
+	write(fd, &cmd, sizeof(int));
+	read(fd, identity, sizeof(identity));
 
-static void VersionInit(void)
-{
-	int cmd = DBUSVERSION;
-	write(fd, &cmd, sizeof(long));
-	read(fd, &version, sizeof(long));
+	return sd_bus_reply_method_return(m, "s", identity);
 }
 
 static int Version(sd_bus_message *m, void *userdata, sd_bus_error *retError)
 {
-	static pthread_once_t initVersion = PTHREAD_ONCE_INIT;
-	pthread_once(&initVersion, VersionInit);
-	return sd_bus_reply_method_return(m, "x", version);
-}
-
-static void InitGetTimeoutDbus(void)
-{
-	int cmd = DBUSGETIMOUT;
-
+	int cmd = DBUSVERSION;
 	write(fd, &cmd, sizeof(long));
-	read(fd, &timeout, sizeof(long));
+	read(fd, &version, sizeof(long));
+
+	return sd_bus_reply_method_return(m, "x", version);
 }
 
 static int GetTimeoutDbus(sd_bus_message *m, void *userdata, sd_bus_error *retError)
 {
-	static pthread_once_t initTimeout = PTHREAD_ONCE_INIT;
-	pthread_once(&initTimeout, InitGetTimeoutDbus);
+	int cmd = DBUSGETIMOUT;
+	write(fd, &cmd, sizeof(long));
+	read(fd, &timeout, sizeof(long));
+
 	return sd_bus_reply_method_return(m, "x", timeout);
 }
 
