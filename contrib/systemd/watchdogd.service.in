@@ -7,7 +7,7 @@ After=syslog.target
 Type=notify
 NotifyAccess=all
 ExecStart=@prefix@/sbin/watchdogd -F
-NotifyAccess=main
+NotifyAccess=all
 OOMScoreAdjust=-1000
 
 [Install]

@@ -317,10 +317,9 @@ static void SaHandler(int sig)
 	sigValue = sig;
 }
 
-static int sock[2] = { 0 };
-
 int main(int argc, char **argv)
 {
+	int sock[2] = { 0 };
 	socketpair(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0, sock);
 	pid_t pid = fork();
 
