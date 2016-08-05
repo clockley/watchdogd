@@ -96,14 +96,10 @@ int LinuxRunningSystemd(void)
 
 bool PlatformInit(void)
 {
-	sd_notifyf(0, "READY=1\n" "MAINPID=%lu", (unsigned long)getppid());
-
 	if (ConfigureKernelOutOfMemoryKiller() < 0) {
 		Logmsg(LOG_ERR, "unable to configure out of memory killer");
 		return false;
 	}
-
-	prctl(PR_SET_DUMPABLE, 0, 0, 0, 0); //prevent children from ptrace() ing main process and helpers
 
 	return true;
 }
