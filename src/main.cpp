@@ -34,7 +34,6 @@ static volatile sig_atomic_t quit = 0;
 volatile sig_atomic_t stop = 0;
 volatile sig_atomic_t stopPing = 0;
 ProcessList processes;
-static pid_t ppid = 0;
 
 static void PrintConfiguration(struct cfgoptions *const cfg)
 {
@@ -43,7 +42,7 @@ static void PrintConfiguration(struct cfgoptions *const cfg)
 	       cfg->sleeptime, cfg->options & REALTIME ? "yes" : "no",
 	       cfg->options & SYNC ? "yes" : "no",
 	       cfg->options & SOFTBOOT ? "yes" : "no",
-	       cfg->options & FORCE ? "yes" : "no", cfg->maxLoadOne, cfg->minfreepages, ppid);
+	       cfg->options & FORCE ? "yes" : "no", cfg->maxLoadOne, cfg->minfreepages, getppid());
 
 	if (cfg->options & ENABLEPING) {
 		for (int cnt = 0; cnt < config_setting_length(cfg->ipAddresses); cnt++) {
@@ -344,33 +343,13 @@ int main(int argc, char **argv)
 	sigaction(SIGINT, &act, NULL);
 	sigaction(SIGHUP, &act, NULL);
 	bool restarted = false;
-	sd_notifyf(0, "READY=1\n" "MAINPID=%lu", (unsigned long)getpid());
-
-	prctl(PR_SET_CHILD_SUBREAPER, 1, 0, 0, 0);
-
-	int fd[2] = {0};
-	pipe(fd);
 init:
 	pid = fork();
-
 	if (pid == 0) {
-		ppid = getppid();
-		unshare(CLONE_NEWPID);
-		pid = fork();
-		if (pid == 0) {
-			ResetSignalHandlers(64);
-			close(fd[0]);
-			close(fd[1]);
-			_Exit(ServiceMain(argc, argv, sock[1], restarted));
-		} else {
-			write(fd[1], &pid, sizeof(pid));
-			_Exit(0);
-		}
-	} else {
-		read(fd[0], &pid, sizeof(pid));
+		ResetSignalHandlers(64);
+		OnParentDeathSend(SIGTERM);
+		_Exit(ServiceMain(argc, argv, sock[1], restarted));
 	}
-
-	wait(NULL);
 
 	do {
 		pause();
@@ -400,9 +379,6 @@ init:
 			break;
 		}
 	} while (sigValue == -1);
-
-	close(fd[0]);
-	close(fd[1]);
 
 	_Exit(WEXITSTATUS(ret));
 }
