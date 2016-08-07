@@ -343,13 +343,52 @@ int main(int argc, char **argv)
 	sigaction(SIGINT, &act, NULL);
 	sigaction(SIGHUP, &act, NULL);
 	bool restarted = false;
+
 init:
 	pid = fork();
+
 	if (pid == 0) {
+		char name[64] = {0};
+		sd_bus *bus = NULL;
+		sd_bus_message *m = NULL;
+		sd_bus_error error = {0};
+
+		sd_bus_open_system(&bus);
+
+		sprintf(name, "watchdogd.%li.scope", getpid());
+		sd_bus_message_new_method_call(bus, &m, "org.freedesktop.systemd1",
+					"/org/freedesktop/systemd1",
+					"org.freedesktop.systemd1.Manager",
+					"StartTransientUnit");
+		sd_bus_message_append(m, "ss", name, "fail");
+		sd_bus_message_open_container(m, 'a', "(sv)");
+		sd_bus_message_append(m, "(sv)", "Description", "s", " ");
+		sd_bus_message_append(m, "(sv)", "PIDs", "au", 1, (uint32_t) getpid());
+		sd_bus_message_close_container(m);
+		sd_bus_message_append(m, "a(sa(sv))", 0);
+		sd_bus_message * reply;
+		sd_bus_call(bus, m, 0, &error, &reply);
+
 		ResetSignalHandlers(64);
 		OnParentDeathSend(SIGTERM);
-		_Exit(ServiceMain(argc, argv, sock[1], restarted));
+
+		sd_bus_flush_close_unref(bus);
+
+		int ret = ServiceMain(argc, argv, sock[1], restarted);
+
+		sd_bus_open_system(&bus);
+
+		sd_bus_call_method(bus, "org.freedesktop.systemd1",
+				"/org/freedesktop/systemd1",
+				"org.freedesktop.systemd1.Manager", "StopUnit", &error,
+				NULL, "ss", name, "ignore-dependencies");
+
+		sd_bus_flush_close_unref(bus);
+
+		_Exit(ret);
 	}
+
+	sd_notifyf(0, "READY=1\n" "MAINPID=%lu", (unsigned long)getpid());
 
 	do {
 		pause();
