@@ -343,19 +343,40 @@ int main(int argc, char **argv)
 	sigaction(SIGINT, &act, NULL);
 	sigaction(SIGHUP, &act, NULL);
 	bool restarted = false;
-
+	char name[64] = {0};
+	sd_bus *bus = NULL;
+	sd_bus_message *m = NULL;
+	sd_bus_error error = {0};
 init:
+	if (name[0] != '\0') {
+		sd_bus_open_system(&bus);
+		sd_bus_call_method(bus, "org.freedesktop.systemd1",
+				"/org/freedesktop/systemd1",
+				"org.freedesktop.systemd1.Manager", "StopUnit", &error,
+				NULL, "ss", name, "ignore-dependencies");
+
+		sd_bus_flush_close_unref(bus);
+	}
+
+	int fildes[2] = {0};
+	pipe(fildes);
 	pid = fork();
 
 	if (pid == 0) {
-		char name[64] = {0};
-		sd_bus *bus = NULL;
-		sd_bus_message *m = NULL;
-		sd_bus_error error = {0};
+		ResetSignalHandlers(64);
+		OnParentDeathSend(SIGTERM);
 
+		close(fildes[1]);
+		read(fildes[0], fildes+1, sizeof(int));
+		close(fildes[0]);
+
+		int ret = ServiceMain(argc, argv, sock[1], restarted);
+
+		_Exit(ret);
+	} else {
 		sd_bus_open_system(&bus);
 
-		sprintf(name, "watchdogd.%li.scope", getpid());
+		sprintf(name, "watchdogd.%li.scope", pid);
 		sd_bus_message_new_method_call(bus, &m, "org.freedesktop.systemd1",
 					"/org/freedesktop/systemd1",
 					"org.freedesktop.systemd1.Manager",
@@ -363,29 +384,17 @@ init:
 		sd_bus_message_append(m, "ss", name, "fail");
 		sd_bus_message_open_container(m, 'a', "(sv)");
 		sd_bus_message_append(m, "(sv)", "Description", "s", " ");
-		sd_bus_message_append(m, "(sv)", "PIDs", "au", 1, (uint32_t) getpid());
+		sd_bus_message_append(m, "(sv)", "KillSignal", "i", SIGKILL);
+		sd_bus_message_append(m, "(sv)", "PIDs", "au", 1, (uint32_t) pid);
 		sd_bus_message_close_container(m);
 		sd_bus_message_append(m, "a(sa(sv))", 0);
 		sd_bus_message * reply;
 		sd_bus_call(bus, m, 0, &error, &reply);
 
-		ResetSignalHandlers(64);
-		OnParentDeathSend(SIGTERM);
+		close(fildes[0]);
+		close(fildes[1]);
 
 		sd_bus_flush_close_unref(bus);
-
-		int ret = ServiceMain(argc, argv, sock[1], restarted);
-
-		sd_bus_open_system(&bus);
-
-		sd_bus_call_method(bus, "org.freedesktop.systemd1",
-				"/org/freedesktop/systemd1",
-				"org.freedesktop.systemd1.Manager", "StopUnit", &error,
-				NULL, "ss", name, "ignore-dependencies");
-
-		sd_bus_flush_close_unref(bus);
-
-		_Exit(ret);
 	}
 
 	sd_notifyf(0, "READY=1\n" "MAINPID=%lu", (unsigned long)getpid());
@@ -418,6 +427,14 @@ init:
 			break;
 		}
 	} while (sigValue == -1);
+
+	sd_bus_open_system(&bus);
+	sd_bus_call_method(bus, "org.freedesktop.systemd1",
+			"/org/freedesktop/systemd1",
+			"org.freedesktop.systemd1.Manager", "StopUnit", &error,
+			NULL, "ss", name, "ignore-dependencies");
+
+	sd_bus_flush_close_unref(bus);
 
 	_Exit(WEXITSTATUS(ret));
 }
