@@ -364,7 +364,6 @@ init:
 
 	if (pid == 0) {
 		ResetSignalHandlers(64);
-		OnParentDeathSend(SIGTERM);
 
 		close(fildes[1]);
 		read(fildes[0], fildes+1, sizeof(int));
