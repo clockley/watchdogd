@@ -369,9 +369,7 @@ init:
 		read(fildes[0], fildes+1, sizeof(int));
 		close(fildes[0]);
 
-		int ret = ServiceMain(argc, argv, sock[1], restarted);
-
-		_Exit(ret);
+		_Exit(ServiceMain(argc, argv, sock[1], restarted));
 	} else {
 		sd_bus_open_system(&bus);
 
