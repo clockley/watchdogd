@@ -400,6 +400,7 @@ init:
 		pause();
 		switch (sigValue) {
 		case SIGHUP:
+			sd_notifyf(0, "RELOADING=1\n" "MAINPID=%lu", (unsigned long)getpid());
 			kill(pid, SIGTERM);
 			do {
 				waitpid(pid, &ret, 0);
