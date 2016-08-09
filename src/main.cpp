@@ -308,12 +308,14 @@ int ServiceMain(int argc, char **argv, int fd, bool restarted)
 	return EXIT_SUCCESS;
 }
 
-sig_atomic_t sigValue = -1;
-pid_t pid = 0;
+static sig_atomic_t sigValue = -1;
+static pid_t pid = 0;
 static int ret = 0;
+static sigset_t set = {0};
 
 static void SaHandler(int sig)
 {
+	pthread_sigmask(SIG_BLOCK, &set, NULL);
 	sigValue = sig;
 }
 
@@ -337,7 +339,8 @@ int main(int argc, char **argv)
 	act.sa_flags = SA_NOCLDSTOP | SA_RESTART;
 	act.sa_handler = SaHandler;
 	sigfillset(&act.sa_mask);
-
+	sigaddset(&set, SIGHUP);
+	sigemptyset(&set);
 	sigaction(SIGCHLD, &act, NULL);
 	sigaction(SIGTERM, &act, NULL);
 	sigaction(SIGINT, &act, NULL);
@@ -357,6 +360,8 @@ init:
 
 		sd_bus_flush_close_unref(bus);
 	}
+
+	pthread_sigmask(SIG_UNBLOCK, &set, NULL);
 
 	int fildes[2] = {0};
 	pipe(fildes);
