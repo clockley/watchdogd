@@ -395,39 +395,4 @@ bool IsClientAdmin(int sock)
 	return false;
 }
 
-bool KillAllOtherThreads(void)
-{
-	pid_t tid = syscall(SYS_gettid);
-
-	DIR * dir = opendir("/proc/self/task");
-
-	if (dir == NULL) {
-		return false;
-	}
-
-	struct dirent *ent = NULL;
-
-	while ((ent = readdir(dir)) != NULL) {
-		if (strchr(".", ent->d_name[0]) != NULL) {
-			continue;
-		}
-
-		pid_t ctid = (pid_t)ConvertStringToInt(ent->d_name);
-
-		if (ctid == tid) {
-			continue;
-		}
-
-		int ret = 0;
-		do
-			ret = syscall(SYS_tgkill, getpid(), ctid, 32);
-		while(ret != -1);
-	}
-
-	if (closedir(dir) != 0) {
-		abort();
-	}
-
-	return true;
-}
 #endif

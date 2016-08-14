@@ -140,33 +140,15 @@ static bool InstallPinger(sd_event * e, int time, Watchdog * w)
 	return true;
 }
 
-static void AtForkParentContext(void)
-{
-}
-
-static void AtForkChildContext(void)
-{
-	sigset_t set = {0};
-	sigfillset(&set);
-	pthread_sigmask(SIG_UNBLOCK, &set, NULL);
-}
-
-
-static void PrepareForFork(void)
-{
-}
-
 int ServiceMain(int argc, char **argv, int fd, bool restarted)
 {
 	cfgoptions options;
 	Watchdog watchdog;
 	cfgoptions *tmp = &options;
 	Watchdog *tmp2 = &watchdog;
-	pthread_atfork(PrepareForFork, AtForkParentContext, AtForkChildContext);
+
 	struct dbusinfo temp = {.config = &tmp,.wdt = &tmp2 };;
 	temp.fd = fd;
-
-	setpgid(0, 0);
 
 	if (MyStrerrorInit() == false) {
 		std::perror("Unable to create a new locale object");
@@ -424,7 +406,7 @@ init:
 		switch (sigValue) {
 		case SIGHUP:
 			sd_notifyf(0, "RELOADING=1\n" "MAINPID=%lu", (unsigned long)getpid());
-			kill(-pid, SIGTERM);
+			kill(pid, SIGTERM);
 			do {
 				waitpid(pid, &ret, 0);
 			} while (!WIFEXITED(ret) && !WIFSIGNALED(ret));

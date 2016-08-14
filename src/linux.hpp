@@ -56,5 +56,4 @@ bool LoadKernelModule(void);
 bool MakeDeviceFile(const char *);
 int ConfigWatchdogNowayoutIsSet(char *);
 bool IsClientAdmin(int);
-bool KillAllOtherThreads(void);
 #endif
