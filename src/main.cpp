@@ -379,6 +379,8 @@ init:
 		sd_bus_flush_close_unref(bus);
 	}
 
+	pthread_sigmask(SIG_UNBLOCK, &set, NULL);
+
 	int fildes[2] = {0};
 	pipe(fildes);
 	pid = fork();
@@ -418,7 +420,6 @@ init:
 	sd_notifyf(0, "READY=1\n" "MAINPID=%lu", (unsigned long)getpid());
 
 	do {
-		pthread_sigmask(SIG_UNBLOCK, &set, NULL);
 		pause();
 		switch (sigValue) {
 		case SIGHUP:
