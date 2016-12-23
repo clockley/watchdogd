@@ -198,7 +198,6 @@ int ServiceMain(int argc, char **argv, int fd, bool restarted)
 		FatalError(&options);
 	}
 
-	sd_event_source *event_source = NULL;
 	sd_event *event = NULL;
 	sd_event_default(&event);
 
@@ -307,11 +306,6 @@ int ServiceMain(int argc, char **argv, int fd, bool restarted)
 
 	return EXIT_SUCCESS;
 }
-
-static sig_atomic_t sigValue = -1;
-static pid_t pid = 0;
-static int ret = 0;
-static sigset_t set = {0};
 
 int main(int argc, char **argv)
 {
