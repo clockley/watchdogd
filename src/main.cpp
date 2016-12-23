@@ -313,12 +313,6 @@ static pid_t pid = 0;
 static int ret = 0;
 static sigset_t set = {0};
 
-static void SaHandler(int sig)
-{
-	pthread_sigmask(SIG_BLOCK, &set, NULL);
-	sigValue = sig;
-}
-
 int main(int argc, char **argv)
 {
 	int sock[2] = { 0 };
@@ -331,45 +325,29 @@ int main(int argc, char **argv)
 		DbusApiInit(sock[0]);
 		_Exit(0);
 	}
-
 	close(sock[0]);
 
-	struct sigaction act = { 0 };
-
-	act.sa_flags = SA_NOCLDSTOP | SA_RESTART;
-	act.sa_handler = SaHandler;
-	sigfillset(&act.sa_mask);
-	sigaddset(&set, SIGHUP);
-	sigemptyset(&set);
-	sigaction(SIGCHLD, &act, NULL);
-	sigaction(SIGTERM, &act, NULL);
-	sigaction(SIGINT, &act, NULL);
-	sigaction(SIGHUP, &act, NULL);
+	sigset_t mask;
 	bool restarted = false;
 	char name[64] = {0};
 	sd_bus *bus = NULL;
 	sd_bus_message *m = NULL;
 	sd_bus_error error = {0};
-init:
-	if (name[0] != '\0') {
-		sd_bus_open_system(&bus);
-		sd_bus_call_method(bus, "org.freedesktop.systemd1",
-				"/org/freedesktop/systemd1",
-				"org.freedesktop.systemd1.Manager", "StopUnit", &error,
-				NULL, "ss", name, "ignore-dependencies");
-
-		sd_bus_flush_close_unref(bus);
-	}
-
-	pthread_sigmask(SIG_UNBLOCK, &set, NULL);
-
 	int fildes[2] = {0};
+	sigemptyset (&mask);
+	sigaddset (&mask, SIGTERM);
+	sigaddset (&mask, SIGINT);
+	sigaddset (&mask, SIGHUP);
+	sigprocmask(SIG_BLOCK, &mask, NULL);
+	int sfd = signalfd (-1, &mask, 0);
+init:
 	pipe(fildes);
 	pid = fork();
 
 	if (pid == 0) {
+		close(sfd);
 		ResetSignalHandlers(64);
-
+		sigprocmask(SIG_UNBLOCK, &mask, NULL);
 		close(fildes[1]);
 		read(fildes[0], fildes+1, sizeof(int));
 		close(fildes[0]);
@@ -400,44 +378,30 @@ init:
 	}
 
 	sd_notifyf(0, "READY=1\n" "MAINPID=%lu", (unsigned long)getpid());
-
-	do {
-		pause();
-		switch (sigValue) {
+	while (true) {
+		struct signalfd_siginfo si = {0};
+		ssize_t ret = read (sfd, &si, sizeof(si));
+		switch (si.ssi_signo) {
 		case SIGHUP:
-			sd_notifyf(0, "RELOADING=1\n" "MAINPID=%lu", (unsigned long)getpid());
-			kill(pid, SIGTERM);
-			do {
-				waitpid(pid, &ret, 0);
-			} while (!WIFEXITED(ret) && !WIFSIGNALED(ret));
+			sd_bus_open_system(&bus);
+			sd_bus_call_method(bus, "org.freedesktop.systemd1",
+					"/org/freedesktop/systemd1",
+					"org.freedesktop.systemd1.Manager", "StopUnit", &error,
+					NULL, "ss", name, "ignore-dependencies");
+			sd_bus_flush_close_unref(bus);
 			restarted = true;
 			goto init;
 			break;
-		case SIGCHLD:
-			do {
-				waitpid(pid, &ret, 0);
-			} while (!WIFEXITED(ret) && !WIFSIGNALED(ret));
-			break;
 		case SIGINT:
 		case SIGTERM:
-			kill(pid, SIGTERM);
-			do {
-				waitpid(pid, &ret, 0);
-			} while (!WIFEXITED(ret) && !WIFSIGNALED(ret));
-			break;
-		default:
-			sigValue = -1;
+			sd_bus_open_system(&bus);
+			sd_bus_call_method(bus, "org.freedesktop.systemd1",
+					"/org/freedesktop/systemd1",
+					"org.freedesktop.systemd1.Manager", "StopUnit", &error,
+					NULL, "ss", name, "ignore-dependencies");
+			sd_bus_flush_close_unref(bus);
+			exit(0);
 			break;
 		}
-	} while (sigValue == -1);
-
-	sd_bus_open_system(&bus);
-	sd_bus_call_method(bus, "org.freedesktop.systemd1",
-			"/org/freedesktop/systemd1",
-			"org.freedesktop.systemd1.Manager", "StopUnit", &error,
-			NULL, "ss", name, "ignore-dependencies");
-
-	sd_bus_flush_close_unref(bus);
-
-	_Exit(WEXITSTATUS(ret));
+	}
 }
