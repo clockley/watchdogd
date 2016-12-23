@@ -332,6 +332,7 @@ int main(int argc, char **argv)
 	sigaddset (&mask, SIGTERM);
 	sigaddset (&mask, SIGINT);
 	sigaddset (&mask, SIGHUP);
+	sigaddset (&mask, SIGCHLD);
 	sigprocmask(SIG_BLOCK, &mask, NULL);
 	int sfd = signalfd (-1, &mask, 0);
 init:
@@ -389,6 +390,7 @@ init:
 			break;
 		case SIGINT:
 		case SIGTERM:
+		case SIGCHLD:
 			sd_bus_open_system(&bus);
 			sd_bus_call_method(bus, "org.freedesktop.systemd1",
 					"/org/freedesktop/systemd1",
