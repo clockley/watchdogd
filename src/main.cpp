@@ -384,6 +384,7 @@ init:
 					NULL, "ss", name, "ignore-dependencies");
 			sd_bus_flush_close_unref(bus);
 			restarted = true;
+			si.ssi_signo = 0;
 			goto init;
 			break;
 		case SIGINT:
