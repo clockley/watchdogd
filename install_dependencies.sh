@@ -18,7 +18,7 @@ if [ $ID == "fedora" ]
 then
 	if [[ "wheel" != $(groups|grep -o wheel) ]]
 	then
-		su -c 'dnf -y install libconfig-devel zlib-devel automake autoconf libmount-devel gcc make liboping-devel systemd-devel dbus-devel gcc-c++'
+		su -c 'dnf -y install libconfig-devel zlib-devel automake autoconf libmount-devel gcc make liboping-devel systemd-devel dbus-devel gcc-c++ dbus-devel dbus-devel'
 		exit
 	fi
 	$SUDO dnf -y install libconfig-devel zlib-devel automake autoconf libmount-devel gcc make liboping-devel systemd-devel gcc-c++
@@ -29,10 +29,10 @@ if [ $ID_LIKE == "fedora" ]
 then
 	if [[ "wheel" != $(groups|grep -o wheel) ]]
 	then
-		su -c 'dnf -y install libconfig-devel zlib-devel automake autoconf libmount-devel gcc make liboping-devel systemd-devel dbus-devel gcc-c++'
+		su -c 'dnf -y install libconfig-devel zlib-devel automake autoconf libmount-devel gcc make liboping-devel systemd-devel dbus-devel gcc-c++ dbus-devel'
 		exit
 	fi
-	$SUDO dnf -y install libconfig-devel zlib-devel automake autoconf libmount-devel gcc make liboping-devel systemd-devel gcc-c++
+	$SUDO dnf -y install libconfig-devel zlib-devel automake autoconf libmount-devel gcc make liboping-devel systemd-devel gcc-c++  dbus-devel
 	exit
 fi
 
