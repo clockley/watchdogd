@@ -328,11 +328,11 @@ int main(int argc, char **argv)
 	sd_bus_message *m = NULL;
 	sd_bus_error error = {0};
 	int fildes[2] = {0};
-	sigemptyset (&mask);
-	sigaddset (&mask, SIGTERM);
-	sigaddset (&mask, SIGINT);
-	sigaddset (&mask, SIGHUP);
-	sigaddset (&mask, SIGCHLD);
+	sigemptyset(&mask);
+	sigaddset(&mask, SIGTERM);
+	sigaddset(&mask, SIGINT);
+	sigaddset(&mask, SIGHUP);
+	sigaddset(&mask, SIGCHLD);
 	sigprocmask(SIG_BLOCK, &mask, NULL);
 	int sfd = signalfd (-1, &mask, 0);
 init:
