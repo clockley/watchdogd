@@ -21,6 +21,7 @@
 #include "testdir.hpp"
 #include "exe.hpp"
 #include "repair.hpp"
+#include <sys/eventfd.h>
 #include "threadpool.hpp"
 #include "futex.hpp"
 
@@ -364,8 +365,8 @@ static int __ExecuteRepairScripts(void *a)
 	return 0;
 }
 
-static int fd[2];
-static int fd2[2];
+static int pipeFd[2] = {0};
+static unsigned int eventFd = 0;
 
 bool ExecuteRepairScriptsPreFork(ProcessList * p, struct cfgoptions *s)
 {
@@ -373,21 +374,16 @@ bool ExecuteRepairScriptsPreFork(ProcessList * p, struct cfgoptions *s)
 		return true;
 	}
 
-	pipe(fd);
-	pipe(fd2);
+	pipe(pipeFd);
+	eventFd = eventfd(0, EFD_CLOEXEC);
 
 	pid_t pid = fork();
 
-	if (pid != -1) {
-		close(fd[0]);
-		close(fd2[1]);
-		wait(NULL);
-	} else if (pid == -1) {
+	if (pid == -1) {
 		Logmsg(LOG_ERR, "%s\n", MyStrerror(errno));
 		return false;
-	}
-
-	if (pid == 0) {
+	} else if (pid == 0) {
+		close(pipeFd[0]);
 		pid_t pid = fork();
 
 #if defined(__linux__)
@@ -408,35 +404,35 @@ bool ExecuteRepairScriptsPreFork(ProcessList * p, struct cfgoptions *s)
 			abort();
 		}
 
-		close(fd[1]);
-		close(fd2[0]);
-
 		char b[1];
 
 		ThreadPoolNew();
 
-		while (read(fd[0], b, sizeof(b)) != 0) {
+		while (true) {
+			uint64_t value = 0;
+			read(eventFd, &value, sizeof(value));
 			struct executeScriptsStruct ess;
 			ess.list = p;
 			ess.config = s;
 
 			int ret = __ExecuteRepairScripts(&ess);
 
-			write(fd2[1], &ret, sizeof(ret));
+			write(pipeFd[1], &ret, sizeof(ret));
 		}
 
 		exit(0);
 	}
-
+	close(pipeFd[1]);
 	return true;
 }
 
 int ExecuteRepairScripts(void)
 {
-	write(fd[1], "", strlen(""));
+	uint64_t value = 1;
+	write(eventFd, &value, sizeof(value));
 	int ret = 0;
 
-	while (read(fd2[0], &ret, sizeof(ret)) != 0);
+	read(pipeFd[0], &ret, sizeof(ret));
 
 	if (ret != 0) {
 		return -1;
