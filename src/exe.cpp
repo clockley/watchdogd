@@ -28,6 +28,11 @@ int Spawn(int timeout, struct cfgoptions *const config, const char *file,
 		.timeout = timeout,.nice = 0,.noNewPrivileges = false,
 		.hasUmask = false
 	};
+
+	if (file == NULL) {
+		return -1;
+	}
+
 	va_list a;
 	va_start(a, args);
 	int ret = SpawnAttr(&attr, file, args, a);

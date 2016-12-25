@@ -115,22 +115,19 @@ int NativeShutdown(int errorcode, int kexec)
 
 	stopPing = 1;
 
-	if (LinuxRunningSystemd() == 1) {
+	if (LinuxRunningSystemd() > 0) {
 		if (kexec == 1) {
 			kill(1, SIGRTMIN + 6);
-		}
-
-		if (errorcode == WECMDREBOOT) {
-			kill(1, SIGINT);
-		}
-
-		if (errorcode == WETEMP) {
+		} else if (errorcode == WECMDREBOOT) {
+			kill(1, SIGRTMIN+5);
+		} else if (errorcode == WETEMP) {
 			kill(1, SIGRTMIN + 4);
-		}
-
-		if (errorcode == WECMDRESET) {
+		} else if (errorcode == WECMDRESET) {
 			kill(1, SIGRTMIN + 15);
+		} else {
+			kill(1, SIGRTMIN + 5);
 		}
+		return 0;
 	}
 
 	return -1;
@@ -148,7 +145,7 @@ int GetConsoleColumns(void)
 
 int SystemdWatchdogEnabled(const int unset, long long int *const interval)
 {
-	if (LinuxRunningSystemd() == 0) {
+	if (LinuxRunningSystemd() != 0) {
 		return 0;
 	}
 
