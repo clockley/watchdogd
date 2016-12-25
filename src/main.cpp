@@ -397,7 +397,7 @@ init:
 					"org.freedesktop.systemd1.Manager", "StopUnit", &error,
 					NULL, "ss", name, "ignore-dependencies");
 			sd_bus_flush_close_unref(bus);
-			exit(0);
+			_Exit(si.ssi_status);
 			break;
 		}
 	}
