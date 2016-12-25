@@ -18,10 +18,10 @@ if [ $ID == "fedora" ]
 then
 	if [[ "wheel" != $(groups|grep -o wheel) ]]
 	then
-		su -c 'dnf -y install libconfig-devel zlib-devel automake autoconf libmount-devel gcc make liboping-devel systemd-devel dbus-devel'
+		su -c 'dnf -y install libconfig-devel zlib-devel automake autoconf libmount-devel gcc make liboping-devel systemd-devel dbus-devel gcc-c++'
 		exit
 	fi
-	$SUDO dnf -y install libconfig-devel zlib-devel automake autoconf libmount-devel gcc make liboping-devel systemd-devel
+	$SUDO dnf -y install libconfig-devel zlib-devel automake autoconf libmount-devel gcc make liboping-devel systemd-devel gcc-c++
 	exit
 fi
 
@@ -29,28 +29,28 @@ if [ $ID_LIKE == "fedora" ]
 then
 	if [[ "wheel" != $(groups|grep -o wheel) ]]
 	then
-		su -c 'dnf -y install libconfig-devel zlib-devel automake autoconf libmount-devel gcc make liboping-devel systemd-devel dbus-devel'
+		su -c 'dnf -y install libconfig-devel zlib-devel automake autoconf libmount-devel gcc make liboping-devel systemd-devel dbus-devel gcc-c++'
 		exit
 	fi
-	$SUDO dnf -y install libconfig-devel zlib-devel automake autoconf libmount-devel gcc make liboping-devel systemd-devel
+	$SUDO dnf -y install libconfig-devel zlib-devel automake autoconf libmount-devel gcc make liboping-devel systemd-devel gcc-c++
 	exit
 fi
 
 if [ $ID == "ubuntu" ]
 then
-	$SUDO apt-get -y install libconfig-dev liboping-dev zlib1g-dev automake autoconf libsystemd-dev libmount-dev gcc make libdbus-1-dev
+	$SUDO apt-get -y install libconfig-dev liboping-dev zlib1g-dev automake autoconf libsystemd-dev libmount-dev gcc make libdbus-1-dev g++
 	exit
 fi
 
 if [ $ID == "debian" ]
 then
-	$SUDO apt-get -y install libconfig-dev liboping-dev zlib1g-dev automake autoconf libsystemd-dev libmount-dev gcc make  libdbus-1-dev
+	$SUDO apt-get -y install libconfig-dev liboping-dev zlib1g-dev automake autoconf libsystemd-dev libmount-dev gcc make  libdbus-1-dev g++
 	exit
 fi
 
 if [ $ID == "opensuse" ]
 then
-	su -c ' zypper install -yl libconfig-devel zlib-devel automake autoconf libmount-devel gcc make liboping-devel systemd-devel   dbus-1-devel'
+	su -c 'zypper install -yl libconfig-devel zlib-devel automake autoconf libmount-devel gcc make liboping-devel systemd-devel   dbus-1-devel gcc-c++'
 	exit
 fi
 
@@ -60,13 +60,13 @@ then
 	do
 		if [ $i == "debian" ]
 		then
-			$SUDO apt-get -y install libconfig-dev liboping-dev zlib1g-dev automake autoconf libsystemd-dev libmount-dev gcc make  libdbus-1-dev
+			$SUDO apt-get -y install libconfig-dev liboping-dev zlib1g-dev automake autoconf libsystemd-dev libmount-dev gcc make  libdbus-1-dev g++
 			exit
 		fi
 
 		if [ $i == "ubuntu" ]
 		then
-			$SUDO apt-get -y install libconfig-dev liboping-dev zlib1g-dev automake autoconf libsystemd-dev libmount-dev gcc make libdbus-1-dev
+			$SUDO apt-get -y install libconfig-dev liboping-dev zlib1g-dev automake autoconf libsystemd-dev libmount-dev gcc make libdbus-1-dev g++
 			exit
 		fi
 	done
