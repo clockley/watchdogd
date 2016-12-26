@@ -15,11 +15,6 @@ AC_PROG_CC_STDC
 AX_CXX_COMPILE_STDCXX_11([ext], [mandatory])
 AX_PTHREAD
 
-# Checks for header files.
-AC_CHECK_HEADERS([fcntl.h inttypes.h limits.h string.h sys/ioctl.h sys/time.h])
-
-AC_CHECK_FUNCS([strerror_l fpathconf dirfd fstatat getopt_long])
-
 #AC_CHECK_PROGS([M4], gm4 m4, no)
 #AS_IF([test "x$M4" = "xno"], AC_MSG_ERROR([m4 missing]))
 AX_NOT_ENABLE_FRAME_POINTER
