@@ -17,6 +17,7 @@
 #include "sub.hpp"
 #include "init.hpp"
 #include "testdir.hpp"
+#include "daemon.hpp"
 #include "configfile.hpp"
 #include "network_tester.hpp"
 
@@ -38,8 +39,13 @@ static bool SetDefaultLogTarget(struct cfgoptions *const cfg)
 	errno = 0;
 
 	if (strcmp(cfg->logTarget, "auto") == 0) {
-		SetLogTarget(STANDARD_ERROR);
-		return true;
+		if (IsDaemon(cfg)) {
+			SetLogTarget(SYSTEM_LOG);
+			return true;
+		} else {
+			SetLogTarget(STANDARD_ERROR);
+			return true;
+		}
 	}
 
 	if (strcmp(cfg->logTarget, "syslog") == 0) {
@@ -242,6 +248,11 @@ int ReadConfigurationFile(struct cfgoptions *const cfg)
 		cfg->testexepath = "/etc/watchdog.d";
 	}
 
+	if (config_lookup_string(&cfg->cfg, "random-seed", &cfg->randomSeedPath)
+	    == CONFIG_FALSE) {
+		cfg->randomSeedPath = GetDefaultRandomSeedPathName();
+	}
+
 	if (config_lookup_string(&cfg->cfg, "log-target", &cfg->logTarget) == CONFIG_FALSE) {
 		cfg->logTarget = "auto";
 	}
@@ -275,9 +286,20 @@ int ReadConfigurationFile(struct cfgoptions *const cfg)
 		}
 	}
 
+	if (config_lookup_string(&cfg->cfg, "pid-pathname", &cfg->pidfile.name)
+	    == CONFIG_FALSE) {
+		cfg->pidfile.name = "/run/watchdogd.pid";
+	}
+
 	if (CreateLinkedListOfExes((char*)cfg->testexepath, &processes, cfg) < 0) {
 		fprintf(stderr, "watchdogd: CreateLinkedListOfExes failed\n");
 		return -1;
+	}
+
+	if (config_lookup_bool(&cfg->cfg, "daemonize", &tmp) == CONFIG_TRUE) {
+		if (tmp) {
+			cfg->options |= DAEMONIZE;
+		}
 	}
 
 	if (config_lookup_bool(&cfg->cfg, "force", &tmp) == CONFIG_TRUE) {
@@ -306,6 +328,14 @@ int ReadConfigurationFile(struct cfgoptions *const cfg)
 		}
 	} else {
 		InitializePosixMemlock();
+	}
+
+	if (config_lookup_bool(&cfg->cfg, "use-pid-file", &tmp) == CONFIG_TRUE) {
+		if (tmp) {
+			cfg->options |= USEPIDFILE;
+		} else {
+			cfg->options &= !USEPIDFILE;
+		}
 	}
 
 	if (config_lookup_bool(&cfg->cfg, "softboot", &tmp) == CONFIG_TRUE) {
