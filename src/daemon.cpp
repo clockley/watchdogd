@@ -94,6 +94,10 @@ int Daemonize(struct cfgoptions *const s)
 		return -1;
 	}
 
+	if (getppid() == 1) {
+		return 0;
+	}
+
 	if (IsDaemon(s) == 0) { //shall we daemonize?
 		return 0;
 	}
