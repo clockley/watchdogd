@@ -299,8 +299,12 @@ int ServiceMain(int argc, char **argv, int fd, bool restarted)
 			sleep(1);
 		}
 	}
-	pthread_cancel(dbusThread);
-	pthread_join(dbusThread, NULL);
+
+	if (!(options.options & NOACTION)) {
+		pthread_cancel(dbusThread);
+		pthread_join(dbusThread, NULL);
+	}
+
 	watchdog.Close();
 
 	unlink("/run/watchdogd.status");
