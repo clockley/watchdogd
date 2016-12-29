@@ -366,7 +366,6 @@ static int __ExecuteRepairScripts(void *a)
 }
 
 static int pipeFd[2] = {0};
-static unsigned int eventFd = 0;
 
 bool ExecuteRepairScriptsPreFork(ProcessList * p, struct cfgoptions *s)
 {
@@ -375,7 +374,6 @@ bool ExecuteRepairScriptsPreFork(ProcessList * p, struct cfgoptions *s)
 	}
 
 	pipe(pipeFd);
-	eventFd = eventfd(0, EFD_CLOEXEC);
 
 	pid_t pid = fork();
 
@@ -410,7 +408,6 @@ bool ExecuteRepairScriptsPreFork(ProcessList * p, struct cfgoptions *s)
 
 		while (true) {
 			uint64_t value = 0;
-			read(eventFd, &value, sizeof(value));
 			struct executeScriptsStruct ess;
 			ess.list = p;
 			ess.config = s;
@@ -429,7 +426,6 @@ bool ExecuteRepairScriptsPreFork(ProcessList * p, struct cfgoptions *s)
 int ExecuteRepairScripts(void)
 {
 	uint64_t value = 1;
-	write(eventFd, &value, sizeof(value));
 	int ret = 0;
 
 	read(pipeFd[0], &ret, sizeof(ret));
