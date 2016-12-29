@@ -286,9 +286,9 @@ int ReadConfigurationFile(struct cfgoptions *const cfg)
 		}
 	}
 
-	if (config_lookup_string(&cfg->cfg, "pid-pathname", &cfg->pidfile.name)
+	if (config_lookup_string(&cfg->cfg, "pid-pathname", &cfg->pidfileName)
 	    == CONFIG_FALSE) {
-		cfg->pidfile.name = "/run/watchdogd.pid";
+		cfg->pidfileName = "/run/watchdogd.pid";
 	}
 
 	if (CreateLinkedListOfExes((char*)cfg->testexepath, &processes, cfg) < 0) {

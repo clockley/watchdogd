@@ -25,6 +25,7 @@
 #include "bootstatus.hpp"
 #include "multicall.hpp"
 #include "daemon.hpp"
+#include "pidfile.hpp"
 extern "C" {
 #include "dbusapi.h"
 }
@@ -147,6 +148,7 @@ int ServiceMain(int argc, char **argv, int fd, bool restarted)
 	Watchdog watchdog;
 	cfgoptions *tmp = &options;
 	Watchdog *tmp2 = &watchdog;
+	Pidfile pidfile;
 
 	struct dbusinfo temp = {.config = &tmp,.wdt = &tmp2 };;
 	temp.fd = fd;
@@ -174,6 +176,8 @@ int ServiceMain(int argc, char **argv, int fd, bool restarted)
 
 	if (IsDaemon(&options) == true) {
 		Daemonize(&options);
+		pidfile.Open(options.pidfileName);
+		pidfile.Write(getppid());
 	}
 
 	if (options.options & IDENTIFY) {
@@ -285,6 +289,10 @@ int ServiceMain(int argc, char **argv, int fd, bool restarted)
 	}
 
 	sd_event_loop(event);
+
+	if (IsDaemon(&options) == true) {
+		pidfile.Delete();
+	}
 
 	if (stop == 1) {
 		while (true) {

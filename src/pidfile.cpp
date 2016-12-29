@@ -17,32 +17,33 @@
 #include "pidfile.hpp"
 #include "sub.hpp"
 
-int WritePidFile(pidfile_t *const pidfile, pid_t pid)
+int Pidfile::Write(pid_t pid)
 {
-	if (dprintf(pidfile->fd, "%d\n", pid) < 0) {
-		if (pidfile->name != NULL) {
+	if (dprintf(ret, "%d\n", pid) < 0) {
+		if (name != NULL) {
 			fprintf(stderr,
 				"watchdogd: unable to write pid to %s: %s\n",
-				pidfile->name, MyStrerror(errno));
+				name, strerror(errno));
 		} else {
 			fprintf(stderr,
 				"watchdogd: unable to write pid to %i: %s\n",
-				pidfile->fd, MyStrerror(errno));
+				ret, strerror(errno));
 		}
 		return -1;
 	}
 
-	fsync(pidfile->fd);
+	fsync(ret);
 	return 0;
 }
 
-int OpenPidFile(const char *const path)
+int Pidfile::Open(const char *const path)
 {
+	name = path;
 	mode_t oumask = umask(0027);
-	int ret = open(path, O_WRONLY | O_CREAT | O_EXCL | O_CLOEXEC, 0644);
+	ret = open(path, O_WRONLY | O_CREAT | O_EXCL | O_CLOEXEC, 0644);
 	if (ret < 0) {
 		fprintf(stderr, "watchdogd: open failed: %s\n",
-			MyStrerror(errno));
+			strerror(errno));
 		if (errno == EEXIST) {
 			ret = open(path, O_RDONLY | O_CLOEXEC);
 
@@ -81,7 +82,7 @@ int OpenPidFile(const char *const path)
 					if (ret < 0) {
 						fprintf(stderr,
 							"watchdogd: open failed: %s\n",
-							MyStrerror(errno));
+							strerror(errno));
 						umask(oumask);
 						return ret;
 					} else {
@@ -97,24 +98,22 @@ int OpenPidFile(const char *const path)
 	return ret;
 }
 
-int DeletePidFile(pidfile_t * const pidfile)
+int Pidfile::Delete()
 {
-	assert(pidfile != NULL);
-
-	if (pidfile == NULL) {
+	if (name == NULL) {
 		return -1;
 	}
 
-	if (pidfile->fd == 0) {
+	if (ret == 0) {
 		return 0;
 	}
 
-	UnlockFile(pidfile->fd, getpid());
+	UnlockFile(ret, getpid());
 
-	CloseWraper(&pidfile->fd);
+	close(ret);
 
-	if (remove(pidfile->name) < 0) {
-		Logmsg(LOG_ERR, "remove failed: %s", MyStrerror(errno));
+	if (remove(name) < 0) {
+		Logmsg(LOG_ERR, "remove failed: %s", strerror(errno));
 		return -2;
 	}
 

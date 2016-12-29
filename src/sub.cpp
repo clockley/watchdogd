@@ -182,7 +182,6 @@ int EndDaemon(struct cfgoptions *s, int keepalive)
 		return 0;
 	}
 
-	DeletePidFile(&s->pidfile);
 	FreeExeList(&processes);
 	Logmsg(LOG_INFO, "restarting system");
 	closelog();
@@ -336,8 +335,6 @@ void FatalError(struct cfgoptions *s)
 	assert(s != NULL);
 
 	Logmsg(LOG_CRIT, "fatal error");
-
-	DeletePidFile(&s->pidfile);
 
 	config_destroy(&s->cfg);
 

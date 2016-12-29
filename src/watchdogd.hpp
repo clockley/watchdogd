@@ -91,11 +91,6 @@
 #define PINGFAILED 0x40
 #define NETWORKDOWN 0x80
 
-struct pidfile_t {
-	const char *name;
-	int fd;
-};
-
 //TODO: Split this struct into an options struct(values read in from config file) and a runtime struct.
 struct cfgoptions {
 	cfgoptions() {
@@ -111,6 +106,7 @@ struct cfgoptions {
 	pingobj_t *pingObj = NULL;
 	const config_setting_t *pidFiles = NULL;
 	const char *devicepath = NULL;
+	const char *pidfileName = NULL;
 	const char *testexepath = "/etc/watchdog.d";
 	const char *exepathname = NULL;
 	const char *testexepathname = NULL;
@@ -118,7 +114,6 @@ struct cfgoptions {
 	const char *randomSeedPath = NULL;
 	const char *logTarget = NULL;
 	const char *logUpto = NULL;
-	pidfile_t pidfile = {0};
 	time_t sleeptime = -1;
 	int sigtermDelay = 0;
 	unsigned long minfreepages = 0;
