@@ -140,7 +140,7 @@ static bool InstallPinger(sd_event * e, int time, Watchdog * w)
 	return true;
 }
 
-int ServiceMain(int argc, char **argv, int fd, bool restarted, pid_t shell)
+int ServiceMain(int argc, char **argv, int fd, bool restarted)
 {
 	cfgoptions options;
 	Watchdog watchdog;
@@ -158,10 +158,8 @@ int ServiceMain(int argc, char **argv, int fd, bool restarted, pid_t shell)
 	int ret = ParseCommandLine(&argc, argv, &options);
 
 	if (ret < 0) {
-		kill(shell, SIGUSR1);
 		return EXIT_FAILURE;
 	} else if (ret != 0) {
-		kill(shell, SIGUSR1);
 		return EXIT_SUCCESS;
 	}
 
@@ -370,7 +368,6 @@ daemon:
 	pid_t shell = 0;
 	close(com1[1]);
 	read(com1[0], &shell, sizeof(pid_t));
-	close(com1[0]);
 
 	int sock[2] = { 0 };
 	socketpair(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0, sock);
@@ -413,7 +410,7 @@ init:
 		read(fildes[0], fildes+1, sizeof(int));
 		close(fildes[0]);
 
-		_Exit(ServiceMain(argc, argv, sock[1], restarted, shell));
+		_Exit(ServiceMain(argc, argv, sock[1], restarted));
 	}
 
 	sd_bus_open_system(&bus);
@@ -438,7 +435,6 @@ init:
 
 	close(com[0]);
 	write(com[1], &pid, sizeof(pid));
-	close(com[0]);
 
 	sd_notifyf(0, "READY=1\n" "MAINPID=%lu", (unsigned long)getpid());
 
@@ -465,6 +461,7 @@ init:
 			break;
 		case SIGINT:
 		case SIGTERM:
+		case SIGCHLD:
 			sd_bus_open_system(&bus);
 
 			sd_bus_call_method(bus, "org.freedesktop.systemd1",
