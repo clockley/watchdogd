@@ -42,7 +42,7 @@ static void PrintConfiguration(struct cfgoptions *const cfg)
 	       cfg->sleeptime, cfg->options & REALTIME ? "yes" : "no",
 	       cfg->options & SYNC ? "yes" : "no",
 	       cfg->options & SOFTBOOT ? "yes" : "no",
-	       cfg->options & FORCE ? "yes" : "no", cfg->maxLoadOne, cfg->minfreepages, getppid());
+	       cfg->options & FORCE ? "yes" : "no", cfg->maxLoadOne, cfg->minfreepages, getpid());
 
 	if (cfg->options & ENABLEPING) {
 		for (int cnt = 0; cnt < config_setting_length(cfg->ipAddresses); cnt++) {
@@ -313,9 +313,65 @@ int ServiceMain(int argc, char **argv, int fd, bool restarted)
 
 int main(int argc, char **argv)
 {
+	int com[2] = {0};
+	pipe2(com, O_CLOEXEC);
+	int com1[2] = {0};
+	pipe2(com1, O_CLOEXEC);
+	pid_t pid = fork();
+
+	if (pid == 0) {
+		setsid();
+		pid = fork();
+		if (pid != 0) {
+			waitpid(pid, NULL, 0);
+			quick_exit(0);
+		}
+		goto daemon;
+	} else {
+		pid_t x = getpid();
+		close(com1[0]);
+		write(com1[1], &x, sizeof(pid_t));
+
+		close(com[1]);
+		read(com[0], &pid, sizeof(pid_t));
+
+		sigset_t mask;
+		sigemptyset(&mask);
+		sigaddset(&mask, SIGTERM);
+		sigaddset(&mask, SIGINT);
+		sigaddset(&mask, SIGHUP);
+		sigaddset(&mask, SIGUSR1);
+		sigprocmask(SIG_BLOCK, &mask, NULL);
+		int sfd = signalfd(-1, &mask, SFD_CLOEXEC);
+
+		while (true) {
+			struct signalfd_siginfo si = {0};
+			ssize_t ret = read (sfd, &si, sizeof(si));
+			switch (si.ssi_signo) {
+			case SIGTERM:
+			case SIGINT:
+				kill(pid, SIGTERM);
+				quick_exit(si.ssi_int);
+				break;
+			case SIGHUP:
+				kill(pid, si.ssi_int);
+				break;
+			case SIGUSR1:
+				quick_exit(0);
+				break;
+			}
+		}
+
+	}
+
+daemon:
+	pid_t shell = 0;
+	close(com1[1]);
+	read(com1[0], &shell, sizeof(pid_t));
+
 	int sock[2] = { 0 };
 	socketpair(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0, sock);
-	pid_t pid = fork();
+	pid = fork();
 
 	if (pid == 0) {
 		OnParentDeathSend(SIGKILL);
@@ -377,7 +433,10 @@ init:
 	close(fildes[0]);
 	close(fildes[1]);
 
-	sd_notifyf(0, "READY=1\n" "MAINPID=%lu", (unsigned long)getpid());
+	close(com[0]);
+	write(com[1], &pid, sizeof(pid));
+
+	sd_notifyf(0, "READY=1\n" "MAINPID=%lu", (unsigned long)pid);
 
 	while (true) {
 		struct signalfd_siginfo si = {0};
@@ -403,6 +462,7 @@ init:
 					"org.freedesktop.systemd1.Manager", "StopUnit", &error,
 					NULL, "ss", name, "ignore-dependencies");
 			sd_bus_flush_close_unref(bus);
+			kill(shell, SIGUSR1);
 			_Exit(si.ssi_status);
 			break;
 		}
