@@ -313,59 +313,9 @@ int ServiceMain(int argc, char **argv, int fd, bool restarted)
 
 int main(int argc, char **argv)
 {
-	int pipefd[2] = {0};
-	pipe2(pipefd, O_CLOEXEC);
-	pid_t mainpid = 0;
-	pid_t shell = fork();
-	pid_t pid = 0;
-	bool isDaemon = false;
-
-	if (shell > 0) {
-		close(pipefd[1]);
-		read(pipefd[0], &mainpid, sizeof(pid_t));
-		close(pipefd[0]);
-		sigset_t mask;
-		sigemptyset(&mask);
-		sigaddset(&mask, SIGTERM);
-		sigaddset(&mask, SIGINT);
-		sigaddset(&mask, SIGHUP);
-		sigaddset(&mask, SIGUSR1);
-		sigprocmask(SIG_BLOCK, &mask, NULL);
-		int sfd = signalfd(-1, &mask, SFD_CLOEXEC);
-		while (true) {
-			struct signalfd_siginfo si = {0};
-			ssize_t ret = read (sfd, &si, sizeof(si));
-			switch (si.ssi_signo) {
-			case SIGTERM:
-			case SIGINT:
-				kill(mainpid, si.ssi_signo);
-				_Exit(si.ssi_int);
-				break;
-			case SIGHUP:
-				kill(mainpid, si.ssi_int);
-				break;
-			case SIGUSR1:
-				_Exit(0);;
-				break;
-			}
-		}
-	}
-
-	close(pipefd[0]);
-	shell = getppid();
-
-	pid = fork();
-
-	if (pid != 0) {
-		wait(NULL);
-		_Exit(0);
-	}
-
-	setsid();
-
 	int sock[2] = { 0 };
 	socketpair(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0, sock);
-	pid = fork();
+	pid_t pid = fork();
 
 	if (pid == 0) {
 		OnParentDeathSend(SIGKILL);
@@ -387,9 +337,8 @@ int main(int argc, char **argv)
 	sigaddset(&mask, SIGINT);
 	sigaddset(&mask, SIGHUP);
 	sigaddset(&mask, SIGCHLD);
-	sigaddset(&mask, SIGUSR1);
 	sigprocmask(SIG_BLOCK, &mask, NULL);
-	int sfd = signalfd (-1, &mask, SFD_CLOEXEC);
+	int sfd = signalfd (-1, &mask, 0);
 init:
 	pipe(fildes);
 	pid = fork();
@@ -404,12 +353,6 @@ init:
 
 		_Exit(ServiceMain(argc, argv, sock[1], restarted));
 	} else {
-
-		pid_t x = getpid();
-
-		write(pipefd[1], &x, sizeof(pid_t));
-		close(pipefd[1]);
-
 		sd_bus_open_system(&bus);
 
 		sprintf(name, "watchdogd.%li.scope", pid);
@@ -433,18 +376,11 @@ init:
 		sd_bus_flush_close_unref(bus);
 	}
 
-	sd_notifyf(0, "READY=1\n" "MAINPID=%lu", (unsigned long)shell);
-
+	sd_notifyf(0, "READY=1\n" "MAINPID=%lu", (unsigned long)getpid());
 	while (true) {
 		struct signalfd_siginfo si = {0};
 		ssize_t ret = read (sfd, &si, sizeof(si));
 		switch (si.ssi_signo) {
-		case SIGUSR1:
-			isDaemon = true;
-			sd_notifyf(0, "READY=1\n" "MAINPID=%lu", (unsigned long)getpid());
-			signal(SIGUSR1, SIG_IGN);
-			kill(shell, SIGUSR1);
-			break;
 		case SIGHUP:
 			sd_bus_open_system(&bus);
 			sd_bus_call_method(bus, "org.freedesktop.systemd1",
@@ -465,9 +401,6 @@ init:
 					"org.freedesktop.systemd1.Manager", "StopUnit", &error,
 					NULL, "ss", name, "ignore-dependencies");
 			sd_bus_flush_close_unref(bus);
-			union sigval val;
-			val.sival_int = si.ssi_status;
-			sigqueue(shell, SIGINT, val);
 			_Exit(si.ssi_status);
 			break;
 		}
