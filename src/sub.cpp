@@ -20,7 +20,6 @@
 #include "watchdogd.hpp"
 #include "sub.hpp"
 #include "testdir.hpp"
-#include "pidfile.hpp"
 
 int CloseWraper(const int *pfd)
 {
@@ -34,9 +33,9 @@ int CloseWraper(const int *pfd)
 int IsDaemon(struct cfgoptions *const s)
 {
 	if (s->options & DAEMONIZE)
-		return true;
+		return 1;
 
-	return false;
+	return 0;
 }
 
 int LockFile(int fd, pid_t pid)
@@ -182,7 +181,6 @@ int EndDaemon(struct cfgoptions *s, int keepalive)
 		return 0;
 	}
 
-	DeletePidFile(&s->pidfile);
 	FreeExeList(&processes);
 	Logmsg(LOG_INFO, "restarting system");
 	closelog();
@@ -336,8 +334,6 @@ void FatalError(struct cfgoptions *s)
 	assert(s != NULL);
 
 	Logmsg(LOG_CRIT, "fatal error");
-
-	DeletePidFile(&s->pidfile);
 
 	config_destroy(&s->cfg);
 

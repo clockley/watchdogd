@@ -69,7 +69,7 @@
 
 #define SOFTBOOT 0x1
 #define SYNC 0x2
-#define USEPIDFILE 0x4
+#define RESERVED 0x4
 #define ENABLEPING 0x8
 #define KEXEC 0x10
 #define DAEMONIZE 0x20
@@ -91,14 +91,10 @@
 #define PINGFAILED 0x40
 #define NETWORKDOWN 0x80
 
-struct pidfile_t {
-	const char *name;
-	int fd;
-};
-
 //TODO: Split this struct into an options struct(values read in from config file) and a runtime struct.
 struct cfgoptions {
 	cfgoptions() {
+		options |= DAEMONIZE;
 	};
 	config_t cfg = {0};
 	double maxLoadFifteen = 0.0;
@@ -118,7 +114,6 @@ struct cfgoptions {
 	const char *randomSeedPath = NULL;
 	const char *logTarget = NULL;
 	const char *logUpto = NULL;
-	pidfile_t pidfile = {0};
 	time_t sleeptime = -1;
 	int sigtermDelay = 0;
 	unsigned long minfreepages = 0;

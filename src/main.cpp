@@ -24,7 +24,6 @@
 #include "identify.hpp"
 #include "bootstatus.hpp"
 #include "multicall.hpp"
-#include "daemon.hpp"
 extern "C" {
 #include "dbusapi.h"
 }
@@ -170,10 +169,6 @@ int ServiceMain(int argc, char **argv, int fd, bool restarted)
 
 	if (ReadConfigurationFile(&options) < 0) {
 		return EXIT_FAILURE;
-	}
-
-	if (IsDaemon(&options) == true) {
-		Daemonize(&options);
 	}
 
 	if (options.options & IDENTIFY) {
