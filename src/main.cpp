@@ -398,6 +398,7 @@ daemon:
 	sigaddset(&mask, SIGINT);
 	sigaddset(&mask, SIGHUP);
 	sigaddset(&mask, SIGCHLD);
+	sigaddset(&mask, SIGUSR1);
 	sigprocmask(SIG_BLOCK, &mask, NULL);
 	int sfd = signalfd (-1, &mask, SFD_CLOEXEC);
 init:
@@ -445,8 +446,14 @@ init:
 
 	while (true) {
 		struct signalfd_siginfo si = {0};
-		ssize_t ret = read (sfd, &si, sizeof(si));
+		read (sfd, &si, sizeof(si));
 		switch (si.ssi_signo) {
+		case SIGUSR1:
+			if (getppid() != 1) {
+				kill(shell, SIGUSR1);
+			}
+			si.ssi_signo = 0;
+			break;
 		case SIGHUP:
 			sd_bus_open_system(&bus);
 
@@ -457,11 +464,10 @@ init:
 			sd_bus_flush_close_unref(bus);
 			restarted = true;
 			read(sfd, &si, sizeof(si));
-			if (si.ssi_signo == SIGCHLD) {
-				si.ssi_signo = 0;
-			} else {
-				kill(getpid(), si.ssi_signo);
+			if (si.ssi_signo != SIGCHLD) {
+				kill(shell, si.ssi_signo);
 			}
+			si.ssi_signo = 0;
 			goto init;
 			break;
 		case SIGINT:
@@ -475,6 +481,7 @@ init:
 					NULL, "ss", name, "ignore-dependencies");
 			sd_bus_flush_close_unref(bus);
 			kill(shell, SIGUSR1);
+			si.ssi_signo = 0;
 			_Exit(si.ssi_status);
 			break;
 		}
