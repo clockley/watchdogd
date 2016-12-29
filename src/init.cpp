@@ -64,6 +64,7 @@ int ParseCommandLine(int *argc, char **argv, struct cfgoptions *cfg)
 		{"force", no_argument, 0, 'f'},
 		{"sync", no_argument, 0, 's'},
 		{"softboot", no_argument, 0, 'b'},
+		{"daemonize", no_argument, 0, 'D'},
 		{"help", no_argument, 0, 'h'},
 		{"verbose", no_argument, 0, 'v'},
 		{"version", no_argument, 0, 'V'},
@@ -78,7 +79,7 @@ int ParseCommandLine(int *argc, char **argv, struct cfgoptions *cfg)
 
 	int tmp = 0;
 	while ((opt =
-		getopt_long(*argc, argv, "ihqsfFbVvndc:X:l:", longOptions,
+		getopt_long(*argc, argv, "iDhqsfFbVvndc:X:l:", longOptions,
 			    &tmp)) != -1) {
 
 		switch (opt) {
@@ -120,6 +121,9 @@ int ParseCommandLine(int *argc, char **argv, struct cfgoptions *cfg)
 			break;
 		case 'i':
 			cfg->options |= IDENTIFY;
+			break;
+		case 'D':
+			cfg->options |= DAEMONIZE;
 			break;
 		case 'V':
 			PrintVersionString();
@@ -316,6 +320,7 @@ static void PrintHelpMain(void)
 		{"", ""},
 		{"  -b, --softboot", "ignore file open errors"},
 		{"  -c, --config-file ", "path to configuration file"},
+		{"  -D, --daemonize ", "daemonize  after  startup"},
 		{"  -f, --force",
 		 "force a ping interval or timeout even if the ping interval is less than the timeout"},
 		{"  -i, --identify", "identify hardware watchdog"},
