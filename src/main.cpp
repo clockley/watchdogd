@@ -42,7 +42,7 @@ static void PrintConfiguration(struct cfgoptions *const cfg)
 	       cfg->sleeptime, cfg->options & REALTIME ? "yes" : "no",
 	       cfg->options & SYNC ? "yes" : "no",
 	       cfg->options & SOFTBOOT ? "yes" : "no",
-	       cfg->options & FORCE ? "yes" : "no", cfg->maxLoadOne, cfg->minfreepages, getpid());
+	       cfg->options & FORCE ? "yes" : "no", cfg->maxLoadOne, cfg->minfreepages, getppid());
 
 	if (cfg->options & ENABLEPING) {
 		for (int cnt = 0; cnt < config_setting_length(cfg->ipAddresses); cnt++) {
@@ -436,7 +436,7 @@ init:
 	close(com[0]);
 	write(com[1], &pid, sizeof(pid));
 
-	sd_notifyf(0, "READY=1\n" "MAINPID=%lu", (unsigned long)pid);
+	sd_notifyf(0, "READY=1\n" "MAINPID=%lu", (unsigned long)getpid());
 
 	while (true) {
 		struct signalfd_siginfo si = {0};
@@ -444,6 +444,12 @@ init:
 		switch (si.ssi_signo) {
 		case SIGHUP:
 			sd_bus_open_system(&bus);
+
+			sd_bus_call_method(bus, "org.freedesktop.systemd1",
+					"/org/freedesktop/systemd1",
+					"org.freedesktop.systemd1.Manager",
+					"KillUnit", &error, NULL, "ssi", name, "all", SIGTERM);
+
 			sd_bus_call_method(bus, "org.freedesktop.systemd1",
 					"/org/freedesktop/systemd1",
 					"org.freedesktop.systemd1.Manager", "StopUnit", &error,
@@ -457,6 +463,12 @@ init:
 		case SIGTERM:
 		case SIGCHLD:
 			sd_bus_open_system(&bus);
+
+			sd_bus_call_method(bus, "org.freedesktop.systemd1",
+					"/org/freedesktop/systemd1",
+					"org.freedesktop.systemd1.Manager",
+					"KillUnit", &error, NULL, "ssi", name, "all", SIGTERM);
+
 			sd_bus_call_method(bus, "org.freedesktop.systemd1",
 					"/org/freedesktop/systemd1",
 					"org.freedesktop.systemd1.Manager", "StopUnit", &error,
