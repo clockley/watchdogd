@@ -422,7 +422,7 @@ init:
 	sd_bus_message_append(m, "ss", name, "fail");
 	sd_bus_message_open_container(m, 'a', "(sv)");
 	sd_bus_message_append(m, "(sv)", "Description", "s", " ");
-	sd_bus_message_append(m, "(sv)", "KillSignal", "i", SIGKILL);
+	sd_bus_message_append(m, "(sv)", "KillSignal", "i", SIGTERM);
 	sd_bus_message_append(m, "(sv)", "PIDs", "au", 1, (uint32_t) pid);
 	sd_bus_message_close_container(m);
 	sd_bus_message_append(m, "a(sa(sv))", 0);
@@ -447,27 +447,22 @@ init:
 
 			sd_bus_call_method(bus, "org.freedesktop.systemd1",
 					"/org/freedesktop/systemd1",
-					"org.freedesktop.systemd1.Manager",
-					"KillUnit", &error, NULL, "ssi", name, "all", SIGTERM);
-
-			sd_bus_call_method(bus, "org.freedesktop.systemd1",
-					"/org/freedesktop/systemd1",
 					"org.freedesktop.systemd1.Manager", "StopUnit", &error,
 					NULL, "ss", name, "ignore-dependencies");
 			sd_bus_flush_close_unref(bus);
 			restarted = true;
-			si.ssi_signo = 0;
+			read(sfd, &si, sizeof(si));
+			if (si.ssi_signo == SIGCHLD) {
+				si.ssi_signo = 0;
+			} else {
+				kill(getpid(), si.ssi_signo);
+			}
 			goto init;
 			break;
 		case SIGINT:
 		case SIGTERM:
 		case SIGCHLD:
 			sd_bus_open_system(&bus);
-
-			sd_bus_call_method(bus, "org.freedesktop.systemd1",
-					"/org/freedesktop/systemd1",
-					"org.freedesktop.systemd1.Manager",
-					"KillUnit", &error, NULL, "ssi", name, "all", SIGTERM);
 
 			sd_bus_call_method(bus, "org.freedesktop.systemd1",
 					"/org/freedesktop/systemd1",
