@@ -271,8 +271,8 @@ static void * __ExecScriptWorkerThread(void *a)
 	} else {
 		spawnattr_t attr = {
 				.workingDirectory = NULL, .repairFilePathname = NULL,
-	        		.execStart = NULL, .user = NULL, .group = NULL, .umask = 0,
-				.timeout = container->config->repairBinTimeout, .nice = 0,
+	        		.execStart = NULL, .user = NULL, .group = NULL,
+				.timeout = container->config->repairBinTimeout, .nice = 0, .umask = 0,
 				.noNewPrivileges = false, .hasUmask = false
 		};
 

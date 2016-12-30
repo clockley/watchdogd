@@ -100,7 +100,6 @@ struct cfgoptions {
 	double maxLoadOne = 0.0;
 	double maxLoadFive = 0.0;
 	double retryLimit = 0.0;
-	long loopExit = -1;
 	const config_setting_t *ipAddresses = NULL;
 	const config_setting_t *networkInterfaces = NULL;
 	pingobj_t *pingObj = NULL;
@@ -111,18 +110,19 @@ struct cfgoptions {
 	const char *exepathname = NULL;
 	const char *testexepathname = NULL;
 	const char *confile = "/etc/watchdogd.conf";
-	const char *randomSeedPath = NULL;
+	unsigned long options = 0;
 	const char *logTarget = NULL;
 	const char *logUpto = NULL;
 	time_t sleeptime = -1;
-	int sigtermDelay = 0;
 	unsigned long minfreepages = 0;
-	unsigned long options = 0;
+	const char *randomSeedPath = NULL;
+	int testBinTimeout = 60;
+	int repairBinTimeout = 60;
+	int sigtermDelay = 0;
 	int priority;
 	int watchdogTimeout = -1;
 	int testExeReturnValue = 0;
-	int testBinTimeout = 60;
-	int repairBinTimeout = 60;
+	long loopExit = -1;
 	int allocatableMemory = 0;
 	volatile std::atomic_uint error = {0};
 	bool haveConfigFile = false;
@@ -140,20 +140,20 @@ struct spawnattr_t {
 	char *execStart;
 	char *user;
 	char *group;
-	mode_t umask;
 	int timeout;
 	int nice;
+	mode_t umask;
 	bool noNewPrivileges;
 	bool hasUmask;
 };
 
 struct repaircmd_t {
-	struct list entry;
-	std::atomic_bool mode;
-	char retString[32];
-	const char *path;
 	spawnattr_t spawnattr;
+	char retString[32];
+	struct list entry;
+	const char *path;
 	int ret;
+	std::atomic_bool mode;
 	bool legacy;
 };
 
@@ -166,9 +166,9 @@ struct dbusinfo
 };
 
 struct identinfo {
-	char daemonVersion[8];
 	char name[128];
 	char deviceName[128];
+	char daemonVersion[8];
 	long unsigned flags;
 	long timeout;
 	long firmwareVersion;
