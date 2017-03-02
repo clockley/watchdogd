@@ -224,10 +224,9 @@ static int ReloadDbusDaemon(void)
 	};
 
 	const long unsigned int cFileLen = 247;
-
 	char *file = calloc(1, 512);
-	uLongf len = 511;
-	uncompress(file, &len, cFile, cFileLen);
+
+	uncompress(file, &(uLongf){511}, cFile, cFileLen);
 
 	sd_bus_error error;
 	sd_bus_message *m = NULL;
