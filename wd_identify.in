@@ -1,1 +1,2 @@
-#!@prefix@/sbin/watchdogd -i
+#!/bin/sh
+exec @prefix@/sbin/watchdogd -i
