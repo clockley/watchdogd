@@ -17,13 +17,11 @@
 #include "watchdogd.hpp"
 #include <semaphore.h>
 
-#define MAX_WORKERS 16
-
+const size_t MAX_WORKERS = 16;
 static std::atomic_bool canceled = {false};
 
 struct threadpool
 {
-	pthread_t thread;
 	sem_t sem;
 	void *(*func)(void*);
 	union {
@@ -57,20 +55,12 @@ bool ThreadPoolNew(void)
 	pthread_attr_setguardsize(&attr, 0);
 	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
 	pthread_attr_setstacksize(&attr, PTHREAD_STACK_MIN*2);
+	pthread_t thread = {0};
 	for (size_t i = 0; i < MAX_WORKERS; i++) {
 		sem_init(&threads[i].sem, 0, 0);
-		pthread_create(&threads[i].thread, &attr, Worker, &threads[i]);
+		pthread_create(&thread, &attr, Worker, &threads[i]);
 	}
 	pthread_attr_destroy(&attr);
-	return true;
-}
-
-bool ThreadPoolCancel(void)
-{
-	canceled = true;
-	for (size_t i = 0; i < MAX_WORKERS; i++) {
-		pthread_cancel(threads[i].thread);
-	}
 	return true;
 }
 
