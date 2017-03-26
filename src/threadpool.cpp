@@ -26,8 +26,10 @@ struct threadpool
 	pthread_t thread;
 	sem_t sem;
 	void *(*func)(void*);
-	void * arg;
-	int active;
+	union {
+		void * arg;
+		int active;
+	};
 };
 
 static struct threadpool threads[MAX_WORKERS] = {0};
