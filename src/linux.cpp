@@ -495,7 +495,7 @@ int NoNewProvileges(void)
 
 int GetCpuCount(void)
 {
-	return get_nprocs();
+	return std::thread::hardware_concurrency();
 }
 
 bool LoadKernelModule(void)
