@@ -161,7 +161,6 @@ struct dbusinfo
 {
 	cfgoptions **config;
 	Watchdog **wdt;
-	pid_t childPid;
 	int fd;
 };
 
