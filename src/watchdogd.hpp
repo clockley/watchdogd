@@ -150,9 +150,9 @@ struct spawnattr_t {
 
 struct repaircmd_t {
 	spawnattr_t * spawnattr;
-	char retString[32];
-	struct list entry;
 	const char *path;
+	char retString[8];
+	struct list entry;
 	int ret;
 	std::atomic_bool mode;
 };
