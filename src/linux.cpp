@@ -611,7 +611,7 @@ int ConfigWatchdogNowayoutIsSet(char *name)
 	gzbuffer(config, 8192);
 
 	while (true) {
-		char buf[4096] = {'\0'};
+		char buf[72] = {'\0'};
 		size_t bytesRead = gzread(config, buf, sizeof(buf) - 1);
 		if (strstr(buf, "# CONFIG_WATCHDOG_NOWAYOUT is not set") != NULL) {
 			found = true;
