@@ -236,7 +236,7 @@ void FreeExeList(ProcessList * p)
 	list_for_each_entry(c, next, &p->head, entry) {
 		list_del(&c->entry);
 		free((void *)c->path);
-		if (c->spawnattr == NULL) {
+		if (c->spawnattr != NULL) {
 			free((void *)c->spawnattr->user);
 			free((void *)c->spawnattr->group);
 			free((void *)c->spawnattr->workingDirectory);
