@@ -149,13 +149,12 @@ struct spawnattr_t {
 };
 
 struct repaircmd_t {
-	spawnattr_t spawnattr;
+	spawnattr_t * spawnattr;
 	char retString[32];
 	struct list entry;
 	const char *path;
 	int ret;
 	std::atomic_bool mode;
-	bool legacy;
 };
 
 struct dbusinfo

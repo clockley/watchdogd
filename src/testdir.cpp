@@ -162,26 +162,28 @@ int CreateLinkedListOfExes(char *repairScriptFolder, ProcessList * p,
 		}
 
 		if (IsRepairScriptConfig(ent->d_name) == 0) {
-			cmd->legacy = true;
+			cmd->spawnattr = NULL;
 		} else {
+			cmd->spawnattr = (spawnattr_t *)calloc(1, sizeof(spawnattr_t *));
 			//For V3 repair scripts cmd->path refers to the pathname of the repair script config file
 			if (LoadRepairScriptLink
-			    (&cmd->spawnattr, (char *)cmd->path) == false) {
+			    (cmd->spawnattr, (char *)cmd->path) == false) {
 				free((void *)cmd->path);
 				free(cmd);
 				continue;
 			}
 
-			cmd->spawnattr.repairFilePathname = strdup(cmd->path);
+			cmd->spawnattr->repairFilePathname = strdup(cmd->path);
 			free((void *)cmd->path);
 			cmd->path = NULL;
 
-			cmd->path = cmd->spawnattr.execStart;
+			cmd->path = cmd->spawnattr->execStart;
 
 			if (cmd->path == NULL) {
 				fprintf(stderr,
 					"Ignoring malformed repair file: %s\n",
 					ent->d_name);
+				free(cmd->spawnattr);
 				free(cmd);
 				continue;
 			}
@@ -189,6 +191,7 @@ int CreateLinkedListOfExes(char *repairScriptFolder, ProcessList * p,
 			if (fd < 0) {
 				fprintf(stderr, "unable to open file %s:\n",
 					MyStrerror(errno));
+				free(cmd->spawnattr);
 				free((void *)cmd->path);
 				free((void *)cmd);
 				continue;
@@ -197,12 +200,11 @@ int CreateLinkedListOfExes(char *repairScriptFolder, ProcessList * p,
 			if (IsExe(cmd->path, false) < 0) {
 				fprintf(stderr, "%s is not an executable\n",
 					cmd->path);
+				free(cmd->spawnattr);
 				free((void *)cmd->path);
 				free((void *)cmd);
 				continue;
 			}
-
-			cmd->legacy = false;
 		}
 
 		list_add(&cmd->entry, &p->head);
@@ -234,12 +236,13 @@ void FreeExeList(ProcessList * p)
 	list_for_each_entry(c, next, &p->head, entry) {
 		list_del(&c->entry);
 		free((void *)c->path);
-		if (c->legacy == false) {
-			free((void *)c->spawnattr.user);
-			free((void *)c->spawnattr.group);
-			free((void *)c->spawnattr.workingDirectory);
-			free((void *)c->spawnattr.repairFilePathname);
-			free((void *)c->spawnattr.noNewPrivileges);
+		if (c->spawnattr == NULL) {
+			free((void *)c->spawnattr->user);
+			free((void *)c->spawnattr->group);
+			free((void *)c->spawnattr->workingDirectory);
+			free((void *)c->spawnattr->repairFilePathname);
+			free((void *)c->spawnattr->noNewPrivileges);
+			free((void*)c->spawnattr);
 		}
 		free(c);
 	}
@@ -258,14 +261,14 @@ static void * __ExecScriptWorkerThread(void *a)
 	FutexWake(&sem);
 	__sync_synchronize();
 
-	if (c->legacy == false) {
+	if (c->spawnattr == NULL) {
 		if (c->retString[0] == '\0') {
 			c->ret =
-			    SpawnAttr(&c->spawnattr, c->path, c->path, c->mode == TEST ? "test": "repair",
+			    SpawnAttr(c->spawnattr, c->path, c->path, c->mode == TEST ? "test": "repair",
 				      NULL);
 		} else {
 			c->ret =
-			    SpawnAttr(&c->spawnattr, c->path, c->path, c->mode == TEST ? "test": "repair", c->retString,
+			    SpawnAttr(c->spawnattr, c->path, c->path, c->mode == TEST ? "test": "repair", c->retString,
 				      NULL);
 		}
 	} else {
@@ -357,7 +360,7 @@ static int __ExecuteRepairScripts(void *a)
 	list_for_each_entry(c, next, &p->head, entry) {
 		if (c->ret != 0) {
 			Logmsg(LOG_ERR, "repair %s script failed",
-				c->legacy == false ? c->spawnattr.repairFilePathname : c->path);
+				c->spawnattr == NULL ? c->spawnattr->repairFilePathname : c->path);
 			return 1;
 		}
 	}
