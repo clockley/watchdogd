@@ -164,7 +164,7 @@ int CreateLinkedListOfExes(char *repairScriptFolder, ProcessList * p,
 		if (IsRepairScriptConfig(ent->d_name) == 0) {
 			cmd->spawnattr = NULL;
 		} else {
-			cmd->spawnattr = (spawnattr_t *)calloc(1, sizeof(spawnattr_t *));
+			cmd->spawnattr = (spawnattr_t *)calloc(1, sizeof(spawnattr_t));
 			//For V3 repair scripts cmd->path refers to the pathname of the repair script config file
 			if (LoadRepairScriptLink
 			    (cmd->spawnattr, (char *)cmd->path) == false) {
