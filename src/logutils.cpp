@@ -581,6 +581,11 @@ bool MyStrerrorInit(void)
 	return true;
 }
 
+void FreeLocale(void)
+{
+	freelocale(locale);
+}
+
 char * MyStrerror(int error)
 {
 	return strerror_l(error, locale);

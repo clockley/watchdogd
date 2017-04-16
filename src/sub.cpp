@@ -178,7 +178,7 @@ int EndDaemon(struct cfgoptions *s, int keepalive)
 		Logmsg(LOG_INFO, "stopping watchdog daemon");
 		closelog();
 		munlockall();
-
+		FreeLocale();
 		return 0;
 	}
 
@@ -189,6 +189,7 @@ int EndDaemon(struct cfgoptions *s, int keepalive)
 	SetLogTarget(STANDARD_ERROR);
 
 	munlockall();
+	FreeLocale();
 
 	return 0;
 }

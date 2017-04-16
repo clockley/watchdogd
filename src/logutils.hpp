@@ -26,4 +26,5 @@ bool LogUpToInt(long pri, bool);
 bool MyStrerrorInit(void);
 char * MyStrerror(int);
 pid_t StartLogger(void);
+void FreeLocale(void);
 #endif
