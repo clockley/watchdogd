@@ -149,20 +149,18 @@ struct spawnattr_t {
 };
 
 struct repaircmd_t {
-	spawnattr_t spawnattr;
-	char retString[32];
-	struct list entry;
+	spawnattr_t * spawnattr;
 	const char *path;
+	char retString[8];
+	struct list entry;
 	int ret;
 	std::atomic_bool mode;
-	bool legacy;
 };
 
 struct dbusinfo
 {
 	cfgoptions **config;
 	Watchdog **wdt;
-	pid_t childPid;
 	int fd;
 };
 

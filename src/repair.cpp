@@ -145,7 +145,6 @@ bool LoadRepairScriptLink(spawnattr_t * obj, char *const filename)
 		return false;
 	}
 
-	memset(obj, 0, sizeof(spawnattr_t));
 	char *buf = NULL;
 	size_t len = 0;
 	while (getline(&buf, &len, fp) != -1) {
