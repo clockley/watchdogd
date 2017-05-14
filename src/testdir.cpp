@@ -164,10 +164,6 @@ int CreateLinkedListOfExes(char *repairScriptFolder, ProcessList * p,
 		if (IsRepairScriptConfig(ent->d_name) == 0) {
 			cmd->legacy = true;
 		} else {
-<<<<<<< HEAD
-			cmd->spawnattr = (spawnattr_t *)calloc(1, sizeof(spawnattr_t));
-=======
->>>>>>> parent of 2063d2e... Use pointer as flag in linked list struct
 			//For V3 repair scripts cmd->path refers to the pathname of the repair script config file
 			if (LoadRepairScriptLink
 			    (&cmd->spawnattr, (char *)cmd->path) == false) {
@@ -238,22 +234,12 @@ void FreeExeList(ProcessList * p)
 	list_for_each_entry(c, next, &p->head, entry) {
 		list_del(&c->entry);
 		free((void *)c->path);
-<<<<<<< HEAD
-		if (c->spawnattr != NULL) {
-			free((void *)c->spawnattr->user);
-			free((void *)c->spawnattr->group);
-			free((void *)c->spawnattr->workingDirectory);
-			free((void *)c->spawnattr->repairFilePathname);
-			free((void *)c->spawnattr->noNewPrivileges);
-			free((void*)c->spawnattr);
-=======
 		if (c->legacy == false) {
 			free((void *)c->spawnattr.user);
 			free((void *)c->spawnattr.group);
 			free((void *)c->spawnattr.workingDirectory);
 			free((void *)c->spawnattr.repairFilePathname);
 			free((void *)c->spawnattr.noNewPrivileges);
->>>>>>> parent of 2063d2e... Use pointer as flag in linked list struct
 		}
 		free(c);
 	}
