@@ -149,12 +149,19 @@ struct spawnattr_t {
 };
 
 struct repaircmd_t {
+<<<<<<< HEAD
 	spawnattr_t * spawnattr;
+=======
+	spawnattr_t spawnattr;
+	char retString[32];
+	struct list entry;
+>>>>>>> parent of 2063d2e... Use pointer as flag in linked list struct
 	const char *path;
 	char retString[8];
 	struct list entry;
 	int ret;
 	std::atomic_bool mode;
+	bool legacy;
 };
 
 struct dbusinfo
