@@ -128,6 +128,7 @@ int SpawnAttr(spawnattr_t * spawnattr, const char *file, const char *args, ...)
 				return -1;
 			}
 
+			RestoreIPCNamespace();
 			execv(file, (char *const *)array);
 
 			Logmsg(LOG_CRIT, "execv failed %s", file);

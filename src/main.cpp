@@ -32,7 +32,7 @@ extern "C" {
 #include <systemd/sd-event.h>
 const bool DISARM_WATCHDOG_BEFORE_REBOOT = true;
 static volatile sig_atomic_t quit = 0;
-
+int ipcNameSpace = -1;
 volatile sig_atomic_t stop = 0;
 volatile sig_atomic_t stopPing = 0;
 ProcessList processes;
@@ -324,6 +324,13 @@ int ServiceMain(int argc, char **argv, int fd, bool restarted)
 	return EXIT_SUCCESS;
 }
 
+void RestoreIPCNamespace(void)
+{
+	if (setns(ipcNameSpace, 0) == -1) {
+		abort();
+	}
+}
+
 int main(int argc, char **argv)
 {
 	int com[2] = {0};
@@ -409,6 +416,11 @@ daemon:
 	sigaddset(&mask, SIGUSR1);
 	sigprocmask(SIG_BLOCK, &mask, NULL);
 	int sfd = signalfd (-1, &mask, SFD_CLOEXEC);
+	ipcNameSpace = open("/proc/self/ns/ipc", O_CLOEXEC|O_RDONLY);
+	if (ipcNameSpace == -1) {
+		fprintf(stderr, "unable to open ipc namespace\n");
+		abort();
+	}
 init:
 	waitpid(-1, NULL, WNOHANG);
 
@@ -416,6 +428,7 @@ init:
 	pid = fork();
 
 	if (pid == 0) {
+		unshare(CLONE_NEWIPC);
 		close(sfd);
 		ResetSignalHandlers(64);
 		sigfillset(&mask);
@@ -490,6 +503,7 @@ init:
 			sd_bus_flush_close_unref(bus);
 			kill(shell, SIGUSR1);
 			si.ssi_signo = 0;
+			close(ipcNameSpace);
 			_Exit(si.ssi_status);
 			break;
 		}
