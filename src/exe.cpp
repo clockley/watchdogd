@@ -19,6 +19,7 @@
 #include "sub.hpp"
 #include "exe.hpp"
 #include "user.hpp"
+#include "main.hpp"
 
 int Spawn(int timeout, struct cfgoptions *const config, const char *file,
 	  const char *args, ...)
