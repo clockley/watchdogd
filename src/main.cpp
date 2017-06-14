@@ -401,6 +401,12 @@ daemon:
 	}
 	close(sock[0]);
 
+	ipcNameSpace = open("/proc/self/ns/ipc", O_CLOEXEC|O_RDONLY);
+	if (ipcNameSpace == -1) {
+		fprintf(stderr, "unable to open ipc namespace\n");
+		abort();
+	}
+
 	sigset_t mask;
 	bool restarted = false;
 	char name[64] = {0};
@@ -416,11 +422,6 @@ daemon:
 	sigaddset(&mask, SIGUSR1);
 	sigprocmask(SIG_BLOCK, &mask, NULL);
 	int sfd = signalfd (-1, &mask, SFD_CLOEXEC);
-	ipcNameSpace = open("/proc/self/ns/ipc", O_CLOEXEC|O_RDONLY);
-	if (ipcNameSpace == -1) {
-		fprintf(stderr, "unable to open ipc namespace\n");
-		abort();
-	}
 init:
 	waitpid(-1, NULL, WNOHANG);
 
@@ -436,7 +437,6 @@ init:
 		close(fildes[1]);
 		read(fildes[0], fildes+1, sizeof(int));
 		close(fildes[0]);
-
 		_Exit(ServiceMain(argc, argv, sock[1], restarted));
 	}
 

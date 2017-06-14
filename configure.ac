@@ -20,7 +20,7 @@ AX_PTHREAD
 AX_NOT_ENABLE_FRAME_POINTER
 # Checks for libraries.
 PKG_PROG_PKG_CONFIG
-PKG_CHECK_MODULES([DEPENDENCIES], [mount >= 2.22.0 zlib libconfig >= 1.4.8 libsystemd >= 222 liboping >= 1.8.0])
+PKG_CHECK_MODULES([DEPENDENCIES], [mount >= 2.22.0 zlib libconfig >= 1.4.8 libsystemd >= 222 liboping >= 1.10.0])
 
 AC_ARG_WITH([systemdsystemunitdir],
      AS_HELP_STRING([--with-systemdsystemunitdir=DIR], [Directory for systemd service files]),,
