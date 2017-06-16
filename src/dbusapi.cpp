@@ -15,7 +15,7 @@
  */
 
 #define DBUSAPI_PROTOTYPES
-#include "dbusapi.h"
+#include "dbusapi.hpp"
 #include <errno.h>
 #include <stdlib.h>
 #include <zlib.h>
@@ -223,10 +223,10 @@ static int ReloadDbusDaemon(void)
 		0x6e, 0xbf, 0x00, 0x9f, 0x86, 0x86, 0x3b
 	};
 
-	const long unsigned int cFileLen = 247;
-	char *file = calloc(1, 512);
-
-	uncompress(file, &(uLongf){511}, cFile, cFileLen);
+	const uLong cFileLen = 247;
+	Bytef *file = (Bytef*) calloc(1, 512);
+	uLongf size = 512;
+	uncompress(file, &size, cFile, cFileLen);
 
 	sd_bus_error error;
 	sd_bus_message *m = NULL;
@@ -238,7 +238,7 @@ static int ReloadDbusDaemon(void)
 		return -1;
 	}
 
-	fputs(file, fp);
+	fputs((const char*)file, fp);
 	fclose(fp);
 
 	sd_bus_call_method(bus, "org.freedesktop.DBus", "/", "org.freedesktop.DBus", "ReloadConfig",&error, &m, "");

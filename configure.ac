@@ -11,7 +11,6 @@ AC_CONFIG_HEADERS([config.h])
 
 # Checks for programs.
 AC_PROG_CXX
-AC_PROG_CC_STDC
 AX_CXX_COMPILE_STDCXX_11([ext], [mandatory])
 AX_PTHREAD
 
@@ -20,7 +19,7 @@ AX_PTHREAD
 AX_NOT_ENABLE_FRAME_POINTER
 # Checks for libraries.
 PKG_PROG_PKG_CONFIG
-PKG_CHECK_MODULES([DEPENDENCIES], [mount >= 2.22.0 zlib libconfig >= 1.4.8 libsystemd >= 222 liboping >= 1.10.0])
+PKG_CHECK_MODULES([DEPENDENCIES], [mount >= 2.22.0 zlib libconfig >= 1.4.8 libsystemd >= 233 liboping >= 1.10.0])
 
 AC_ARG_WITH([systemdsystemunitdir],
      AS_HELP_STRING([--with-systemdsystemunitdir=DIR], [Directory for systemd service files]),,

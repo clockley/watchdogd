@@ -26,9 +26,7 @@
 #include "multicall.hpp"
 #include "daemon.hpp"
 #include "pidfile.hpp"
-extern "C" {
-#include "dbusapi.h"
-}
+#include "dbusapi.hpp"
 #include <systemd/sd-event.h>
 const bool DISARM_WATCHDOG_BEFORE_REBOOT = true;
 static volatile sig_atomic_t quit = 0;

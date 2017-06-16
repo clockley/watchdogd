@@ -26,7 +26,7 @@
 #include "testdir.hpp"
 #include "exe.hpp"
 #include "network_tester.hpp"
-#include "dbusapi.h"
+#include "dbusapi.hpp"
 
 extern volatile sig_atomic_t stop;
 static pthread_mutex_t managerlock = PTHREAD_MUTEX_INITIALIZER;
