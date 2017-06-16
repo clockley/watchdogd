@@ -10,7 +10,6 @@ AC_CONFIG_SRCDIR([Makefile.am])
 AC_CONFIG_HEADERS([config.h])
 
 # Checks for programs.
-AC_PROG_CXX
 AX_CXX_COMPILE_STDCXX_11([ext], [mandatory])
 AX_PTHREAD
 
