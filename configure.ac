@@ -13,11 +13,6 @@ AC_CONFIG_HEADERS([config.h])
 AX_CXX_COMPILE_STDCXX_11([ext], [mandatory])
 AX_PTHREAD
 
-#AC_CHECK_PROGS([M4], gm4 m4, no)
-#AS_IF([test "x$M4" = "xno"], AC_MSG_ERROR([m4 missing]))
-AX_NOT_ENABLE_FRAME_POINTER
-# Checks for libraries.
-PKG_PROG_PKG_CONFIG
 PKG_CHECK_MODULES([DEPENDENCIES], [mount >= 2.22.0 zlib libconfig >= 1.4.8 libsystemd >= 233 liboping >= 1.10.0], [:], [bash install_dependencies.sh; PKG_CHECK_MODULES([DEPENDENCIES], [mount >= 2.22.0 zlib libconfig >= 1.4.8 libsystemd >= 233 liboping >= 1.10.0])])
 
 AC_ARG_WITH([systemdsystemunitdir],
