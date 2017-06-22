@@ -140,7 +140,7 @@ static bool InstallPinger(sd_event * e, int time, Watchdog * w)
 	return true;
 }
 
-int ServiceMain(int argc, char **argv, int fd, bool restarted)
+static int ServiceMain(int argc, char **argv, int fd, bool restarted)
 {
 	cfgoptions options;
 	Watchdog watchdog;
@@ -148,7 +148,7 @@ int ServiceMain(int argc, char **argv, int fd, bool restarted)
 	Watchdog *tmp2 = &watchdog;
 	Pidfile pidfile;
 
-	struct dbusinfo temp = {.config = &tmp,.wdt = &tmp2 };;
+	struct dbusinfo temp = {.config = &tmp,.wdt = &tmp2 };
 	temp.fd = fd;
 
 	if (MyStrerrorInit() == false) {
@@ -272,7 +272,11 @@ int ServiceMain(int argc, char **argv, int fd, bool restarted)
 		i.firmwareVersion = watchdog.GetFirmwareVersion();
 
 		CreateDetachedThread(IdentityThread, &i);
+		pthread_attr_t attr;
+		pthread_attr_init(&attr);
+		pthread_attr_setstacksize(&attr, PTHREAD_STACK_MIN*2);
 		pthread_create(&dbusThread, NULL, DbusHelper, &temp);
+		pthread_attr_destroy(&attr);
 		InstallPinger(event, options.sleeptime, &watchdog);
 
 		write(fd, "", sizeof(char));
@@ -341,6 +345,14 @@ int main(int argc, char **argv)
 		setsid();
 		pid = fork();
 		if (pid != 0) {
+			//close all fds in shell
+			close(com1[0]);
+			close(com1[1]);
+			close(com[0]);
+			close(com[1]);
+			close(0);
+			close(1);
+			close(2);
 			waitpid(pid, NULL, 0);
 			quick_exit(0);
 		}
@@ -386,7 +398,7 @@ daemon:
 	pid_t shell = 0;
 	close(com1[1]);
 	read(com1[0], &shell, sizeof(pid_t));
-
+	close(com1[0]);
 	int sock[2] = { 0 };
 	socketpair(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0, sock);
 	pid = fork();
@@ -459,6 +471,7 @@ init:
 	close(fildes[1]);
 
 	close(com[0]);
+	com[0] = -1;
 	write(com[1], &pid, sizeof(pid));
 
 	sd_notifyf(0, "READY=1\n" "MAINPID=%lu", (unsigned long)getpid());
