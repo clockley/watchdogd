@@ -329,6 +329,12 @@ void RestoreIPCNamespace(void)
 	}
 }
 
+static void ClosePipe(int *fd)
+{
+	close(*fd);
+	close(fd[1]);
+}
+
 int main(int argc, char **argv)
 {
 	int com[2] = {0};
@@ -341,6 +347,9 @@ int main(int argc, char **argv)
 		setsid();
 		pid = fork();
 		if (pid != 0) {
+			ClosePipe(com);
+			ClosePipe(com1);
+			close(0);close(1);close(2);
 			waitpid(pid, NULL, 0);
 			quick_exit(0);
 		}
