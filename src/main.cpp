@@ -358,7 +358,7 @@ int main(int argc, char **argv)
 		pid_t x = getpid();
 		close(com1[0]);
 		write(com1[1], &x, sizeof(pid_t));
-
+		close(com1[1]);
 		close(com[1]);
 		read(com[0], &pid, sizeof(pid_t));
 
@@ -393,6 +393,7 @@ int main(int argc, char **argv)
 daemon:
 	pid_t shell = 0;
 	close(com1[1]);
+	close(com[0]);
 	read(com1[0], &shell, sizeof(pid_t));
 
 	int sock[2] = { 0 };
@@ -400,6 +401,9 @@ daemon:
 	pid = fork();
 
 	if (pid == 0) {
+		close(com1[0]);
+		close(com[1]);
+		close(0);close(1);close(2);
 		OnParentDeathSend(SIGKILL);
 		close(sock[1]);
 		DbusApiInit(sock[0]);
@@ -428,6 +432,8 @@ daemon:
 	sigaddset(&mask, SIGUSR1);
 	sigprocmask(SIG_BLOCK, &mask, NULL);
 	int sfd = signalfd (-1, &mask, SFD_CLOEXEC);
+	pid = getpid();
+	write(com[1], &pid, sizeof(pid));
 init:
 	waitpid(-1, NULL, WNOHANG);
 
@@ -435,6 +441,7 @@ init:
 	pid = fork();
 
 	if (pid == 0) {
+		ClosePipe(com);
 		unshare(CLONE_NEWIPC);
 		close(sfd);
 		ResetSignalHandlers(64);
@@ -465,10 +472,6 @@ init:
 
 	close(fildes[0]);
 	close(fildes[1]);
-
-	close(com[0]);
-	pid = getpid();
-	write(com[1], &pid, sizeof(pid));
 
 	sd_notifyf(0, "READY=1\n" "MAINPID=%lu", (unsigned long)getpid());
 
