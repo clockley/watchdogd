@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([watchdogd],[3],[clockley1@gmail.com])
+AC_INIT([watchdogd],[3.5],[clockley1@gmail.com])
 AC_CONFIG_AUX_DIR([.build-aux])
 AM_INIT_AUTOMAKE([1.15] [foreign subdir-objects tar-pax])
 AM_SILENT_RULES([yes])
