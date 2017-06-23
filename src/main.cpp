@@ -368,10 +368,12 @@ int main(int argc, char **argv)
 			switch (si.ssi_signo) {
 			case SIGTERM:
 			case SIGINT:
+				read(com[0], &pid, sizeof(pid_t));
 				kill(pid, SIGTERM);
 				quick_exit(si.ssi_int);
 				break;
 			case SIGHUP:
+				read(com[0], &pid, sizeof(pid_t));
 				kill(pid, si.ssi_int);
 				break;
 			case SIGUSR1:
