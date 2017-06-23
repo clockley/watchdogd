@@ -368,9 +368,7 @@ int main(int argc, char **argv)
 			switch (si.ssi_signo) {
 			case SIGTERM:
 			case SIGINT:
-				read(com[0], &pid, sizeof(pid_t));
-				kill(pid, SIGTERM);
-				quick_exit(si.ssi_int);
+ 				kill(pid, SIGTERM);
 				break;
 			case SIGHUP:
 				kill(pid, si.ssi_int);
@@ -460,6 +458,7 @@ init:
 	close(fildes[1]);
 
 	close(com[0]);
+	pid = getpid();
 	write(com[1], &pid, sizeof(pid));
 
 	sd_notifyf(0, "READY=1\n" "MAINPID=%lu", (unsigned long)getpid());
