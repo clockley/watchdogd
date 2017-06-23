@@ -14,7 +14,7 @@ dbusconf_DATA = contrib/dbus/watchdogd.conf
 watchdogddir = $(sysconfdir)
 dist_watchdogd_DATA = conf/watchdogd.conf
 sysconf_DATA = conf/watchdogd.conf
-ACLOCAL_AMFLAGS = -I m4
+ACLOCAL_AMFLAGS = -I .m4
 dist_doc_DATA = README LICENSE INSTALL MAN.TXT
 
 DISTCHECK_CONFIGURE_FLAGS = \
