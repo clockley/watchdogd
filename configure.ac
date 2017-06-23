@@ -3,7 +3,8 @@
 
 AC_PREREQ([2.69])
 AC_INIT([watchdogd],[3],[clockley1@gmail.com])
-AM_INIT_AUTOMAKE([1.15] [foreign subdir-objects])
+AC_CONFIG_AUX_DIR([.build-aux])
+AM_INIT_AUTOMAKE([1.15] [foreign subdir-objects tar-pax])
 AM_SILENT_RULES([yes])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR([Makefile.am])
