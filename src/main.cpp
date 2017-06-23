@@ -227,7 +227,11 @@ static int ServiceMain(int argc, char **argv, int fd, bool restarted)
 			return EXIT_FAILURE;
 		} else if (ret <= -1) {
 			LoadKernelModule();
+			Logmsg(LOG_INFO, "Trying to load software watchdog timer...");
 			ret = watchdog.Open(options.devicepath);
+			if (ret == 0) {
+				Logmsg(LOG_INFO, "Successfully loaded watchdog device");
+			}
 		}
 
 		if (ret <= -1) {
