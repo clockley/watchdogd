@@ -140,7 +140,7 @@ static bool InstallPinger(sd_event * e, int time, Watchdog * w)
 	return true;
 }
 
-int ServiceMain(int argc, char **argv, int fd, bool restarted)
+static int ServiceMain(int argc, char **argv, int fd, bool restarted)
 {
 	cfgoptions options;
 	Watchdog watchdog;
