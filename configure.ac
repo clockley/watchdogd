@@ -6,7 +6,7 @@ AC_INIT([watchdogd],[3],[clockley1@gmail.com])
 AC_CONFIG_AUX_DIR([.build-aux])
 AM_INIT_AUTOMAKE([1.15] [foreign subdir-objects tar-pax])
 AM_SILENT_RULES([yes])
-AC_CONFIG_MACRO_DIR([m4])
+AC_CONFIG_MACRO_DIR([.m4])
 AC_CONFIG_SRCDIR([Makefile.am])
 AC_CONFIG_HEADERS([src/config.h])
 
@@ -60,7 +60,7 @@ AC_ARG_WITH(dbusdatadir, AC_HELP_STRING([--with-dbusdatadir=PATH],
 	]
 )
 if (test -z "${path_dbusdata}"); then
-	DBUS_DATADIR='${datadir}/dbus-1/system-services'
+		DBUS_DATADIR='${datadir}/dbus-1/system-services'
 else
 	[path_dbusconf="$(echo ${path_dbusdata} | sed 's:^'"${prefix}"':${prefix}:')" ; ]
 	[path_dbusconf="$(echo ${path_dbusdata} | sed 's:^'"${datadir}"':${datadir}:')" ; ]
