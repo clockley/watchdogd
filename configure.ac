@@ -8,7 +8,7 @@ AM_INIT_AUTOMAKE([1.15] [foreign subdir-objects tar-pax])
 AM_SILENT_RULES([yes])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR([Makefile.am])
-AC_CONFIG_HEADERS([config.h])
+AC_CONFIG_HEADERS([src/config.h])
 
 # Checks for programs.
 AX_CXX_COMPILE_STDCXX_11([ext], [mandatory])
