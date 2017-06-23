@@ -373,7 +373,6 @@ int main(int argc, char **argv)
 				quick_exit(si.ssi_int);
 				break;
 			case SIGHUP:
-				read(com[0], &pid, sizeof(pid_t));
 				kill(pid, si.ssi_int);
 				break;
 			case SIGUSR1:
