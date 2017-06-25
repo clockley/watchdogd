@@ -21,56 +21,6 @@
 #include "pidfile.hpp"
 #include "daemon.hpp"
 
-static int CloseStandardFileDescriptors(void)
-{
-	int ret = 0;
-	struct stat statBuf;
-
-	int fd = open("/dev/null", O_RDWR);
-
-	if (fd < 0) {
-		Logmsg(LOG_CRIT, "Unable to open: /dev/null: %s:",
-		       MyStrerror(errno));
-		return -1;
-	}
-
-	if (fstat(fd, &statBuf) != 0) {
-		Logmsg(LOG_CRIT, "Stat failed %s", MyStrerror(errno));
-		goto error;
-	} else if (S_ISCHR(statBuf.st_mode) == 0
-		   && S_ISBLK(statBuf.st_mode) == 0) {
-		Logmsg(LOG_CRIT, "/dev/null is not a unix device file");
-		goto error;
-	}
-
-	ret = dup2(fd, STDIN_FILENO);
-	if (ret < 0) {
-		Logmsg(LOG_CRIT, "dup2 failed: STDIN_FILENO: %s",
-		       MyStrerror(errno));
-		goto error;
-	}
-
-	ret = dup2(fd, STDOUT_FILENO);
-	if (ret < 0) {
-		Logmsg(LOG_CRIT, "dup2 failed: STDOUT_FILENO: %s",
-		       MyStrerror(errno));
-		goto error;
-	}
-
-	ret = dup2(fd, STDERR_FILENO);
-	if (ret < 0) {
-		Logmsg(LOG_CRIT, "dup2 failed: STDERR_FILENO: %s",
-		       MyStrerror(errno));
-		goto error;
-	}
-
-	close(fd);
-	return 0;
- error:
-	close(fd);
-	return -1;
-}
-
 static void CloseFileDescriptors(long maxfd)
 {
 	long fd = 0;
