@@ -20,6 +20,7 @@
 #include "daemon.hpp"
 #include "configfile.hpp"
 #include "network_tester.hpp"
+#include "repair.hpp"
 
 static const char *LibconfigWraperConfigSettingSourceFile(const config_setting_t *
 						   setting)
@@ -162,6 +163,105 @@ static bool SetDefaultLogTarget(struct cfgoptions *const cfg)
 	return false;
 }
 
+static void NoWhitespace(char *s)
+{
+	if (isspace(*s)) {
+		s[strlen((char*)memmove(s, s+1, (strlen(s)-1)*sizeof(char)))-1] = '\0';
+		NoWhitespace(s);
+	} else if (*s == '\0') {
+		return;
+	}
+	NoWhitespace(s+1);
+}
+
+static bool ConvertLegacyWatchdogConfigfile(char * path, char **ptr)
+{
+	char **ping = NULL;
+	char **pidFiles = NULL;
+	unsigned int pidLen = 0;
+	unsigned int pLen = 0;
+	char *buf = NULL;
+	size_t len = 0;
+	size_t size;
+
+	FILE *fp = fopen(path, "r");
+	if (fp == NULL)
+		return false;
+
+	FILE * configFile = open_memstream(ptr, &size);
+	if (configFile == NULL) {
+		fclose(fp);
+		return false;
+	}
+
+	while (getline(&buf, &len, fp) != -1) {
+		if (*buf == '#')
+			continue;
+		char *const name = strtok(buf, "=");
+		char *const value = strtok(NULL, "=");
+
+		if (Validate(name, value) == false) {
+			continue;
+		}
+
+		NoWhitespace(value);
+		NoWhitespace(name);
+
+		if (value[strlen(value)-1] == 34 && value[strlen(value)] == '\0') {
+			value[strlen((char*)memmove(value, value+1, (strlen(value)-1)*sizeof(char)))-2] = '\0';
+		}
+
+		if (strcasecmp(name, "ping") == 0) {
+			if (value[0] == '\0') {
+				continue;
+			}
+			if ((ping = (char**)realloc(ping, pLen+2*sizeof(char*))) == NULL) {
+				abort();
+			}
+			ping[pLen++] = strdup(value);
+		} else if (strcasecmp(name, "pidfile") == 0) {
+			if (value[0] == '\0') {
+				continue;
+			}
+			if ((pidFiles = (char**)realloc(pidFiles, pidLen+2*sizeof(char*))) == NULL) {
+				abort();
+			}
+			pidFiles[pidLen++] = strdup(value);
+		} else {
+			fprintf(configFile, "%s = \"%s\"\n", name, value);
+		}
+	}
+
+	free(buf);
+	if (pidFiles != NULL) {
+		fprintf(configFile, "pid-files = [");
+		for (size_t i = 0; i < pidLen; i++) {
+			if (i == 0)
+				fprintf(configFile, "\"%s\"", pidFiles[i]);
+			else
+				fprintf(configFile, ", \"%s\"", pidFiles[i]);
+			free(pidFiles[i]);
+		}
+		fprintf(configFile, "]\n");
+	}
+
+	if (ping != NULL) {
+		fprintf(configFile, "ping = [");
+		for (size_t i = 0; i < pLen; i++) {
+			if (i == 0)
+				fprintf(configFile, "\"%s\"", ping[i]);
+			else
+				fprintf(configFile, ", \"%s\"", ping[i]);
+			free(ping[i]);
+		}
+		fprintf(configFile, "]\n");
+	}
+	fclose(configFile);
+	free(ping);
+	free(pidFiles);
+	return true;
+}
+
 static bool LoadConfigurationFile(config_t *const config, const char *const fileName, struct cfgoptions *const cfg)
 {
 	assert(config != NULL);
@@ -183,12 +283,29 @@ static bool LoadConfigurationFile(config_t *const config, const char *const file
 		}
 		cfg->haveConfigFile = false;
 	} else if (!config_read_file(config, fileName)) {
-		fprintf(stderr, "watchdogd: %s:%d: %s\n",
-			config_error_file(config),
-			config_error_line(config),
-			config_error_text(config));
-		config_destroy(config);
-		return false;
+		char *ptr = NULL;
+		if (ConvertLegacyWatchdogConfigfile((char*)fileName, &ptr) == false) {
+			fprintf(stderr, "watchdogd: %s:%d: %s\n",
+				config_error_file(config),
+				config_error_line(config),
+				config_error_text(config));
+			config_destroy(config);
+			free(ptr);
+			return false;
+		} else {
+			config_destroy(config);
+			config_init(config);
+			if (config_read_string(config, ptr) == CONFIG_FALSE) {
+				fprintf(stderr, "watchdogd: %s:%d: %s\n",
+					config_error_file(config),
+					config_error_line(config),
+					config_error_text(config));
+				config_destroy(config);
+				free(ptr);
+				return false;
+			}
+			free(ptr);
+		}
 	}
 
 	return true;
