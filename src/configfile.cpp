@@ -182,7 +182,7 @@ static bool ConvertLegacyWatchdogConfigfile(char * path, char **ptr)
 	unsigned int pLen = 0;
 	char *buf = NULL;
 	size_t len = 0;
-	size_t size;
+	size_t size = 0;
 
 	FILE *fp = fopen(path, "r");
 	if (fp == NULL)
