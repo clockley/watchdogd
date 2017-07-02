@@ -276,7 +276,10 @@ static int ServiceMain(int argc, char **argv, int fd, bool restarted)
 		i.firmwareVersion = watchdog.GetFirmwareVersion();
 
 		CreateDetachedThread(IdentityThread, &i);
-		pthread_create(&dbusThread, NULL, DbusHelper, &temp);
+		pthread_attr_t attr = {0};
+		pthread_attr_setstacksize(&attr, PTHREAD_STACK_MIN*2);
+		pthread_attr_setguardsize(&attr, 0);
+		pthread_create(&dbusThread, &attr, DbusHelper, &temp);
 		InstallPinger(event, options.sleeptime, &watchdog);
 
 		write(fd, "", sizeof(char));
