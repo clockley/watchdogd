@@ -288,7 +288,7 @@ int IsExe(const char *pathname, bool returnfildes)
 int CreateDetachedThread(void *(*startFunction) (void *), void *const arg)
 {
 	pthread_t thread;
-	pthread_attr_t attr;
+	pthread_attr_t attr = {0};
 
 	if (arg == NULL)
 		return -1;
