@@ -54,7 +54,7 @@ static void PrintConfiguration(struct cfgoptions *const cfg)
 			Logmsg(LOG_INFO, "ping: %s", ipAddress);
 		}
 	} else {
-		Logmsg(LOG_INFO, "ping: no ip adresses to ping");
+		Logmsg(LOG_INFO, "ping: no machine to check");
 	}
 
 	if (cfg->options & ENABLEPIDCHECKER) {
