@@ -27,51 +27,6 @@
 #include "futex.hpp"
 
 static std::atomic_int sem = {0};
-//The dirent_buf_size function was written by Ben Hutchings and released under the following license.
-
-//Permission is hereby granted, free of charge, to any person obtaining a copy of this
-//software and associated documentation files (the "Software"), to deal in the Software
-//without restriction, including without limitation the rights to use, copy, modify, merge,
-//publish, distribute, sublicense, and/or sell copies of the Software, and to permit
-//persons to whom the Software is furnished to do so, subject to the following
-//condition:
-//THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-//EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-//MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-//NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-//HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-//WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-//DEALINGS IN THE SOFTWARE.
-
-//Copied into this program Sun September 8, 2013 by Christian Lockley
-
-size_t DirentBufSize(DIR * dirp)
-{
-	long name_max;
-	size_t name_end;
-#if defined(HAVE_FPATHCONF) && defined(HAVE_DIRFD) \
-&& defined(_PC_NAME_MAX)
-	name_max = fpathconf(dirfd(dirp), _PC_NAME_MAX);
-	if (name_max == -1)
-#if defined(NAME_MAX)
-		name_max = (NAME_MAX > 255) ? NAME_MAX : 255;
-#else
-		return (size_t) (-1);
-#endif
-#else
-#if defined(NAME_MAX)
-	name_max = (NAME_MAX > 255) ? NAME_MAX : 255;
-#else
-#error "buffer size for readdir_r cannot be determined"
-#endif
-#endif
-	name_end =
-	    (size_t) offsetof(struct dirent,
-			      d_name) + (unsigned long)name_max + 1;
-	return (name_end > sizeof(struct dirent)
-		? name_end : sizeof(struct dirent));
-}
 
 static void DeleteDuplicates(ProcessList * p)
 {
