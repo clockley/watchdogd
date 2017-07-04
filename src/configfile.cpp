@@ -163,7 +163,7 @@ static bool SetDefaultLogTarget(struct cfgoptions *const cfg)
 	return false;
 }
 
-static void NoWhitespace(char *s)
+void NoWhitespace(char *s)
 {
 	if (isspace(*s)) {
 		s[strlen((char*)memmove(s, s+1, (strlen(s)-1)*sizeof(char)))-1] = '\0';

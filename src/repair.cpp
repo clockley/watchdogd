@@ -15,6 +15,7 @@
  */
 #include "sub.hpp"
 #include "repair.hpp"
+#include "configfile.hpp"
 
 static bool ParseConfigfile(char *name, char *value, spawnattr_t * obj)
 {
@@ -150,6 +151,9 @@ bool LoadRepairScriptLink(spawnattr_t * obj, char *const filename)
 	while (getline(&buf, &len, fp) != -1) {
 		char *const name = strtok(buf, "=");
 		char *const value = strtok(NULL, "=");
+
+		NoWhitespace(name);
+		NoWhitespace(value);
 
 		if (Validate(name, value) == false) {
 			continue;
