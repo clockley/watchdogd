@@ -56,24 +56,9 @@ static void KillAllProcesses(int sig)
 		return;
 	}
 
-	size_t size = DirentBufSize(dir);
-
-	int error = 0;
-
-	if (size == ((size_t) (-1))) {
-		return;
-	}
-
-	direntbuf = (struct dirent *)calloc(1, size);
-
-	if (direntbuf == NULL) {
-		close(fd);
-		return;
-	}
-
 	errno = 0;
 
-	while ((error = readdir_r(dir, direntbuf, &ent)) == 0 && ent != NULL) {
+	while ((ent = readdir(dir)) != NULL) {
 
 		if (ent->d_type != DT_DIR) {
 			continue;
@@ -106,7 +91,6 @@ static void KillAllProcesses(int sig)
 
 	}
 
-	free(direntbuf);
 	closedir(dir);
 	close(fd);
 

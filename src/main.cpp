@@ -448,7 +448,7 @@ init:
 	}
 
 	sd_bus_open_system(&bus);
-	sprintf(name, "watchdogd.%li.scope", pid);
+	sprintf(name, "watchdogd.%i.scope", pid);
 	sd_bus_message_new_method_call(bus, &m, "org.freedesktop.systemd1",
 				"/org/freedesktop/systemd1",
 				"org.freedesktop.systemd1.Manager",

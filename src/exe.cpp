@@ -59,8 +59,8 @@ int SpawnAttr(spawnattr_t * spawnattr, const char *file, const char *args, ...)
 				       MyStrerror(errno));
 			}
 
-			char buf[512] = {"watchdogd_user_supplied_exe="};
-			strncat(buf, file, sizeof(buf));
+			char buf[512] = {"watchdogdRepairScript="};
+			strncat(buf, file, sizeof(buf) - strlen(buf) - 1);
 			buf[511] = '\0';
 
 			int fd = sd_journal_stream_fd(buf, LOG_INFO, true);
