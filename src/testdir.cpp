@@ -72,6 +72,30 @@ size_t DirentBufSize(DIR * dirp)
 		? name_end : sizeof(struct dirent));
 }
 
+static void DeleteDuplicates(ProcessList * p)
+{
+	assert(p != NULL);
+
+	repaircmd_t *c = NULL;
+	repaircmd_t *next = NULL;
+
+	list_for_each_entry(c, next, &p->head, entry) {
+		repaircmd_t *b = NULL;
+		repaircmd_t *next2 = NULL;
+		if (c->legacy) {
+			list_for_each_entry(b, next2, &p->head, entry) {
+				if (!b->legacy) {
+					if (strcmp(c->path, b->path) == 0) {
+						list_del(&c->entry);
+						free((void *)c->path);
+						Logmsg(LOG_INFO, "Using configuration info for %s script", b->path);
+					}
+				}
+			}
+		}
+	}
+}
+
 int CreateLinkedListOfExes(char *repairScriptFolder, ProcessList * p,
 			   struct cfgoptions *const config)
 {
@@ -212,7 +236,7 @@ int CreateLinkedListOfExes(char *repairScriptFolder, ProcessList * p,
 
 	close(fd);
 	closedir(dir);
-
+	DeleteDuplicates(p);
 	return 0;
 
  error:
