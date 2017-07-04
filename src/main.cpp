@@ -329,13 +329,6 @@ static int ServiceMain(int argc, char **argv, int fd, bool restarted)
 	return EXIT_SUCCESS;
 }
 
-void RestoreIPCNamespace(void)
-{
-	if (setns(ipcNameSpace, 0) == -1) {
-		abort();
-	}
-}
-
 static void ClosePipe(int *fd)
 {
 	close(*fd);
@@ -417,12 +410,6 @@ daemon:
 		_Exit(0);
 	}
 	close(sock[0]);
-
-	ipcNameSpace = open("/proc/self/ns/ipc", O_CLOEXEC|O_RDONLY);
-	if (ipcNameSpace == -1) {
-		fprintf(stderr, "unable to open ipc namespace\n");
-		abort();
-	}
 
 	sigset_t mask;
 	bool restarted = false;
