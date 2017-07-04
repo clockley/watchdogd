@@ -14,6 +14,7 @@
  * permissions and limitations under the License. 
  */
 #define _DEFAULT_SOURCE
+#include <libgen.h>
 #include "watchdogd.hpp"
 #include "sub.hpp"
 #include <dirent.h>
@@ -199,8 +200,16 @@ int CreateLinkedListOfExes(char *repairScriptFolder, ProcessList * p,
 			cmd->spawnattr.repairFilePathname = strdup(cmd->path);
 			free((void *)cmd->path);
 			cmd->path = NULL;
-
 			cmd->path = cmd->spawnattr.execStart;
+
+			char * rel = basename(strdup(cmd->path));
+
+			if (strcmp(rel, cmd->path) == 0) {
+				free((void*)rel);
+				Wasprintf((char **)&rel, "%s/%s", repairScriptFolder, cmd->path);
+				free((void*)cmd->path);
+				cmd->path = cmd->spawnattr.execStart = rel;
+			}
 
 			if (cmd->path == NULL) {
 				fprintf(stderr,
