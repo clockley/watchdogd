@@ -152,12 +152,12 @@ bool LoadRepairScriptLink(spawnattr_t * obj, char *const filename)
 		char *const name = strtok(buf, "=");
 		char *const value = strtok(NULL, "=");
 
-		NoWhitespace(name);
-		NoWhitespace(value);
-
 		if (Validate(name, value) == false) {
 			continue;
 		}
+
+		NoWhitespace(name);
+		NoWhitespace(value);
 
 		ParseConfigfile(name, value, obj);
 	}
