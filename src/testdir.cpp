@@ -89,6 +89,7 @@ static void DeleteDuplicates(ProcessList * p)
 					if (strcmp(c->path, b->path) == 0) {
 						list_del(&c->entry);
 						free((void *)c->path);
+						free((void *)c);
 						Logmsg(LOG_INFO, "Using configuration info for %s script", b->path);
 					}
 				}
