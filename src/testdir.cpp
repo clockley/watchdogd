@@ -356,8 +356,6 @@ static int __ExecuteRepairScripts(void *a)
 	return 0;
 }
 
-int shmid = 0;
-
 struct repairscriptTranctions
 {
 	std::atomic_int sem;
@@ -372,7 +370,7 @@ bool ExecuteRepairScriptsPreFork(ProcessList * p, struct cfgoptions *s)
 		return true;
 	}
 
-	shmid = shmget(IPC_PRIVATE, sysconf(_SC_PAGESIZE), (IPC_CREAT|IPC_EXCL|SHM_NORESERVE|0600));
+	int shmid = shmget(IPC_PRIVATE, sysconf(_SC_PAGESIZE), (IPC_CREAT|IPC_EXCL|SHM_NORESERVE|0600));
 	rst = (repairscriptTranctions*)shmat(shmid, NULL, 0);
 	struct shmid_ds buf = {0};
 	shmctl(shmid, IPC_RMID, &buf);
