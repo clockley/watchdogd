@@ -388,7 +388,7 @@ bool ExecuteRepairScriptsPreFork(ProcessList * p, struct cfgoptions *s)
 		}
 
 		quick_exit(0);
-		close(evfd)
+		close(evfd);
 	}
 
 	return true;
