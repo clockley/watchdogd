@@ -136,18 +136,27 @@ int SpawnAttr(spawnattr_t * spawnattr, const char *file, const char *args, ...)
 			close(fd);
 			return -1;
 		}
-		if (spawnattr->timeout > 0) {
-			pid_t timer = fork();
 
-			if (timer == 0) {
-				setpgid(0, mpid);
-				int t = spawnattr->timeout;
+		char stack[1024];
+		if (spawnattr->timeout > 0) {
+			pid_t timer;
+			struct para {
+				int t;
+				pid_t m;
+			};
+			para a = {spawnattr->timeout, mpid};
+			if ((timer = clone([](void *s)->int {
+				setpgid(0, ((para*)s)->m);
+				int t = ((para*)s)->t;
 				while (t > 0) {
 					sleep(1);
 					t -= 1;
 				}
 				_Exit(0);
+			}, stack+sizeof(stack), CLONE_VM|SIGCHLD, &a)) < 0) {
+				abort();
 			}
+
 			int ret = 0;
 			pid_t first = wait(&ret);
 			if (first == timer) {
