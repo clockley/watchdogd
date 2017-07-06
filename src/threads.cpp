@@ -284,10 +284,6 @@ static void *TestDirThread(void *arg)
 	//tests from running.
 
 	struct cfgoptions *s = (struct cfgoptions *)arg;
-	struct timespec rqtp;
-
-	rqtp.tv_sec = 5;
-	rqtp.tv_nsec = 5 * 1000;
 
 	for (;;) {
 		if (ExecuteRepairScripts() < 0) {
@@ -297,7 +293,8 @@ static void *TestDirThread(void *arg)
 				s->error &= !SCRIPTFAILED;
 			}
 		}
-		nanosleep(&rqtp, NULL);
+
+		sleep(30);
 
 		if (stop == 1) {
 			pthread_exit(NULL);
