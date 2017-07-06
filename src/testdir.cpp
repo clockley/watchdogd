@@ -354,7 +354,7 @@ static int __ExecuteRepairScripts(void *a)
 	return 0;
 }
 
-static int pipeFd[2] = {0};
+int evfd = 0;
 
 bool ExecuteRepairScriptsPreFork(ProcessList * p, struct cfgoptions *s)
 {
@@ -362,7 +362,7 @@ bool ExecuteRepairScriptsPreFork(ProcessList * p, struct cfgoptions *s)
 		return true;
 	}
 
-	pipe(pipeFd);
+	evfd = eventfd(0, 0);
 
 	pid_t pid = fork();
 
@@ -370,54 +370,36 @@ bool ExecuteRepairScriptsPreFork(ProcessList * p, struct cfgoptions *s)
 		Logmsg(LOG_ERR, "%s\n", MyStrerror(errno));
 		return false;
 	} else if (pid == 0) {
-		close(pipeFd[0]);
-		pid_t pid = fork();
-
-#if defined(__linux__)
-		if (LinuxRunningSystemd() == 1) {
-			unsetenv("NOTIFY_SOCKET");
-		}
-#endif
-
+		unsetenv("NOTIFY_SOCKET");
 		unsetenv("LD_PRELOAD");
 
-		if (pid > 0) {
-			_Exit(0);
-		}
-
-
-		if (pid < 0) {
-			Logmsg(LOG_ERR, "fork failed: %s", MyStrerror(errno));
-			abort();
-		}
-
-		char b[1];
+		uint64_t x = 0;
 
 		ThreadPoolNew();
 
 		while (true) {
+			read(evfd, &x, sizeof(uint64_t));
 			uint64_t value = 0;
 			struct executeScriptsStruct ess;
 			ess.list = p;
 			ess.config = s;
 
 			int ret = __ExecuteRepairScripts(&ess);
-
-			write(pipeFd[1], &ret, sizeof(ret));
 		}
 
-		exit(0);
+		quick_exit(0);
+		close(evfd)
 	}
-	close(pipeFd[1]);
+
 	return true;
 }
 
 int ExecuteRepairScripts(void)
 {
-	uint64_t value = 1;
+	uint64_t x = 0;
 	int ret = 0;
 
-	read(pipeFd[0], &ret, sizeof(ret));
+	write(evfd, &x, sizeof(uint64_t));
 
 	if (ret != 0) {
 		return -1;
