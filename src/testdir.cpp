@@ -25,6 +25,8 @@
 #include <sys/eventfd.h>
 #include "threadpool.hpp"
 #include "futex.hpp"
+#include <sys/ipc.h>
+#include <sys/shm.h>
 
 static std::atomic_int sem = {0};
 
@@ -354,7 +356,15 @@ static int __ExecuteRepairScripts(void *a)
 	return 0;
 }
 
-int evfd = 0;
+int shmid = 0;
+
+struct repairscriptTranctions
+{
+	std::atomic_int sem;
+	std::atomic_int ret;
+};
+
+struct repairscriptTranctions *rst = NULL;
 
 bool ExecuteRepairScriptsPreFork(ProcessList * p, struct cfgoptions *s)
 {
@@ -362,7 +372,10 @@ bool ExecuteRepairScriptsPreFork(ProcessList * p, struct cfgoptions *s)
 		return true;
 	}
 
-	evfd = eventfd(0, 0);
+	shmid = shmget(IPC_PRIVATE, sysconf(_SC_PAGESIZE), (IPC_CREAT|IPC_EXCL|SHM_NORESERVE|0600));
+	rst = (repairscriptTranctions*)shmat(shmid, NULL, 0);
+	struct shmid_ds buf = {0};
+	shmctl(shmid, IPC_RMID, &buf);
 
 	pid_t pid = fork();
 
@@ -373,22 +386,17 @@ bool ExecuteRepairScriptsPreFork(ProcessList * p, struct cfgoptions *s)
 		unsetenv("NOTIFY_SOCKET");
 		unsetenv("LD_PRELOAD");
 
-		uint64_t x = 0;
-
 		ThreadPoolNew();
 
 		while (true) {
-			read(evfd, &x, sizeof(uint64_t));
-			uint64_t value = 0;
+			FutexWait(&rst->sem, 0);
+
 			struct executeScriptsStruct ess;
 			ess.list = p;
 			ess.config = s;
-
-			int ret = __ExecuteRepairScripts(&ess);
+			rst->ret = __ExecuteRepairScripts(&ess);
 		}
-
 		quick_exit(0);
-		close(evfd);
 	}
 
 	return true;
@@ -396,12 +404,9 @@ bool ExecuteRepairScriptsPreFork(ProcessList * p, struct cfgoptions *s)
 
 int ExecuteRepairScripts(void)
 {
-	uint64_t x = 0;
-	int ret = 0;
+	FutexWake(&rst->sem);
 
-	write(evfd, &x, sizeof(uint64_t));
-
-	if (ret != 0) {
+	if (rst->ret != 0) {
 		return -1;
 	}
 
