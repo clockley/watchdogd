@@ -157,7 +157,7 @@ int SpawnAttr(spawnattr_t * spawnattr, const char *file, const char *args, ...)
 					t -= 1;
 				}
 				_Exit(0);
-			}, stack+sizeof(stack), CLONE_VM|SIGCHLD, &a);
+			}, stack+sizeof(stack), CLONE_VM|CLONE_FILES|CLONE_FS|SIGCHLD, &a);
 			if (timer < 0) {
 				abort();
 			}
