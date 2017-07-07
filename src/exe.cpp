@@ -137,23 +137,26 @@ int SpawnAttr(spawnattr_t * spawnattr, const char *file, const char *args, ...)
 			return -1;
 		}
 
-		char stack[1024];
+		char stack[2014] = {0};
 		if (spawnattr->timeout > 0) {
-			pid_t timer;
+
 			struct para {
 				int t;
 				pid_t m;
 			};
 			para a = {spawnattr->timeout, mpid};
-			if ((timer = clone([](void *s)->int {
-				setpgid(0, ((para*)s)->m);
-				int t = ((para*)s)->t;
+			pid_t timer = clone([](void *s)->int {
+				para *a = (para*)s;
+				setpgid(0, a->m);
+				int t = a->t;
+
 				while (t > 0) {
 					sleep(1);
 					t -= 1;
 				}
 				_Exit(0);
-			}, stack+sizeof(stack), CLONE_VM|SIGCHLD, &a)) < 0) {
+			}, stack+sizeof(stack), CLONE_VM|SIGCHLD, &a);
+			if (timer < 0) {
 				abort();
 			}
 
@@ -166,7 +169,9 @@ int SpawnAttr(spawnattr_t * spawnattr, const char *file, const char *args, ...)
 				wait(NULL);
 				_Exit(EXIT_FAILURE);
 			} else {
-				kill(timer, SIGKILL);
+				syscall(SYS_tgkill, timer, timer, SIGKILL);
+				Logmsg(LOG_DEBUG, "binary %s returned %i",
+				       file, ret);
 				wait(NULL);
 				_Exit(WEXITSTATUS(ret));
 			}
