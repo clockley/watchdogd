@@ -137,7 +137,7 @@ int SpawnAttr(spawnattr_t * spawnattr, const char *file, const char *args, ...)
 			return -1;
 		}
 
-		char stack[2014] = {0};
+		char stack[2048] = {0};
 		if (spawnattr->timeout > 0) {
 
 			struct para {
@@ -151,7 +151,9 @@ int SpawnAttr(spawnattr_t * spawnattr, const char *file, const char *args, ...)
 				int t = a->t;
 
 				while (t > 0) {
-					sleep(1);
+					struct timeval tv = {0};
+					tv.tv_sec = 1;
+					syscall(SYS_select, 0, NULL, NULL, NULL, &tv);
 					t -= 1;
 				}
 				_Exit(0);
