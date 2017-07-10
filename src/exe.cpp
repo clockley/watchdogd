@@ -149,13 +149,9 @@ int SpawnAttr(spawnattr_t * spawnattr, const char *file, const char *args, ...)
 				para *a = (para*)s;
 				setpgid(0, a->m);
 				int t = a->t;
-
-				while (t > 0) {
-					struct timeval tv = {0};
-					tv.tv_sec = 1;
-					syscall(SYS_select, 0, NULL, NULL, NULL, &tv);
-					t -= 1;
-				}
+				struct timeval tv = {0};
+				tv.tv_sec = t;
+				syscall(SYS_select, 0, NULL, NULL, NULL, &tv);
 				_Exit(0);
 			}, stack+sizeof(stack), CLONE_VM|CLONE_FILES|CLONE_FS|SIGCHLD, &a);
 			if (timer < 0) {
