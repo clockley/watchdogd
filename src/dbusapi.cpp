@@ -246,13 +246,14 @@ static int ReloadDbusDaemon(void)
 	return 0;
 }
 
-void DbusApiInit(int sock)
+void * DbusApiInit(void * sock)
 {
-	fd = sock;
+	fd = *((int*)sock);
 	sd_event_source *busSource = NULL;
 	sd_bus_slot *slot = NULL;
 
 	int ret = sd_event_default(&event);
+
 	char tmp = '0';
 	read(fd, &tmp, sizeof(char));
 
@@ -271,4 +272,5 @@ void DbusApiInit(int sock)
 	sd_event_add_io(event, &busSource, sd_bus_get_fd(bus), EPOLLIN, BusHandler, NULL);
 
 	sd_event_loop(event);
+	quick_exit(0);
 }

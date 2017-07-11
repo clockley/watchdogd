@@ -341,12 +341,17 @@ int main(int argc, char **argv)
 	pipe2(com, O_CLOEXEC);
 	int com1[2] = {0};
 	pipe2(com1, O_CLOEXEC);
+
+	int sock[2] = {0};
+	socketpair(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0, sock);
+
 	pid_t pid = fork();
 
 	if (pid == 0) {
 		setsid();
 		pid = fork();
 		if (pid != 0) {
+			ClosePipe(sock);
 			ClosePipe(com);
 			ClosePipe(com1);
 			close(0);close(1);close(2);
@@ -355,6 +360,15 @@ int main(int argc, char **argv)
 		}
 		goto daemon;
 	} else {
+		close(sock[1]);
+		sigset_t mask;
+		sigemptyset(&mask);
+		sigaddset(&mask, SIGTERM);
+		sigaddset(&mask, SIGINT);
+		sigaddset(&mask, SIGHUP);
+		sigaddset(&mask, SIGUSR1);
+		sigaddset(&mask, SIGUSR2);
+		pthread_sigmask(SIG_BLOCK, &mask, NULL);
 		pid_t x = getpid();
 		close(com1[0]);
 		write(com1[1], &x, sizeof(pid_t));
@@ -362,13 +376,6 @@ int main(int argc, char **argv)
 		close(com[1]);
 		read(com[0], &pid, sizeof(pid_t));
 
-		sigset_t mask;
-		sigemptyset(&mask);
-		sigaddset(&mask, SIGTERM);
-		sigaddset(&mask, SIGINT);
-		sigaddset(&mask, SIGHUP);
-		sigaddset(&mask, SIGUSR1);
-		sigprocmask(SIG_BLOCK, &mask, NULL);
 		int sfd = signalfd(-1, &mask, SFD_CLOEXEC);
 
 		while (true) {
@@ -385,6 +392,9 @@ int main(int argc, char **argv)
 			case SIGUSR1:
 				quick_exit(0);
 				break;
+			case SIGUSR2:
+				CreateDetachedThread(DbusApiInit, &sock);
+				break;
 			}
 		}
 
@@ -396,19 +406,7 @@ daemon:
 	close(com[0]);
 	read(com1[0], &shell, sizeof(pid_t));
 
-	int sock[2] = { 0 };
-	socketpair(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0, sock);
-	pid = fork();
-
-	if (pid == 0) {
-		close(com1[0]);
-		close(com[1]);
-		close(0);close(1);close(2);
-		OnParentDeathSend(SIGKILL);
-		close(sock[1]);
-		DbusApiInit(sock[0]);
-		_Exit(0);
-	}
+	kill(shell, SIGUSR2);
 	close(sock[0]);
 
 	sigset_t mask;
