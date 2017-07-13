@@ -353,8 +353,8 @@ int main(int argc, char **argv)
 			close(sock[1]);
 			ClosePipe(com);
 			ClosePipe(com1);
-			close(0);close(1);close(2);
 			CreateDetachedThread(DbusApiInit, &sock);
+			close(0);close(1);close(2);
 			waitpid(pid, NULL, 0);
 			quick_exit(0);
 		}
@@ -422,6 +422,7 @@ daemon:
 	int sfd = signalfd (-1, &mask, SFD_CLOEXEC);
 	pid = getpid();
 	write(com[1], &pid, sizeof(pid));
+	close(com[1]);
 init:
 	waitpid(-1, NULL, WNOHANG);
 
