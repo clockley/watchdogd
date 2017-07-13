@@ -61,9 +61,7 @@ error:
 	printf("%s\n", "Unable to open watchdog device");
 		
 
-	if (fd >= 0) {
-		close(fd);
-	}
+	close(fd);
 
 	return 0;
 }
