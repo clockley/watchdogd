@@ -1,6 +1,8 @@
 #ifndef WATCHDOGD_H
 #define WATCHDOGD_H
-
+#ifdef __COVERITY__
+#define __INCLUDE_LEVEL__ 22 //XXX: This is nessary for cov-build to work
+#endif
 #define _XOPEN_SOURCE 700
 #define _FILE_OFFSET_BITS 64
 #define PREFER_PORTABLE_SNPRINTF
@@ -120,7 +122,7 @@ struct cfgoptions {
 	int testBinTimeout = 60;
 	int repairBinTimeout = 60;
 	int sigtermDelay = 0;
-	int priority;
+	int priority = 0;
 	int watchdogTimeout = -1;
 	int testExeReturnValue = 0;
 	long loopExit = -1;
