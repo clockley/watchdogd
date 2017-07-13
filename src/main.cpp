@@ -402,6 +402,7 @@ daemon:
 	close(com1[1]);
 	close(com[0]);
 	read(com1[0], &shell, sizeof(pid_t));
+	close(com1[0]);
 	close(sock[0]);
 
 	sigset_t mask;
