@@ -302,7 +302,7 @@ static bool IsRootStorageDaemon(pid_t pid)
 
 	int fd = open(path, O_RDONLY | O_CLOEXEC);
 
-	char buf[32] = { "\0" };
+	char buf[64] = { "\0" };
 
 	if (fd < 0) {
 		goto error;
