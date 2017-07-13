@@ -215,7 +215,7 @@ static int ServiceMain(int argc, char **argv, int fd, bool restarted)
 		FatalError(&options);
 	}
 
-	pthread_t dbusThread;
+	pthread_t dbusThread = {0};
 
 	if (!(options.options & NOACTION)) {
 		errno = 0;
