@@ -168,8 +168,6 @@ int SpawnAttr(spawnattr_t * spawnattr, const char *file, const char *args, ...)
 				_Exit(EXIT_FAILURE);
 			} else {
 				syscall(SYS_tgkill, timer, timer, SIGKILL);
-				Logmsg(LOG_DEBUG, "binary %s returned %i",
-				       file, ret);
 				wait(NULL);
 				_Exit(WEXITSTATUS(ret));
 			}
