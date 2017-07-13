@@ -341,33 +341,33 @@ int main(int argc, char **argv)
 	pipe2(com, O_CLOEXEC);
 	int com1[2] = {0};
 	pipe2(com1, O_CLOEXEC);
-
 	int sock[2] = {0};
-	socketpair(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0, sock);
 
 	pid_t pid = fork();
 
 	if (pid == 0) {
 		setsid();
+		socketpair(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0, sock);
 		pid = fork();
 		if (pid != 0) {
-			ClosePipe(sock);
+			close(sock[1]);
 			ClosePipe(com);
 			ClosePipe(com1);
 			close(0);close(1);close(2);
+			CreateDetachedThread(DbusApiInit, &sock);
 			waitpid(pid, NULL, 0);
 			quick_exit(0);
 		}
 		goto daemon;
 	} else {
-		close(sock[1]);
+		ClosePipe(sock);
 		sigset_t mask;
 		sigemptyset(&mask);
 		sigaddset(&mask, SIGTERM);
 		sigaddset(&mask, SIGINT);
 		sigaddset(&mask, SIGHUP);
 		sigaddset(&mask, SIGUSR1);
-		sigaddset(&mask, SIGUSR2);
+
 		pthread_sigmask(SIG_BLOCK, &mask, NULL);
 		pid_t x = getpid();
 		close(com1[0]);
@@ -392,9 +392,6 @@ int main(int argc, char **argv)
 			case SIGUSR1:
 				quick_exit(0);
 				break;
-			case SIGUSR2:
-				CreateDetachedThread(DbusApiInit, &sock);
-				break;
 			}
 		}
 
@@ -405,8 +402,6 @@ daemon:
 	close(com1[1]);
 	close(com[0]);
 	read(com1[0], &shell, sizeof(pid_t));
-
-	kill(shell, SIGUSR2);
 	close(sock[0]);
 
 	sigset_t mask;
