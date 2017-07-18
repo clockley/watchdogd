@@ -72,7 +72,7 @@ int ParseCommandLine(int *argc, char **argv, struct cfgoptions *cfg, bool earlyP
 	};
 
 	char const * const loglevels[] = { "\x1b[1mnone", "err", "info", "notice", "debug\x1B[0m"};
-	struct cfgoptions x = {0};
+	struct cfgoptions x;
 	const char *opstr;
 	if (earlyParse) {
 		opstr = "hiV";
