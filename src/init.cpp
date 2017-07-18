@@ -49,11 +49,14 @@ int InitializePosixMemlock(void)
 
 static void PrintHelpIdentify(void);
 
-int ParseCommandLine(int *argc, char **argv, struct cfgoptions *cfg)
+int ParseCommandLine(int *argc, char **argv, struct cfgoptions *cfg, bool earlyParse)
 {
 	int opt = 0;
 
-	const struct option longOptions[] = {
+	struct option longOptions[] = {
+		{"help", no_argument, 0, 'h'},
+		{"identify", no_argument, 0, 'i'},
+		{"version", no_argument, 0, 'V'},
 		{"no-action", no_argument, 0, 'q'},
 		{"foreground", no_argument, 0, 'F'},
 		{"debug", no_argument, 0, 'd'},
@@ -61,22 +64,30 @@ int ParseCommandLine(int *argc, char **argv, struct cfgoptions *cfg)
 		{"sync", no_argument, 0, 's'},
 		{"softboot", no_argument, 0, 'b'},
 		{"daemonize", no_argument, 0, 'D'},
-		{"help", no_argument, 0, 'h'},
 		{"verbose", no_argument, 0, 'v'},
-		{"version", no_argument, 0, 'V'},
 		{"config-file", required_argument, 0, 'c'},
 		{"loop-exit", required_argument, 0, 'X'},
 		{"loglevel", required_argument, 0, 'l'},
-		{"identify", no_argument, 0, 'i'},
 		{0, 0, 0, 0}
 	};
 
 	char const * const loglevels[] = { "\x1b[1mnone", "err", "info", "notice", "debug\x1B[0m"};
+	struct cfgoptions x = {0};
+	const char *opstr;
+	if (earlyParse) {
+		opstr = "hiV";
+		longOptions[3] = {0,0,0,0};
+		if (!cfg) {
+			cfg = &x;
+		}
+	} else {
+		opstr = "iDhqsfFbVvndc:X:l:";
+		optind = 0;
+	}
 
 	int tmp = 0;
 	while ((opt =
-		getopt_long(*argc, argv, "iDhqsfFbVvndc:X:l:", longOptions,
-			    &tmp)) != -1) {
+		getopt_long(*argc, argv, opstr, longOptions, &tmp)) != -1) {
 
 		switch (opt) {
 		case 'n':
@@ -123,6 +134,8 @@ int ParseCommandLine(int *argc, char **argv, struct cfgoptions *cfg)
 			break;
 		case 'V':
 			PrintVersionString();
+			if (earlyParse)
+				quick_exit(1);
 			return 1;
 		case 'h':
 			if (cfg->options & IDENTIFY) {
@@ -130,6 +143,8 @@ int ParseCommandLine(int *argc, char **argv, struct cfgoptions *cfg)
 			} else {
 				Usage();
 			}
+			if (earlyParse)
+				quick_exit(1);
 			return 1;
 		case '?':
 			switch (optopt) {

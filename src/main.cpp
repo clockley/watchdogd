@@ -337,6 +337,9 @@ static void ClosePipe(int *fd)
 
 int main(int argc, char **argv)
 {
+	opterr = 0;
+	ParseCommandLine(&argc, argv, NULL, true);
+	opterr = 1;
 	int com[2] = {0};
 	pipe2(com, O_CLOEXEC);
 	int com1[2] = {0};

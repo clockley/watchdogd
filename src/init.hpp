@@ -21,7 +21,7 @@ int CheckPriority(int priority);
 int InitializePosixMemlock(void);
 int Usage(void);
 int PrintVersionString(void);
-int ParseCommandLine(int *argc, char **argv, struct cfgoptions *s);
+int ParseCommandLine(int *argc, char **argv, struct cfgoptions *s, bool earlyParse = false);
 bool SetDefaultConfig(struct cfgoptions *const options);
 int GetDefaultPriority(void);
 int PingInit(struct cfgoptions *const cfg);
