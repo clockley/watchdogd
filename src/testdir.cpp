@@ -29,6 +29,7 @@
 #include <sys/shm.h>
 
 static std::atomic_int sem = {0};
+unsigned long numberOfRepairScripts = 0;
 
 static void DeleteDuplicates(ProcessList * p)
 {
@@ -40,10 +41,12 @@ static void DeleteDuplicates(ProcessList * p)
 	list_for_each_entry(c, next, &p->head, entry) {
 		repaircmd_t *b = NULL;
 		repaircmd_t *next2 = NULL;
+		++numberOfRepairScripts;
 		if (c->legacy) {
 			list_for_each_entry(b, next2, &p->head, entry) {
 				if (!b->legacy) {
 					if (strcmp(c->path, b->path) == 0) {
+						--numberOfRepairScripts;
 						list_del(&c->entry);
 						free((void *)c->path);
 						free((void *)c);

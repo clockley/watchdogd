@@ -19,6 +19,7 @@
 
 const size_t MAX_WORKERS = 16;
 static std::atomic_bool canceled = {false};
+extern unsigned long numberOfRepairScripts;
 
 struct threadpool
 {
@@ -56,7 +57,9 @@ bool ThreadPoolNew(void)
 	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
 	pthread_attr_setstacksize(&attr, PTHREAD_STACK_MIN*2);
 	pthread_t thread = {0};
-	for (size_t i = 0; i < MAX_WORKERS; i++) {
+	if (numberOfRepairScripts > MAX_WORKERS)
+		numberOfRepairScripts = MAX_WORKERS;
+	for (size_t i = 0; i < numberOfRepairScripts; i++) {
 		sem_init(&threads[i].sem, 0, 0);
 		pthread_create(&thread, &attr, Worker, &threads[i]);
 	}
@@ -76,7 +79,7 @@ bool ThreadPoolAddTask(void *(*entry)(void*), void * arg, bool retry)
 	}
 
 	do {
-		for (size_t i = 0; i < MAX_WORKERS; i++) {
+		for (size_t i = 0; i < numberOfRepairScripts; i++) {
 			if (__sync_val_compare_and_swap(&threads[i].active, 0, 1) == 0) {
 				threads[i].func = entry;
 				threads[i].arg = arg;
