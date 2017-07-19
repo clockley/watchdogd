@@ -172,7 +172,7 @@ int GetCpuCount(void)
 
 bool LoadKernelModule(void)
 {
-	pid_t pid = fork();
+	pid_t pid = vfork();
 	if (pid == 0) {
 		if (execl("/sbin/modprobe", "modprobe", "softdog", NULL) == -1) {
 			_Exit(1);
