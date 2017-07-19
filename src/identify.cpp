@@ -50,6 +50,8 @@ int Identify(long timeout, const char * identity, const char * deviceName, bool 
 	return 0;
 
 direct:
+	if (!identity)
+		goto error;
 	if (verbose) {
 		printf("watchdog was set to %li seconds\n", timeout);
 	}
