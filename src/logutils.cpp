@@ -261,10 +261,11 @@ void SetLogTarget(sig_atomic_t target, ...)
 	if (target == SYSTEM_LOG) {
 
 		if (logTarget != SYSTEM_LOG) {
+#if 0
 			if (LinuxRunningSystemd() != 1) {
 				StartLogger();
 			}
-
+#endif
 		}
 
 		CloseOldTarget(logTarget);
@@ -550,13 +551,14 @@ void Logmsg(int priority, const char *const fmt, ...)
 	}
 
 	if (logTarget == SYSTEM_LOG) {
-		if (LinuxRunningSystemd() == 1) {
+		if (true) {
 			va_start(args, fmt);
 			SystemdSyslog(priority, fmt, args); //async-signal safe
 			va_end(args);
 			return;
 		}
 
+#if 0
 		va_start(args, fmt);
 		portable_vsnprintf(buf, sizeof(buf) - 1, fmt, args);
 
@@ -565,6 +567,7 @@ void Logmsg(int priority, const char *const fmt, ...)
 		assert(buf[sizeof(buf) - 1] == '\0');
 
 		Syslog(priority, buf); //Made syslog() signal safe :)
+#endif
 	}
 }
 

@@ -17,7 +17,6 @@
 #define LINUX_H
 #include <linux/types.h>
 #include <stdbool.h>
-#include <libmount.h>
 #include <sys/ioctl.h>
 #include <sys/prctl.h>
 #include <linux/watchdog.h>
@@ -37,15 +36,10 @@
 #define SD_JOURNAL_SUPPRESS_LOCATION
 #include <systemd/sd-journal.h>
 
-int DisablePageFiles(void);
-int RemountRootReadOnly(void);
-int SaveRandomSeed(const char *);
-const char *GetDefaultRandomSeedPathName(void);
-int StopNetwork(void);
+
 int _Shutdown(int, bool);
 int NativeShutdown(int, int);
 int LinuxRunningSystemd(void);
-bool DontKillProcess(pid_t);
 bool PlatformInit(void);
 int GetConsoleColumns(void);
 int SystemdWatchdogEnabled(const int, long long int *const);
