@@ -418,25 +418,8 @@ void Logmsg(int priority, const char *const fmt, ...)
 	}
 
 	va_list args;
-	va_start(args, fmt);
 
-	int len =
-	    portable_vsnprintf(NULL, 0, fmt,
-		      args) + strlen((applesquePriority ==
-				      0) ? "<0>": " #System #Attention") + 10;
-	va_end(args);
-
-	if (len <= 0) {
-		len = 2048;
-	}
-
-	if (len > 2048) {
-		len = 2048;
-	}
-
-	char buf[len];
-
-	memset(buf, 0, len);
+	static __thread char buf[2048];
 
 	if ((logTarget == STANDARD_ERROR || logTarget == FILE_APPEND
 	     || logTarget == FILE_NEW) && applesquePriority == 0) {
