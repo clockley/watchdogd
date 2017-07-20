@@ -340,11 +340,11 @@ int main(int argc, char **argv)
 	opterr = 0;
 	ParseCommandLine(&argc, argv, NULL, true);
 	opterr = 1;
-	int com[2] = {0};
+	int com[2] = {-1};
 	pipe2(com, O_CLOEXEC);
-	int com1[2] = {0};
+	int com1[2] = {-1};
 	pipe2(com1, O_CLOEXEC);
-	int sock[2] = {0};
+	int sock[2] = {-1};
 
 	pid_t pid = fork();
 
@@ -363,7 +363,6 @@ int main(int argc, char **argv)
 		}
 		goto daemon;
 	} else {
-		ClosePipe(sock);
 		sigset_t mask;
 		sigemptyset(&mask);
 		sigaddset(&mask, SIGTERM);
