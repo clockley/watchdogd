@@ -109,7 +109,7 @@ struct cfgoptions {
 	const config_setting_t *pidFiles = NULL;
 	const char *devicepath = NULL;
 	const char *pidfileName = NULL;
-	const char *testexepath = "/etc/watchdog.d";
+	const char *testexepath = "/usr/libexec/watchdog/scripts";
 	const char *exepathname = NULL;
 	const char *testexepathname = NULL;
 	const char *confile = "/etc/watchdogd.conf";
