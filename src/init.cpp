@@ -180,7 +180,11 @@ int ParseCommandLine(int *argc, char **argv, struct cfgoptions *cfg, bool earlyP
 
 	if (optind < *argc) {
 		struct stat buf = {0};
-		stat(argv[optind], &buf);
+		if (stat(argv[optind], &buf) < 0) {
+			fprintf(stderr, "watchdogd: %s\n", strerror(errno));
+			return -1;
+		}
+
 		if (!S_ISCHR(buf.st_mode)) {
 			fprintf(stderr, "watchdogd: %s is an invalid device file\n", argv[optind]);
 			return -1;
