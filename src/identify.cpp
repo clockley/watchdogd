@@ -61,9 +61,6 @@ direct:
 
 error:
 	printf("%s\n", "Unable to open watchdog device");
-		
-
-	close(fd);
 
 	return 0;
 }
