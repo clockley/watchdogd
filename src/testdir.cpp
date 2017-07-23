@@ -47,10 +47,10 @@ static void DeleteDuplicates(ProcessList * p)
 				if (!b->legacy) {
 					if (strcmp(c->path, b->path) == 0) {
 						--numberOfRepairScripts;
+						Logmsg(LOG_INFO, "Using configuration info for %s script", b->path);
 						list_del(&c->entry);
 						free((void *)c->path);
 						free((void *)c);
-						Logmsg(LOG_INFO, "Using configuration info for %s script", b->path);
 					}
 				}
 			}
