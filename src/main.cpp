@@ -30,7 +30,6 @@
 #include <systemd/sd-event.h>
 const bool DISARM_WATCHDOG_BEFORE_REBOOT = true;
 static volatile sig_atomic_t quit = 0;
-int ipcNameSpace = -1;
 volatile sig_atomic_t stop = 0;
 volatile sig_atomic_t stopPing = 0;
 ProcessList processes;
@@ -504,7 +503,6 @@ init:
 			sd_bus_flush_close_unref(bus);
 			kill(shell, SIGUSR1);
 			si.ssi_signo = 0;
-			close(ipcNameSpace);
 			_Exit(si.ssi_status);
 			break;
 		}
