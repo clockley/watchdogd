@@ -362,7 +362,7 @@ int ReadConfigurationFile(struct cfgoptions *const cfg)
 
 	if (config_lookup_string(&cfg->cfg, "test-directory", &cfg->testexepath)
 	    == CONFIG_FALSE) {
-		cfg->testexepath = "/etc/watchdog.d";
+		cfg->testexepath = "/usr/libexec/watchdog/scripts";
 	}
 
 	if (config_lookup_string(&cfg->cfg, "log-target", &cfg->logTarget) == CONFIG_FALSE) {
