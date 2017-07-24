@@ -6,7 +6,6 @@
 int EndDaemon(struct cfgoptions *s, int keepalive);
 int IsDaemon(struct cfgoptions *const s);
 
-int CloseWraper(const int *pfd);
 int Shutdown(int errorcode, struct cfgoptions *arg);
 
 int UnmountAll(void);

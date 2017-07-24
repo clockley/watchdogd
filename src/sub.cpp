@@ -22,15 +22,6 @@
 #include "testdir.hpp"
 #include "pidfile.hpp"
 
-int CloseWraper(const int *pfd)
-{
-	if (pfd == NULL) {
-		return -1;
-	}
-
-	return close(*pfd);
-}
-
 int IsDaemon(struct cfgoptions *const s)
 {
 	if (s->options & DAEMONIZE)
