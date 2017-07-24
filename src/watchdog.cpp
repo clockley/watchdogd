@@ -74,10 +74,10 @@ bool Watchdog::PrintWdtInfo()
 		Logmsg(LOG_ERR, "%s", MyStrerror(errno));
 	} else {
 		if (strcasecmp((const char*)watchDogInfo.identity, "software watchdog") != 0) {
-			Logmsg(LOG_DEBUG, "Hardware watchdog '%s', version %lu",
+			Logmsg(LOG_DEBUG, "Hardware watchdog '%s', version %u",
 			       watchDogInfo.identity, watchDogInfo.firmware_version);
 		} else {
-			Logmsg(LOG_DEBUG, "%s, version %lu",
+			Logmsg(LOG_DEBUG, "%s, version %u",
 			       watchDogInfo.identity, watchDogInfo.firmware_version);
 		}
 		return true;

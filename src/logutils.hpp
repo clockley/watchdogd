@@ -16,7 +16,7 @@
 #define	LOG_UPTO(pri)	((1 << ((pri)+1)) - 1)
 #endif
 
-void Logmsg(int priority, const char *const fmt, ...);
+void __attribute__ ((format (printf, 2, 3))) Logmsg(int priority, const char *const fmt, ...);
 void SetLogTarget(sig_atomic_t target, ...);
 void SetAutoUpperCase(bool);
 void SetAutoPeriod(bool);

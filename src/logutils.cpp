@@ -409,7 +409,7 @@ bool LogUpTo(const char *const str, bool cmdln)
 	return LogUpToInt(logPri, cmdln);
 }
 
-void Logmsg(int priority, const char *const fmt, ...)
+void __attribute__ ((format (printf, 2, 3))) Logmsg(int priority, const char *const fmt, ...)
 {
 	assert(fmt != NULL);
 

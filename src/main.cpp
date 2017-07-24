@@ -37,7 +37,7 @@ ProcessList processes;
 static void PrintConfiguration(struct cfgoptions *const cfg)
 {
 	Logmsg(LOG_INFO,
-	       "int=%is realtime=%s sync=%s softboot=%s force=%s mla=%.2f mem=%li pid=%li",
+	       "int=%lis realtime=%s sync=%s softboot=%s force=%s mla=%.2f mem=%li pid=%i",
 	       cfg->sleeptime, cfg->options & REALTIME ? "yes" : "no",
 	       cfg->options & SYNC ? "yes" : "no",
 	       cfg->options & SOFTBOOT ? "yes" : "no",
@@ -248,7 +248,7 @@ static int ServiceMain(int argc, char **argv, int fd, bool restarted)
 
 		if (options.sleeptime == -1) {
 			options.sleeptime = watchdog.GetOptimalPingInterval();
-			Logmsg(LOG_INFO, "ping interval autodetect: %i", options.sleeptime);
+			Logmsg(LOG_INFO, "ping interval autodetect: %li", options.sleeptime);
 		}
 
 		if (options.watchdogTimeout != -1 && watchdog.CheckWatchdogTimeout(options.sleeptime) == true) {

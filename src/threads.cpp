@@ -546,7 +546,7 @@ static void *TestPidfileThread(void *arg)
 
 			if (kill(pid, 0) == -1) {
 				Logmsg(LOG_ERR,
-				       "unable to send null signal to pid %li: %s: %s",
+				       "unable to send null signal to pid %i: %s: %s",
 				       pid, pidFilePathName, MyStrerror(errno));
 				if (errno == ESRCH) {
 					s->error |= PIDFILERROR;

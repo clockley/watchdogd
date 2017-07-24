@@ -161,7 +161,7 @@ int SpawnAttr(spawnattr_t * spawnattr, const char *file, const char *args, ...)
 			int ret = 0;
 			pid_t first = wait(&ret);
 			if (first == timer) {
-				Logmsg(LOG_ERR, "binary %s exceeded time limit %ld",
+				Logmsg(LOG_ERR, "binary %s exceeded time limit %i",
 				       file, spawnattr->timeout);
 				kill(worker, SIGKILL);
 				wait(NULL);
