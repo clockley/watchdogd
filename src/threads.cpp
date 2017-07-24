@@ -883,7 +883,6 @@ int StartPingThread(void *arg)
 
 int StartServiceManagerKeepAliveNotification(void *arg)
 {
-#if defined(__linux__)
 	long long int usec = 0;
 
 	int ret = SystemdWatchdogEnabled(0, &usec);
@@ -917,8 +916,6 @@ int StartServiceManagerKeepAliveNotification(void *arg)
 		return -1;
 	}
 
-	return 0;
-#endif
 	return 0;
 }
 
