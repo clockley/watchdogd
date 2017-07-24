@@ -211,7 +211,7 @@ static void *Ping(void *arg)
 								  calloc(1,
 									 sizeof
 									 (int
-									  *)));
+									  )));
 					void *cxt =
 					    ping_iterator_get_context(iter);
 					if (cxt == NULL) {
