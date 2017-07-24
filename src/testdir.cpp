@@ -33,7 +33,11 @@ unsigned long numberOfRepairScripts = 0;
 
 static void DeleteDuplicates(ProcessList * p)
 {
-	assert(p != NULL);
+	if (!p)
+		return;
+
+	if (list_is_empty(&p->head))
+		return;
 
 	repaircmd_t *c = NULL;
 	repaircmd_t *next = NULL;
@@ -405,6 +409,10 @@ bool ExecuteRepairScriptsPreFork(ProcessList * p, struct cfgoptions *s)
 
 int ExecuteRepairScripts(void)
 {
+	if (rst == NULL) {
+		pthread_exit(NULL);
+	}
+
 	FutexWake(&rst->sem);
 
 	if (rst->ret != 0) {
