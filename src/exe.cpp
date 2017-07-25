@@ -24,11 +24,7 @@
 int Spawn(int timeout, struct cfgoptions *const config, const char *file,
 	  const char *args, ...)
 {
-	static spawnattr_t attr = {.workingDirectory = NULL,.repairFilePathname = NULL,
-		.execStart = NULL, .user = 0, .group = NULL,
-		.timeout = timeout,.nice = 0, .umask = 0, .noNewPrivileges = false,
-		.hasUmask = false
-	};
+	static spawnattr_t attr;
 
 	if (file == NULL) {
 		return -1;
