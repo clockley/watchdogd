@@ -363,12 +363,6 @@ static int __ExecuteRepairScripts(void *a)
 	return 0;
 }
 
-struct repairscriptTranctions
-{
-	std::atomic_int sem;
-	std::atomic_int ret;
-};
-
 struct repairscriptTranctions *rst = NULL;
 
 bool ExecuteRepairScriptsPreFork(ProcessList * p, struct cfgoptions *s)

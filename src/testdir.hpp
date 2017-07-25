@@ -1,5 +1,12 @@
 #ifndef TESTDIR_H
 #define TESTDIR_H
+
+struct repairscriptTranctions
+{
+	std::atomic_int sem;
+	std::atomic_int ret;
+};
+
 struct executeScriptsStruct
 {
 	ProcessList *list;

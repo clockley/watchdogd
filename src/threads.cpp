@@ -789,6 +789,9 @@ int SetupTestFork(void *arg)
 
 int SetupExeDir(void *arg)
 {
+	extern struct repairscriptTranctions *rst;
+	if (rst == NULL)
+		return 0;
 	if (CreateDetachedThread(TestDirThread, arg) < 0)
 		return -1;
 
