@@ -10,5 +10,6 @@ ExecStart=@prefix@/sbin/watchdogd -F
 NotifyAccess=all
 OOMScoreAdjust=-1000
 ExecReload=/bin/kill -1 $MAINPID
+WatchdogSec=60
 [Install]
 WantedBy=multi-user.target
