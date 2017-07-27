@@ -101,45 +101,14 @@ int GetConsoleColumns(void)
 	return w.ws_col;
 }
 
-int SystemdWatchdogEnabled(const int unset, long long int *const interval)
+int SystemdWatchdogEnabled(pid_t *pid, long long int *const interval)
 {
-	const char *str = getenv("WATCHDOG_USEC");
-	if (str == NULL) {
+	char *spid = getenv("WATCHDOG_PID");
+	char *sinv = getenv("WATCHDOG_USEC");
+	if (spid == NULL || sinv == NULL)
 		return -1;
-	}
-
-	const char *watchdogPid = getenv("WATCHDOG_PID");
-	if (watchdogPid != NULL) {
-		if (getpid() != (pid_t) strtoll(watchdogPid, NULL, 10)) {
-			return -1;
-		}
-	} else {
-		Logmsg(LOG_WARNING,
-		       "Your version of systemd is out of date. Upgrade for better integration with watchdogd");
-	}
-
-	if (interval != NULL) {
-		if (strtoll(str, NULL, 10) < 0) {
-			return -1;
-		}
-
-		if (strtoll(str, NULL, 10) == 0) {
-			return 0;
-		}
-
-		*interval = strtoll(str, NULL, 10);
-	}
-
-	if (unset != 0) {
-		if (unsetenv("WATCHDOG_PID") < 0) {
-			Logmsg(LOG_WARNING,
-			       "Unable to delete WATCHDOG_PID environment variable:%s",
-			       MyStrerror(errno));
-		} else if (unsetenv("WATCHDOG_USEC") < 0) {
-			return -1;
-		}
-	}
-
+	*interval = atoll(sinv);
+	*pid = atoll(spid);
 	return 1;
 }
 

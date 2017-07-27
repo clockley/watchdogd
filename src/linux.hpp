@@ -42,7 +42,7 @@ int NativeShutdown(int, int);
 int LinuxRunningSystemd(void);
 bool PlatformInit(void);
 int GetConsoleColumns(void);
-int SystemdWatchdogEnabled(const int, long long int *const);
+int SystemdWatchdogEnabled(pid_t *, long long int *const);
 bool OnParentDeathSend(uintptr_t);
 int NoNewProvileges(void);
 int GetCpuCount(void);

@@ -96,28 +96,22 @@ void *DbusHelper(void * arg)
 	pthread_exit(NULL);
 }
 
+struct SystemdWatchdog
+{
+	struct timespec tp;
+	pid_t pid;
+};
+
 static void *ServiceManagerKeepAliveNotification(void * arg)
 {
-	assert(arg != NULL);
+	struct SystemdWatchdog *tArg = (struct SystemdWatchdog*)arg;
 
-	struct timespec *tp = (struct timespec*)arg;
-
-	struct timespec ts = {0};
-	
-	ts.tv_sec = tp->tv_sec;
-	ts.tv_nsec = tp->tv_nsec;
-
-	assert(ts.tv_sec == tp->tv_sec);
-	assert(ts.tv_nsec == tp->tv_nsec);
-
-	free(arg);
-
-	for (;;) {
-		int ret = sd_notify(0, "WATCHDOG=1");
+	while (true) {
+		int ret = sd_pid_notify(tArg->pid, 0, "WATCHDOG=1");
 		if (ret < 0) {
 			Logmsg(LOG_ERR, "%s", MyStrerror(-ret));
 		}
-		nanosleep(&ts, NULL);
+		nanosleep(&tArg->tp, NULL);
 	}
 
 	return NULL;
@@ -887,35 +881,26 @@ int StartPingThread(void *arg)
 int StartServiceManagerKeepAliveNotification(void *arg)
 {
 	long long int usec = 0;
+	pid_t pid = 0;
+	int ret = SystemdWatchdogEnabled(&pid, &usec);
 
-	int ret = SystemdWatchdogEnabled(0, &usec);
-
-	if (ret == 0) {
+	if (ret == -1) {
 		return 0;
 	}
 
-	if (ret < 0) {
-		return 0;
-	}
-
-	usec /= 2;
 	usec *= 1000;
+	usec /= 2;
 
-	struct timespec *tp = (struct timespec*)calloc(1, sizeof(struct timespec));
-
-	if (tp == NULL) {
-		Logmsg(LOG_ERR, "Unable to allocate memory: %s", MyStrerror(errno));
-		return -1;
-	}
-
+	static struct SystemdWatchdog tArg;
+	tArg.pid = pid;
 	while (usec > 999999999) {
-		tp->tv_sec += 1;
+		tArg.tp.tv_sec += 1;
 		usec -= 999999999;
 	}
 
-	tp->tv_nsec = (long)usec;
+	tArg.tp.tv_nsec = (long)usec;
 
-	if (CreateDetachedThread(ServiceManagerKeepAliveNotification, tp) < 0) {
+	if (CreateDetachedThread(ServiceManagerKeepAliveNotification, &tArg) < 0) {
 		return -1;
 	}
 

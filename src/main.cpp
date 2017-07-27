@@ -465,6 +465,8 @@ init:
 
 	sd_notifyf(0, "READY=1\n" "MAINPID=%lu", (unsigned long)getpid());
 
+
+
 	while (true) {
 		struct signalfd_siginfo si = {0};
 		read (sfd, &si, sizeof(si));
