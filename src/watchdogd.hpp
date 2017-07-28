@@ -90,8 +90,6 @@
 
 //TODO: Split this struct into an options struct(values read in from config file) and a runtime struct.
 struct cfgoptions {
-	cfgoptions() {
-	};
 	config_t cfg = {0};
 	double maxLoadFifteen = 0.0;
 	double maxLoadOne = 0.0;
@@ -112,7 +110,6 @@ struct cfgoptions {
 	const char *logUpto = NULL;
 	time_t sleeptime = -1;
 	unsigned long minfreepages = 0;
-	const char *randomSeedPath = NULL;
 	int testBinTimeout = 60;
 	int repairBinTimeout = 60;
 	int sigtermDelay = 0;
