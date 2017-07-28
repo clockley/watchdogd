@@ -384,7 +384,6 @@ bool ExecuteRepairScriptsPreFork(ProcessList * p, struct cfgoptions *s)
 		return false;
 	} else if (pid == 0) {
 		unsetenv("NOTIFY_SOCKET");
-		unsetenv("LD_PRELOAD");
 
 		ThreadPoolNew();
 
