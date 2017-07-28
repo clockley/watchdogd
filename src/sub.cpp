@@ -20,7 +20,7 @@
 #include "watchdogd.hpp"
 #include "sub.hpp"
 #include "testdir.hpp"
-#include "pidfile.hpp"
+#include "logutils.hpp"
 
 int IsDaemon(struct cfgoptions *const s)
 {

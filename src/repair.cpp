@@ -16,6 +16,7 @@
 #include "sub.hpp"
 #include "repair.hpp"
 #include "configfile.hpp"
+#include "logutils.hpp"
 
 static bool ParseConfigfile(char *name, char *value, spawnattr_t * obj)
 {

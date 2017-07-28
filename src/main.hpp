@@ -17,5 +17,4 @@
 #if !defined(MAIN_H)
 #define MAIN_H
 #include "testdir.hpp"
-void RestoreIPCNamespace(void);
 #endif

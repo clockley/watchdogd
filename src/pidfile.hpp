@@ -1,6 +1,5 @@
 #ifndef PIDFILE_H
 #define PIDFILE_H
-#include <sys/types.h>
 #include <unistd.h>
 class Pidfile {
 	const char * name = NULL;

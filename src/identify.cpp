@@ -15,8 +15,6 @@
  */
 
 #include "watchdogd.hpp"
-#include "logutils.hpp"
-#include "sub.hpp"
 
 int Identify(long timeout, const char * identity, const char * deviceName, bool verbose)
 {

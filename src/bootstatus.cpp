@@ -16,7 +16,6 @@
  
 #include "watchdogd.hpp"
 #include "bootstatus.hpp"
-#include "sub.hpp"
 
 int WriteBootStatus(unsigned long status, const char * const pathName, long long sleeptime, int timeout)
 {

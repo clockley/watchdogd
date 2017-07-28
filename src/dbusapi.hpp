@@ -26,10 +26,9 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <unistd.h>
-#include <pthread.h>
 #include <systemd/sd-bus.h>
 #include <systemd/sd-event.h>
-
+#include <time.h>
 void * DbusApiInit(void*);
 #ifdef DBUSAPI_PROTOTYPES
 static int DevicePath(sd_bus_message *, void *, sd_bus_error *);

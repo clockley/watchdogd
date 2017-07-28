@@ -15,11 +15,11 @@
  */
 
 #include "watchdogd.hpp"
-#include <sys/wait.h>
 #include "sub.hpp"
 #include "init.hpp"
 #include "pidfile.hpp"
 #include "daemon.hpp"
+#include "logutils.hpp"
 
 static void CloseFileDescriptors(long maxfd)
 {

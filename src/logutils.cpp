@@ -16,6 +16,7 @@
 #include "watchdogd.hpp"
 #include "sub.hpp"
 #include "logutils.hpp"
+#include "linux.hpp"
 
 #define KNRM  "\x1B[0m"
 #define KRED  "\x1B[31m"

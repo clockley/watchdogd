@@ -1,8 +1,6 @@
 #ifndef SUB_H
 #define SUB_H
 #include "watchdogd.hpp"
-#include "logutils.hpp"
-
 int EndDaemon(struct cfgoptions *s, int keepalive);
 int IsDaemon(struct cfgoptions *const s);
 

@@ -14,12 +14,13 @@
  * permissions and limitations under the License. 
  */
 
-#include "watchdogd.hpp"
 #include "linux.hpp"
+#include "errorlist.hpp"
+#include "watchdogd.hpp"
 #include "sub.hpp"
 #include "repair.hpp"
-#ifdef __linux__
-
+#include "logutils.hpp"
+#include <zlib.h>
 static int ConfigureKernelOutOfMemoryKiller(void)
 {
 	int fd = 0;
@@ -314,5 +315,3 @@ bool IsClientAdmin(int sock)
 	}
 	return false;
 }
-
-#endif

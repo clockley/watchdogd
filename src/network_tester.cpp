@@ -15,7 +15,7 @@
  */
 
 #include "watchdogd.hpp"
-#include "logutils.hpp"
+#include "linux.hpp"
 #include <linux/if_link.h>
 
 struct NetworkDevices {

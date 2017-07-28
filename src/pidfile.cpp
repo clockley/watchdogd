@@ -16,6 +16,7 @@
 
 #include "pidfile.hpp"
 #include "sub.hpp"
+#include "logutils.hpp"
 
 int Pidfile::Write(pid_t pid)
 {

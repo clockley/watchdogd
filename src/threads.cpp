@@ -16,10 +16,8 @@
 
 #define _DEFAULT_SOURCE
 #include "watchdogd.hpp"
-#include <pthread.h>
+#include "logutils.hpp"
 #include <netdb.h>
-#include <sys/wait.h>
-#include <sys/sysinfo.h>
 #include "sub.hpp"
 #include "errorlist.hpp"
 #include "threads.hpp"
@@ -27,6 +25,7 @@
 #include "exe.hpp"
 #include "network_tester.hpp"
 #include "dbusapi.hpp"
+#include "linux.hpp"
 
 extern volatile sig_atomic_t stop;
 static pthread_mutex_t managerlock = PTHREAD_MUTEX_INITIALIZER;

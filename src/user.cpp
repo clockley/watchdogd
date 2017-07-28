@@ -15,7 +15,7 @@
  */
 
 #include "watchdogd.hpp"
-#include "sub.hpp"
+#include "logutils.hpp"
 #include "user.hpp"
 
 static bool SetGroup(const char *restrict const group)

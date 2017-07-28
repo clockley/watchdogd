@@ -19,7 +19,8 @@
 #include "sub.hpp"
 #include "exe.hpp"
 #include "errorlist.hpp"
-#include "testdir.hpp"
+#include "logutils.hpp"
+#include "linux.hpp"
 
 int Shutdown(int errorcode, struct cfgoptions *arg)
 {

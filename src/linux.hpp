@@ -15,27 +15,16 @@
  */
 #if !defined(LINUX_H) && defined(__linux__)
 #define LINUX_H
-#include <linux/types.h>
+#define SD_JOURNAL_SUPPRESS_LOCATION
 #include <stdbool.h>
 #include <sys/ioctl.h>
 #include <sys/prctl.h>
 #include <linux/watchdog.h>
-#include <sys/reboot.h>
 #include <sys/sysinfo.h>
-#include <linux/reboot.h>
-#include <utmpx.h>
-#include <utmp.h>
-#include <sys/swap.h>
 #include <sys/syscall.h>
-#include <sys/utsname.h>
-#include <sys/types.h>
 #include <ifaddrs.h>
-#include <linux/if.h>
-#include "errorlist.hpp"
 #include <systemd/sd-daemon.h>
-#define SD_JOURNAL_SUPPRESS_LOCATION
 #include <systemd/sd-journal.h>
-
 
 int _Shutdown(int, bool);
 int NativeShutdown(int, int);

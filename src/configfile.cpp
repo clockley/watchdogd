@@ -21,6 +21,7 @@
 #include "configfile.hpp"
 #include "network_tester.hpp"
 #include "repair.hpp"
+#include "logutils.hpp"
 
 static const char *LibconfigWraperConfigSettingSourceFile(const config_setting_t *
 						   setting)

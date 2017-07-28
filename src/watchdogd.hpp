@@ -13,7 +13,6 @@
 #include <cerrno>
 #include <cinttypes>
 #include <climits>
-#include <clocale>
 #include <config.h>
 #include <csignal>
 #include <cstdarg>
@@ -34,20 +33,15 @@
 #include <sched.h>
 #include <syslog.h>
 #include <sys/mman.h>
-#include <sys/resource.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/time.h>
-#include <sys/types.h>
 #include <sys/un.h>
 #include <sys/wait.h>
 #include <thread>
 #include <unistd.h>
-#include <zlib.h>
 
 #include "snprintf.hpp"
-#include "watchdog.hpp"
-#include "linux.hpp"
 #include "watchdog.hpp"
 
 #ifndef NSIG

@@ -14,7 +14,6 @@
  * permissions and limitations under the License. 
  */
 
-#include "watchdogd.hpp"
 #ifndef REPAIR_H
 #define REPAIR_H
 bool LoadRepairScriptLink(spawnattr_t *, char * const);

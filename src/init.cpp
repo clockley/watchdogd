@@ -18,8 +18,9 @@
 #include "watchdogd.hpp"
 #include "init.hpp"
 #include "sub.hpp"
-#include "testdir.hpp"
 #include "multicall.hpp"
+#include "logutils.hpp"
+#include "linux.hpp"
 
 int SetSchedulerPolicy(int priority)
 {

@@ -25,6 +25,7 @@
 #include <sys/eventfd.h>
 #include "threadpool.hpp"
 #include "futex.hpp"
+#include "logutils.hpp"
 #include <sys/ipc.h>
 #include <sys/shm.h>
 
