@@ -68,7 +68,7 @@ else
 	DBUS_DATADIR="${path_dbusdata}/dbus-1/system-services"
 fi
 AC_SUBST(DBUS_DATADIR)
-AC_DEFINE(CODENAME, "Check Tofu Pile", "release codename or phrase")
+AC_DEFINE(CODENAME, "Trillion Sky Cache", "release codename or phrase")
 AC_CONFIG_FILES([Makefile
 		 wd_identify
 		 contrib/systemd/watchdogd.service])
