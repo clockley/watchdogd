@@ -434,7 +434,6 @@ init:
 
 	if (pid == 0) {
 		ClosePipe(com);
-		unshare(CLONE_NEWIPC);
 		close(sfd);
 		ResetSignalHandlers(64);
 		sigfillset(&mask);
