@@ -195,13 +195,18 @@ static bool ConvertLegacyWatchdogConfigfile(char * path, char **ptr)
 		return false;
 	}
 
+	unsigned long line = 1;
+
+	static const char* errorMessages[] = {"missing initializer for", "option initlized to null value"};
 	while (getline(&buf, &len, fp) != -1) {
+		++line;
 		if (*buf == '#')
 			continue;
 		char *const name = strtok(buf, "=");
 		char *const value = strtok(NULL, "=");
 
 		if (Validate(name, value) == false) {
+			fprintf(stderr, "watchdogd: syntax error on line %lu:\n      %s %s", line, value == NULL ? errorMessages[0] : errorMessages[1], value == NULL ? buf: "\n");
 			continue;
 		}
 
