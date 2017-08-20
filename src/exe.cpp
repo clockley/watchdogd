@@ -135,21 +135,12 @@ int SpawnAttr(spawnattr_t * spawnattr, const char *file, const char *args, ...)
 
 		char stack[2048] = {0};
 		if (spawnattr->timeout > 0) {
-
-			struct para {
-				int t;
-				pid_t m;
-			};
-			para a = {spawnattr->timeout, mpid};
 			pid_t timer = clone([](void *s)->int {
-				para *a = (para*)s;
-				setpgid(0, a->m);
-				int t = a->t;
-				struct timeval tv = {0};
-				tv.tv_sec = t;
+				struct timeval tv;
+				tv.tv_sec = *(int*)s;
 				syscall(SYS_select, 0, NULL, NULL, NULL, &tv);
 				_Exit(0);
-			}, stack+sizeof(stack), CLONE_VM|CLONE_FILES|CLONE_FS|SIGCHLD, &a);
+			}, stack+sizeof(stack), CLONE_VM|CLONE_FILES|CLONE_FS|SIGCHLD, &spawnattr->timeout);
 			if (timer < 0) {
 				abort();
 			}
