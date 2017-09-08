@@ -21,21 +21,6 @@
 #include "daemon.hpp"
 #include "logutils.hpp"
 
-static void CloseFileDescriptors(long maxfd)
-{
-	long fd = 0;
-
-	while (fd < maxfd || fd == maxfd) {
-		if (fd == STDIN_FILENO || fd == STDOUT_FILENO
-		    || fd == STDERR_FILENO) {
-			fd = fd + 1;
-		} else {
-			close((int)fd);
-			fd = fd + 1;
-		}
-	}
-}
-
 int Daemonize(struct cfgoptions *const s)
 {
 	assert(s != NULL);

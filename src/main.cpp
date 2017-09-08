@@ -383,7 +383,7 @@ int main(int argc, char **argv)
 
 		while (true) {
 			struct signalfd_siginfo si = {0};
-			ssize_t ret = read (sfd, &si, sizeof(si));
+			read (sfd, &si, sizeof(si));
 			switch (si.ssi_signo) {
 			case SIGTERM:
 			case SIGINT:
