@@ -452,7 +452,7 @@ init:
 				"StartTransientUnit");
 	sd_bus_message_append(m, "ss", name, "fail");
 	sd_bus_message_open_container(m, 'a', "(sv)");
-	sd_bus_message_append(m, "(sv)", "Description", "s", " ");
+	sd_bus_message_append(m, "(sv)", "Description", "s", "This scope contains the main process and any repair scripts.");
 	sd_bus_message_append(m, "(sv)", "KillSignal", "i", SIGTERM);
 	sd_bus_message_append(m, "(sv)", "PIDs", "au", 1, (uint32_t) pid);
 	sd_bus_message_close_container(m);
