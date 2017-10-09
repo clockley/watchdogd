@@ -58,6 +58,11 @@ direct:
 	return 0;
 
 error:
+	if (access(deviceName, R_OK|W_OK) != 0) {
+		printf("%s\n", "unable to open watchdog device, this operation requires permission from system Administrator");
+		return 0;
+	}
+
 	printf("%s\n", "Unable to open watchdog device");
 
 	return 0;
