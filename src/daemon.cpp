@@ -33,7 +33,7 @@ int Daemonize(struct cfgoptions *const s)
 		return 0;
 	}
 
-	kill(getppid(), SIGUSR1);
 	SetLogTarget(SYSTEM_LOG);
+	kill(getppid(), SIGUSR1);
 	return 0;
 }
