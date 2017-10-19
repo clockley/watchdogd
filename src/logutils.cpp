@@ -110,32 +110,6 @@ static ssize_t Syslog(int p, char *m)
 	return write(fd[WRITE], &buf, sizeof(struct message));
 }
 
-pid_t StartLogger(void)
-{
-	pipe(fd);
-	pid_t pid = fork();
-	
-	if (pid == 0) {
-		close(fd[WRITE]);
-		openlog("watchdogd", LOG_NDELAY | LOG_NOWAIT | LOG_CONS, LOG_DAEMON);
-		struct message buf = {0};
-		while (read(fd[READ], &buf, sizeof(struct message)) != 0) {
-			syslog(buf.pri, "%s", buf.message);
-		}
-		_Exit(0);
-	}
-
-	fcntl(fd[WRITE], F_SETFD, FD_CLOEXEC);
-
-	close(fd[READ]);
-	return pid;
-}
-
-void StopLogger(void)
-{
-	close(fd[WRITE]);
-}
-
 static bool IsTty(void)
 {
 	if (logTarget != STANDARD_ERROR) {
@@ -260,15 +234,6 @@ void SetLogTarget(sig_atomic_t target, ...)
 	}
 
 	if (target == SYSTEM_LOG) {
-
-		if (logTarget != SYSTEM_LOG) {
-#if 0
-			if (LinuxRunningSystemd() != 1) {
-				StartLogger();
-			}
-#endif
-		}
-
 		CloseOldTarget(logTarget);
 		logTarget = SYSTEM_LOG;
 	}
