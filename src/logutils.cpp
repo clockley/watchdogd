@@ -507,16 +507,6 @@ void __attribute__ ((format (printf, 2, 3))) Logmsg(int priority, const char *co
 			return;
 		}
 
-#if 0
-		va_start(args, fmt);
-		portable_vsnprintf(buf, sizeof(buf) - 1, fmt, args);
-
-		va_end(args);
-
-		assert(buf[sizeof(buf) - 1] == '\0');
-
-		Syslog(priority, buf); //Made syslog() signal safe :)
-#endif
 	}
 }
 
