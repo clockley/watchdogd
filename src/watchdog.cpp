@@ -63,7 +63,7 @@ bool Watchdog::CanMagicClose()
 		return false;
 	}
 
-	return WDIOF_MAGICCLOSE & watchDogInfo.options;
+	return !(WDIOF_MAGICCLOSE & watchDogInfo.options);
 }
 
 bool Watchdog::PrintWdtInfo()
