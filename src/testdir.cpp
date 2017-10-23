@@ -28,6 +28,7 @@
 #include "logutils.hpp"
 #include <sys/ipc.h>
 #include <sys/shm.h>
+#include "linux.hpp"
 
 static std::atomic_int sem = {0};
 unsigned long numberOfRepairScripts = 0;
@@ -300,8 +301,10 @@ static void * __ExecScriptWorkerThread(void *a)
 
 static void __WaitForWorkers(Container const *container)
 {
+	struct timeval tv = {0};
+	tv.tv_sec = 1;
 	while (container->workerThreadCount != 0) {
-		sleep(1);
+		syscall(SYS_select, 0, NULL, NULL, NULL, &tv);
 	}
 }
 
