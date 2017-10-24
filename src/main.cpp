@@ -100,7 +100,7 @@ static int SignalHandler(sd_event_source * s, const signalfd_siginfo * si, void 
 		sd_event_exit((sd_event *) cxt, 0);
 		break;
 	case SIGHUP:
-		//reload;
+		kill(getppid(), SIGHUP);
 		break;
 	}
 	return 1;
