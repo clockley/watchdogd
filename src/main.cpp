@@ -248,6 +248,8 @@ static int ServiceMain(int argc, char **argv, int fd, bool restarted)
 			return EXIT_FAILURE;
 		}
 
+		watchdog.PrintWdtInfo();
+
 		if (options.sleeptime == -1) {
 			options.sleeptime = watchdog.GetOptimalPingInterval();
 			Logmsg(LOG_INFO, "ping interval autodetect: %li", options.sleeptime);
