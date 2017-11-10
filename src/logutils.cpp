@@ -386,6 +386,7 @@ void __attribute__ ((format (printf, 2, 3))) Logmsg(int priority, const char *co
 	va_list args;
 
 	static __thread char buf[2048];
+	buf[0] = 0;
 
 	if ((logTarget == STANDARD_ERROR || logTarget == FILE_APPEND
 	     || logTarget == FILE_NEW) && applesquePriority == 0) {
