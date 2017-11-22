@@ -6,7 +6,7 @@
 
 #ifndef LOG_PRI
 #define LOG_PRI(p) ((p) & LOG_PRIMASK)
-#endif 
+#endif
 
 #ifndef LOG_MASK
 #define	LOG_MASK(pri)	(1 << (pri))
