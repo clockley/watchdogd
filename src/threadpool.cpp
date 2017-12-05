@@ -17,7 +17,7 @@
 #include "watchdogd.hpp"
 #include <semaphore.h>
 
-const size_t MAX_WORKERS = 16;
+constexpr size_t MAX_WORKERS = 16;
 static std::atomic_bool canceled = {false};
 extern unsigned long numberOfRepairScripts;
 
