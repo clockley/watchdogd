@@ -101,7 +101,6 @@ static bool SetDefaultLogTarget(struct cfgoptions *const cfg)
 		fclose(fp);
 
 		if (S_ISDIR(buf.st_mode)
-			|| S_ISCHR(buf.st_mode)
 			|| S_ISBLK(buf.st_mode)
 			|| S_ISFIFO(buf.st_mode)
 			|| S_ISSOCK(buf.st_mode)
@@ -133,7 +132,6 @@ static bool SetDefaultLogTarget(struct cfgoptions *const cfg)
 		fclose(fp);
 
 		if (S_ISDIR(buf.st_mode)
-			|| S_ISCHR(buf.st_mode)
 			|| S_ISBLK(buf.st_mode)
 			|| S_ISFIFO(buf.st_mode)
 			|| S_ISSOCK(buf.st_mode)
