@@ -15,8 +15,30 @@
  */
 
 #include "pidfile.hpp"
-#include "sub.hpp"
+#include "watchdogd.hpp"
 #include "logutils.hpp"
+
+int LockFile(int fd, pid_t pid)
+{
+	struct flock fl;
+	fl.l_type = F_WRLCK;
+	fl.l_whence = SEEK_SET;
+	fl.l_start = 0;
+	fl.l_len = 0;
+	fl.l_pid = pid;
+	return fcntl(fd, F_SETLKW, &fl);
+}
+
+int UnlockFile(int fd, pid_t pid)
+{
+	struct flock fl;
+	fl.l_type = F_UNLCK;
+	fl.l_whence = SEEK_SET;
+	fl.l_start = 0;
+	fl.l_len = 0;
+	fl.l_pid = pid;
+	return fcntl(fd, F_SETLKW, &fl);
+}
 
 int Pidfile::Write(pid_t pid)
 {

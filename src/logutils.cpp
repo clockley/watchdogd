@@ -79,6 +79,101 @@ struct message {
 
 static_assert(PIPE_BUF > sizeof(struct message), "message struct cannot be witten atomically on this platform");
 
+int Wasprintf(char **ret, const char *format, ...)
+{
+//http://stackoverflow.com/questions/4899221/substitute-or-workaround-for-asprintf-on-aix
+
+	va_list ap;
+
+	*ret = NULL;
+
+	va_start(ap, format);
+	int count = portable_vsnprintf(NULL, 0, format, ap);
+	va_end(ap);
+
+	if (count >= 0) {
+		char *buffer = (char *)malloc((size_t) count + 1);
+
+		if (buffer == NULL)
+			return -1;
+
+		va_start(ap, format);
+		count = portable_vsnprintf(buffer, (size_t) count + 1, format, ap);
+		va_end(ap);
+
+		if (count < 0) {
+			free(buffer);
+			*ret = NULL;
+			return count;
+		}
+		*ret = buffer;
+	}
+
+	return count;
+}
+
+int Wasnprintf(size_t *len, char **ret, const char *format, ...)
+{
+	va_list ap;
+
+	if (*len == 0) {
+		*ret = NULL;
+	}
+
+	va_start(ap, format);
+	int count = portable_vsnprintf(NULL, 0, format, ap);
+	va_end(ap);
+
+	if (count+1 < *len) {
+		va_start(ap, format);
+		count = portable_vsnprintf(*ret, (size_t) count + 1, format, ap);
+		va_end(ap);
+		return count;
+	} else {
+		free(*ret);
+	}
+
+	if (count >= 0) {
+		char *buffer = (char *)malloc((size_t) count + 1);
+
+		if (buffer == NULL)
+			return -1;
+
+		va_start(ap, format);
+		count = portable_vsnprintf(buffer, (size_t) count + 1, format, ap);
+		va_end(ap);
+
+		if (count < 0) {
+			free(buffer);
+			*ret = NULL;
+			*len = 0;
+			return count;
+		}
+		*ret = buffer;
+		*len = count;
+	}
+
+	return count;
+}
+
+long ConvertStringToInt(const char *const str)
+{
+	if (str == NULL) {
+		return -1;
+	}
+	char *endptr = NULL;
+	long ret = strtol((str), &endptr, 10);
+
+	if (*endptr != '\0') {
+		if (errno == 0) {
+			errno = ERANGE;
+		}
+		return -1;
+	}
+
+	return ret;
+}
+
 static int SystemdSyslog(int priority, const char *format, va_list ap)
 {
 	static __thread char buf[2048] = {"MESSAGE="};
