@@ -5,7 +5,7 @@ AC_PREREQ([2.69])
 AC_INIT([watchdogd],[4.1],[clockley1@gmail.com])
 : ${CXXFLAGS=$CXXFLAGS" -fdebug-prefix-map=$(pwd)=."}
 AC_CONFIG_AUX_DIR([.build-aux])
-AM_INIT_AUTOMAKE([1.15.1] [foreign subdir-objects tar-pax])
+AM_INIT_AUTOMAKE([1.15] [foreign subdir-objects tar-pax])
 AM_SILENT_RULES([yes])
 AC_CONFIG_MACRO_DIR([.m4])
 AC_CONFIG_SRCDIR([Makefile.am])
@@ -15,7 +15,7 @@ AC_CONFIG_HEADERS([src/config.h])
 AX_CXX_COMPILE_STDCXX_11([ext], [mandatory])
 AX_PTHREAD
 
-PKG_CHECK_MODULES([DEPENDENCIES], [zlib libconfig++ libconfig >= 1.4.8 libsystemd >= 233 liboping >= 1.10.0], [:], [bash install_dependencies.sh; PKG_CHECK_MODULES([DEPENDENCIES], [zlib libconfig >= 1.4.8 libsystemd >= 233 liboping >= 1.10.0])])
+PKG_CHECK_MODULES([DEPENDENCIES], [zlib libconfig >= 1.4.8 libsystemd >= 233 liboping >= 1.10.0], [:], [bash install_dependencies.sh; PKG_CHECK_MODULES([DEPENDENCIES], [zlib libconfig >= 1.4.8 libsystemd >= 233 liboping >= 1.10.0])])
 
 AC_ARG_WITH([systemdsystemunitdir],
      AS_HELP_STRING([--with-systemdsystemunitdir=DIR], [Directory for systemd service files]),,

@@ -16,9 +16,6 @@
 #define	LOG_UPTO(pri)	((1 << ((pri)+1)) - 1)
 #endif
 
-int Wasprintf(char **ret, const char *format, ...);
-int Wasnprintf(size_t *len, char **ret, const char *format, ...);
-long ConvertStringToInt(const char *const str);
 void __attribute__ ((format (printf, 2, 3))) Logmsg(int priority, const char *const fmt, ...);
 void SetLogTarget(sig_atomic_t target, ...);
 void SetAutoUpperCase(bool);
