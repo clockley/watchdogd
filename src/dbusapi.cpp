@@ -49,7 +49,7 @@ static const sd_bus_vtable watchdogPmon[] = {
 		SD_BUS_METHOD("PmonInit", "t", "u", PmonInit, 0),
 		SD_BUS_METHOD("PmonPing", "u", "b", PmonPing, 0),
 		SD_BUS_METHOD("PmonRemove", "u", "b", PmonRemove, 0),
-		SD_BUS_METHOD("ReloadService", "", "b", ReloadService, 0),
+		SD_BUS_METHOD("ReloadConfig", "", "b", ReloadService, 0),
         SD_BUS_VTABLE_END
 };
 
