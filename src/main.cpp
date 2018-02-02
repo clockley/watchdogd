@@ -392,7 +392,7 @@ int main(int argc, char **argv)
  				kill(pid, SIGTERM);
 				break;
 			case SIGHUP:
-				kill(pid, si.ssi_int);
+				kill(pid, SIGHUP);
 				break;
 			case SIGUSR1:
 				quick_exit(0);
