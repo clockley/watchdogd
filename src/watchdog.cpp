@@ -62,7 +62,9 @@ bool Watchdog::CanMagicClose()
 		Logmsg(LOG_ERR, "%s", MyStrerror(errno));
 		return false;
 	}
-
+	if (strcmp((const char*)GetIdentity(),"iamt_wdt") == 0) {
+		return true; //iamt_wdt is broken
+	}
 	return (WDIOF_MAGICCLOSE & watchDogInfo.options);
 }
 
