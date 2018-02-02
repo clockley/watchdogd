@@ -56,7 +56,7 @@ int Watchdog::Close()
 
 bool Watchdog::CanMagicClose()
 {
-	struct watchdog_info watchDogInfo;
+	struct watchdog_info watchDogInfo = {0};
 
 	if (ioctl(fd, WDIOC_GETSUPPORT, &watchDogInfo) < 0) {
 		Logmsg(LOG_ERR, "%s", MyStrerror(errno));
