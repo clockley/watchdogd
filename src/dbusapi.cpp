@@ -40,17 +40,23 @@ static long version = 0;
 static long timeout = 0;
 
 static const sd_bus_vtable watchdogPmon[] = {
-        SD_BUS_VTABLE_START(0),
-        SD_BUS_METHOD("DevicePath", "", "s", DevicePath, 0),
-        SD_BUS_METHOD("Identity", "", "s", Identity, 0),
-        SD_BUS_METHOD("Version", "", "x", Version, 0),
-        SD_BUS_METHOD("GetTimeout", "", "x", GetTimeoutDbus, 0),
-        SD_BUS_METHOD("GetTimeleft", "", "x", GetTimeleftDbus, 0),
-        SD_BUS_METHOD("PmonInit", "t", "u", PmonInit, 0),
-        SD_BUS_METHOD("PmonPing", "u", "b", PmonPing, 0),
-        SD_BUS_METHOD("PmonRemove", "u", "b", PmonRemove, 0),
+		SD_BUS_VTABLE_START(0),
+		SD_BUS_METHOD("DevicePath", "", "s", DevicePath, 0),
+		SD_BUS_METHOD("Identity", "", "s", Identity, 0),
+		SD_BUS_METHOD("Version", "", "x", Version, 0),
+		SD_BUS_METHOD("GetTimeout", "", "x", GetTimeoutDbus, 0),
+		SD_BUS_METHOD("GetTimeleft", "", "x", GetTimeleftDbus, 0),
+		SD_BUS_METHOD("PmonInit", "t", "u", PmonInit, 0),
+		SD_BUS_METHOD("PmonPing", "u", "b", PmonPing, 0),
+		SD_BUS_METHOD("PmonRemove", "u", "b", PmonRemove, 0),
+		SD_BUS_METHOD("ReloadService", "", "b", ReloadService, 0),
         SD_BUS_VTABLE_END
 };
+
+static int ReloadService(sd_bus_message *m, void *userdata, sd_bus_error *retError)
+{
+	return sd_bus_reply_method_return(m, "b", kill(getppid(), SIGHUP) == 0);
+}
 
 static int Timeout(sd_event_source *source, usec_t usec, void *userdata)
 {
