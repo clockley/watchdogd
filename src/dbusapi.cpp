@@ -55,7 +55,10 @@ static const sd_bus_vtable watchdogPmon[] = {
 
 static int ReloadService(sd_bus_message *m, void *userdata, sd_bus_error *retError)
 {
-	return sd_bus_reply_method_return(m, "b", kill(getppid(), SIGHUP) == 0);
+	int x = 0;
+	int y = kill(getppid(), SIGHUP);
+	read(fd, &x, sizeof(x));
+	return sd_bus_reply_method_return(m, "b", y == 0);
 }
 
 static int Timeout(sd_event_source *source, usec_t usec, void *userdata)
