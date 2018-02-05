@@ -34,9 +34,9 @@ static int openSlots = MAX_CLIENT_ID;
 static int lastFreedSlot = -1;
 
 static int fd = 0;
-static char identity[64] = {'0'};
-static char path[64] = {'0'};
-static long version = 0;
+static char identity[64] = {'\0'};
+static char path[64] = {'\0'};
+static long version = -1;
 static long timeout = 0;
 
 static const sd_bus_vtable watchdogPmon[] = {
@@ -156,8 +156,11 @@ static int PmonInit(sd_bus_message *m, void *userdata, sd_bus_error *retError)
 static int DevicePath(sd_bus_message *m, void *userdata, sd_bus_error *retError)
 {
 	int cmd = DBUSGETPATH;
-	write(fd, &cmd, sizeof(int));
-	read(fd, path, sizeof(path));
+
+	if (strlen(path) == 0) {
+		write(fd, &cmd, sizeof(int));
+		read(fd, path, sizeof(path));
+	}
 
 	return sd_bus_reply_method_return(m, "s", path);
 }
@@ -165,8 +168,11 @@ static int DevicePath(sd_bus_message *m, void *userdata, sd_bus_error *retError)
 static int Identity(sd_bus_message *m, void *userdata, sd_bus_error *retError)
 {
 	int cmd = DBUSGETNAME;
-	write(fd, &cmd, sizeof(int));
-	read(fd, identity, sizeof(identity));
+
+	if (strlen(identity) == 0) {
+		write(fd, &cmd, sizeof(int));
+		read(fd, identity, sizeof(identity));
+	}
 
 	return sd_bus_reply_method_return(m, "s", identity);
 }
@@ -174,8 +180,11 @@ static int Identity(sd_bus_message *m, void *userdata, sd_bus_error *retError)
 static int Version(sd_bus_message *m, void *userdata, sd_bus_error *retError)
 {
 	int cmd = DBUSVERSION;
-	write(fd, &cmd, sizeof(long));
-	read(fd, &version, sizeof(long));
+
+	if (version == -1) {
+		write(fd, &cmd, sizeof(long));
+		read(fd, &version, sizeof(long));
+	}
 
 	return sd_bus_reply_method_return(m, "x", version);
 }
@@ -183,8 +192,11 @@ static int Version(sd_bus_message *m, void *userdata, sd_bus_error *retError)
 static int GetTimeoutDbus(sd_bus_message *m, void *userdata, sd_bus_error *retError)
 {
 	int cmd = DBUSGETIMOUT;
-	write(fd, &cmd, sizeof(long));
-	read(fd, &timeout, sizeof(long));
+
+	if (timeout == 0) {
+		write(fd, &cmd, sizeof(long));
+		read(fd, &timeout, sizeof(long));
+	}
 
 	return sd_bus_reply_method_return(m, "x", timeout);
 }
@@ -255,6 +267,15 @@ static int ReloadDbusDaemon(void)
 	return 0;
 }
 
+static int SignalHandler(sd_event_source * s, const signalfd_siginfo * si, void *cxt)
+{
+	identity[0] = {'\0'};
+	path[0] = {'\0'};
+	version = -1;
+	timeout = 0;
+	return 1;
+}
+
 void * DbusApiInit(void * sock)
 {
 	fd = *((int*)sock);
@@ -262,6 +283,8 @@ void * DbusApiInit(void * sock)
 	sd_bus_slot *slot = NULL;
 
 	int ret = sd_event_default(&event);
+
+	ret = sd_event_add_signal(event, NULL, SIGHUP, SignalHandler, event);
 
 	char tmp = '0';
 	read(fd, &tmp, sizeof(char));

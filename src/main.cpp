@@ -350,12 +350,16 @@ int main(int argc, char **argv)
 	int sock[2] = {-1};
 
 	pid_t pid = fork();
-
+	pid_t dbusPid = 0;
 	if (pid == 0) {
 		setsid();
 		socketpair(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0, sock);
 		pid = fork();
 		if (pid != 0) {
+			sigset_t set;
+			sigemptyset(&set);
+			sigaddset(&set, SIGHUP);
+			pthread_sigmask(SIG_BLOCK, &set, nullptr);
 			close(sock[1]);
 			ClosePipe(com);
 			ClosePipe(com1);
@@ -364,6 +368,7 @@ int main(int argc, char **argv)
 			waitpid(pid, NULL, 0);
 			quick_exit(0);
 		}
+		dbusPid = getppid();
 		goto daemon;
 	} else {
 		sigset_t mask;
@@ -429,6 +434,7 @@ daemon:
 	write(com[1], &pid, sizeof(pid));
 	close(com[1]);
 init:
+	kill(dbusPid, SIGHUP);
 	waitpid(-1, NULL, WNOHANG);
 
 	pipe(fildes);
