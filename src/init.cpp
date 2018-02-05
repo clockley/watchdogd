@@ -58,7 +58,6 @@ int ParseCommandLine(int *argc, char **argv, struct cfgoptions *cfg, bool earlyP
 		{"help", no_argument, 0, 'h'},
 		{"identify", no_argument, 0, 'i'},
 		{"version", no_argument, 0, 'V'},
-		{"no-action", no_argument, 0, 'q'},
 		{"foreground", no_argument, 0, 'F'},
 		{"debug", no_argument, 0, 'd'},
 		{"force", no_argument, 0, 'f'},
@@ -101,9 +100,6 @@ int ParseCommandLine(int *argc, char **argv, struct cfgoptions *cfg, bool earlyP
 			break;
 		case 's':
 			cfg->options |= SYNC;
-			break;
-		case 'q':
-			cfg->options |= NOACTION;
 			break;
 		case 'l':
 			if (LogUpTo(optarg, true) == false) {
