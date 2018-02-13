@@ -336,8 +336,6 @@ static void PrintHelpMain(void)
 		{"  -s, --sync", "sync file-systems regularly"},
 		{"  -h, --help", "this help"},
 		{"  -V, --version", "print version info"},
-		{isatty(STDOUT_FILENO) == 1 ? "  -X, --loop-exit \033[4mnum\033[0m ":
-		"  -X, --loop-exit num", " Run  for  'num'  loops  then  exit"}
 	};
 
 	for (size_t i = 0; i < ARRAY_SIZE(help); i += 1) {
