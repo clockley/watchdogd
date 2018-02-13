@@ -116,7 +116,6 @@ struct cfgoptions {
 	int priority = 0;
 	int watchdogTimeout = -1;
 	int testExeReturnValue = 0;
-	long loopExit = -1;
 	int allocatableMemory = 0;
 	volatile std::atomic_uint error = {0};
 	bool haveConfigFile = false;
