@@ -67,7 +67,6 @@ int ParseCommandLine(int *argc, char **argv, struct cfgoptions *cfg, bool earlyP
 		{"daemonize", no_argument, 0, 'D'},
 		{"verbose", no_argument, 0, 'v'},
 		{"config-file", required_argument, 0, 'c'},
-		{"loop-exit", required_argument, 0, 'X'},
 		{"loglevel", required_argument, 0, 'l'},
 		{0, 0, 0, 0}
 	};
@@ -82,7 +81,7 @@ int ParseCommandLine(int *argc, char **argv, struct cfgoptions *cfg, bool earlyP
 			cfg = &x;
 		}
 	} else {
-		opstr = "iDhqsfFbVvndc:X:l:";
+		opstr = "iDhqsfFbVvndc:l:";
 		optind = 0;
 	}
 
@@ -119,13 +118,6 @@ int ParseCommandLine(int *argc, char **argv, struct cfgoptions *cfg, bool earlyP
 			break;
 		case 'v':
 			cfg->options |= VERBOSE;
-			break;
-		case 'X':
-			cfg->loopExit = ConvertStringToInt(optarg);
-			if (cfg->loopExit <= 0) {
-				Logmsg(LOG_ERR, "optarg must be greater than 0 for X option");
-				return -1;
-			}
 			break;
 		case 'i':
 			cfg->options |= IDENTIFY;
