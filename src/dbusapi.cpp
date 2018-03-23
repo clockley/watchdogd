@@ -204,10 +204,14 @@ static int GetTimeoutDbus(sd_bus_message *m, void *userdata, sd_bus_error *retEr
 static int GetTimeleftDbus(sd_bus_message *m, void *userdata, sd_bus_error *retError)
 {
 	int cmd = DBUSTIMELEFT;
-	long buf = 0;
+	static long buf;
+	static time_t last;
 
-	write(fd, &cmd, sizeof(long));
-	read(fd, &buf, sizeof(long));
+	if (difftime(time(nullptr), last) > 2.0) {
+		last = time(nullptr);
+		write(fd, &cmd, sizeof(long));
+		read(fd, &buf, sizeof(long));
+	}
 
 	return sd_bus_reply_method_return(m, "x", buf);
 }
