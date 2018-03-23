@@ -45,9 +45,15 @@ void *DbusHelper(void * arg)
 	cfgoptions * config = *info->config;
 	unsigned int cmd = 0;
 
-	long version = wdt->GetFirmwareVersion();
-	char *identity = (char*)wdt->GetIdentity();
-	int timeout = wdt->GetRawTimeout();
+	long version = -1;
+	char *identity = (char*)"EINVALID";
+	int timeout = 0;
+
+	if (!info->miniMode) {
+		version = wdt->GetFirmwareVersion();
+		identity = (char*)wdt->GetIdentity();
+		timeout = wdt->GetRawTimeout();
+	}
 
 	while (stop == 0) {
 		int ret = read(info->fd, &cmd, sizeof(unsigned int));
@@ -56,38 +62,74 @@ void *DbusHelper(void * arg)
 		}
 		int x = 0;
 		pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &x);
-		switch (cmd) {
-			case DBUSGETIMOUT:
-				{
-					write(info->fd, &timeout, sizeof(int));
-				};
-				break;
-			case DBUSTIMELEFT:
-				{
-					int timeleft = wdt->GetTimeleft();
-					write(info->fd, &timeleft, sizeof(int));
-				};
-				break;
-			case DBUSGETPATH:
-				{
-					write(info->fd, config->devicepath, strlen(config->devicepath));
-				};
-				break;
-			case DBUSVERSION:
-				{
-					write(info->fd, &version, sizeof(version));
-				};
-				break;
-			case DBUSGETNAME:
-				{
-					write(info->fd, identity, strlen((char *)identity));
-				};
-				break;
-			case DBUSHUTDOWN:
-				{
-					Shutdown(9221996, config);
-				};
-				break;
+		if (!info->miniMode) {
+			switch (cmd) {
+				case DBUSGETIMOUT:
+					{
+						write(info->fd, &timeout, sizeof(int));
+					};
+					break;
+				case DBUSTIMELEFT:
+					{
+						int timeleft = wdt->GetTimeleft();
+						write(info->fd, &timeleft, sizeof(int));
+					};
+					break;
+				case DBUSGETPATH:
+					{
+						write(info->fd, config->devicepath, strlen(config->devicepath));
+					};
+					break;
+				case DBUSVERSION:
+					{
+						write(info->fd, &version, sizeof(version));
+					};
+					break;
+				case DBUSGETNAME:
+					{
+						write(info->fd, identity, strlen((char *)identity));
+					};
+					break;
+				case DBUSHUTDOWN:
+					{
+						Shutdown(9221996, config);
+					};
+					break;
+			}
+		} else {
+			switch (cmd) {
+				case DBUSGETIMOUT:
+					{
+						write(info->fd, &timeout, sizeof(int));
+					};
+					break;
+				case DBUSTIMELEFT:
+					{
+						int timeleft = 0;
+						write(info->fd, &timeleft, sizeof(int));
+					};
+					break;
+				case DBUSGETPATH:
+					{
+						write(info->fd, "ENIVALID", strlen("ENIVALID"));
+					};
+					break;
+				case DBUSVERSION:
+					{
+						write(info->fd, &version, sizeof(version));
+					};
+					break;
+				case DBUSGETNAME:
+					{
+						write(info->fd, identity, strlen((char *)identity));
+					};
+					break;
+				case DBUSHUTDOWN:
+					{
+						Shutdown(9221996, config);
+					};
+					break;
+			}
 		}
 		pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, &x);
 	}

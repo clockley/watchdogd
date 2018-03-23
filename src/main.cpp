@@ -149,7 +149,7 @@ static int ServiceMain(int argc, char **argv, int fd, bool restarted)
 	Watchdog *tmp2 = &watchdog;
 	Pidfile pidfile;
 
-	struct dbusinfo temp = {.config = &tmp,.wdt = &tmp2 };;
+	struct dbusinfo temp = {.config = &tmp,.wdt = &tmp2, .miniMode = false };
 	temp.fd = fd;
 
 	if (MyStrerrorInit() == false) {
@@ -286,6 +286,13 @@ static int ServiceMain(int argc, char **argv, int fd, bool restarted)
 		InstallPinger(event, options.sleeptime, &watchdog);
 
 		write(fd, "", sizeof(char));
+	} else {
+		temp.miniMode = true;
+		pthread_attr_t attr = {0};
+		pthread_attr_setstacksize(&attr, PTHREAD_STACK_MIN*2);
+		pthread_attr_setguardsize(&attr, 0);
+		pthread_create(&dbusThread, &attr, DbusHelper, &temp);
+		write(fd, "", sizeof(char));
 	}
 
 	if (SetupAuxManagerThread(&options) < 0) {
@@ -316,10 +323,8 @@ static int ServiceMain(int argc, char **argv, int fd, bool restarted)
 		}
 	}
 
-	if (!(options.options & NOACTION)) {
-		pthread_cancel(dbusThread);
-		pthread_join(dbusThread, NULL);
-	}
+	pthread_cancel(dbusThread);
+	pthread_join(dbusThread, NULL);
 
 	watchdog.Close();
 

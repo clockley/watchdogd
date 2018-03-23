@@ -155,6 +155,7 @@ struct dbusinfo
 	cfgoptions **config;
 	Watchdog **wdt;
 	int fd;
+	bool miniMode;
 };
 
 struct identinfo {
