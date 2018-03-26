@@ -328,6 +328,25 @@ int ReadConfigurationFile(struct cfgoptions *const cfg)
 
 	config_set_auto_convert(&cfg->cfg, true);
 
+	config_lookup_string(&cfg->cfg, "script", &cfg->pluginScript);
+
+	cfg->filern = (FileDescriptorPlugin*)calloc(1, sizeof(FileDescriptorPlugin));
+
+	if ((cfg->filern->setting = config_lookup(&cfg->cfg, "filern")) != nullptr) {
+		if (config_setting_lookup_int(cfg->filern->setting, "interval", &cfg->filern->interval) == CONFIG_FALSE) {
+			cfg->filern->interval = 300;
+		}
+		config_setting_lookup_string(cfg->filern->setting, "script", &cfg->filern->script);
+		config_setting_lookup_int(cfg->filern->setting, "warning", &cfg->filern->warning);
+		if (cfg->filern->script == nullptr && cfg->pluginScript == nullptr) {
+				free((void*)cfg->filern);
+				cfg->filern = nullptr;	
+		}
+	} else {
+		free((void*)cfg->filern);
+		cfg->filern = nullptr;
+	}
+
 	if (!(cfg->options & BUSYBOXDEVOPTCOMPAT)) {
 		if (config_lookup_string(&cfg->cfg, "watchdog-device", &cfg->devicepath)
 		    == CONFIG_FALSE) {
