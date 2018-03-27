@@ -319,6 +319,8 @@ static void *TestDirThread(void *arg)
 	//tests from running.
 
 	struct cfgoptions *s = (struct cfgoptions *)arg;
+	struct timeval tv = {0};
+	tv.tv_sec = 30;
 
 	for (;;) {
 		if (ExecuteRepairScripts() < 0) {
@@ -329,7 +331,7 @@ static void *TestDirThread(void *arg)
 			}
 		}
 
-		sleep(30);
+		syscall(SYS_select, 0, NULL, NULL, NULL, &tv);
 
 		if (stop == 1) {
 			pthread_exit(NULL);
