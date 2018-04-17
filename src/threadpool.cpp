@@ -49,7 +49,7 @@ static void *Worker(void *arg)
 	return NULL;
 }
 
-bool ThreadPoolNew(void)
+bool ThreadPoolNew(int numberOfThreads = numberOfRepairScripts)
 {
 	pthread_attr_t attr;
 	pthread_attr_init(&attr);
@@ -57,9 +57,9 @@ bool ThreadPoolNew(void)
 	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
 	pthread_attr_setstacksize(&attr, PTHREAD_STACK_MIN*2);
 	pthread_t thread = {0};
-	if (numberOfRepairScripts > MAX_WORKERS)
-		numberOfRepairScripts = MAX_WORKERS;
-	for (size_t i = 0; i < numberOfRepairScripts; i++) {
+	if (numberOfThreads > MAX_WORKERS)
+		numberOfThreads = MAX_WORKERS;
+	for (size_t i = 0; i < numberOfThreads; i++) {
 		sem_init(&threads[i].sem, 0, 0);
 		pthread_create(&thread, &attr, Worker, &threads[i]);
 	}
