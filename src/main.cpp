@@ -149,8 +149,9 @@ static int ServiceMain(int argc, char **argv, int fd, bool restarted)
 	Watchdog *tmp2 = &watchdog;
 	Pidfile pidfile;
 
-	struct dbusinfo temp = {.config = &tmp,.wdt = &tmp2, .miniMode = false };
+	struct dbusinfo temp = {.config = &tmp,.wdt = &tmp2};
 	temp.fd = fd;
+	temp.miniMode = false;
 
 	if (MyStrerrorInit() == false) {
 		std::perror("Unable to create a new locale object");
