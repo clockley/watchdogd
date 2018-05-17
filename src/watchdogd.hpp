@@ -88,15 +88,6 @@
 #define PINGFAILED 0x40
 #define NETWORKDOWN 0x80
 
-struct FileDescriptorPlugin {
-	const config_setting_t *setting;
-	const char *script;
-	int interval;
-	int warning;
-	int critical;
-	int logmark;
-};
-
 //TODO: Split this struct into an options struct(values read in from config file) and a runtime struct.
 struct cfgoptions {
 	config_t cfg = {0};
@@ -117,8 +108,6 @@ struct cfgoptions {
 	unsigned long options = 0;
 	const char *logTarget = NULL;
 	const char *logUpto = NULL;
-	const char * pluginScript;
-	FileDescriptorPlugin * filern;
 	time_t sleeptime = -1;
 	unsigned long minfreepages = 0;
 	int testBinTimeout = 60;
