@@ -82,6 +82,9 @@ bool Watchdog::PrintWdtInfo()
 			Logmsg(LOG_DEBUG, "%s, version %u",
 			       watchDogInfo.identity, watchDogInfo.firmware_version);
 		}
+		dev dev;
+		GetDeviceMajorMinor(&dev, (char*)path);
+		Logmsg(LOG_DEBUG, "Device: %s Major: %i Minor: %i", path, dev.major, dev.minor);
 		return true;
 	}
 

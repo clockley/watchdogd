@@ -39,4 +39,5 @@ bool LoadKernelModule(void);
 bool MakeDeviceFile(const char *);
 int ConfigWatchdogNowayoutIsSet(char *);
 bool IsClientAdmin(int);
+bool GetDeviceMajorMinor(struct dev *, char *);
 #endif

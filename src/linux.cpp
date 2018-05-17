@@ -169,7 +169,7 @@ bool MakeDeviceFile(const char *file)
 	return true;
 }
 
-static bool GetDeviceMajorMinor(struct dev *m, char *name)
+bool GetDeviceMajorMinor(struct dev *m, char *name)
 {
 	if (name == NULL || m == NULL) {
 		return false;
