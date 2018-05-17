@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([watchdogd],[4.1.1],[clockley1@gmail.com])
+AC_INIT([watchdogd],[4.1.2],[clockley1@gmail.com])
 : ${CXXFLAGS=$CXXFLAGS" -fdebug-prefix-map=$(pwd)=."}
 AC_CONFIG_AUX_DIR([.build-aux])
 AM_INIT_AUTOMAKE([1.15] [foreign subdir-objects tar-pax])
@@ -68,7 +68,7 @@ else
 	DBUS_DATADIR="${path_dbusdata}/dbus-1/system-services"
 fi
 AC_SUBST(DBUS_DATADIR)
-AC_DEFINE(CODENAME, "Trillion Sky Cache", "release codename or phrase")
+AC_DEFINE(CODENAME, "Dud Era Gait", "release codename or phrase")
 AC_CONFIG_FILES([Makefile
 		 wd_identify
 		 contrib/systemd/watchdogd.service])
