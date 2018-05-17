@@ -26,7 +26,6 @@
 #include <fcntl.h>
 #include <grp.h>
 #include <libconfig.h>
-#include <libgen.h>
 #include <oping.h>
 #include <pthread.h>
 #include <pwd.h>

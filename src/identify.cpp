@@ -48,8 +48,42 @@ int Identify(long timeout, const char * identity, const char * deviceName, bool 
 	return 0;
 
 direct:
-	if (!identity)
-		goto error;
+	if (!identity) {
+		size_t len0 = 0, len1 = 0;
+		int addZero = isdigit(*(basename(deviceName)+(strlen(basename(deviceName))-1)));
+		size_t l = strlen(basename(deviceName))+1;
+		char * watchdogBasename = (char*)calloc(1, l+1);
+		memcpy(watchdogBasename, basename(deviceName), l);
+		if (!addZero) {
+			watchdogBasename[strlen(watchdogBasename)] = '0';
+		}
+
+		char * sysfsIdentity = (char*)calloc(1, strlen(watchdogBasename)+strlen("/sys/class/watchdog//identity")+1);
+		char * sysfsTimeout = (char*)calloc(1, strlen(watchdogBasename)+strlen("/sys/class/watchdog//identity")+1);
+		sprintf(sysfsIdentity, "/sys/class/watchdog/%s/identity", watchdogBasename);
+		sprintf(sysfsTimeout, "/sys/class/watchdog/%s/timeout", watchdogBasename);
+
+		FILE * timeoutFile = fopen(sysfsTimeout, "r");
+		FILE * identityFile = fopen(sysfsIdentity, "r");
+		if (!identityFile||!timeoutFile)
+			goto error;
+
+		char *timeoutString = nullptr;
+		char *identityString = nullptr;
+
+		getline(&timeoutString, &len0, timeoutFile);
+		getline(&identityString, &len1, identityFile);
+
+		timeoutString[strlen(timeoutString)-1] = '\0';
+		identityString[strlen(identityString)-1] = '\0';
+
+		if (verbose) {
+			printf("watchdog was set to %s seconds\n", timeoutString);
+		}
+
+		printf("%s\n", identityString);
+		return 0;
+	}
 	if (verbose) {
 		printf("watchdog was set to %li seconds\n", timeout);
 	}
