@@ -84,7 +84,7 @@ bool Watchdog::PrintWdtInfo()
 		}
 		dev dev;
 		GetDeviceMajorMinor(&dev, (char*)path);
-		Logmsg(LOG_DEBUG, "Device: %s Major: %i Minor: %i", path, dev.major, dev.minor);
+		Logmsg(LOG_DEBUG, "Device: %s Major: %li Minor: %li", path, dev.major, dev.minor);
 		return true;
 	}
 
