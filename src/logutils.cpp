@@ -39,7 +39,6 @@ static sig_atomic_t autoUpperCase = 0;
 static sig_atomic_t autoPeriod = 1;
 static unsigned int logMask = 0xff;
 static 	locale_t locale;
-static int fd[2] = {-1, -1};
 static bool noLog = false;
 static int ipri[] = { LOG_EMERG, LOG_ALERT, LOG_CRIT, LOG_ERR, LOG_WARNING,
 	LOG_NOTICE, LOG_INFO, LOG_DEBUG
@@ -100,14 +99,6 @@ static int SystemdSyslog(int priority, const char *format, va_list ap)
 	iov[2].iov_len = strlen("SYSLOG_IDENTIFIER=watchdogd");
 
 	return sd_journal_sendv(iov, 3);
-}
-
-static ssize_t Syslog(int p, char *m)
-{
-	struct message buf = {0};
-	strcpy(buf.message, m);
-	buf.pri = p;
-	return write(fd[WRITE], &buf, sizeof(struct message));
 }
 
 static bool IsTty(void)
