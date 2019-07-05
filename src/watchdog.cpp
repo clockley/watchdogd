@@ -26,6 +26,8 @@ int Watchdog::Ping()
 		return 0;
 	}
 
+	ioctl(fd, WDIOC_SETTIMEOUT, &timeout);
+
 	if (ioctl(fd, WDIOC_KEEPALIVE, &tmp) == 0) {
 		return 0;
 	}
