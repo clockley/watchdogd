@@ -65,7 +65,7 @@ bool PlatformInit(void)
 		return false;
 	}
 
-	prctl(PR_SET_DUMPABLE, 0, 0, 0, 0); //prevent children from ptrace() ing main process and helpers
+	prctl(PR_SET_DUMPABLE, 0, 0, 0, 0);	//prevent children from ptrace() ing main process and helpers
 
 	return true;
 }
@@ -80,7 +80,7 @@ int NativeShutdown(int errorcode, int kexec)
 	if (kexec == 1) {
 		kill(1, SIGRTMIN + 6);
 	} else if (errorcode == WECMDREBOOT) {
-		kill(1, SIGRTMIN+5);
+		kill(1, SIGRTMIN + 5);
 	} else if (errorcode == WETEMP) {
 		kill(1, SIGRTMIN + 4);
 	} else if (errorcode == WECMDRESET) {
@@ -102,7 +102,7 @@ int GetConsoleColumns(void)
 	return w.ws_col;
 }
 
-int SystemdWatchdogEnabled(pid_t *pid, long long int *const interval)
+int SystemdWatchdogEnabled(pid_t * pid, long long int *const interval)
 {
 	char *spid = getenv("WATCHDOG_PID");
 	char *sinv = getenv("WATCHDOG_USEC");
@@ -115,7 +115,7 @@ int SystemdWatchdogEnabled(pid_t *pid, long long int *const interval)
 
 bool OnParentDeathSend(uintptr_t sig)
 {
-	if (prctl(PR_SET_PDEATHSIG, (uintptr_t  *)sig) == -1) {
+	if (prctl(PR_SET_PDEATHSIG, (uintptr_t *) sig) == -1) {
 		return false;
 	}
 
@@ -169,7 +169,73 @@ bool MakeDeviceFile(const char *file)
 	return true;
 }
 
-bool GetDeviceMajorMinor(struct dev *m, char *name)
+struct bestDevice {
+	char *driverName;
+	char *deviceName;
+	short score;
+};
+
+static short ScoreDriver(char *driver)
+{
+	short score = 0;
+	if (strcmp(driver, "mei_wdt") == 0) {
+		--score;
+	}
+	return score;
+}
+
+char *FindBestWatchdogDevice(void)
+{
+	DIR *devFolder = opendir("/dev");
+	struct dirent *device = NULL;
+	struct bestDevice bestDevice = { 0 };
+	if (!devFolder) {
+		return NULL;
+	}
+	while ((device = readdir(devFolder)) != NULL) {
+		const char *devName = strstr(device->d_name, "watchdog");
+		if (devName == NULL || *(1 + strrchr(devName, 'g')) == '\0') {
+			continue;
+		}
+		if (bestDevice.driverName == NULL) {
+			char *path;
+			asprintf(&path,
+				 "/sys/class/watchdog/%s/device/driver/module",
+				 device->d_name);
+			bestDevice.deviceName = strdup(device->d_name);
+			char *derefedPath = realpath(path, NULL);
+			bestDevice.driverName = strdup(basename(derefedPath));
+			free(derefedPath);
+			free(path);
+		} else {
+			struct bestDevice potentialDevice = { 0 };
+			char *path;
+			asprintf(&path,
+				 "/sys/class/watchdog/%s/device/driver/module",
+				 device->d_name);
+			char *derefedPath = realpath(path, NULL);
+			potentialDevice.driverName =
+			    strdup(basename(derefedPath));
+			potentialDevice.deviceName = strdup(device->d_name);
+			if (ScoreDriver(potentialDevice.driverName) >
+			    ScoreDriver(bestDevice.driverName)) {
+				free(bestDevice.driverName);
+				free(bestDevice.deviceName);
+				bestDevice = potentialDevice;
+			}
+			free(derefedPath);
+			free(path);
+		}
+	}
+	closedir(devFolder);
+
+	free(bestDevice.driverName); //will use detected driver name in the future
+	static char * ret;
+	asprintf(&ret, "/dev/%s",  bestDevice.deviceName);
+	return ret;
+}
+
+bool GetDeviceMajorMinor(struct dev * m, char *name)
 {
 	if (name == NULL || m == NULL) {
 		return false;
@@ -178,7 +244,7 @@ bool GetDeviceMajorMinor(struct dev *m, char *name)
 	char *tmp = basename(name);
 	size_t len = 0;
 	char *buf = NULL;
-	struct dev tmpdev = {0};
+	struct dev tmpdev = { 0 };
 
 	DIR *dir = opendir("/sys/dev/char");
 
@@ -186,7 +252,8 @@ bool GetDeviceMajorMinor(struct dev *m, char *name)
 		return false;
 	}
 
-	for (struct dirent *node = readdir(dir); node != NULL; node = readdir(dir)) {
+	for (struct dirent * node = readdir(dir); node != NULL;
+	     node = readdir(dir)) {
 		if (node->d_name[0] == '.') {
 			continue;
 		}
@@ -232,7 +299,6 @@ bool GetDeviceMajorMinor(struct dev *m, char *name)
 			return true;
 		}
 
-
 		fclose(fp);
 	}
 	closedir(dir);
@@ -253,9 +319,10 @@ int ConfigWatchdogNowayoutIsSet(char *name)
 	gzbuffer(config, 8192);
 
 	while (true) {
-		char buf[72] = {'\0'};
+		char buf[72] = { '\0' };
 		size_t bytesRead = gzread(config, buf, sizeof(buf) - 1);
-		if (strstr(buf, "# CONFIG_WATCHDOG_NOWAYOUT is not set") != NULL) {
+		if (strstr(buf, "# CONFIG_WATCHDOG_NOWAYOUT is not set") !=
+		    NULL) {
 			found = true;
 			break;
 		}
@@ -271,11 +338,12 @@ int ConfigWatchdogNowayoutIsSet(char *name)
 
 	gzclose(config);
 
-	struct dev ad = {0};
+	struct dev ad = { 0 };
 
 	GetDeviceMajorMinor(&ad, name);
-	char * devicePath = NULL;
-	Wasprintf(&devicePath, "/sys/dev/char/%lu:%lu/device/driver", ad.major, ad.minor);
+	char *devicePath = NULL;
+	Wasprintf(&devicePath, "/sys/dev/char/%lu:%lu/device/driver", ad.major,
+		  ad.minor);
 	buf = (char *)calloc(1, 4096);
 	if (devicePath == NULL) {
 		abort();

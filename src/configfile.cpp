@@ -22,6 +22,7 @@
 #include "network_tester.hpp"
 #include "repair.hpp"
 #include "logutils.hpp"
+#include "linux.hpp"
 
 static const char *LibconfigWraperConfigSettingSourceFile(const config_setting_t *
 						   setting)
@@ -331,7 +332,7 @@ int ReadConfigurationFile(struct cfgoptions *const cfg)
 	if (!(cfg->options & BUSYBOXDEVOPTCOMPAT)) {
 		if (config_lookup_string(&cfg->cfg, "watchdog-device", &cfg->devicepath)
 		    == CONFIG_FALSE) {
-			cfg->devicepath = "/dev/watchdog";
+			cfg->devicepath = FindBestWatchdogDevice();
 		}
 	}
 
