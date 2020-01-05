@@ -147,7 +147,7 @@ int Watchdog::GetOptimalPingInterval()
 
 	timeout /= 2;
 
-	if (timeout < 1)
+	if (timeout < 1 || timeout == 0)
 		return 1;
 
 	return timeout;
