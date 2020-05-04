@@ -1,0 +1,14 @@
+﻿I plan to add these features in the next major release: May 2022
+ 1. Ability to send email on important status changes via sendmail.
+ 2. Add support for sending text messages with Twilio. You will have to supply your own
+ API key. Additionally I will use an abstraction layer to make it easy to use other SMS API's.
+ 3. Ability to add/remove repair scripts without restarting daemon. user would simply
+register/unregister scripts with a provided tool. I'll also include a command line
+utility to interface with the dbus API. I plan to allocate enough memory for 2^32
+repair scripts. Note preallocated memory will not be locked until actually used so most systems should be ok. I project the preallocation will cost about 2GiB virtual memory.
+ 4. Deprecate support for v1 repair scripts (May 2022)
+ 5. Web interface/REST API
+ 6. Web interface
+ 7. Use Squirrel for embedded scripting.
+
+Features 1,2 and 3 should be ready in a beta by Dec 2021.
