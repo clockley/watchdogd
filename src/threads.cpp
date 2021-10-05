@@ -330,7 +330,7 @@ static void *TestDirThread(void *arg)
 				s->error &= !SCRIPTFAILED;
 			}
 		}
-
+		tv.tv_sec = 30;
 		syscall(SYS_pselect6, 0, NULL, NULL, NULL, &tv);
 
 		if (stop == 1) {
