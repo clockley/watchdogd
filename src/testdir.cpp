@@ -301,10 +301,10 @@ static void * __ExecScriptWorkerThread(void *a)
 
 static void __WaitForWorkers(Container const *container)
 {
-	struct timeval tv = {0};
+	struct timespec tv = {0};
 	tv.tv_sec = 1;
 	while (container->workerThreadCount != 0) {
-		syscall(SYS_select, 0, NULL, NULL, NULL, &tv);
+		syscall(SYS_pselect6, 0, NULL, NULL, NULL, &tv);
 	}
 }
 

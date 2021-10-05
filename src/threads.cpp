@@ -319,7 +319,7 @@ static void *TestDirThread(void *arg)
 	//tests from running.
 
 	struct cfgoptions *s = (struct cfgoptions *)arg;
-	struct timeval tv = {0};
+	struct timespec tv = {0};
 	tv.tv_sec = 30;
 
 	for (;;) {
@@ -331,7 +331,7 @@ static void *TestDirThread(void *arg)
 			}
 		}
 
-		syscall(SYS_select, 0, NULL, NULL, NULL, &tv);
+		syscall(SYS_pselect6, 0, NULL, NULL, NULL, &tv);
 
 		if (stop == 1) {
 			pthread_exit(NULL);

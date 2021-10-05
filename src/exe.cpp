@@ -136,9 +136,9 @@ int SpawnAttr(spawnattr_t * spawnattr, const char *file, const char *args, ...)
 		char stack[2048] = {0};
 		if (spawnattr->timeout > 0) {
 			pid_t timer = clone([](void *s)->int {
-				struct timeval tv;
+				struct timespec tv;
 				tv.tv_sec = *(int*)s;
-				syscall(SYS_select, 0, NULL, NULL, NULL, &tv);
+				syscall(SYS_pselect6, 0, NULL, NULL, NULL, &tv);
 				_Exit(0);
 			}, stack+sizeof(stack), CLONE_VM|CLONE_FILES|CLONE_FS|SIGCHLD, &spawnattr->timeout);
 			if (timer < 0) {
