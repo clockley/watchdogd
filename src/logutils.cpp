@@ -17,6 +17,7 @@
 #include "sub.hpp"
 #include "logutils.hpp"
 #include "linux.hpp"
+#include <locale.h>
 
 #define KNRM  "\x1B[0m"
 #define KRED  "\x1B[31m"
