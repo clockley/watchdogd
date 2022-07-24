@@ -63,6 +63,12 @@ direct:
 
 		char * sysfsIdentity = (char*)calloc(1, strlen(watchdogBasename)+strlen("/sys/class/watchdog//identity")+1);
 		char * sysfsTimeout = (char*)calloc(1, strlen(watchdogBasename)+strlen("/sys/class/watchdog//identity")+1);
+		if (!sysfsIdentity||!sysfsTimeout) {
+			free(sysfsTimeout);
+			free(sysfsIdentity);
+			free(watchdogBasename);
+			goto error;
+		}
 		sprintf(sysfsIdentity, "/sys/class/watchdog/%s/identity", watchdogBasename);
 		sprintf(sysfsTimeout, "/sys/class/watchdog/%s/timeout", watchdogBasename);
 
