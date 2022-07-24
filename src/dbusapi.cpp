@@ -251,7 +251,10 @@ static int ReloadDbusDaemon(void)
 	const uLong cFileLen = 247;
 	Bytef *file = (Bytef*) calloc(1, 512);
 	uLongf size = 512;
-	uncompress(file, &size, cFile, cFileLen);
+	if (uncompress(file, &size, cFile, cFileLen) != Z_OK) {
+		free(file);
+		return -1;
+	}
 
 	sd_bus_error error;
 	sd_bus_message *m = NULL;
