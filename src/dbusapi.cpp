@@ -63,7 +63,7 @@ static int ReloadService(sd_bus_message *m, void *userdata, sd_bus_error *retErr
 
 static int Timeout(sd_event_source *source, usec_t usec, void *userdata)
 {
-	int cmd = DBUSHUTDOWN;
+	long cmd = DBUSHUTDOWN;
 
 	do
 		write(fd, &cmd, sizeof(long));
@@ -155,10 +155,10 @@ static int PmonInit(sd_bus_message *m, void *userdata, sd_bus_error *retError)
 
 static int DevicePath(sd_bus_message *m, void *userdata, sd_bus_error *retError)
 {
-	int cmd = DBUSGETPATH;
+	long cmd = DBUSGETPATH;
 
 	if (strlen(path) == 0) {
-		write(fd, &cmd, sizeof(int));
+		write(fd, &cmd, sizeof(long));
 		read(fd, path, sizeof(path));
 	}
 
@@ -167,10 +167,10 @@ static int DevicePath(sd_bus_message *m, void *userdata, sd_bus_error *retError)
 
 static int Identity(sd_bus_message *m, void *userdata, sd_bus_error *retError)
 {
-	int cmd = DBUSGETNAME;
+	long cmd = DBUSGETNAME;
 
 	if (strlen(identity) == 0) {
-		write(fd, &cmd, sizeof(int));
+		write(fd, &cmd, sizeof(long));
 		read(fd, identity, sizeof(identity));
 	}
 
@@ -179,7 +179,7 @@ static int Identity(sd_bus_message *m, void *userdata, sd_bus_error *retError)
 
 static int Version(sd_bus_message *m, void *userdata, sd_bus_error *retError)
 {
-	int cmd = DBUSVERSION;
+	long cmd = DBUSVERSION;
 
 	if (version == -1) {
 		write(fd, &cmd, sizeof(long));
@@ -191,7 +191,7 @@ static int Version(sd_bus_message *m, void *userdata, sd_bus_error *retError)
 
 static int GetTimeoutDbus(sd_bus_message *m, void *userdata, sd_bus_error *retError)
 {
-	int cmd = DBUSGETIMOUT;
+	long cmd = DBUSGETIMOUT;
 
 	if (timeout == 0) {
 		write(fd, &cmd, sizeof(long));
@@ -203,7 +203,7 @@ static int GetTimeoutDbus(sd_bus_message *m, void *userdata, sd_bus_error *retEr
 
 static int GetTimeleftDbus(sd_bus_message *m, void *userdata, sd_bus_error *retError)
 {
-	int cmd = DBUSTIMELEFT;
+	long cmd = DBUSTIMELEFT;
 	static long buf;
 	static time_t last;
 

@@ -19,7 +19,7 @@
 int Identify(long timeout, const char * identity, const char * deviceName, bool verbose)
 {
 	struct sockaddr_un address = {0};
-	struct identinfo buf;
+	struct identinfo buf = {0};
 	int fd = -1;
 
 	address.sun_family = AF_UNIX;
@@ -53,6 +53,9 @@ direct:
 		int addZero = isdigit(*(basename(deviceName)+(strlen(basename(deviceName))-1)));
 		size_t l = strlen(basename(deviceName))+1;
 		char * watchdogBasename = (char*)calloc(1, l+1);
+		if (!watchdogBasename) {
+			goto error;
+		}
 		memcpy(watchdogBasename, basename(deviceName), l);
 		if (!addZero) {
 			watchdogBasename[strlen(watchdogBasename)] = '0';
@@ -65,8 +68,18 @@ direct:
 
 		FILE * timeoutFile = fopen(sysfsTimeout, "r");
 		FILE * identityFile = fopen(sysfsIdentity, "r");
-		if (!identityFile||!timeoutFile)
+		if (!identityFile||!timeoutFile||!sysfsIdentity||!sysfsTimeout) {
+			free(watchdogBasename);
+			free(sysfsIdentity);
+			free(sysfsTimeout);
+			if (timeoutFile) {
+				fclose(timeoutFile);
+			}
+			if (identityFile) {
+				fclose(identityFile);
+			}
 			goto error;
+		}
 
 		char *timeoutString = nullptr;
 		char *identityString = nullptr;
@@ -82,6 +95,14 @@ direct:
 		}
 
 		printf("%s\n", identityString);
+		free(watchdogBasename);
+		free(timeoutString);
+		free(identityString);
+		free(sysfsIdentity);
+		free(sysfsTimeout);
+		fclose(timeoutFile);
+		fclose(identityFile);
+
 		return 0;
 	}
 	if (verbose) {
