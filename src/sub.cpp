@@ -94,7 +94,7 @@ int Wasnprintf(size_t *len, char **ret, const char *format, ...)
 	}
 
 	va_start(ap, format);
-	int count = portable_vsnprintf(NULL, 0, format, ap);
+	size_t count = portable_vsnprintf(NULL, 0, format, ap);
 	va_end(ap);
 
 	if (count+1 < *len) {
@@ -292,7 +292,7 @@ int CreateDetachedThread(void *(*startFunction) (void *), void *const arg)
 
 	size_t stackSize = 0;
 	if (pthread_attr_getstacksize(&attr, &stackSize) == 0) {
-		const size_t targetStackSize = 262144;
+		const long int targetStackSize = 262144;
 		if ((targetStackSize >= PTHREAD_STACK_MIN)
 		    && (stackSize > targetStackSize)) {
 			if (pthread_attr_setstacksize(&attr, 1048576) != 0) {
