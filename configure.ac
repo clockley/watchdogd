@@ -15,7 +15,7 @@ AC_CONFIG_HEADERS([src/config.h])
 AX_CXX_COMPILE_STDCXX_11([ext], [mandatory])
 AX_PTHREAD
 
-PKG_CHECK_MODULES([DEPENDENCIES], [zlib libconfig >= 1.4.8 libsystemd >= 233 liboping >= 1.10.0], [:], [bash install_dependencies.sh; PKG_CHECK_MODULES([DEPENDENCIES], [zlib libconfig >= 1.4.8 libsystemd >= 233 liboping >= 1.10.0])])
+PKG_CHECK_MODULES([DEPENDENCIES], [zlib libconfig >= 1.4.8 libsystemd >= 233 liboping >= 1.10.0], [:], [bash install_dependencies.sh; PKG_CHECK_MODULES([DEPENDENCIES], [zlib libconfig >= 1.7.3 libsystemd >= 233 liboping >= 1.10.0])])
 
 AC_ARG_WITH([systemdsystemunitdir],
      AS_HELP_STRING([--with-systemdsystemunitdir=DIR], [Directory for systemd service files]),,

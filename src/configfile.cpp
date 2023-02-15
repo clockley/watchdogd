@@ -273,6 +273,7 @@ static bool LoadConfigurationFile(config_t *const config, const char *const file
 	assert(fileName != NULL);
 
 	config_init(config);
+	config_set_options(config, CONFIG_OPTION_ALLOW_OVERRIDES);
 
 	if (config == NULL) {
 		return false;
